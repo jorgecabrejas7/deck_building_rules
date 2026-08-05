@@ -23,7 +23,7 @@ inputPh:'Pega una URL de Archidekt o una lista de cartas (una por línea: "1 Sol
 tryLabel:'Prueba con un ejemplo:',archLabel:'Arquetipo',auto:'Detección automática',analyze:'Analizar mazo',
 analyzing:'Analizando…',fetchingCards:'Descargando cartas de Scryfall…',
 mox:'Moxfield bloquea el acceso directo desde el navegador — pega la exportación de texto del mazo en su lugar (Export → Text).',
-archErr:'Archidekt bloquea la lectura directa desde el navegador — en tu mazo usa Export → Copy to clipboard (o «Text») y pega aquí la lista.',
+archErr:'No se pudo cargar el mazo de Archidekt (ni directo ni vía proxy) — en tu mazo usa Export → Copy to clipboard (o «Text») y pega aquí la lista.',
 netErr:'Error de red hablando con Scryfall — ¿hay conexión a internet?',
 tierWord:'NIVEL',tier1:'Tier 1 · Precon',tier2:'Tier 2 · Algo sobre precon',above:'Sobre el nivel del pod',
 pts:'PUNTOS',price:'PRECIO',cardsN:'CARTAS',archetype:'ARQUETIPO',autoTag:'(auto)',
@@ -73,7 +73,7 @@ inputPh:'Paste an Archidekt deck URL or a card list (one per line: "1 Sol Ring")
 tryLabel:'Try a sample:',archLabel:'Archetype',auto:'Auto-detect',analyze:'Analyze deck',
 analyzing:'Analyzing…',fetchingCards:'Downloading cards from Scryfall…',
 mox:'Moxfield blocks direct access from browsers — paste the deck’s text export instead (Export → Text).',
-archErr:'Archidekt blocks direct reads from browsers — in your deck use Export → Copy to clipboard (or "Text") and paste the list here.',
+archErr:'Could not load the Archidekt deck (direct and proxy both failed) — in your deck use Export → Copy to clipboard (or "Text") and paste the list here.',
 netErr:'Network error talking to Scryfall — is there an internet connection?',
 tierWord:'TIER',tier1:'Tier 1 · Precon',tier2:'Tier 2 · Slightly above precon',above:'Above pod power level',
 pts:'POINTS',price:'PRICE',cardsN:'CARDS',archetype:'ARCHETYPE',autoTag:'(auto)',
@@ -326,7 +326,6 @@ const state = {
   deck: null,        // {entries, commanders, deckName}
   result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, whatIf}
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
-  archFailId: null, archProxy: false,
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
 };
@@ -343,8 +342,10 @@ async function analyze() {
   try {
     let parsed;
     if (det.kind === 'archidekt') {
-      try { parsed = await PodEngine.fetchArchidekt(det.id, state.archProxy); }
-      catch (e) { state.error = 'archErr'; state.archFailId = det.id; state.archProxy = false; state.busy = false; renderInput(); return; }
+      try {
+        try { parsed = await PodEngine.fetchArchidekt(det.id, false); }
+        catch (e) { parsed = await PodEngine.fetchArchidekt(det.id, true); }
+      } catch (e) { state.error = 'archErr'; state.busy = false; renderInput(); return; }
     } else {
       parsed = PodEngine.parseDecklist(text);
     }
@@ -476,15 +477,7 @@ function renderInput() {
   for (const b of $('samples').querySelectorAll('[data-sample]'))
     b.onclick = () => { $('deckText').value = SAMPLES[b.dataset.sample]; state.error = null; renderInput(); };
   const notice = $('inputNotice');
-  if (state.error === 'archErr' && state.archFailId) {
-    notice.style.display = '';
-    notice.innerHTML = (location.protocol === 'file:' ? '<div style="padding-bottom:6px">' + esc(t.fileProto) + '</div>' : '') +
-      esc(t.archErr) + ' <button id="archProxyBtn" style="margin-left:8px;border:1px solid var(--warnBd);background:transparent;color:var(--warnFg);border-radius:7px;padding:4px 12px;font-size:12px;font-weight:600">' + t.proxyBtn + '</button>' +
-      '<div style="padding-top:6px;font-size:11.5px;opacity:.85">' + t.proxyNote + '</div>';
-    const pb = document.getElementById('archProxyBtn');
-    if (pb) pb.onclick = () => { state.archProxy = true; state.error = null; analyze(); };
-  }
-  else if (state.error) { notice.style.display = ''; notice.textContent = t[state.error] || state.error; }
+  if (state.error) { notice.style.display = ''; notice.textContent = t[state.error] || state.error; }
   else if (PodEngine.detectInput($('deckText').value).kind === 'moxfield') { notice.style.display = ''; notice.textContent = t.mox; }
   else notice.style.display = 'none';
 }
@@ -1251,7 +1244,7 @@ function renderHow() {
 <li>Con cualquier combo infinito: cero tutores.</li>
 <li>Maná rápido alto (9+) y hechizos gratis altos (5+) a la vez: +2 puntos extra.</li></ul>
 <h3 style="font-size:15px;margin:18px 0 6px">Precios, combos y sugerencias</h3>
-<p style="font-size:13px;line-height:1.7">Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5. Las consultas a Archidekt y Spellbook pasan por un proxy público <b>solo si tú pulsas el botón</b> — nada se envía a terceros sin avisar.</p>`
+<p style="font-size:13px;line-height:1.7">Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5. Las URLs de Archidekt se cargan automáticamente a través de un proxy público (corsproxy.io) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
   : `
 <button id="howClose" style="position:absolute;top:14px;right:16px;border:1px solid var(--border);background:transparent;border-radius:7px;width:30px;height:30px;font-size:14px">✕</button>
 <h2 style="margin:0 0 4px;font-size:20px">How this guide works</h2>
@@ -1273,7 +1266,7 @@ function renderHow() {
 <li>With any infinite combo: zero tutors.</li>
 <li>High fast mana (9+) and high free spells (5+) together: +2 extra points.</li></ul>
 <h3 style="font-size:15px;margin:18px 0 6px">Prices, combos and suggestions</h3>
-<p style="font-size:13px;line-height:1.7">Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5. Archidekt and Spellbook lookups go through a public proxy <b>only when you press the button</b> — nothing is sent to third parties silently.</p>`;
+<p style="font-size:13px;line-height:1.7">Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5. Archidekt URLs load automatically through a public proxy (corsproxy.io) because Archidekt blocks direct browser reads; if you prefer your deck not to transit a third party, paste the list as text. Combos are checked against a database hosted on this very site — no third parties.</p>`;
   $('howBody').innerHTML = html;
   $('howClose').onclick = closeHow;
 }
