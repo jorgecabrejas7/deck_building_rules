@@ -15,11 +15,15 @@ Notes:
 
 ## Pod Deck Checker (app/pod_deck_checker.html)
 
-Single self-contained HTML app for the pod: paste a decklist (Archidekt/Moxfield
-text export) and it fetches card data + Cardmarket EUR prices from Scryfall,
-applies the pod power rules (rules/pod_rules.json, embedded), reports tier /
-points / violations, deck composition vs archetype targets, deck browser with
-card art, mana curve, and a bilingual (ES/EN) archetype guide.
+Single self-contained HTML app for the pod, organized in tabs (Cargar mazo /
+Poder / Análisis / Consejos / Guía) with a sticky tier summary + commander
+header. Paste a decklist (Archidekt/Moxfield text export) and it fetches card
+data + Cardmarket EUR prices from Scryfall, applies the pod power rules
+(rules/pod_rules.json, embedded), reports tier / points / violations with
+what-if cut deltas, deck composition vs archetype targets with concrete
+EDHREC-ranked card suggestions (curated fallback + disclaimer offline),
+deck browser with card art, mana curve, sample opening hand, a 4-deck table
+compare mode, and a bilingual (ES/EN) archetype guide.
 
 Share the file as-is: recipients just double-click it — no install, no server.
 (Internet is needed for Scryfall. Archidekt/Moxfield block direct browser reads,
