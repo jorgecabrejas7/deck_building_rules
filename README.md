@@ -17,8 +17,11 @@ Notes:
 
 Live at: https://jorgecabrejas7.github.io/deck_building_rules/app/
 
-Web app for the pod (app/index.html + styles.css + engine.js + app.js; the old
-app/pod_deck_checker.html redirects there), organized in tabs (Cargar mazo /
+Web app for the pod — native ES modules, no build step: app/index.html +
+app/styles/ (tokens/layout/components/mobile) + app/js/engine/ (pure,
+DOM-free rules engine, also imported by the Node parity test) + app/js/ui/
+(one module per section) with app/js/main.js as the entry point. Organized
+in tabs (Cargar mazo /
 Poder / Análisis / Consejos / Guía) with a sticky tier summary + commander
 header. Paste a decklist (Archidekt/Moxfield text export) and it fetches card
 data + Cardmarket EUR prices from Scryfall, applies the pod power rules
@@ -35,7 +38,8 @@ each extra unit adds +1); only the tier budgets decide (T1<=2, T2<=7) plus hard
 bans and conditionals. Combos: every infinite combo counts separately, first 2
 free, then 2-card +3 / 3-card +2 / 4+ +1. Calibration: 31 T1 / 5 T2 / 0 above.
 
-Share the link — nothing to install. Rules are fetched from
+Share the link — nothing to install; the layout adapts to phones (tap the
+card tiles and "?" icons where there is no mouse hover). Rules are fetched from
 rules/pod_rules.json (single source of truth) and infinite combos are matched
 client-side against data/combos.json, a compact index distilled from Commander
 Spellbook's bulk export by scripts/build_combo_db.py and refreshed weekly by a
