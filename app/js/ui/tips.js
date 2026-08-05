@@ -40,19 +40,19 @@ function whyCut(x, slot) {
 function bigSugTile(c, cat) {
   const price = c.price != null ? '€' + c.price : '';
   const img = c.img_normal
-    ? '<img src="' + c.img_normal + '" loading="lazy" style="width:100%;border-radius:10px;background:var(--track);aspect-ratio:0.717" alt="">'
-    : '<div style="width:100%;aspect-ratio:0.717;border:1px solid var(--border);border-radius:10px;display:grid;place-items:center;font-size:13px;font-weight:700;padding:8px;box-sizing:border-box;text-align:center">' + esc(c.name) + '</div>';
-  return '<div class="sugTile" data-img="' + esc(c.img_normal || '') + '" style="display:flex;flex-direction:column;gap:7px">' + img +
-    '<div style="font-size:12.5px;font-weight:700;line-height:1.25">' + esc(c.name) +
-    (price ? ' <span class="mono" style="color:var(--muted);font-weight:600">' + price + '</span>' : '') + '</div>' +
-    '<div style="font-size:11.5px;color:var(--muted);line-height:1.5">' + esc(whyAdd(c, cat)) + '</div></div>';
+    ? '<img src="' + c.img_normal + '" loading="lazy" class="sug-img" alt="">'
+    : '<div class="sug-ph">' + esc(c.name) + '</div>';
+  return '<div class="sugTile sug-tile" data-img="' + esc(c.img_normal || '') + '">' + img +
+    '<div class="sug-name">' + esc(c.name) +
+    (price ? ' <span class="mono chip-price">' + price + '</span>' : '') + '</div>' +
+    '<div class="sug-why">' + esc(whyAdd(c, cat)) + '</div></div>';
 }
 
 export function sugChip(c) {
   const price = c.price != null ? '€' + c.price : '';
-  return '<span class="sugTile" data-img="' + esc(c.img_normal || '') + '" style="display:flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--panel2);border-radius:99px;padding:4px 12px 4px 5px;font-size:11.5px;font-weight:600;cursor:default">' +
-    '<span style="width:24px;height:24px;border-radius:99px;flex:none;background:var(--track) center/cover no-repeat;' + (c.img_art ? "background-image:url('" + c.img_art + "')" : '') + '"></span>' +
-    esc(c.name) + (price ? ' <span class="mono" style="color:var(--muted)">' + price + '</span>' : '') + '</span>';
+  return '<span class="sugTile card-chip" data-img="' + esc(c.img_normal || '') + '">' +
+    '<span class="chip-art"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
+    esc(c.name) + (price ? ' <span class="mono chip-price">' + price + '</span>' : '') + '</span>';
 }
 
 function tipsKey() {
@@ -67,30 +67,30 @@ export function renderTips() {
     return;
   }
   // synchronous part first (power advice), async suggestions fill in after
-  let html = '<div class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">' +
+  let html = '<div class="panel panel-pad-lg">' +
     '<span class="secT">' + t.tipsT + '</span>' +
-    '<div style="background:var(--tipBg);border:1px solid var(--tipBd);border-radius:10px;padding:14px 18px;font-size:13px;line-height:1.65;color:var(--tipFg)">' + esc(buildTip()) + '</div>';
+    '<div class="tip-note">' + esc(buildTip()) + '</div>';
   const entries = Object.entries(ev.breakdown).sort((a, b) => b[1] - a[1]);
   if (entries.length || ev.violations.length) {
-    html += '<span class="secT" style="font-size:11px">' + t.tipsPower + '</span>';
+    html += '<span class="secT secT-sm">' + t.tipsPower + '</span>';
     for (const [k, pts] of entries) {
       const nameK = EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang);
       const cards = (ev.driving[k] || []).slice(0, 8);
-      html += '<div style="display:flex;flex-direction:column;gap:8px;border:1px solid var(--border2);border-radius:10px;padding:12px 14px">' +
-        '<div style="display:flex;justify-content:space-between;gap:10px;font-size:13px"><b>' + esc(nameK) + '</b>' +
-        '<span class="mono" style="color:var(--warn);font-weight:700">+' + pts + ' pts</span></div>' +
-        (cards.length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + cards.map(([n]) => {
+      html += '<div class="tips-block">' +
+        '<div class="tips-block-head"><b>' + esc(nameK) + '</b>' +
+        '<span class="mono">+' + pts + ' pts</span></div>' +
+        (cards.length ? '<div class="chip-row">' + cards.map(([n]) => {
           const c = cardCache[n] || { name: n };
           const wi = r.whatIf[n];
           return sugChip({ name: n, price: c.price, img_art: c.img_art, img_normal: c.img_normal }) +
-            (wi && wi.dPts > 0 ? '<span style="align-self:center;font-size:10px;font-weight:700;color:var(--good)">✂ −' + wi.dPts + ' ' + t.whatIf + '</span>' : '');
+            (wi && wi.dPts > 0 ? '<span class="wi-note">✂ −' + wi.dPts + ' ' + t.whatIf + '</span>' : '');
         }).join('') + '</div>' : '') + '</div>';
     }
   }
   html += '</div>';
   // composition advice placeholder — filled by async fetch
-  html += '<div class="panel" id="tipsComp" style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">' +
-    '<span class="secT">' + t.tipsComp + '</span><div style="font-size:12.5px;color:var(--muted)">' + t.tipsLoading + '</div></div>';
+  html += '<div class="panel panel-pad-lg" id="tipsComp">' +
+    '<span class="secT">' + t.tipsComp + '</span><div class="note-muted">' + t.tipsLoading + '</div></div>';
   $('tips').innerHTML = html;
   bindSugPopovers($('tips'));
   fillCompAdvice();
@@ -113,19 +113,19 @@ async function fillCompAdvice() {
     let sug = { cards: [], source: 'live' };
     try { sug = await PodEngine.suggestCards({ cat: sl.cat, colorIdentity: ci, excludeNames: inDeck, bannedNames: banned }); } catch (e) {}
     if (sug.source === 'curated') usedCurated = true;
-    body += '<div style="display:flex;flex-direction:column;gap:12px;border:1px solid var(--border2);border-radius:12px;padding:16px 18px">' +
-      '<div style="font-size:14.5px"><b>' + catLabel(sl.cat, lang) + '</b> — ' + sl.v + '/' + sl.min + '–' + sl.max +
-      ' <span style="color:var(--warnFg);font-weight:700">' + t.few + '</span></div>';
+    body += '<div class="advice-block">' +
+      '<div class="advice-head"><b>' + catLabel(sl.cat, lang) + '</b> — ' + sl.v + '/' + sl.min + '–' + sl.max +
+      ' <span class="few">' + t.few + '</span></div>';
     if (sug.cards.length) {
-      body += '<div style="font-size:12.5px;color:var(--muted)">' + t.tipsAdd + ' ' + esc(CATS[sl.cat][lang]).toLowerCase() + ':</div>' +
-        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px">' +
+      body += '<div class="note-muted">' + t.tipsAdd + ' ' + esc(CATS[sl.cat][lang]).toLowerCase() + ':</div>' +
+        '<div class="sug-grid">' +
         sug.cards.map(c => bigSugTile(c, sl.cat)).join('') + '</div>';
     }
     const cutBlocks = many.map(m => {
       const cands = cutCandsOf(m);
       if (!cands.length) return '';
-      return '<div style="font-size:12.5px;color:var(--muted);line-height:1.6">' + t.tipsCutFrom + ' <b>' + catLabel(m.cat, lang) + '</b>: ' +
-        cands.map(x => esc(x.name) + ' <span style="color:var(--faint)">(' + esc(whyCut(x, m)) + ')</span>').join(' · ') + '</div>';
+      return '<div class="cut-line">' + t.tipsCutFrom + ' <b>' + catLabel(m.cat, lang) + '</b>: ' +
+        cands.map(x => esc(x.name) + ' <span class="why">(' + esc(whyCut(x, m)) + ')</span>').join(' · ') + '</div>';
     }).filter(Boolean).join('');
     body += cutBlocks + '</div>';
   }
@@ -133,15 +133,15 @@ async function fillCompAdvice() {
     if (many.length) {
       body += many.map(m => {
         const cands = cutCandsOf(m);
-        return '<div style="font-size:13px;color:var(--muted);line-height:1.7"><b>' + catLabel(m.cat, lang) + '</b> ' + m.v + '/' + m.min + '–' + m.max +
+        return '<div class="over-line"><b>' + catLabel(m.cat, lang) + '</b> ' + m.v + '/' + m.min + '–' + m.max +
           ' (' + t.many.toLowerCase() + ') — ' + t.tipsCutLabel + ': ' +
-          cands.map(x => esc(x.name) + ' <span style="color:var(--faint)">(' + esc(whyCut(x, m)) + ')</span>').join(' · ') + '</div>';
+          cands.map(x => esc(x.name) + ' <span class="why">(' + esc(whyCut(x, m)) + ')</span>').join(' · ') + '</div>';
       }).join('');
     } else {
-      body += '<div style="font-size:13px;color:var(--muted)">' + t.tipsNone + '</div>';
+      body += '<div class="over-line">' + t.tipsNone + '</div>';
     }
   }
-  if (usedCurated) body += '<div style="font-size:12px;color:var(--warnFg)">' + t.tipsCurated + '</div>';
+  if (usedCurated) body += '<div class="note-warn">' + t.tipsCurated + '</div>';
   const el = $('tipsComp');
   if (!el || tipsKey() !== key) return; // state changed while fetching
   el.innerHTML = '<span class="secT">' + t.tipsComp + '</span>' + body;

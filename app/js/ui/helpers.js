@@ -6,8 +6,8 @@ import { ARCH, CATS, CAT_HELP, BADGE_OF } from './constants.js';
 export const $ = (id) => document.getElementById(id);
 export const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-export function tierColors(k) {
-  return { tier1: ['var(--okBg)', 'var(--okBd)', 'var(--okFg)'], tier2: ['var(--warnBg)', 'var(--warnBd)', 'var(--warnFg)'], above: ['var(--badBg)', 'var(--badBd)', 'var(--badFg)'] }[k];
+export function tierTone(k) {
+  return { tier1: 'tone-ok', tier2: 'tone-warn', above: 'tone-bad' }[k];
 }
 export function archKey() {
   if (state.arch !== 'auto') return state.arch;
@@ -25,9 +25,7 @@ export function badgeFor(name) {
     if (!spec) continue;
     const inDial = (r.flagged[dial] || []).some(([n]) => n === name);
     if (inDial && ((r.stats[dial] || 0) > spec.baseline_max || dial === 'game_changers')) {
-      const bg = tone === 'bad' ? 'var(--badBg)' : tone === 'warn' ? 'var(--warnBg)' : 'var(--border2)';
-      const fg = tone === 'bad' ? 'var(--badFg)' : tone === 'warn' ? 'var(--warnFg)' : 'var(--muted)';
-      return { label, bg, fg };
+      return { label, tone };
     }
   }
   return null;
@@ -35,6 +33,6 @@ export function badgeFor(name) {
 
 export function helpIcon(cat) {
   if (!CAT_HELP[cat]) return '';
-  return '<span class="catHelp" data-cat="' + cat + '" style="display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1.2px solid var(--muted);color:var(--muted);font-size:10px;font-weight:700;cursor:help;vertical-align:1px;margin-left:5px">?</span>';
+  return '<span class="catHelp" data-cat="' + cat + '">?</span>';
 }
 export function catLabel(cat, lang) { return esc(CATS[cat][lang]) + helpIcon(cat); }

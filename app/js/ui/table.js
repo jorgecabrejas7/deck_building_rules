@@ -3,7 +3,7 @@ import { state, cardCache, persistCache } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { ARCH } from './constants.js';
-import { $, esc, tierColors } from './helpers.js';
+import { $, esc, tierTone } from './helpers.js';
 import { analyze } from '../pipeline.js';
 import { renderInput } from './input.js';
 
@@ -24,9 +24,8 @@ export function renderTableMode() {
     html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
       '<tr style="text-align:left;color:var(--muted);font-size:11px"><th style="padding:8px">' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.price + '</th><th>GC</th><th>' + t.archetype + '</th><th></th></tr>' +
       state.tableResults.map((d, i) => {
-        const [bg, bd, fg] = tierColors(d.tier);
         return '<tr style="border-top:1px solid var(--border2)"><td style="padding:9px 8px;font-weight:600">' + esc(d.name) + '</td>' +
-          '<td><span style="background:' + bg + ';border:1px solid ' + bd + ';color:' + fg + ';border-radius:99px;padding:3px 12px;font-size:11.5px;font-weight:700;white-space:nowrap">' + T()[d.tier] + '</span></td>' +
+          '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + T()[d.tier] + '</span></td>' +
           '<td class="mono">' + d.pts + '</td><td class="mono">€' + Math.round(d.price) + '</td><td class="mono">' + d.gc + '</td><td>' + esc(d.arch) + '</td>' +
           '<td><button data-tmload="' + i + '" style="border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600">' + t.tmLoad + '</button></td></tr>';
       }).join('') + '</table></div>';

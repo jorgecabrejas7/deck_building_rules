@@ -20,7 +20,7 @@ export function renderInput() {
     ARCH.map(a => '<option value="' + a.k + '">' + esc(a.name[state.lang]) + '</option>').join('');
   sel.value = cur;
   $('samples').innerHTML = ['s1', 's2', 's3'].map(k =>
-    '<button data-sample="' + k + '" style="border:1px dashed var(--border);background:transparent;border-radius:99px;padding:5px 13px;font-size:12px;font-weight:600;color:var(--muted)">' + esc(t[k]) + '</button>').join('');
+    '<button data-sample="' + k + '" class="chip-dashed">' + esc(t[k]) + '</button>').join('');
   for (const b of $('samples').querySelectorAll('[data-sample]'))
     b.onclick = () => { $('deckText').value = SAMPLES[b.dataset.sample]; state.error = null; renderInput(); };
   const notice = $('inputNotice');
