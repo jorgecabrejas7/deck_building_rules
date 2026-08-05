@@ -706,6 +706,19 @@ footer:'hecho para el pod · reglas del pod v'+RULES.version+' · precios Cardma
 validT:'AVISOS DE CONSTRUCCIÓN',
 podCap:'(límite del pod: ',
 banLabel:{true_fast_mana:'maná rápido explosivo',extra_turn_recursion:'turnos extra recurrentes'},
+tabLoad:'Cargar mazo',tabPower:'Poder',tabAnalysis:'Análisis',tabTips:'Consejos',tabGuide:'Guía',
+commander:'COMANDANTE',
+tipsT:'CONSEJOS DEL POD',tipsPower:'BAJAR DE NIVEL',tipsComp:'REDONDEAR LA COMPOSICIÓN',
+tipsAdd:'Añade',tipsCutFrom:'y córtalo de',tipsCutCands:'candidatas a salir',
+tipsCurated:'⚠ Sugerencias de la lista local — no se pudo consultar EDHREC/Scryfall en este momento.',
+tipsLoading:'Buscando sugerencias en EDHREC/Scryfall…',
+tipsNone:'Nada que arreglar: el mazo cumple los objetivos de composición de su arquetipo.',
+tipsCutLabel:'corta',tipsFor:'para',
+whatIf:'si la cortas',
+handT:'MANO DE PRUEBA',handDraw:'Robar mano',handMull:'Mulligan',handHint:'Roba una mano inicial de 7 al azar para ver la consistencia del mazo.',
+tmBtn:'Modo mesa',tmT:'MODO MESA — compara hasta 4 mazos',tmRun:'Comparar mesa',tmDeck:'Mazo',
+tmHint:'Pega 2–4 listas y compara nivel y puntos de toda la mesa antes de quedar.',
+tmLoad:'Cargar en el analizador',tmRunning:'Analizando mazo',
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Pasado de vueltas · Spellslinger'},
 en:{appTag:'POD DECK CHECKER',copy:'Copy report',copied:'Copied!',inputTitle:'ANALYZE DECK',
 inputPh:'Paste an Archidekt deck URL or a card list (one per line: "1 Sol Ring")',
@@ -731,6 +744,19 @@ footer:'made for the pod · pod rules v'+RULES.version+' · Cardmarket prices vi
 validT:'DECKBUILDING NOTES',
 podCap:'(pod cap: ',
 banLabel:{true_fast_mana:'explosive fast mana',extra_turn_recursion:'repeatable extra turns'},
+tabLoad:'Load deck',tabPower:'Power',tabAnalysis:'Analysis',tabTips:'Advice',tabGuide:'Guide',
+commander:'COMMANDER',
+tipsT:'POD ADVICE',tipsPower:'DROP A TIER',tipsComp:'ROUND OUT THE COMPOSITION',
+tipsAdd:'Add',tipsCutFrom:'and cut it from',tipsCutCands:'cut candidates',
+tipsCurated:'⚠ Suggestions from the built-in list — could not reach EDHREC/Scryfall right now.',
+tipsLoading:'Fetching suggestions from EDHREC/Scryfall…',
+tipsNone:'Nothing to fix: the deck meets its archetype composition targets.',
+tipsCutLabel:'cut',tipsFor:'for',
+whatIf:'if you cut it',
+handT:'SAMPLE HAND',handDraw:'Draw hand',handMull:'Mulligan',handHint:'Draw a random opening 7 to feel the deck’s consistency.',
+tmBtn:'Table mode',tmT:'TABLE MODE — compare up to 4 decks',tmRun:'Compare table',tmDeck:'Deck',
+tmHint:'Paste 2–4 lists and compare tier and points for the whole table before game night.',
+tmLoad:'Load into analyzer',tmRunning:'Analyzing deck',
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Over the top · Spellslinger'}
 };
 
@@ -807,6 +833,8 @@ valid_identity:{es:v=>v.name+' está fuera de la identidad de color del comandan
                 en:v=>v.name+' is outside the commander’s color identity ('+v.colors.join('')+')'},
 valid_not_found:{es:v=>'No se encontró en Scryfall: «'+v.name+'» — revisa el nombre',
                  en:v=>'Not found on Scryfall: “'+v.name+'” — check the spelling'},
+valid_banned_official:{es:v=>v.name+' está prohibida en Commander (banlist oficial de Wizards, aparte de las reglas del pod)',
+                       en:v=>v.name+' is banned in Commander (official Wizards banlist, separate from pod rules)'},
 };
 function dialName(k, lang){ const m = DIAL_META.find(d=>d.k===k); return m? m.name[lang] : k; }
 
@@ -888,11 +916,15 @@ function persistCache(){ try { localStorage.setItem('pdc_cards_v2', JSON.stringi
 
 const state = {
   lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
-  arch: 'auto', grp: 'type', cf: 'all', hl: null, openArch: null,
+  arch: 'auto', grp: 'type', cf: 'all', hl: null, openArch: null, tab: 'load',
   deck: null,        // {entries, commanders, deckName}
-  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation}
+  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, whatIf}
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
+  hand: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
+  tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
 };
+const TAB_KEYS = ['load', 'power', 'analysis', 'tips', 'guide'];
+const TAB_LABEL = { load: 'tabLoad', power: 'tabPower', analysis: 'tabAnalysis', tips: 'tabTips', guide: 'tabGuide' };
 const T = () => L[state.lang];
 
 // ================= analysis pipeline =================
@@ -918,6 +950,7 @@ async function analyze() {
     state.deck = parsed;
     recompute(notFound);
     state.fetchSt = 'idle';
+    state.tab = 'power';
   } catch (e) {
     console.error(e); state.error = 'netErr';
   }
@@ -933,10 +966,23 @@ function recompute(notFound) {
   const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
     cls: PodEngine.classifyCard(cardCache[e.name]) }));
   const detected = PodEngine.detectArchetype(cardsInfo);
-  const validation = PodEngine.validateDeck(cardsInfo, parsed.commanders, cardCache,
+  const commander = (parsed.commanders && parsed.commanders[0]) || PodEngine.guessCommander(resolved, cardCache);
+  const commanders = parsed.commanders && parsed.commanders.length ? parsed.commanders : (commander ? [commander] : []);
+  const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache,
     notFound !== undefined ? notFound : (state.result ? state.result.notFound : []));
-  state.result = { stats, flagged, evalRes, cardsInfo, detected,
+  // what-if cut deltas for every card that drives a points dial or violation
+  const drivingNames = new Set();
+  for (const list of Object.values(evalRes.driving)) for (const [n] of list) drivingNames.add(n);
+  const whatIf = {};
+  for (const n of drivingNames) {
+    const wi = PodEngine.whatIfCut(resolved, cardCache, RULES, n);
+    whatIf[n] = { dPts: evalRes.points - wi.points, tier: wi.tier,
+      fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
+  }
+  state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, whatIf,
     notFound: notFound !== undefined ? notFound : (state.result ? state.result.notFound : []), validation };
+  state.hand = null;
+  state.tipsCache = null;
 }
 
 let fetchCancelled = false;
@@ -1038,18 +1084,43 @@ function renderSummary() {
   const t = T(), r = state.result, ev = r.evalRes;
   const [bg, bd, fg] = tierColors(ev.tier);
   const budgetN = RULES.tiers.tier2.max_points;
+  const cmd = r.commander ? cardCache[r.commander] : null;
+  const cmdTile = cmd
+    ? '<div class="panel" style="padding:6px 14px 6px 6px;display:flex;align-items:center;gap:10px;min-width:180px">' +
+      '<img src="' + (cmd.img_art || '') + '" style="width:56px;height:41px;object-fit:cover;border-radius:7px;background:var(--track)" alt="">' +
+      '<div><div style="font-size:10.5px;color:var(--muted)">' + t.commander + '</div>' +
+      '<div style="font-size:13px;font-weight:700;line-height:1.2">' + esc(cmd.name.split(' // ')[0]) + '</div>' +
+      '<div style="display:flex;gap:3px;padding-top:3px">' + (cmd.color_identity || []).map(k =>
+        '<span style="width:10px;height:10px;border-radius:50%;background:' + PIP[k] + ';border:1px solid var(--muted)"></span>').join('') + '</div></div></div>'
+    : '';
   $('summary').innerHTML =
-    '<div style="background:' + bg + ';border:1px solid ' + bd + ';border-radius:12px;padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:210px">' +
+    '<div style="background:' + bg + ';border:1px solid ' + bd + ';border-radius:12px;padding:12px 20px;display:flex;flex-direction:column;justify-content:center;min-width:200px">' +
       '<span style="font-size:10.5px;font-weight:600;letter-spacing:0.06em;color:' + fg + ';opacity:.75">' + t.tierWord + '</span>' +
-      '<span style="font-size:19px;font-weight:700;color:' + fg + '">' + t[ev.tier] + '</span></div>' +
-    '<div style="flex:1;min-width:300px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">' +
+      '<span style="font-size:18px;font-weight:700;color:' + fg + '">' + t[ev.tier] + '</span></div>' +
+    cmdTile +
+    '<div style="flex:1;min-width:280px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">' +
       stat(t.pts, ev.points + ' / ' + budgetN) +
       stat(t.price, '€' + Math.round(r.stats.total_price_eur)) +
       stat(t.cardsN, r.stats.total_cards) +
-      '<div class="panel" style="padding:11px 16px"><div style="font-size:10.5px;color:var(--muted)">' + t.archetype + '</div><div style="font-size:14.5px;font-weight:600;padding-top:3px">' + esc(archName()) + '</div></div></div>';
+      '<div class="panel" style="padding:9px 14px"><div style="font-size:10.5px;color:var(--muted)">' + t.archetype + '</div><div style="font-size:13.5px;font-weight:600;padding-top:3px">' + esc(archName()) + '</div></div></div>';
   function stat(lbl, val) {
-    return '<div class="panel" style="padding:11px 16px"><div style="font-size:10.5px;color:var(--muted)">' + lbl + '</div><div class="mono" style="font-weight:700;font-size:19px">' + val + '</div></div>';
+    return '<div class="panel" style="padding:9px 14px"><div style="font-size:10.5px;color:var(--muted)">' + lbl + '</div><div class="mono" style="font-weight:700;font-size:18px">' + val + '</div></div>';
   }
+}
+
+function renderTabbar() {
+  const t = T();
+  $('tabbar').innerHTML = TAB_KEYS.map(k => {
+    const enabled = k === 'load' || k === 'guide' || !!state.result;
+    const active = state.tab === k;
+    return '<button data-tab="' + k + '" ' + (enabled ? '' : 'disabled') + ' style="border:none;border-bottom:2.5px solid ' +
+      (active ? 'var(--accent)' : 'transparent') + ';background:transparent;padding:10px 18px;font-size:13.5px;font-weight:' +
+      (active ? '700' : '600') + ';color:' + (active ? 'var(--text)' : enabled ? 'var(--muted)' : 'var(--faint)') +
+      ';cursor:' + (enabled ? 'pointer' : 'default') + '">' + t[TAB_LABEL[k]] + '</button>';
+  }).join('');
+  for (const b of $('tabbar').querySelectorAll('[data-tab]'))
+    b.onclick = () => { if (!b.disabled) { state.tab = b.dataset.tab; renderAll(); } };
+  for (const k of TAB_KEYS) $('tab-' + k).style.display = state.tab === k ? 'flex' : 'none';
 }
 
 function renderBanner() {
@@ -1220,7 +1291,8 @@ function renderBrowser() {
           '<img src="' + (x.card.img_art || '') + '" loading="lazy" style="width:52px;height:38px;object-fit:cover;border-radius:5px;flex:none;background:var(--track)" alt="">' +
           '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.name) + '</div>' +
           '<div class="mono" style="font-size:10px;color:var(--muted)">' + esc(mana) + ' · ' + (x.card.price != null ? '€' + x.card.price : '—') + (x.qty > 1 ? ' · x' + x.qty : '') + '</div></div>' +
-          (badge ? '<span style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:' + badge.bg + ';color:' + badge.fg + ';flex:none">' + badge.label + '</span>' : '') + '</div>';
+          (badge ? '<span style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:' + badge.bg + ';color:' + badge.fg + ';flex:none">' + badge.label + '</span>' : '') +
+          whatIfChip(x.name) + '</div>';
       }).join('') + '</div>';
   }).join('');
   for (const tile of $('groups').querySelectorAll('.cardTile')) {
@@ -1238,6 +1310,233 @@ function renderBrowser() {
       img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="52" height="38"><rect width="52" height="38" fill="#8a8794"/><text x="26" y="25" font-family="monospace" font-size="16" fill="#fff" text-anchor="middle">' + tile.dataset.name.charAt(0) + '</text></svg>');
     };
   }
+}
+
+function whatIfChip(name) {
+  const r = state.result;
+  const wi = r && r.whatIf && r.whatIf[name];
+  if (!wi || (wi.dPts <= 0 && !wi.fixes)) return '';
+  const t = T();
+  const tierUp = wi.tier !== r.evalRes.tier;
+  const label = (wi.dPts > 0 ? '−' + wi.dPts + ' pt' + (wi.dPts > 1 ? 's' : '') : '') +
+    (tierUp ? (wi.dPts > 0 ? ' → ' : '→ ') + t[wi.tier].split(' · ')[0] : '');
+  if (!label) return '';
+  return '<span title="' + t.whatIf + '" style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:var(--okBg);color:var(--okFg);flex:none;white-space:nowrap">✂ ' + label + '</span>';
+}
+
+// ---------------- Consejos (tips) tab ----------------
+function deckColorIdentity() {
+  const r = state.result;
+  const cmd = r.commander && cardCache[r.commander];
+  if (cmd && cmd.color_identity && cmd.color_identity.length) return cmd.color_identity;
+  const ci = new Set();
+  for (const x of r.cardsInfo) for (const c of x.card.color_identity || []) ci.add(c);
+  return [...ci];
+}
+
+function sugChip(c) {
+  const price = c.price != null ? '€' + c.price : '';
+  return '<span class="sugTile" data-img="' + esc(c.img_normal || '') + '" style="display:flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--panel2);border-radius:99px;padding:4px 12px 4px 5px;font-size:11.5px;font-weight:600;cursor:default">' +
+    '<span style="width:24px;height:24px;border-radius:99px;flex:none;background:var(--track) center/cover no-repeat;' + (c.img_art ? "background-image:url('" + c.img_art + "')" : '') + '"></span>' +
+    esc(c.name) + (price ? ' <span class="mono" style="color:var(--muted)">' + price + '</span>' : '') + '</span>';
+}
+
+function bindSugPopovers(root) {
+  for (const el of root.querySelectorAll('.sugTile')) {
+    el.onmouseenter = () => {
+      const src = el.dataset.img; if (!src) return;
+      const rect = el.getBoundingClientRect();
+      let x = rect.right + 12; if (x + 276 > innerWidth) x = Math.max(8, rect.left - 288);
+      const y = Math.max(10, Math.min(rect.top - 60, innerHeight - 390));
+      const pop = $('popover');
+      pop.style.display = ''; pop.style.left = x + 'px'; pop.style.top = y + 'px';
+      pop.style.backgroundImage = "url('" + src + "')";
+    };
+    el.onmouseleave = () => { $('popover').style.display = 'none'; };
+  }
+}
+
+function tipsKey() {
+  return state.result.stats.total_price_eur + '|' + state.result.stats.total_cards + '|' + archKey() + '|' + state.lang + '|' + state.fetchSt;
+}
+
+function renderTips() {
+  const t = T(), r = state.result, lang = state.lang, ev = r.evalRes;
+  if (state.tipsCache && state.tipsCache.key === tipsKey()) {
+    $('tips').innerHTML = state.tipsCache.html;
+    bindSugPopovers($('tips'));
+    return;
+  }
+  // synchronous part first (power advice), async suggestions fill in after
+  let html = '<div class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">' +
+    '<span class="secT">' + t.tipsT + '</span>' +
+    '<div style="background:var(--tipBg);border:1px solid var(--tipBd);border-radius:10px;padding:14px 18px;font-size:13px;line-height:1.65;color:var(--tipFg)">' + esc(buildTip()) + '</div>';
+  const entries = Object.entries(ev.breakdown).sort((a, b) => b[1] - a[1]);
+  if (entries.length || ev.violations.length) {
+    html += '<span class="secT" style="font-size:11px">' + t.tipsPower + '</span>';
+    for (const [k, pts] of entries) {
+      const nameK = EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang);
+      const cards = (ev.driving[k] || []).slice(0, 8);
+      html += '<div style="display:flex;flex-direction:column;gap:8px;border:1px solid var(--border2);border-radius:10px;padding:12px 14px">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;font-size:13px"><b>' + esc(nameK) + '</b>' +
+        '<span class="mono" style="color:var(--warn);font-weight:700">+' + pts + ' pts</span></div>' +
+        (cards.length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + cards.map(([n]) => {
+          const c = cardCache[n] || { name: n };
+          const wi = r.whatIf[n];
+          return sugChip({ name: n, price: c.price, img_art: c.img_art, img_normal: c.img_normal }) +
+            (wi && wi.dPts > 0 ? '<span style="align-self:center;font-size:10px;font-weight:700;color:var(--good)">✂ −' + wi.dPts + ' ' + t.whatIf + '</span>' : '');
+        }).join('') + '</div>' : '') + '</div>';
+    }
+  }
+  html += '</div>';
+  // composition advice placeholder — filled by async fetch
+  html += '<div class="panel" id="tipsComp" style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">' +
+    '<span class="secT">' + t.tipsComp + '</span><div style="font-size:12.5px;color:var(--muted)">' + t.tipsLoading + '</div></div>';
+  $('tips').innerHTML = html;
+  bindSugPopovers($('tips'));
+  fillCompAdvice();
+}
+
+async function fillCompAdvice() {
+  const t = T(), r = state.result, lang = state.lang;
+  const key = tipsKey();
+  const slots = compSlots().map(s => ({ ...s, v: tagCount(s.cat) }));
+  const few = slots.filter(s => s.v < s.min && s.cat !== 'land');
+  const many = slots.filter(s => s.v > s.max);
+  const ci = deckColorIdentity();
+  const inDeck = r.cardsInfo.map(x => x.name);
+  const banned = Object.values(RULES.hard_bans.banned_cards).flat();
+  let body = '', usedCurated = false;
+  for (const s of few) {
+    let sug = { cards: [], source: 'live' };
+    try { sug = await PodEngine.suggestCards({ cat: s.cat, colorIdentity: ci, excludeNames: inDeck, bannedNames: banned }); } catch (e) {}
+    if (sug.source === 'curated') usedCurated = true;
+    const cutRows = many.map(m => {
+      const cands = r.cardsInfo.filter(x => (x.cls.cat === m.cat || x.cls.tags.includes(m.cat)) && x.cls.type !== 'L')
+        .sort((a, b) => (b.card.edhrec_rank || 1e9) - (a.card.edhrec_rank || 1e9)).slice(0, 3);
+      return cands.length ? esc(CATS[m.cat][lang]) + ' (' + t.tipsCutCands + ': ' + cands.map(x => esc(x.name)).join(', ') + ')' : '';
+    }).filter(Boolean).join(' · ');
+    body += '<div style="display:flex;flex-direction:column;gap:8px;border:1px solid var(--border2);border-radius:10px;padding:12px 14px">' +
+      '<div style="font-size:13px"><b>' + esc(CATS[s.cat][lang]) + '</b> — ' + s.v + '/' + s.min + '–' + s.max +
+      ' <span style="color:var(--warnFg);font-weight:600">' + t.few + '</span></div>' +
+      (sug.cards.length ? '<div style="font-size:12px;color:var(--muted)">' + t.tipsAdd + ' ' + esc(CATS[s.cat][lang]).toLowerCase() + ':</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' + sug.cards.map(sugChip).join('') + '</div>' : '') +
+      (cutRows ? '<div style="font-size:12px;color:var(--muted)">' + t.tipsCutFrom + ': ' + cutRows + '</div>' : '') + '</div>';
+  }
+  if (!few.length) {
+    if (many.length) {
+      body += '<div style="font-size:13px;color:var(--muted)">' + many.map(m => {
+        const cands = r.cardsInfo.filter(x => (x.cls.cat === m.cat || x.cls.tags.includes(m.cat)) && x.cls.type !== 'L')
+          .sort((a, b) => (b.card.edhrec_rank || 1e9) - (a.card.edhrec_rank || 1e9)).slice(0, 3);
+        return '<b>' + esc(CATS[m.cat][lang]) + '</b> ' + m.v + '/' + m.min + '–' + m.max + ' (' + t.many.toLowerCase() + ') — ' +
+          t.tipsCutLabel + ': ' + cands.map(x => esc(x.name)).join(', ');
+      }).join('<br>') + '</div>';
+    } else {
+      body += '<div style="font-size:13px;color:var(--muted)">' + t.tipsNone + '</div>';
+    }
+  }
+  if (usedCurated) body += '<div style="font-size:12px;color:var(--warnFg)">' + t.tipsCurated + '</div>';
+  const el = $('tipsComp');
+  if (!el || tipsKey() !== key) return; // state changed while fetching
+  el.innerHTML = '<span class="secT">' + t.tipsComp + '</span>' + body;
+  bindSugPopovers(el);
+  state.tipsCache = { key, html: $('tips').innerHTML };
+}
+
+// ---------------- sample hand ----------------
+function drawHand() {
+  const r = state.result;
+  const pool = [];
+  for (const x of r.cardsInfo) {
+    const isCmd = r.commanders && r.commanders.includes(x.name);
+    for (let i = 0; i < x.qty - (isCmd ? 1 : 0); i++) pool.push(x.name);
+  }
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  state.hand = pool.slice(0, 7);
+  renderHand();
+}
+
+function renderHand() {
+  const t = T();
+  let html = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">' +
+    '<span class="secT">' + t.handT + '</span>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button id="handDrawBtn" style="background:var(--accent);color:var(--accentFg);border:none;border-radius:7px;padding:7px 16px;font-size:12.5px;font-weight:600">' + (state.hand ? t.handMull : t.handDraw) + '</button></div></div>';
+  if (!state.hand) html += '<div style="font-size:12.5px;color:var(--muted)">' + t.handHint + '</div>';
+  else html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">' +
+    state.hand.map(n => {
+      const c = cardCache[n] || {};
+      return c.img_normal
+        ? '<img src="' + c.img_normal + '" loading="lazy" style="width:100%;border-radius:8px;background:var(--track)" alt="' + esc(n) + '">'
+        : '<div style="border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;min-height:80px">' + esc(n) + '</div>';
+    }).join('') + '</div>';
+  $('handPanel').innerHTML = html;
+  $('handDrawBtn').onclick = drawHand;
+}
+
+// ---------------- pod table mode ----------------
+function renderTableMode() {
+  const t = T();
+  $('tableModeBtn').textContent = t.tmBtn;
+  const el = $('tableMode');
+  if (!state.tableOpen) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  let html = '<div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:12px">' +
+    '<span class="secT">' + t.tmT + '</span>' +
+    '<div style="font-size:12px;color:var(--muted)">' + t.tmHint + '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px">' +
+    [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="mono" placeholder="' + t.tmDeck + ' ' + (i + 1) + '" style="border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:10px;font-size:11px;resize:vertical">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
+    '<div><button id="tmRunBtn" ' + (state.tableBusy ? 'disabled' : '') + ' style="background:var(--accent);color:var(--accentFg);border:none;border-radius:8px;padding:10px 24px;font-weight:600;font-size:13.5px">' +
+    (state.tableBusy ? t.tmRunning + '…' : t.tmRun) + '</button></div>';
+  if (state.tableResults) {
+    html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
+      '<tr style="text-align:left;color:var(--muted);font-size:11px"><th style="padding:8px">' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.price + '</th><th>GC</th><th>' + t.archetype + '</th><th></th></tr>' +
+      state.tableResults.map((d, i) => {
+        const [bg, bd, fg] = tierColors(d.tier);
+        return '<tr style="border-top:1px solid var(--border2)"><td style="padding:9px 8px;font-weight:600">' + esc(d.name) + '</td>' +
+          '<td><span style="background:' + bg + ';border:1px solid ' + bd + ';color:' + fg + ';border-radius:99px;padding:3px 12px;font-size:11.5px;font-weight:700;white-space:nowrap">' + T()[d.tier] + '</span></td>' +
+          '<td class="mono">' + d.pts + '</td><td class="mono">€' + Math.round(d.price) + '</td><td class="mono">' + d.gc + '</td><td>' + esc(d.arch) + '</td>' +
+          '<td><button data-tmload="' + i + '" style="border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600">' + t.tmLoad + '</button></td></tr>';
+      }).join('') + '</table></div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+  for (const ta of el.querySelectorAll('[data-tm]'))
+    ta.oninput = () => { state.tableTexts[+ta.dataset.tm] = ta.value; };
+  $('tmRunBtn').onclick = runTableMode;
+  for (const b of el.querySelectorAll('[data-tmload]'))
+    b.onclick = () => { $('deckText').value = state.tableTexts.filter(x => x.trim())[+b.dataset.tmload]; analyze(); };
+}
+
+async function runTableMode() {
+  if (state.tableBusy) return;
+  const texts = state.tableTexts.filter(x => x.trim());
+  if (!texts.length) return;
+  state.tableBusy = true; renderTableMode();
+  const results = [];
+  try {
+    for (const text of texts) {
+      const parsed = PodEngine.parseDecklist(text);
+      const names = [...new Set(parsed.entries.map(e => e.name))];
+      await PodEngine.fetchCards(names, cardCache, () => {});
+      const resolved = parsed.entries.filter(e => cardCache[e.name]);
+      const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
+      const ev = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
+      const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name, cls: PodEngine.classifyCard(cardCache[e.name]) }));
+      const det = PodEngine.detectArchetype(cardsInfo);
+      const cmd = (parsed.commanders && parsed.commanders[0]) || PodEngine.guessCommander(resolved, cardCache);
+      const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
+      results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
+        tier: ev.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers, arch: a.name[state.lang] });
+    }
+    persistCache();
+    state.tableResults = results;
+  } catch (e) { console.error(e); state.error = 'netErr'; }
+  state.tableBusy = false;
+  renderTableMode(); renderInput();
 }
 
 function segOf(x) {
@@ -1320,8 +1619,7 @@ function renderGuide() {
   for (const h of $('guideBody').querySelectorAll('[data-arch]'))
     h.onclick = () => { state.openArch = state.openArch === h.dataset.arch ? null : h.dataset.arch; renderGuide(); };
   for (const b of $('guideBody').querySelectorAll('[data-build]'))
-    b.onclick = (e) => { e.stopPropagation(); state.arch = b.dataset.build; state.openArch = null; $('archSel').value = state.arch;
-      renderGuide(); if (state.result) { renderSummary(); renderComp(); } };
+    b.onclick = (e) => { e.stopPropagation(); state.arch = b.dataset.build; state.openArch = null; renderAll(); };
 }
 
 function copyReport() {
@@ -1342,14 +1640,19 @@ function copyReport() {
 }
 
 function renderAll() {
-  applyTheme(); renderHeader(); renderInput(); renderGuide();
+  applyTheme(); renderHeader(); renderInput(); renderGuide(); renderTabbar(); renderTableMode();
   const t = T();
   $('emptyT').textContent = t.emptyT; $('emptyX').textContent = t.emptyX;
   $('footer').textContent = t.footer;
   const has = !!state.result;
-  $('empty').style.display = has ? 'none' : '';
-  $('resultWrap').style.display = has ? '' : 'none';
-  if (has) { renderSummary(); renderBanner(); renderValidation(); renderPower(); renderComp(); renderBrowser(); renderCurve(); }
+  $('empty').style.display = has || state.tableOpen ? 'none' : '';
+  $('stickyWrap').style.display = has ? 'flex' : 'none';
+  if (has) {
+    renderSummary(); renderBanner(); renderValidation();
+    if (state.tab === 'power') renderPower();
+    if (state.tab === 'analysis') { renderComp(); renderBrowser(); renderCurve(); renderHand(); }
+    if (state.tab === 'tips') renderTips();
+  }
 }
 
 // ================= boot =================
@@ -1361,10 +1664,11 @@ window.addEventListener('DOMContentLoaded', () => {
   $('enBtn').onclick = () => { state.lang = 'en'; store.lang = 'en'; renderAll(); };
   $('copyBtn').onclick = copyReport;
   $('analyzeBtn').onclick = analyze;
-  $('archSel').onchange = (e) => { state.arch = e.target.value; if (state.result) { renderSummary(); renderComp(); } };
+  $('archSel').onchange = (e) => { state.arch = e.target.value; renderAll(); };
   $('deckText').oninput = () => { state.error = null; renderInput(); };
   $('gtBtn').onclick = () => { state.grp = 'type'; renderBrowser(); };
   $('gcBtn').onclick = () => { state.grp = 'cat'; renderBrowser(); };
+  $('tableModeBtn').onclick = () => { state.tableOpen = !state.tableOpen; renderAll(); };
   const st = PodEngine.runSelfTest(RULES);
   if (!st.pass) console.warn('PodEngine selftest FAILED', st.results.filter(r => !r.pass));
   renderAll();
@@ -1396,41 +1700,52 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </div>
-<main style="width:100%;max-width:1180px;margin:0 auto;padding:24px 20px 12px;display:flex;flex-direction:column;gap:20px;box-sizing:border-box">
-  <div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:12px">
-    <div id="inputTitle" class="secT">ANALIZAR MAZO</div>
-    <textarea id="deckText" rows="6" class="mono" style="border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:12px 14px;font-size:12.5px;resize:vertical;min-height:72px"></textarea>
-    <div id="inputNotice" style="display:none;background:var(--warnBg);border:1px solid var(--warnBd);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--warnFg)"></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <span id="tryLabel" style="font-size:12px;color:var(--muted)"></span>
-      <span id="samples" style="display:contents"></span>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <label style="flex:1;min-width:220px;display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px">
-        <span id="archLabel" style="color:var(--muted);white-space:nowrap"></span>
-        <select id="archSel" style="flex:1;border:none;background:transparent;padding:10px 0;font-weight:600;cursor:pointer"></select>
-      </label>
-      <button id="analyzeBtn" style="background:var(--accent);color:var(--accentFg);border:none;font-weight:600;font-size:14.5px;padding:11px 30px;border-radius:8px"></button>
-    </div>
-  </div>
-
-  <div id="empty" style="border:1.5px dashed var(--border);border-radius:12px;padding:44px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
-    <div style="display:flex;gap:4px;padding-bottom:6px">
-      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.93 0.05 95);border:1.5px solid var(--muted)"></div>
-      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.7 0.11 240);border:1.5px solid var(--muted)"></div>
-      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.35 0.03 300);border:1.5px solid var(--muted)"></div>
-      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.6 0.17 30);border:1.5px solid var(--muted)"></div>
-      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.62 0.13 150);border:1.5px solid var(--muted)"></div>
-    </div>
-    <div id="emptyT" style="font-size:16px;font-weight:700"></div>
-    <div id="emptyX" style="font-size:13px;color:var(--muted);max-width:420px"></div>
-  </div>
-
-  <div id="resultWrap" style="display:none;flex-direction:column;gap:20px">
-    <div id="summary" style="display:flex;gap:14px;align-items:stretch;flex-wrap:wrap"></div>
+<main style="width:100%;max-width:1180px;margin:0 auto;padding:16px 20px 12px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+  <div id="stickyWrap" style="display:none;position:sticky;top:0;z-index:60;background:var(--bg);padding:8px 0 10px;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)">
+    <div id="summary" style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap"></div>
     <div id="banner"></div>
+  </div>
+
+  <nav id="tabbar" style="display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0"></nav>
+
+  <div id="tab-load" style="display:flex;flex-direction:column;gap:16px">
+    <div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:12px">
+      <div id="inputTitle" class="secT">ANALIZAR MAZO</div>
+      <textarea id="deckText" rows="10" class="mono" style="border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:12px 14px;font-size:12.5px;resize:vertical;min-height:120px"></textarea>
+      <div id="inputNotice" style="display:none;background:var(--warnBg);border:1px solid var(--warnBd);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--warnFg)"></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span id="tryLabel" style="font-size:12px;color:var(--muted)"></span>
+        <span id="samples" style="display:contents"></span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <label style="flex:1;min-width:220px;display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px">
+          <span id="archLabel" style="color:var(--muted);white-space:nowrap"></span>
+          <select id="archSel" style="flex:1;border:none;background:transparent;padding:10px 0;font-weight:600;cursor:pointer"></select>
+        </label>
+        <button id="analyzeBtn" style="background:var(--accent);color:var(--accentFg);border:none;font-weight:600;font-size:14.5px;padding:11px 30px;border-radius:8px"></button>
+        <button id="tableModeBtn" style="border:1px solid var(--border);background:transparent;color:var(--muted);font-weight:600;font-size:13px;padding:10px 18px;border-radius:8px"></button>
+      </div>
+    </div>
     <div id="validation" style="display:none"></div>
+    <div id="tableMode" style="display:none"></div>
+    <div id="empty" style="border:1.5px dashed var(--border);border-radius:12px;padding:44px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
+      <div style="display:flex;gap:4px;padding-bottom:6px">
+        <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.93 0.05 95);border:1.5px solid var(--muted)"></div>
+        <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.7 0.11 240);border:1.5px solid var(--muted)"></div>
+        <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.35 0.03 300);border:1.5px solid var(--muted)"></div>
+        <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.6 0.17 30);border:1.5px solid var(--muted)"></div>
+        <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.62 0.13 150);border:1.5px solid var(--muted)"></div>
+      </div>
+      <div id="emptyT" style="font-size:16px;font-weight:700"></div>
+      <div id="emptyX" style="font-size:13px;color:var(--muted);max-width:420px"></div>
+    </div>
+  </div>
+
+  <div id="tab-power" style="display:none;flex-direction:column;gap:16px">
     <div id="power" class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:2px"></div>
+  </div>
+
+  <div id="tab-analysis" style="display:none;flex-direction:column;gap:16px">
     <div id="comp" style="background:var(--compBg);border:1px solid var(--compBd);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:12px"></div>
     <div class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
@@ -1446,11 +1761,18 @@ window.addEventListener('DOMContentLoaded', () => {
       <div id="groups" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:start"></div>
     </div>
     <div id="curveWrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px"></div>
+    <div id="handPanel" class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:14px"></div>
   </div>
 
-  <div class="panel" style="overflow:hidden">
-    <div id="guideT" class="secT" style="padding:15px 22px;border-bottom:1px solid var(--border)"></div>
-    <div id="guideBody"></div>
+  <div id="tab-tips" style="display:none;flex-direction:column;gap:16px">
+    <div id="tips" style="display:flex;flex-direction:column;gap:16px"></div>
+  </div>
+
+  <div id="tab-guide" style="display:none;flex-direction:column;gap:16px">
+    <div class="panel" style="overflow:hidden">
+      <div id="guideT" class="secT" style="padding:15px 22px;border-bottom:1px solid var(--border)"></div>
+      <div id="guideBody"></div>
+    </div>
   </div>
 </main>
 <div id="footer" class="mono" style="text-align:center;font-size:11px;color:var(--faint);padding:10px 20px 28px"></div>
