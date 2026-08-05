@@ -61,7 +61,7 @@ export function renderPower() {
   if (viols.length) html += '<div class="alert tone-bad">' +
     '<span class="alert-title">✕ ' + t.viols + '</span>' +
     viols.map(v => '<div class="alert-line">' + esc(v) + '</div>').join('') + '</div>';
-  if (flags.length) html += '<div class="alert tone-warn" style="margin-top:10px">' +
+  if (flags.length) html += '<div class="alert tone-warn">' +
     '<span class="alert-title">⚠ ' + t.flags + '</span>' +
     flags.map(f => '<div class="alert-line">' + esc(f) + '</div>').join('') + '</div>';
   html += '<div class="tip-box">' +

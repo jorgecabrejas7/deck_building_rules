@@ -30,7 +30,7 @@ export function renderBanner() {
     const fi = state.fi, pct = fi.total ? Math.round(fi.done / fi.total * 100) : 0;
     el.innerHTML = '<div class="banner-box tone-warn banner-col">' +
       '<div class="banner-prog-head"><span>' + t.fetchBtn + '…</span>' +
-      '<span class="mono" style="font-weight:600">' + fi.done + ' / ' + fi.total + (fi.card ? ' · ' + esc(fi.card) : '') + '…</span></div>' +
+      '<span class="mono">' + fi.done + ' / ' + fi.total + (fi.card ? ' · ' + esc(fi.card) : '') + '…</span></div>' +
       '<div class="progress"><div style="--w:' + pct + '%"></div></div></div>';
   } else {
     el.innerHTML = '<div class="banner-box tone-ok">✓ ' + t.fetchDone + '</div>';

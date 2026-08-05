@@ -13,21 +13,21 @@ export function renderTableMode() {
   const el = $('tableMode');
   if (!state.tableOpen) { el.style.display = 'none'; return; }
   el.style.display = '';
-  let html = '<div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:12px">' +
+  let html = '<div class="panel tm-panel">' +
     '<span class="secT">' + t.tmT + '</span>' +
-    '<div style="font-size:12px;color:var(--muted)">' + t.tmHint + '</div>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px">' +
-    [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="mono" placeholder="' + t.tmDeck + ' ' + (i + 1) + '" style="border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:10px;font-size:11px;resize:vertical">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
-    '<div><button id="tmRunBtn" ' + (state.tableBusy ? 'disabled' : '') + ' style="background:var(--accent);color:var(--accentFg);border:none;border-radius:8px;padding:10px 24px;font-weight:600;font-size:13.5px">' +
+    '<div class="lbl-muted">' + t.tmHint + '</div>' +
+    '<div class="tm-grid">' +
+    [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="mono tm-ta" placeholder="' + t.tmDeck + ' ' + (i + 1) + '">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
+    '<div><button id="tmRunBtn" ' + (state.tableBusy ? 'disabled' : '') + ' class="btn-accent">' +
     (state.tableBusy ? t.tmRunning + '…' : t.tmRun) + '</button></div>';
   if (state.tableResults) {
-    html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
-      '<tr style="text-align:left;color:var(--muted);font-size:11px"><th style="padding:8px">' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.price + '</th><th>GC</th><th>' + t.archetype + '</th><th></th></tr>' +
+    html += '<div class="table-scroll"><table class="tm-table">' +
+      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.price + '</th><th>GC</th><th>' + t.archetype + '</th><th></th></tr>' +
       state.tableResults.map((d, i) => {
-        return '<tr style="border-top:1px solid var(--border2)"><td style="padding:9px 8px;font-weight:600">' + esc(d.name) + '</td>' +
+        return '<tr><td>' + esc(d.name) + '</td>' +
           '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + T()[d.tier] + '</span></td>' +
           '<td class="mono">' + d.pts + '</td><td class="mono">€' + Math.round(d.price) + '</td><td class="mono">' + d.gc + '</td><td>' + esc(d.arch) + '</td>' +
-          '<td><button data-tmload="' + i + '" style="border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600">' + t.tmLoad + '</button></td></tr>';
+          '<td><button data-tmload="' + i + '" class="btn-ghost-sm">' + t.tmLoad + '</button></td></tr>';
       }).join('') + '</table></div>';
   }
   html += '</div>';
