@@ -627,8 +627,9 @@ async function fetchCheapest(names, cache, onProgress, isCancelled) {
   return { done: targets.length, total: targets.length, cancelled: false };
 }
 
-async function fetchArchidekt(id) {
-  const res = await fetch("https://archidekt.com/api/decks/" + id + "/");
+async function fetchArchidekt(id, useProxy) {
+  const api = "https://archidekt.com/api/decks/" + id + "/";
+  const res = await fetch(useProxy ? "https://corsproxy.io/?url=" + encodeURIComponent(api) : api);
   if (!res.ok) throw new Error("Archidekt " + res.status);
   const data = await res.json();
   const excluded = new Set((data.categories || []).filter(c => c.includedInDeck === false).map(c => c.name));
@@ -992,6 +993,8 @@ comboNone:'Sin combos infinitos completos en el mazo.',comboUnchecked:'sin compr
 comboErr:'No se pudo consultar — comprueba a mano en commanderspellbook.com.',
 comboProduces:'genera',comboOthers:'combos no infinitos detectados',
 howBtn:'¿Cómo funciona?',
+proxyBtn:'Intentar vía proxy público',
+proxyNote:'El proxy es un servicio de terceros (corsproxy.io): tu petición del mazo pasa por él. Solo se usa si pulsas el botón.',
 rampT:'ANÁLISIS DE RAMPEO',rampNone:'Este mazo no lleva aceleradores de maná detectables.',
 rampPlay:'baja',rampAvail:'maná disponible',rampAhead:'te adelanta a',rampNothing:'(no hay cartas de ese coste en el mazo)',
 rampAgg1:'aceleradores de maná',rampAgg2:'de maná extra potencial · curva media',
@@ -1039,6 +1042,8 @@ comboNone:'No complete infinite combos in the deck.',comboUnchecked:'not checked
 comboErr:'Lookup failed — check manually on commanderspellbook.com.',
 comboProduces:'produces',comboOthers:'non-infinite combos detected',
 howBtn:'How it works',
+proxyBtn:'Try via public proxy',
+proxyNote:'The proxy is a third-party service (corsproxy.io): your deck request passes through it. Only used when you press the button.',
 rampT:'RAMP ANALYSIS',rampNone:'This deck runs no detectable mana accelerators.',
 rampPlay:'play',rampAvail:'mana available',rampAhead:'gets you ahead to',rampNothing:'(no cards at that cost in the deck)',
 rampAgg1:'mana accelerators',rampAgg2:'of potential extra mana · avg curve',
@@ -1251,6 +1256,7 @@ const state = {
   deck: null,        // {entries, commanders, deckName}
   result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, whatIf}
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
+  archFailId: null, archProxy: false,
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
 };
@@ -1267,8 +1273,8 @@ async function analyze() {
   try {
     let parsed;
     if (det.kind === 'archidekt') {
-      try { parsed = await PodEngine.fetchArchidekt(det.id); }
-      catch (e) { state.error = 'archErr'; state.busy = false; renderInput(); return; }
+      try { parsed = await PodEngine.fetchArchidekt(det.id, state.archProxy); }
+      catch (e) { state.error = 'archErr'; state.archFailId = det.id; state.archProxy = false; state.busy = false; renderInput(); return; }
     } else {
       parsed = PodEngine.parseDecklist(text);
     }
@@ -1400,7 +1406,14 @@ function renderInput() {
   for (const b of $('samples').querySelectorAll('[data-sample]'))
     b.onclick = () => { $('deckText').value = SAMPLES[b.dataset.sample]; state.error = null; renderInput(); };
   const notice = $('inputNotice');
-  if (state.error) { notice.style.display = ''; notice.textContent = t[state.error] || state.error; }
+  if (state.error === 'archErr' && state.archFailId) {
+    notice.style.display = '';
+    notice.innerHTML = esc(t.archErr) + ' <button id="archProxyBtn" style="margin-left:8px;border:1px solid var(--warnBd);background:transparent;color:var(--warnFg);border-radius:7px;padding:4px 12px;font-size:12px;font-weight:600">' + t.proxyBtn + '</button>' +
+      '<div style="padding-top:6px;font-size:11.5px;opacity:.85">' + t.proxyNote + '</div>';
+    const pb = document.getElementById('archProxyBtn');
+    if (pb) pb.onclick = () => { state.archProxy = true; state.error = null; analyze(); };
+  }
+  else if (state.error) { notice.style.display = ''; notice.textContent = t[state.error] || state.error; }
   else if (PodEngine.detectInput($('deckText').value).kind === 'moxfield') { notice.style.display = ''; notice.textContent = t.mox; }
   else notice.style.display = 'none';
 }
@@ -1944,7 +1957,7 @@ function renderHand() {
     '<div style="display:flex;gap:8px">' +
     '<button id="handDrawBtn" style="background:var(--accent);color:var(--accentFg);border:none;border-radius:7px;padding:7px 16px;font-size:12.5px;font-weight:600">' + (state.hand ? t.handMull : t.handDraw) + '</button></div></div>';
   if (!state.hand) html += '<div style="font-size:12.5px;color:var(--muted)">' + t.handHint + '</div>';
-  else html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">' +
+  else html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px">' +
     state.hand.map(n => {
       const c = cardCache[n] || {};
       return c.img_normal
