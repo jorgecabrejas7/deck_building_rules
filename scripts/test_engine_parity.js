@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * Dev-only parity test: extracts the PodEngine <script> block from
- * app/pod_deck_checker.html, runs it in Node, and checks that
- *   (a) the 20 selftest cases pass (same expectations as tier_rules.py --selftest)
+ * Dev-only parity test: loads app/engine.js in Node and checks that
+ *   (a) the selftest cases pass (same expectations as tier_rules.py --selftest)
  *   (b) all 36 precon decks get the same stats/points/tier as the Python pipeline
  *       (expected values generated on the fly via python3).
  *
@@ -12,35 +11,12 @@
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
-const vm = require("vm");
 
 const ROOT = path.resolve(__dirname, "..");
-const html = fs.readFileSync(path.join(ROOT, "app", "pod_deck_checker.html"), "utf8");
-
-const engineSrc = html.split("/* ENGINE-START */")[1].split("/* ENGINE-END */")[0];
-const sandbox = { module: { exports: {} }, console };
-vm.createContext(sandbox);
-vm.runInContext(engineSrc, sandbox);
-const PodEngine = sandbox.module.exports;
-
-const rulesJson = html.match(/<script type="application\/json" id="pod-rules">\s*([\s\S]*?)<\/script>/)[1];
-const RULES = JSON.parse(rulesJson);
-
-// Rules drift check: inline block must equal rules/pod_rules.json (ignoring doc-only keys)
-const fileRules = JSON.parse(fs.readFileSync(path.join(ROOT, "rules", "pod_rules.json"), "utf8"));
-function comparable(r) {
-  return JSON.stringify({
-    tiers: { tier1: r.tiers.tier1.max_points, tier2: r.tiers.tier2.max_points },
-    dials: Object.fromEntries(Object.entries(r.dials).map(([k, v]) => [k, [v.baseline_max, v.point_steps, v.hard_max]])),
-    bans: { price: r.hard_bans.max_card_price_eur, cards: r.hard_bans.banned_cards },
-    conds: (r.conditionals || []).map(c => [c.id, c.type || "hard", c.if || c.if_all, c.then || c.penalty_points]),
-  });
-}
-if (comparable(RULES) !== comparable(fileRules)) {
-  console.error("FAIL: inline rules in HTML have drifted from rules/pod_rules.json");
-  process.exit(1);
-}
-console.log("Rules drift check: OK (HTML inline rules == rules/pod_rules.json)");
+const PodEngine = require(path.join(ROOT, "app", "engine.js"));
+const RULES = JSON.parse(fs.readFileSync(path.join(ROOT, "rules", "pod_rules.json"), "utf8"));
+// Rules now live ONLY in rules/pod_rules.json (the app fetches it at runtime),
+// so the old HTML-inline drift check is obsolete.
 
 // (a) selftest
 const st = PodEngine.runSelfTest(RULES);
