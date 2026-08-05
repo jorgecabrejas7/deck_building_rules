@@ -36,6 +36,20 @@ def load_rules(path=RULES_PATH):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def dial_points(value, spec, overflow):
+    """Total points a dial charges at `value` (> baseline_max). Uses the priced
+    steps; beyond the last step, +overflow per extra unit — counting never stops."""
+    steps = spec.get("point_steps") or {}
+    if str(value) in steps:
+        return steps[str(value)]
+    if steps:
+        last = max(int(k) for k in steps)
+        if value > last:
+            return steps[str(last)] + (value - last) * overflow
+        return 0
+    return (value - spec["baseline_max"]) * overflow
+
+
 def _names_in_deck(flagged, banned_names):
     """Banned-list hits among the deck's cards. flagged values are (name, qty) lists;
     the union of all flagged names misses unflagged cards, so callers pass a full
@@ -81,14 +95,18 @@ def evaluate_deck(stats, flagged, rules, card_names=None):
         if hits:
             violations.append(f"Banned ({list_name}): {', '.join(hits)}")
 
-    # 1c/2. Per-dial hard max + points
+    # 1c/2. Per-dial points. Points never stop: beyond the last priced step every
+    # extra unit costs overflow_per_unit more. Only dials marked "forbidden"
+    # (mass land denial) violate outright; hard_max is display-only metadata.
+    overflow = rules.get("overflow_per_unit", 1)
     for dial, spec in rules["dials"].items():
         value = stats.get(dial, 0)
-        if value > spec["hard_max"]:
-            violations.append(f"{dial} = {value}, over hard max {spec['hard_max']}")
-            driving[dial] = flagged.get(dial, [])
+        if spec.get("forbidden"):
+            if value > 0:
+                violations.append(f"{dial} = {value}: forbidden in this pod")
+                driving[dial] = flagged.get(dial, [])
         elif value > spec["baseline_max"]:
-            pts = spec["point_steps"].get(str(value), 0)
+            pts = dial_points(value, spec, overflow)
             points += pts
             point_breakdown[dial] = pts
             driving[dial] = flagged.get(dial, [])
@@ -167,10 +185,13 @@ def selftest():
         ("gc + 5th board wipe = 3pts", _fake({"game_changers": 1, "board_wipes": 5}), "tier2"),
         ("5 counterspells still precon", _fake({"counterspells": 5}), "tier1"),
         ("20 cards of 1-5 EUR = 1pt", _fake({"price_1_5": 20}), "tier1"),
-        ("25 cards of 1-5 EUR busts hard max", _fake({"price_1_5": 25}), "above"),
+        ("25 cards of 1-5 EUR = 2+1 overflow = 3pts", _fake({"price_1_5": 25}), "tier2"),
         ("31 EUR card", _fake({"max_card_price_eur": 31.0},
                               {"price_30_plus": [("Cavern-Hoard Whale", 1)]}), "above"),
-        ("two game changers", _fake({"game_changers": 2}), "above"),
+        ("two game changers = 2+1 overflow = 3pts", _fake({"game_changers": 2}), "tier2"),
+        ("three tutors = 5+1 overflow = 6pts", _fake({"tutors": 3}), "tier2"),
+        ("five tutors = 5+3 = 8pts busts budget", _fake({"tutors": 5}), "above"),
+        ("two extra turns = 3+1 = 4pts", _fake({"extra_turns": 2}), "tier2"),
         ("mass land denial", _fake({"mass_land_denial": 1}), "above"),
         ("banned fast mana card", _fake({}, None, {"Mana Crypt"}), "above"),
         ("banned turn recursion", _fake({"extra_turns": 1}, None, {"Nexus of Fate"}), "above"),
@@ -179,7 +200,7 @@ def selftest():
         ("fast mana 9 + free 5 = 1+1+2 penalty pts", _fake({"fast_mana": 9, "free_spells": 5}), "tier2"),
         ("fast mana 12 + free 5 = 4+1+2 pts, top of T2", _fake({"fast_mana": 12, "free_spells": 5}), "tier2"),
         ("fast mana 12 + free 6 = 4+2+2 pts, busted budget", _fake({"fast_mana": 12, "free_spells": 6}), "above"),
-        ("fast mana 15 over hard max", _fake({"fast_mana": 15}), "above"),
+        ("fast mana 15 = 6+1 overflow = 7pts", _fake({"fast_mana": 15}), "tier2"),
         ("budget blowout 2 tutors + 2 pricey", _fake({"tutors": 2, "price_20_30": 1}), "above"),
         ("tier2 spend: 2 pricey 20-30", _fake({"price_20_30": 2}), "tier2"),
         ("extra turn flagged", _fake({"extra_turns": 1}), "tier2"),

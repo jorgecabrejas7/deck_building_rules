@@ -1,40 +1,159 @@
 {
   "$comment": "Pod power-level rules: two-tier shared-point-budget system. Anchored to the 36 precon decks (2024-2026) in out/precon_decks. Consumed by scripts/tier_rules.py. Dials are computed by scripts/power_metrics.py compute_deck_stats().",
-  "version": 1,
+  "version": 2,
   "tiers": {
-    "tier1": {"label": "Tier 1 (Precon)", "max_points": 2},
-    "tier2": {"label": "Tier 2 (Slightly above precon)", "max_points": 7},
-    "above": {"label": "Above pod power level"}
+    "tier1": {
+      "label": "Tier 1 (Precon)",
+      "max_points": 2
+    },
+    "tier2": {
+      "label": "Tier 2 (Slightly above precon)",
+      "max_points": 7
+    },
+    "above": {
+      "label": "Above pod power level"
+    }
   },
   "dials": {
-    "game_changers": {"baseline_max": 0, "point_steps": {"1": 2}, "hard_max": 1},
-    "extra_turns": {"baseline_max": 0, "point_steps": {"1": 3}, "hard_max": 1,
-      "flag_if_over_zero": "Extra-turn effects need explicit table justification (one-shot spells only)."},
-    "tutors": {"baseline_max": 0, "point_steps": {"1": 2, "2": 5}, "hard_max": 2},
-    "stax_effects": {"baseline_max": 1, "point_steps": {"2": 1, "3": 3}, "hard_max": 3},
-    "counterspells": {"baseline_max": 5, "point_steps": {"6": 1, "7": 2}, "hard_max": 7},
-    "board_wipes": {"baseline_max": 4, "point_steps": {"5": 1, "6": 2}, "hard_max": 6},
-    "free_spells": {"baseline_max": 4, "point_steps": {"5": 1, "6": 2, "7": 3, "8": 4}, "hard_max": 8},
-    "fast_mana": {"baseline_max": 8, "point_steps": {"9": 1, "10": 2, "11": 3, "12": 4, "13": 5, "14": 6}, "hard_max": 14},
-    "mass_land_denial": {"baseline_max": 0, "point_steps": {}, "hard_max": 0},
-    "price_1_5": {"baseline_max": 18, "point_steps": {"19": 1, "20": 1, "21": 1, "22": 2, "23": 2, "24": 2}, "hard_max": 24},
-    "price_10_20": {"baseline_max": 3, "point_steps": {"4": 1, "5": 2, "6": 3}, "hard_max": 6},
-    "price_20_30": {"baseline_max": 0, "point_steps": {"1": 3, "2": 5}, "hard_max": 2}
+    "game_changers": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 2
+      },
+      "hard_max": 1
+    },
+    "extra_turns": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 3
+      },
+      "hard_max": 1,
+      "flag_if_over_zero": "Extra-turn effects need explicit table justification (one-shot spells only)."
+    },
+    "tutors": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 2,
+        "2": 5
+      },
+      "hard_max": 2
+    },
+    "stax_effects": {
+      "baseline_max": 1,
+      "point_steps": {
+        "2": 1,
+        "3": 3
+      },
+      "hard_max": 3
+    },
+    "counterspells": {
+      "baseline_max": 5,
+      "point_steps": {
+        "6": 1,
+        "7": 2
+      },
+      "hard_max": 7
+    },
+    "board_wipes": {
+      "baseline_max": 4,
+      "point_steps": {
+        "5": 1,
+        "6": 2
+      },
+      "hard_max": 6
+    },
+    "free_spells": {
+      "baseline_max": 4,
+      "point_steps": {
+        "5": 1,
+        "6": 2,
+        "7": 3,
+        "8": 4
+      },
+      "hard_max": 8
+    },
+    "fast_mana": {
+      "baseline_max": 8,
+      "point_steps": {
+        "9": 1,
+        "10": 2,
+        "11": 3,
+        "12": 4,
+        "13": 5,
+        "14": 6
+      },
+      "hard_max": 14
+    },
+    "mass_land_denial": {
+      "baseline_max": 0,
+      "point_steps": {},
+      "hard_max": 0,
+      "forbidden": true
+    },
+    "price_1_5": {
+      "baseline_max": 18,
+      "point_steps": {
+        "19": 1,
+        "20": 1,
+        "21": 1,
+        "22": 2,
+        "23": 2,
+        "24": 2
+      },
+      "hard_max": 24
+    },
+    "price_10_20": {
+      "baseline_max": 3,
+      "point_steps": {
+        "4": 1,
+        "5": 2,
+        "6": 3
+      },
+      "hard_max": 6
+    },
+    "price_20_30": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 3,
+        "2": 5
+      },
+      "hard_max": 2
+    }
   },
   "hard_bans": {
     "max_card_price_eur": 30.0,
     "max_card_price_note": "No single card over 30 EUR (cheapest Cardmarket printing). Exceeding requires explicit table approval, outside these rules.",
     "banned_cards": {
       "true_fast_mana": [
-        "Mana Crypt", "Mana Vault", "Grim Monolith", "Jeweled Lotus", "Lotus Petal",
-        "Lion's Eye Diamond", "Chrome Mox", "Mox Diamond", "Mox Amber", "Mox Opal",
-        "Dockside Extortionist", "Ancient Tomb", "Gaea's Cradle", "City of Traitors",
-        "Dark Ritual", "Cabal Ritual", "Pyretic Ritual", "Desperate Ritual",
-        "Seething Song", "Rite of Flame", "Jeska's Will"
+        "Mana Crypt",
+        "Mana Vault",
+        "Grim Monolith",
+        "Jeweled Lotus",
+        "Lotus Petal",
+        "Lion's Eye Diamond",
+        "Chrome Mox",
+        "Mox Diamond",
+        "Mox Amber",
+        "Mox Opal",
+        "Dockside Extortionist",
+        "Ancient Tomb",
+        "Gaea's Cradle",
+        "City of Traitors",
+        "Dark Ritual",
+        "Cabal Ritual",
+        "Pyretic Ritual",
+        "Desperate Ritual",
+        "Seething Song",
+        "Rite of Flame",
+        "Jeska's Will"
       ],
       "extra_turn_recursion": [
-        "Nexus of Fate", "Sage of Hours", "Timestream Navigator",
-        "Magistrate's Scepter", "Wanderwine Prophets", "Ral Zarek"
+        "Nexus of Fate",
+        "Sage of Hours",
+        "Timestream Navigator",
+        "Magistrate's Scepter",
+        "Wanderwine Prophets",
+        "Ral Zarek"
       ]
     },
     "banned_cards_note": "Curated lists, extend as the pod meets new cards. true_fast_mana: precons don't run explosive mana and neither do we. extra_turn_recursion: extra turns may never be repeatable."
@@ -43,18 +162,38 @@
     {
       "id": "gc_locks_price",
       "description": "A game changer must be the deck's only luxury: no elevated price bands alongside it.",
-      "if": {"dial": "game_changers", "op": ">=", "value": 1},
+      "if": {
+        "dial": "game_changers",
+        "op": ">=",
+        "value": 1
+      },
       "then": [
-        {"dial": "price_10_20", "op": "<=", "value": 3},
-        {"dial": "price_20_30", "op": "<=", "value": 0}
+        {
+          "dial": "price_10_20",
+          "op": "<=",
+          "value": 3
+        },
+        {
+          "dial": "price_20_30",
+          "op": "<=",
+          "value": 0
+        }
       ]
     },
     {
       "id": "tutors_gate_gc",
       "description": "Tutors turn any strong card into multiple virtual copies: no game changers alongside tutors.",
-      "if": {"dial": "tutors", "op": ">=", "value": 1},
+      "if": {
+        "dial": "tutors",
+        "op": ">=",
+        "value": 1
+      },
       "then": [
-        {"dial": "game_changers", "op": "<=", "value": 0}
+        {
+          "dial": "game_changers",
+          "op": "<=",
+          "value": 0
+        }
       ]
     },
     {
@@ -63,13 +202,29 @@
       "type": "penalty",
       "penalty_points": 2,
       "if_all": [
-        {"dial": "fast_mana", "op": ">", "value": 8},
-        {"dial": "free_spells", "op": ">", "value": 4}
+        {
+          "dial": "fast_mana",
+          "op": ">",
+          "value": 8
+        },
+        {
+          "dial": "free_spells",
+          "op": ">",
+          "value": 4
+        }
       ]
     }
   ],
   "informational_dials": [
-    "single_target_removal", "card_advantage", "protection_effects",
-    "avg_cmc", "land_count", "nonbasic_land_count", "total_price_eur", "avg_price_per_card"
-  ]
+    "single_target_removal",
+    "card_advantage",
+    "protection_effects",
+    "avg_cmc",
+    "land_count",
+    "nonbasic_land_count",
+    "total_price_eur",
+    "avg_price_per_card"
+  ],
+  "overflow_per_unit": 1,
+  "overflow_note": "Beyond a dial's last priced step, every extra unit costs +1 more point — points never stop counting. No per-dial forbidden zones; only the tier budgets decide, except dials marked forbidden and the hard bans."
 }

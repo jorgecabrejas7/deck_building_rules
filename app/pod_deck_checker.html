@@ -50,55 +50,217 @@ button{cursor:pointer}
 
 <script type="application/json" id="pod-rules">
 {
-  "version": 1,
+  "version": 2,
   "tiers": {
-    "tier1": {"label": "Tier 1 (Precon)", "max_points": 2},
-    "tier2": {"label": "Tier 2 (Slightly above precon)", "max_points": 7},
-    "above": {"label": "Above pod power level"}
+    "tier1": {
+      "label": "Tier 1 (Precon)",
+      "max_points": 2
+    },
+    "tier2": {
+      "label": "Tier 2 (Slightly above precon)",
+      "max_points": 7
+    },
+    "above": {
+      "label": "Above pod power level"
+    }
   },
   "dials": {
-    "game_changers": {"baseline_max": 0, "point_steps": {"1": 2}, "hard_max": 1},
-    "extra_turns": {"baseline_max": 0, "point_steps": {"1": 3}, "hard_max": 1,
-      "flag_if_over_zero": "extra_turns"},
-    "tutors": {"baseline_max": 0, "point_steps": {"1": 2, "2": 5}, "hard_max": 2},
-    "stax_effects": {"baseline_max": 1, "point_steps": {"2": 1, "3": 3}, "hard_max": 3},
-    "counterspells": {"baseline_max": 5, "point_steps": {"6": 1, "7": 2}, "hard_max": 7},
-    "board_wipes": {"baseline_max": 4, "point_steps": {"5": 1, "6": 2}, "hard_max": 6},
-    "free_spells": {"baseline_max": 4, "point_steps": {"5": 1, "6": 2, "7": 3, "8": 4}, "hard_max": 8},
-    "fast_mana": {"baseline_max": 8, "point_steps": {"9": 1, "10": 2, "11": 3, "12": 4, "13": 5, "14": 6}, "hard_max": 14},
-    "mass_land_denial": {"baseline_max": 0, "point_steps": {}, "hard_max": 0},
-    "price_1_5": {"baseline_max": 18, "point_steps": {"19": 1, "20": 1, "21": 1, "22": 2, "23": 2, "24": 2}, "hard_max": 24},
-    "price_10_20": {"baseline_max": 3, "point_steps": {"4": 1, "5": 2, "6": 3}, "hard_max": 6},
-    "price_20_30": {"baseline_max": 0, "point_steps": {"1": 3, "2": 5}, "hard_max": 2}
+    "game_changers": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 2
+      },
+      "hard_max": 1
+    },
+    "extra_turns": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 3
+      },
+      "hard_max": 1,
+      "flag_if_over_zero": "extra_turns"
+    },
+    "tutors": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 2,
+        "2": 5
+      },
+      "hard_max": 2
+    },
+    "stax_effects": {
+      "baseline_max": 1,
+      "point_steps": {
+        "2": 1,
+        "3": 3
+      },
+      "hard_max": 3
+    },
+    "counterspells": {
+      "baseline_max": 5,
+      "point_steps": {
+        "6": 1,
+        "7": 2
+      },
+      "hard_max": 7
+    },
+    "board_wipes": {
+      "baseline_max": 4,
+      "point_steps": {
+        "5": 1,
+        "6": 2
+      },
+      "hard_max": 6
+    },
+    "free_spells": {
+      "baseline_max": 4,
+      "point_steps": {
+        "5": 1,
+        "6": 2,
+        "7": 3,
+        "8": 4
+      },
+      "hard_max": 8
+    },
+    "fast_mana": {
+      "baseline_max": 8,
+      "point_steps": {
+        "9": 1,
+        "10": 2,
+        "11": 3,
+        "12": 4,
+        "13": 5,
+        "14": 6
+      },
+      "hard_max": 14
+    },
+    "mass_land_denial": {
+      "baseline_max": 0,
+      "point_steps": {},
+      "hard_max": 0,
+      "forbidden": true
+    },
+    "price_1_5": {
+      "baseline_max": 18,
+      "point_steps": {
+        "19": 1,
+        "20": 1,
+        "21": 1,
+        "22": 2,
+        "23": 2,
+        "24": 2
+      },
+      "hard_max": 24
+    },
+    "price_10_20": {
+      "baseline_max": 3,
+      "point_steps": {
+        "4": 1,
+        "5": 2,
+        "6": 3
+      },
+      "hard_max": 6
+    },
+    "price_20_30": {
+      "baseline_max": 0,
+      "point_steps": {
+        "1": 3,
+        "2": 5
+      },
+      "hard_max": 2
+    }
   },
   "hard_bans": {
     "max_card_price_eur": 30.0,
     "banned_cards": {
       "true_fast_mana": [
-        "Mana Crypt", "Mana Vault", "Grim Monolith", "Jeweled Lotus", "Lotus Petal",
-        "Lion's Eye Diamond", "Chrome Mox", "Mox Diamond", "Mox Amber", "Mox Opal",
-        "Dockside Extortionist", "Ancient Tomb", "Gaea's Cradle", "City of Traitors",
-        "Dark Ritual", "Cabal Ritual", "Pyretic Ritual", "Desperate Ritual",
-        "Seething Song", "Rite of Flame", "Jeska's Will"
+        "Mana Crypt",
+        "Mana Vault",
+        "Grim Monolith",
+        "Jeweled Lotus",
+        "Lotus Petal",
+        "Lion's Eye Diamond",
+        "Chrome Mox",
+        "Mox Diamond",
+        "Mox Amber",
+        "Mox Opal",
+        "Dockside Extortionist",
+        "Ancient Tomb",
+        "Gaea's Cradle",
+        "City of Traitors",
+        "Dark Ritual",
+        "Cabal Ritual",
+        "Pyretic Ritual",
+        "Desperate Ritual",
+        "Seething Song",
+        "Rite of Flame",
+        "Jeska's Will"
       ],
       "extra_turn_recursion": [
-        "Nexus of Fate", "Sage of Hours", "Timestream Navigator",
-        "Magistrate's Scepter", "Wanderwine Prophets", "Ral Zarek"
+        "Nexus of Fate",
+        "Sage of Hours",
+        "Timestream Navigator",
+        "Magistrate's Scepter",
+        "Wanderwine Prophets",
+        "Ral Zarek"
       ]
     }
   },
   "conditionals": [
-    {"id": "gc_locks_price",
-     "if": {"dial": "game_changers", "op": ">=", "value": 1},
-     "then": [{"dial": "price_10_20", "op": "<=", "value": 3},
-              {"dial": "price_20_30", "op": "<=", "value": 0}]},
-    {"id": "tutors_gate_gc",
-     "if": {"dial": "tutors", "op": ">=", "value": 1},
-     "then": [{"dial": "game_changers", "op": "<=", "value": 0}]},
-    {"id": "mana_cheat_stacking", "type": "penalty", "penalty_points": 2,
-     "if_all": [{"dial": "fast_mana", "op": ">", "value": 8},
-                {"dial": "free_spells", "op": ">", "value": 4}]}
-  ]
+    {
+      "id": "gc_locks_price",
+      "if": {
+        "dial": "game_changers",
+        "op": ">=",
+        "value": 1
+      },
+      "then": [
+        {
+          "dial": "price_10_20",
+          "op": "<=",
+          "value": 3
+        },
+        {
+          "dial": "price_20_30",
+          "op": "<=",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "tutors_gate_gc",
+      "if": {
+        "dial": "tutors",
+        "op": ">=",
+        "value": 1
+      },
+      "then": [
+        {
+          "dial": "game_changers",
+          "op": "<=",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "mana_cheat_stacking",
+      "type": "penalty",
+      "penalty_points": 2,
+      "if_all": [
+        {
+          "dial": "fast_mana",
+          "op": ">",
+          "value": 8
+        },
+        {
+          "dial": "free_spells",
+          "op": ">",
+          "value": 4
+        }
+      ]
+    }
+  ],
+  "overflow_per_unit": 1
 }
 </script>
 
@@ -206,6 +368,18 @@ function computeDeckStats(entries, db) {
 
 // ---- tier evaluation (port of tier_rules.evaluate_deck) ----
 // Violations/flags are structured {id, ...params}; the UI localizes them.
+function dialPoints(value, spec, overflow) {
+  const steps = spec.point_steps || {};
+  if (steps[String(value)] !== undefined) return steps[String(value)];
+  const keys = Object.keys(steps).map(Number);
+  if (keys.length) {
+    const last = Math.max(...keys);
+    if (value > last) return steps[String(last)] + (value - last) * overflow;
+    return 0;
+  }
+  return (value - spec.baseline_max) * overflow;
+}
+
 function evaluateDeck(stats, flagged, rules, cardNames) {
   const violations = [], flags = [];
   let points = 0;
@@ -228,13 +402,18 @@ function evaluateDeck(stats, flagged, rules, cardNames) {
     const hits = list.filter(n => names.has(n)).sort();
     if (hits.length) violations.push({ id: "banned", list: listName, cards: hits });
   }
+  // Points never stop: beyond the last priced step, +overflow_per_unit per extra
+  // unit. Only "forbidden" dials (mass land denial) violate outright.
+  const overflow = rules.overflow_per_unit !== undefined ? rules.overflow_per_unit : 1;
   for (const [dial, spec] of Object.entries(rules.dials)) {
     const value = stats[dial] || 0;
-    if (value > spec.hard_max) {
-      violations.push({ id: "dial_over", dial, value, max: spec.hard_max });
-      driving[dial] = flagged[dial] || [];
+    if (spec.forbidden) {
+      if (value > 0) {
+        violations.push({ id: "dial_forbidden", dial, value });
+        driving[dial] = flagged[dial] || [];
+      }
     } else if (value > spec.baseline_max) {
-      const pts = spec.point_steps[String(value)] || 0;
+      const pts = dialPoints(value, spec, overflow);
       points += pts;
       breakdown[dial] = pts;
       driving[dial] = flagged[dial] || [];
@@ -636,9 +815,12 @@ function runSelfTest(rules) {
     ["gc + 5th board wipe = 3pts", _fake({ game_changers: 1, board_wipes: 5 }), "tier2"],
     ["5 counterspells still precon", _fake({ counterspells: 5 }), "tier1"],
     ["20 cards of 1-5 EUR = 1pt", _fake({ price_1_5: 20 }), "tier1"],
-    ["25 cards of 1-5 EUR busts hard max", _fake({ price_1_5: 25 }), "above"],
+    ["25 cards of 1-5 EUR = 2+1 overflow = 3pts", _fake({ price_1_5: 25 }), "tier2"],
     ["31 EUR card", _fake({ max_card_price_eur: 31.0 }, { price_30_plus: [["Pricy", 1]] }), "above"],
-    ["two game changers", _fake({ game_changers: 2 }), "above"],
+    ["two game changers = 2+1 overflow = 3pts", _fake({ game_changers: 2 }), "tier2"],
+    ["three tutors = 5+1 overflow = 6pts", _fake({ tutors: 3 }), "tier2"],
+    ["five tutors = 5+3 = 8pts busts budget", _fake({ tutors: 5 }), "above"],
+    ["two extra turns = 3+1 = 4pts", _fake({ extra_turns: 2 }), "tier2"],
     ["mass land denial", _fake({ mass_land_denial: 1 }), "above"],
     ["banned fast mana card", _fake({}, null, ["Mana Crypt"]), "above"],
     ["banned turn recursion", _fake({ extra_turns: 1 }, null, ["Nexus of Fate"]), "above"],
@@ -647,7 +829,7 @@ function runSelfTest(rules) {
     ["fast mana 9 + free 5 = 1+1+2 penalty pts", _fake({ fast_mana: 9, free_spells: 5 }), "tier2"],
     ["fast mana 12 + free 5 = 4+1+2 pts, top of T2", _fake({ fast_mana: 12, free_spells: 5 }), "tier2"],
     ["fast mana 12 + free 6 = 4+2+2 pts, busted budget", _fake({ fast_mana: 12, free_spells: 6 }), "above"],
-    ["fast mana 15 over hard max", _fake({ fast_mana: 15 }), "above"],
+    ["fast mana 15 = 6+1 overflow = 7pts", _fake({ fast_mana: 15 }), "tier2"],
     ["budget blowout 2 tutors + 2 pricey", _fake({ tutors: 2, price_20_30: 1 }), "above"],
     ["tier2 spend: 2 pricey 20-30", _fake({ price_20_30: 2 }), "tier2"],
     ["extra turn flagged", _fake({ extra_turns: 1 }), "tier2"],
@@ -767,41 +949,41 @@ const CATS = {land:{es:'Tierras',en:'Lands'},ramp:{es:'Rampeo',en:'Ramp'},draw:{
 // Dial display: order, names and help texts describing the REAL pod rules (v1.1).
 const DIAL_META = [
 {k:'game_changers',name:{es:'Cambia-partidas',en:'Game changers'},help:{
- es:'Cartas de la lista oficial de game changers de Wizards: generan una ventaja desproporcionada por sí solas. Uno cuesta 2 puntos; dos están prohibidos. Además, si llevas uno no puedes subir de 3 cartas de €10–20 ni llevar ninguna de €20–30 — es tu único lujo.',
- en:'Cards on Wizards’ official game-changer list: they generate outsized advantage on their own. One costs 2 points; two are forbidden. And if you run one you can’t exceed 3 cards at €10–20 or run any at €20–30 — it must be your only luxury.'}},
+ es:'Cartas de la lista oficial de game changers de Wizards: generan una ventaja desproporcionada por sí solas. El primero cuesta 2 puntos y cada uno más suma +1 punto extra — el contador nunca se para. Además, si llevas alguno no puedes subir de 3 cartas de €10–20 ni llevar ninguna de €20–30: es tu único lujo.',
+ en:'Cards on Wizards’ official game-changer list: they generate outsized advantage on their own. The first costs 2 points and each extra adds +1 more — the counter never stops. And with any of them you can’t exceed 3 cards at €10–20 or run any at €20–30: it must be your only luxury.'}},
 {k:'extra_turns',name:{es:'Turnos extra',en:'Extra turns'},help:{
- es:'Los turnos extra dejan a la mesa mirando. Uno (de un solo uso) cuesta 3 puntos y exige justificación en mesa; dos o cualquier forma de repetirlos está prohibido.',
- en:'Extra turns leave the table watching. One (one-shot) costs 3 points and needs table justification; two, or any way to repeat them, is forbidden.'}},
+ es:'Los turnos extra dejan a la mesa mirando. El primero (de un solo uso) cuesta 3 puntos y cada uno más suma +1; todos exigen justificación en mesa. Las cartas que permiten repetirlos (lista vetada) siguen prohibidas.',
+ en:'Extra turns leave the table watching. The first (one-shot) costs 3 points and each extra adds +1; all of them need table justification. Cards that make them repeatable (banned list) stay forbidden.'}},
 {k:'tutors',name:{es:'Tutores',en:'Tutors'},help:{
- es:'Los tutores incondicionales convierten tu mejor carta en varias copias virtuales. El primero cuesta 2 puntos, el segundo sube a 5 en total, y el tercero está prohibido. Con tutores no se permiten game changers.',
- en:'Unconditional tutors turn your best card into several virtual copies. The first costs 2 points, the second raises it to 5 total, and a third is forbidden. With tutors, no game changers allowed.'}},
+ es:'Los tutores incondicionales convierten tu mejor carta en varias copias virtuales. El primero cuesta 2 puntos, el segundo sube a 5 en total, y cada uno más suma +1. Con tutores no se permiten game changers.',
+ en:'Unconditional tutors turn your best card into several virtual copies. The first costs 2 points, the second raises it to 5 total, and each extra adds +1. With tutors, no game changers allowed.'}},
 {k:'stax_effects',name:{es:'Stax',en:'Stax'},help:{
- es:'Las piezas de stax frenan a toda la mesa, no solo al que va ganando. La primera es gratis (los precons llevan alguna); la segunda cuesta 1 punto, la tercera 3, y la cuarta está prohibida.',
- en:'Stax pieces slow the whole table, not just whoever is winning. The first is free (precons run some); the second costs 1 point, the third 3, and a fourth is forbidden.'}},
+ es:'Las piezas de stax frenan a toda la mesa, no solo al que va ganando. La primera es gratis (los precons llevan alguna); la segunda cuesta 1 punto, la tercera 3 en total, y cada una más suma +1.',
+ en:'Stax pieces slow the whole table, not just whoever is winning. The first is free (precons run some); the second costs 1 point, the third 3 total, and each extra adds +1.'}},
 {k:'counterspells',name:{es:'Contrahechizos',en:'Counterspells'},help:{
- es:'Hasta 5 contrahechizos son defensa propia razonable a nivel precon. El sexto cuesta 1 punto, el séptimo 2, y más de 7 está fuera del pod.',
- en:'Up to 5 counterspells is reasonable self-defense at precon level. The sixth costs 1 point, the seventh 2, and more than 7 is out of pod range.'}},
+ es:'Hasta 5 counters son defensa propia razonable a nivel precon. El sexto cuesta 1 punto, el séptimo 2 en total, y cada uno más suma +1 — puedes ir de mazo contramágico si pagas el presupuesto.',
+ en:'Up to 5 counterspells is reasonable self-defense at precon level. The sixth costs 1 point, the seventh 2 total, and each extra adds +1 — you can go full countermagic if you pay the budget.'}},
 {k:'board_wipes',name:{es:'Barridos',en:'Board wipes'},help:{
- es:'Los barridos mantienen la mesa sana en mazos lentos. Hasta 4 gratis; el quinto cuesta 1 punto, el sexto 2, y más de 6 está fuera. Ojo: un barrido premium tipo Farewell es además game changer y paga por esa vía.',
- en:'Board wipes keep the table healthy in slower decks. Up to 4 free; the fifth costs 1 point, the sixth 2, more than 6 is out. Note: a premium wipe like Farewell is also a game changer and pays through that dial.'}},
+ es:'Los barridos mantienen la mesa sana en mazos lentos. Hasta 4 gratis; el quinto cuesta 1 punto, el sexto 2 en total, y cada uno más suma +1. Ojo: un barrido premium tipo Farewell es además game changer y paga por esa vía.',
+ en:'Board wipes keep the table healthy in slower decks. Up to 4 free; the fifth costs 1 point, the sixth 2 total, and each extra adds +1. Note: a premium wipe like Farewell is also a game changer and pays through that dial.'}},
 {k:'free_spells',name:{es:'Hechizos gratis',en:'Free spells'},help:{
- es:'Los hechizos gratis rompen la regla básica del maná: puedes responder incluso sin maná abierto. Hasta 4 gratis (los precons llevan alguno); del quinto al octavo, 1–4 puntos acumulados; más de 8, prohibido.',
- en:'Free spells break the basic rule of mana: you can respond even fully tapped out. Up to 4 free (precons run a few); the fifth through eighth cost 1–4 cumulative points; more than 8 is forbidden.'}},
+ es:'Los hechizos gratis rompen la regla básica del maná: puedes responder incluso sin maná abierto. Hasta 4 gratis (los precons llevan alguno); del quinto al octavo cuestan 1–4 puntos acumulados, y cada uno más suma +1.',
+ en:'Free spells break the basic rule of mana: you can respond even fully tapped out. Up to 4 free (precons run a few); the fifth through eighth cost 1–4 cumulative points, and each extra adds +1.'}},
 {k:'fast_mana',name:{es:'Maná rápido',en:'Fast mana'},help:{
- es:'Rocas y criaturas de maná de coste ≤2 (Sol Ring, sellos…). Hasta 8 es el paquete normal de un precon. De 9 a 14, 1–6 puntos acumulados; más de 14, fuera. El maná explosivo real (Mana Crypt, rituales…) está directamente prohibido. Y si además llevas hechizos gratis por encima de 4, pagas +2 puntos extra.',
- en:'Mana rocks and dorks costing ≤2 (Sol Ring, signets…). Up to 8 is a normal precon package. From 9 to 14, 1–6 cumulative points; beyond 14, out. Real explosive mana (Mana Crypt, rituals…) is outright banned. And if you also run free spells above 4, you pay +2 extra points.'}},
+ es:'Rocas y criaturas de maná de coste ≤2 (Sol Ring, sellos…). Hasta 8 es el paquete normal de un precon. De 9 a 14 cuestan 1–6 puntos acumulados, y cada una más suma +1. El maná explosivo real (Mana Crypt, rituales…) sigue directamente prohibido. Y si además llevas hechizos gratis por encima de 4, pagas +2 puntos extra.',
+ en:'Mana rocks and dorks costing ≤2 (Sol Ring, signets…). Up to 8 is a normal precon package. From 9 to 14 they cost 1–6 cumulative points, and each extra adds +1. Real explosive mana (Mana Crypt, rituals…) stays outright banned. And if you also run free spells above 4, you pay +2 extra points.'}},
 {k:'mass_land_denial',name:{es:'Destrucción de tierras',en:'Mass land denial'},help:{
  es:'Destrucción masiva de tierras: prohibida sin excepciones. Ningún precon la lleva y este pod tampoco.',
  en:'Mass land destruction: banned, no exceptions. No precon runs it and neither does this pod.'}},
 {k:'price_1_5',name:{es:'Cartas €1–5',en:'Cards €1–5'},help:{
- es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24, 1–2 puntos; más de 24, fuera.',
- en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 costs 1–2 points; beyond 24, out.'}},
+ es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24 cuestan 1–2 puntos, y cada una más suma +1.',
+ en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 cost 1–2 points, and each extra adds +1.'}},
 {k:'price_10_20',name:{es:'Cartas €10–20',en:'Cards €10–20'},help:{
- es:'Las cartas de €10–20 suelen ser los staples que suben el techo del mazo. Hasta 3 gratis (los precons llegan a 3); de la cuarta a la sexta, 1–3 puntos; más de 6, fuera.',
- en:'€10–20 cards are usually the staples that raise the deck’s ceiling. Up to 3 free (precons reach 3); the fourth through sixth cost 1–3 points; more than 6, out.'}},
+ es:'Las cartas de €10–20 suelen ser los staples que suben el techo del mazo. Hasta 3 gratis (los precons llegan a 3); de la cuarta a la sexta cuestan 1–3 puntos, y cada una más suma +1.',
+ en:'€10–20 cards are usually the staples that raise the deck’s ceiling. Up to 3 free (precons reach 3); the fourth through sixth cost 1–3 points, and each extra adds +1.'}},
 {k:'price_20_30',name:{es:'Cartas €20–30',en:'Cards €20–30'},help:{
- es:'El escalón antes del límite duro de €30. Ningún precon tiene cartas aquí: la primera cuesta 3 puntos, la segunda 5 en total, y la tercera está prohibida. Por encima de €30 hace falta aprobación explícita de la mesa.',
- en:'The step before the hard €30 cap. No precon has cards here: the first costs 3 points, the second 5 total, and a third is forbidden. Above €30 needs explicit table approval.'}}
+ es:'El escalón antes del límite duro de €30. Ningún precon tiene cartas aquí: la primera cuesta 3 puntos, la segunda 5 en total, y cada una más suma +1. Por encima de €30 hace falta aprobación explícita de la mesa, eso no cambia.',
+ en:'The step before the hard €30 cap. No precon has cards here: the first costs 3 points, the second 5 total, and each extra adds +1. Above €30 still needs explicit table approval — that never changes.'}}
 ];
 
 // Localized names for point-breakdown entries that aren't dials
@@ -812,8 +994,8 @@ price_cap:{es:v=>'Carta(s) de más de €'+v.cap+': '+v.cards.join(', ')+' — n
            en:v=>'Card(s) over €'+v.cap+': '+v.cards.join(', ')+' — needs explicit table approval'},
 banned:{es:v=>'Carta prohibida ('+(L.es.banLabel[v.list]||v.list)+'): '+v.cards.join(', '),
         en:v=>'Banned card ('+(L.en.banLabel[v.list]||v.list)+'): '+v.cards.join(', ')},
-dial_over:{es:v=>dialName(v.dial,'es')+' = '+v.value+', por encima del máximo del pod ('+v.max+')',
-           en:v=>dialName(v.dial,'en')+' = '+v.value+', over the pod maximum ('+v.max+')'},
+dial_forbidden:{es:v=>dialName(v.dial,'es')+' = '+v.value+': prohibido en este pod, sin excepciones',
+                en:v=>dialName(v.dial,'en')+' = '+v.value+': forbidden in this pod, no exceptions'},
 conditional:{
  gc_locks_price:{es:v=>'Un game changer debe ser tu único lujo: con game changer, '+dialName(v.reqDial,'es')+' debe ser ≤ '+v.reqValue+' (tienes '+v.actual+')',
                  en:v=>'A game changer must be your only luxury: with one, '+dialName(v.reqDial,'en')+' must be ≤ '+v.reqValue+' (you have '+v.actual+')'},
@@ -1150,11 +1332,13 @@ function renderPower() {
   for (const m of DIAL_META) {
     const spec = RULES.dials[m.k];
     const value = r.stats[m.k] || 0;
-    const axis = Math.max(spec.hard_max, 1) * 1.3;
-    const z0 = (spec.baseline_max + 0.5) / axis, z1 = (spec.hard_max - spec.baseline_max) / axis, z2 = Math.max(1 - z0 - z1, 0.05);
+    const stepKeys = Object.keys(spec.point_steps || {}).map(Number);
+    const lastStep = stepKeys.length ? Math.max(...stepKeys) : spec.baseline_max;
+    const axis = Math.max(lastStep, value, 1) * 1.4;
+    const z0 = (spec.baseline_max + 0.5) / axis, z1 = Math.max((lastStep - spec.baseline_max) / axis, 0), z2 = Math.max(1 - z0 - z1, 0.08);
     const pos = Math.min(value / axis * 100, 98);
     const pts = ev.breakdown[m.k] || 0;
-    const over = value > spec.hard_max;
+    const over = !!spec.forbidden && value > 0;
     const ptsLabel = over ? '✕' : (pts > 0 ? '+' + pts + (pts === 1 ? ' pt' : ' pts') : '0');
     const ptsColor = over ? 'var(--bad)' : pts === 0 ? 'var(--good)' : pts >= 3 ? 'var(--bad)' : 'var(--warn)';
     const chips = (value > spec.baseline_max ? (r.flagged[m.k] || []) : []).slice(0, 10);
