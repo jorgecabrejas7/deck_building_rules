@@ -2,7 +2,7 @@ import { state, cardCache } from '../state.js';
 import { T } from '../i18n.js';
 import { TYPES, TYPE_ORDER, CATS } from './constants.js';
 import { $, esc, badgeFor, helpIcon } from './helpers.js';
-import { showCardPopover, hideCardPopover } from './popover.js';
+import { bindCardTilePopover } from './popover.js';
 
 export function renderBrowser() {
   const t = T(), lang = state.lang, r = state.result;
@@ -38,11 +38,7 @@ export function renderBrowser() {
       }).join('') + '</div></div>';
   }).join('');
   for (const tile of $('groups').querySelectorAll('.cardTile')) {
-    tile.onmouseenter = () => {
-      const c = cardCache[tile.dataset.name]; if (!c || !c.img_normal) return;
-      showCardPopover(tile, c.img_normal);
-    };
-    tile.onmouseleave = hideCardPopover;
+    bindCardTilePopover(tile, () => (cardCache[tile.dataset.name] || {}).img_normal);
     for (const img of tile.querySelectorAll('img')) img.onerror = () => {
       img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="170" height="92"><rect width="170" height="92" fill="#8a8794"/><text x="85" y="52" font-family="monospace" font-size="26" fill="#fff" text-anchor="middle">' + tile.dataset.name.charAt(0) + '</text></svg>');
     };
