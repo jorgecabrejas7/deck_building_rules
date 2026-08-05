@@ -36,8 +36,17 @@ KEYWORD_PATTERNS = {
     "extra_turns": r"extra turn",
     "board_wipes": r"destroy all creatures|damage to each creature|each creature (?:gets|is destroyed)",
     "single_target_removal": r"(?:destroy|exile) target (?:creature|permanent|artifact|enchantment|planeswalker|attacking or blocking creature)",
-    "counterspells": r"counter target spell",
-    "stax_effects": r"players can't|opponents can't|skip (?:your|their) (?:draw|untap|upkeep)",
+    # "counter target ... spell" with an optional qualifier gap ("noncreature",
+    # "enchantment, instant, or sorcery", ...) — plain "counter target spell" included.
+    "counterspells": r"counter target [^.\n]{0,60}?spell",
+    # players/opponents-can't + skip-step, plus: opponents' permanents entering
+    # tapped (Authority of the Consuls), cost-increase taxes (Thalia/Sphere), and
+    # forced no-untap on others' permanents (its controller's/their — NOT "your",
+    # which is a self-drawback like Basalt Monolith).
+    "stax_effects": r"players can't|opponents can't|skip (?:your|their) (?:draw|untap|upkeep)"
+                    r"|your opponents control enter(?:s)? (?:the battlefield )?tapped"
+                    r"|spells? (?:[a-z' ]{0,30})?cost \{\d+\} more to cast"
+                    r"|(?:don't|doesn't) untap during (?:their|its controller's)",
     "mass_land_denial": r"destroy all lands|search .* library for .* lands? and (?:exile|put)",
     "free_spells": r"without paying its mana cost|rather than pay|\bcascade\b",
     "card_advantage": r"draw (?:a card|two cards|three cards|cards equal to)",
