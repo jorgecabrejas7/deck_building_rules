@@ -168,6 +168,16 @@ button{cursor:pointer}
         "2": 5
       },
       "hard_max": 2
+    },
+    "combos": {
+      "baseline_max": 2,
+      "point_steps": {
+        "3": 1,
+        "4": 2
+      },
+      "hard_max": 4,
+      "external": true,
+      "note": "Included infinite combos per Commander Spellbook (find-my-combos). Not computable from oracle text: the checker fetches it (opt-in, via proxy) or you count by hand. Calibration: 12/36 precons ship combos, up to 4 (Living Energy, Witherbloom Pestilence); 2-card combos are precon-normal."
     }
   },
   "hard_bans": {
@@ -270,7 +280,7 @@ const KEYWORD_PATTERNS = {
   board_wipes: /destroy all creatures|damage to each creature|each creature (?:gets|is destroyed)/i,
   single_target_removal: /(?:destroy|exile) target (?:creature|permanent|artifact|enchantment|planeswalker|attacking or blocking creature)/i,
   counterspells: /counter target [^.\n]{0,60}?spell/i,
-  stax_effects: /players can't|opponents can't|skip (?:your|their) (?:draw|untap|upkeep)|your opponents control enter(?:s)? (?:the battlefield )?tapped|spells? (?:[a-z' ]{0,30})?cost \{\d+\} more to cast|(?:don't|doesn't) untap during (?:their|its controller's)/i,
+  stax_effects: /players can't|opponents can't|skip (?:your|their) (?:draw|untap|upkeep)|your opponents control enter(?:s)? (?:the battlefield )?tapped|spells? (?:[a-z' ]{0,30})?cost \{\d+\} more to cast|(?:don't|doesn't) untap during (?:their|its controller's)|can't attack (?:you|you or planeswalkers)[^.\n]{0,40}unless/i,
   mass_land_denial: /destroy all lands|search .* library for .* lands? and (?:exile|put)/i,
   free_spells: /without paying its mana cost|rather than pay|\bcascade\b/i,
   card_advantage: /draw (?:a card|two cards|three cards|cards equal to)/i,
@@ -601,6 +611,27 @@ async function fetchArchidekt(id) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// ---- infinite combos via Commander Spellbook (CORS-blocked: callers use the proxy) ----
+async function fetchCombos(entries, commanders, useProxy) {
+  const api = "https://backend.commanderspellbook.com/find-my-combos";
+  const target = useProxy ? "https://corsproxy.io/?url=" + encodeURIComponent(api) : api;
+  const res = await fetch(target, { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      main: entries.map(e => ({ card: e.name.split(" // ")[0], quantity: e.quantity })),
+      commanders: (commanders || []).map(c => ({ card: c.split(" // ")[0], quantity: 1 })),
+    }) });
+  if (!res.ok) throw new Error("spellbook " + res.status);
+  const data = await res.json();
+  const combos = [];
+  for (const c of (data.results && data.results.included) || []) {
+    const cards = (c.uses || []).map(u => u.card && u.card.name).filter(Boolean);
+    const features = (c.produces || []).map(f => f.feature && f.feature.name).filter(Boolean);
+    combos.push({ cards, n: cards.length, features: features.slice(0, 4),
+      infinite: features.some(f => /infinite/i.test(f)) });
+  }
+  return combos;
+}
+
 // ---- functional categorization (Archidekt-style, heuristic) ----
 const CAT_RULES = [
   ["land", c => c.type_line.includes("Land") && !c.type_line.split(" // ")[0].includes("Creature")],
@@ -793,7 +824,7 @@ async function suggestCards({ cat, colorIdentity, excludeNames, bannedNames, max
 // ---- selftest (mirrors tier_rules.py --selftest) ----
 function _fake(over, flaggedOver, names) {
   const dials = ["game_changers","extra_turns","tutors","stax_effects","counterspells","board_wipes",
-    "free_spells","fast_mana","mass_land_denial","price_1_5","price_10_20","price_20_30","price_30_plus"];
+    "free_spells","fast_mana","mass_land_denial","combos","price_1_5","price_10_20","price_20_30","price_30_plus"];
   const stats = {}; for (const d of dials) stats[d] = 0;
   stats.max_card_price_eur = 5.0;
   Object.assign(stats, over);
@@ -815,6 +846,9 @@ function runSelfTest(rules) {
     ["three tutors = 5+1 overflow = 6pts", _fake({ tutors: 3 }), "tier2"],
     ["five tutors = 5+3 = 8pts busts budget", _fake({ tutors: 5 }), "above"],
     ["two extra turns = 3+1 = 4pts", _fake({ extra_turns: 2 }), "tier2"],
+    ["two infinite combos free (precon norm)", _fake({ combos: 2 }), "tier1"],
+    ["three infinite combos = 1pt", _fake({ combos: 3 }), "tier1"],
+    ["five infinite combos = 2+1 = 3pts", _fake({ combos: 5 }), "tier2"],
     ["mass land denial", _fake({ mass_land_denial: 1 }), "above"],
     ["banned fast mana card", _fake({}, null, ["Mana Crypt"]), "above"],
     ["banned turn recursion", _fake({ extra_turns: 1 }, null, ["Nexus of Fate"]), "above"],

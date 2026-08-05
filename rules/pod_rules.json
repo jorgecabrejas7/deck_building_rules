@@ -118,6 +118,16 @@
         "2": 5
       },
       "hard_max": 2
+    },
+    "combos": {
+      "baseline_max": 2,
+      "point_steps": {
+        "3": 1,
+        "4": 2
+      },
+      "hard_max": 4,
+      "external": true,
+      "note": "Included infinite combos per Commander Spellbook (find-my-combos). Not computable from oracle text: the checker fetches it (opt-in, via proxy) or you count by hand. Calibration: 12/36 precons ship combos, up to 4 (Living Energy, Witherbloom Pestilence); 2-card combos are precon-normal."
     }
   },
   "hard_bans": {

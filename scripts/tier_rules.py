@@ -192,6 +192,9 @@ def selftest():
         ("three tutors = 5+1 overflow = 6pts", _fake({"tutors": 3}), "tier2"),
         ("five tutors = 5+3 = 8pts busts budget", _fake({"tutors": 5}), "above"),
         ("two extra turns = 3+1 = 4pts", _fake({"extra_turns": 2}), "tier2"),
+        ("two infinite combos free (precon norm)", _fake({"combos": 2}), "tier1"),
+        ("three infinite combos = 1pt", _fake({"combos": 3}), "tier1"),
+        ("five infinite combos = 2+1 = 3pts", _fake({"combos": 5}), "tier2"),
         ("mass land denial", _fake({"mass_land_denial": 1}), "above"),
         ("banned fast mana card", _fake({}, None, {"Mana Crypt"}), "above"),
         ("banned turn recursion", _fake({"extra_turns": 1}, None, {"Nexus of Fate"}), "above"),
@@ -229,11 +232,20 @@ def calibrate():
 
     cache = json.loads((REPO_ROOT / "cache" / "scryfall_cache.json").read_text())
     rules = load_rules()
+    # Commander Spellbook combo counts per deck (see combo_analysis.json; the
+    # 'combos' dial is externally measured — inject when the analysis exists).
+    combo_path = REPO_ROOT / "out" / "precon_decks" / "combo_analysis.json"
+    combo_counts = {}
+    if combo_path.exists():
+        for row in json.loads(combo_path.read_text()):
+            inc = row.get("included") or []
+            combo_counts[row["deck"]] = sum(1 for c in inc if c.get("infinite"))
     rows = []
     for report in sorted((REPO_ROOT / "out" / "precon_decks").glob("*.report.json")):
         data = json.loads(report.read_text())
         for deck in data.get("decks", []):
             stats, flagged = compute_deck_stats(deck["cards"], cache)
+            stats["combos"] = combo_counts.get(deck["deck_title"], 0)
             names = {c["name"] for c in deck["cards"]}
             res = evaluate_deck(stats, flagged, rules, card_names=names)
             rows.append((deck["deck_title"], report.stem.split(".")[0], stats, res))

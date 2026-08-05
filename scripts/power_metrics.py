@@ -46,7 +46,8 @@ KEYWORD_PATTERNS = {
     "stax_effects": r"players can't|opponents can't|skip (?:your|their) (?:draw|untap|upkeep)"
                     r"|your opponents control enter(?:s)? (?:the battlefield )?tapped"
                     r"|spells? (?:[a-z' ]{0,30})?cost \{\d+\} more to cast"
-                    r"|(?:don't|doesn't) untap during (?:their|its controller's)",
+                    r"|(?:don't|doesn't) untap during (?:their|its controller's)"
+                    r"|can't attack (?:you|you or planeswalkers)[^.\n]{0,40}unless",
     "mass_land_denial": r"destroy all lands|search .* library for .* lands? and (?:exile|put)",
     "free_spells": r"without paying its mana cost|rather than pay|\bcascade\b",
     "card_advantage": r"draw (?:a card|two cards|three cards|cards equal to)",
