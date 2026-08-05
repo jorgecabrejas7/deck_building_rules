@@ -118,14 +118,6 @@
 <div id="popover" style="display:none;position:fixed;width:264px;height:368px;border-radius:13px;box-shadow:0 18px 50px rgba(0,0,0,.45);z-index:99;pointer-events:none;background:var(--panel) center/cover no-repeat"></div>
 </div>
 
-<script type="module">
-  // Temporary shim while app.js is still a classic script: expose the ESM
-  // engine as the PodEngine global, then load app.js (which reads it synchronously).
-  import * as PodEngine from "./js/engine/index.js";
-  window.PodEngine = PodEngine;
-  const s = document.createElement("script");
-  s.src = "app.js";
-  document.body.appendChild(s);
-</script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
