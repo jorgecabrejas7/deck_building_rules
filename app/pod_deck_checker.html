@@ -1657,27 +1657,36 @@ function renderBrowser() {
   $('gtBtn').textContent = t.byType; $('gcBtn').textContent = t.byCat;
   const gmap = {};
   for (const x of r.cardsInfo) { const g = byT ? x.cls.type : x.cls.cat; (gmap[g] = gmap[g] || []).push(x); }
-  const cnt = {}; for (const [g, arr] of Object.entries(gmap)) cnt[g] = arr.reduce((s, x) => s + x.qty, 0);
+  const cnt = {}; for (const [g, arr] of Object.entries(gmap)) cnt[g] = arr.reduce((sum, x) => sum + x.qty, 0);
   const order = byT ? TYPE_ORDER.filter(k => gmap[k]) : Object.keys(gmap).sort((a, b) => cnt[b] - cnt[a]);
   $('groups').innerHTML = order.map(g => {
     const label = byT ? TYPES[g][lang] : (CATS[g] ? CATS[g][lang] : g);
-    return '<div style="display:flex;flex-direction:column;gap:7px">' +
-      '<div style="font-size:11px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:5px;letter-spacing:0.05em">' + esc(label.toUpperCase()) + ' · ' + cnt[g] + '</div>' +
-      gmap[g].sort((a, b) => (a.card.cmc || 0) - (b.card.cmc || 0)).map(x => {
+    return '<div style="display:flex;flex-direction:column;gap:10px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:6px;letter-spacing:0.05em">' +
+      esc(label.toUpperCase()) + ' · ' + cnt[g] + (!byT ? helpIcon(g) : '') + '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">' +
+      gmap[g].sort((a, b) => (a.card.cmc || 0) - (b.card.cmc || 0) || a.name.localeCompare(b.name)).map(x => {
         const badge = badgeFor(x.name);
         const dim = state.hl && x.cls.cat !== state.hl && !x.cls.tags.includes(state.hl);
         const hit = state.hl && !dim;
         const mana = (x.card.mana_cost || '').replace(/[{}]/g, '') || '—';
-        return '<div class="cardTile" data-name="' + esc(x.name) + '" style="display:flex;gap:9px;align-items:center;background:var(--panel2);border:1.5px solid ' + (hit ? 'var(--accent)' : 'var(--border)') + ';border-radius:8px;padding:5px;opacity:' + (dim ? 0.45 : 1) + '">' +
-          '<img src="' + (x.card.img_art || '') + '" loading="lazy" style="width:52px;height:38px;object-fit:cover;border-radius:5px;flex:none;background:var(--track)" alt="">' +
-          '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.name) + '</div>' +
-          '<div class="mono" style="font-size:10px;color:var(--muted)">' + esc(mana) + ' · ' + (x.card.price != null ? '€' + x.card.price : '—') + (x.qty > 1 ? ' · x' + x.qty : '') + '</div></div>' +
-          (badge ? '<span style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:' + badge.bg + ';color:' + badge.fg + ';flex:none">' + badge.label + '</span>' : '') +
-          whatIfChip(x.name) + '</div>';
-      }).join('') + '</div>';
+        const wi = whatIfChip(x.name);
+        return '<div class="cardTile" data-name="' + esc(x.name) + '" style="position:relative;display:flex;flex-direction:column;background:var(--panel2);border:1.5px solid ' + (hit ? 'var(--accent)' : 'var(--border)') + ';border-radius:10px;overflow:hidden;opacity:' + (dim ? 0.4 : 1) + '">' +
+          '<img src="' + (x.card.img_art || '') + '" loading="lazy" style="width:100%;aspect-ratio:1.85;object-fit:cover;background:var(--track)" alt="">' +
+          '<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px">' +
+          (badge ? '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:' + badge.bg + ';color:' + badge.fg + ';box-shadow:0 1px 4px rgba(0,0,0,.35)">' + badge.label + '</span>' : '') +
+          wi + '</div>' +
+          '<div style="padding:7px 9px 8px;display:flex;flex-direction:column;gap:2px">' +
+          '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.name.split(' // ')[0]) + '</div>' +
+          '<div class="mono" style="font-size:10px;color:var(--muted)">' + esc(mana) + ' · ' + (x.card.price != null ? '€' + x.card.price : '—') + (x.qty > 1 ? ' · x' + x.qty : '') + '</div></div></div>';
+      }).join('') + '</div></div>';
   }).join('');
+  $('groups').style.display = 'flex';
+  $('groups').style.flexDirection = 'column';
+  $('groups').style.gap = '22px';
+  $('groups').style.gridTemplateColumns = '';
   for (const tile of $('groups').querySelectorAll('.cardTile')) {
-    tile.onmouseenter = (e) => {
+    tile.onmouseenter = () => {
       const c = cardCache[tile.dataset.name]; if (!c || !c.img_normal) return;
       const rect = tile.getBoundingClientRect();
       let x = rect.right + 12; if (x + 276 > innerWidth) x = Math.max(8, rect.left - 288);
@@ -1688,12 +1697,12 @@ function renderBrowser() {
     };
     tile.onmouseleave = () => { $('popover').style.display = 'none'; };
     for (const img of tile.querySelectorAll('img')) img.onerror = () => {
-      img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="52" height="38"><rect width="52" height="38" fill="#8a8794"/><text x="26" y="25" font-family="monospace" font-size="16" fill="#fff" text-anchor="middle">' + tile.dataset.name.charAt(0) + '</text></svg>');
+      img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="170" height="92"><rect width="170" height="92" fill="#8a8794"/><text x="85" y="52" font-family="monospace" font-size="26" fill="#fff" text-anchor="middle">' + tile.dataset.name.charAt(0) + '</text></svg>');
     };
   }
 }
 
-function whatIfChip(name) {
+function whatIfChip(name) {function whatIfChip(name) {
   const r = state.result;
   const wi = r && r.whatIf && r.whatIf[name];
   if (!wi || (wi.dPts <= 0 && !wi.fixes)) return '';
