@@ -607,7 +607,7 @@ power:'ANÁLISIS DE PODER',ptsOf:'pts gastados de',viols:'VIOLACIONES',flags:'AV
 budget:'PRESUPUESTO DE PUNTOS',comp:'COMPOSICIÓN DEL MAZO',compTargets:'objetivos:',
 compHint:'Clic en una fila resalta sus cartas en el navegador ↓',clear:'Limpiar',few:'Pocas',ok:'OK',many:'Muchas',
 browser:'NAVEGADOR DEL MAZO',groupBy:'Agrupar por:',byType:'Tipo de carta',byCat:'Categoría',
-curve:'CURVA DE MANÁ',avg:'media',all:'Todas',cre:'Criaturas',draw:'Robo',rem:'Remoción',ramp:'Rampa',oth:'Otros',
+curve:'CURVA DE MANÁ',avg:'media',all:'Todas',cre:'Criaturas',draw:'Robo',rem:'Removal',ramp:'Rampeo',oth:'Otros',
 nonlands:'no-tierras',pips:'PIPS DE COLOR',bands:'BANDAS DE PRECIO',guide:'GUÍA DE ARQUETIPOS',
 build:'Construir este arquetipo →',slots:'Huecos clave:',
 emptyT:'Sin mazo que analizar todavía',
@@ -646,7 +646,7 @@ s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:
 
 const TYPES = {C:{es:'Criaturas',en:'Creatures'},I:{es:'Instantáneos',en:'Instants'},S:{es:'Conjuros',en:'Sorceries'},A:{es:'Artefactos',en:'Artifacts'},E:{es:'Encantamientos',en:'Enchantments'},P:{es:'Planeswalkers',en:'Planeswalkers'},B:{es:'Batallas',en:'Battles'},L:{es:'Tierras',en:'Lands'},O:{es:'Otros',en:'Other'}};
 const TYPE_ORDER = ['C','I','S','A','E','P','B','L','O'];
-const CATS = {land:{es:'Tierras',en:'Lands'},ramp:{es:'Rampa',en:'Ramp'},draw:{es:'Robo de cartas',en:'Card draw'},rem:{es:'Remoción',en:'Removal'},burn:{es:'Daño directo',en:'Burn'},wipe:{es:'Barridos',en:'Board wipes'},prot:{es:'Protección',en:'Protection'},ctr:{es:'Contrahechizos',en:'Counterspells'},tut:{es:'Tutores',en:'Tutors'},sac:{es:'Sacrificio',en:'Sac outlets'},drain:{es:'Drenaje',en:'Drain'},tok:{es:'Fichas',en:'Tokens'},mot:{es:'Motores',en:'Engines'},eq:{es:'Equipos y auras',en:'Equipment & Auras'},life:{es:'Ganar vida',en:'Lifegain'},rec:{es:'Recursión',en:'Recursion'},anthem:{es:'Anthems',en:'Anthems'},cre:{es:'Criaturas',en:'Creatures'},oth:{es:'Otros',en:'Other'}};
+const CATS = {land:{es:'Tierras',en:'Lands'},ramp:{es:'Rampeo',en:'Ramp'},draw:{es:'Robo',en:'Card draw'},rem:{es:'Removal',en:'Removal'},burn:{es:'Daño directo',en:'Burn'},wipe:{es:'Barridos',en:'Board wipes'},prot:{es:'Protección',en:'Protection'},ctr:{es:'Counters',en:'Counterspells'},tut:{es:'Tutores',en:'Tutors'},sac:{es:'Sacrificio',en:'Sac outlets'},drain:{es:'Drenaje',en:'Drain'},tok:{es:'Tokens',en:'Tokens'},mot:{es:'Motores',en:'Engines'},eq:{es:'Equipos y auras',en:'Equipment & Auras'},life:{es:'Lifegain',en:'Lifegain'},rec:{es:'Recursión',en:'Recursion'},anthem:{es:'Anthems',en:'Anthems'},cre:{es:'Criaturas',en:'Creatures'},oth:{es:'Otros',en:'Other'}};
 
 // Dial display: order, names and help texts describing the REAL pod rules (v1.1).
 const DIAL_META = [
@@ -726,7 +726,7 @@ const ARCH = [
  desc:{es:'Un solo atacante enorme: tu comandante cargado de auras y equipos hasta matar de 21 de daño de comandante.',en:'One huge attacker: your commander stacked with auras and equipment until 21 commander damage kills.'},
  how:{es:'Prioriza protección barata (botas, capas) y robo que recargue la mano tras un barrido enemigo.',en:'Prioritize cheap protection (boots, capes) and draw that refills your hand after an enemy wipe.'},
  slots:{es:['Equipos/Auras 8–12','Protección 6–10','Robo 8–10'],en:['Equipment/Auras 8–12','Protection 6–10','Draw 8–10']}},
-{k:'aristocrats',name:{es:'Aristócratas',en:'Aristocrats'},spec:[['sac',5,8],['drain',4,6],['tok',8,12]],
+{k:'aristocrats',name:{es:'Aristocrats',en:'Aristocrats'},spec:[['sac',5,8],['drain',4,6],['tok',8,12]],
  desc:{es:'Sacrifica tus propias criaturas para drenar vida a toda la mesa. Gana sin atacar.',en:'Sacrifice your own creatures to drain the whole table. Wins without attacking.'},
  how:{es:'Necesitas tres patas: salidas de sacrificio, material sacrificable (fichas) y drenajes tipo Blood Artist. Recursión antes que cartas caras.',en:'You need three legs: sac outlets, sac fodder (tokens) and Blood Artist–style drains. Recursion over expensive cards.'},
  slots:{es:['Salidas de sacrificio 5–8','Drenajes 4–6','Fichas 8–12'],en:['Sac outlets 5–8','Drains 4–6','Tokens 8–12']}},
@@ -738,7 +738,7 @@ const ARCH = [
  desc:{es:'Cartas de valor jugadas en curva: cada permanente genera ventaja por sí solo.',en:'Value cards played on curve: every permanent generates advantage on its own.'},
  how:{es:'Curva 2–4 densa, remoción flexible y amenazas que sobreviven a un barrido.',en:'Dense 2–4 curve, flexible removal, and threats that survive a wipe.'},
  slots:{es:['Amenazas de valor 12–16','Remoción 8–11','Rampa 8–10'],en:['Value threats 12–16','Removal 8–11','Ramp 8–10']}},
-{k:'tokens',name:{es:'Fichas a lo ancho',en:'Go-Wide Tokens'},spec:[['tok',10,14],['anthem',4,6]],
+{k:'tokens',name:{es:'Go-Wide Tokens',en:'Go-Wide Tokens'},spec:[['tok',10,14],['anthem',4,6]],
  desc:{es:'Inunda la mesa de fichas y gana con anthems que las convierten en un ejército real.',en:'Flood the board with tokens and win with anthems that turn them into a real army.'},
  how:{es:'Generadores repetibles > efectos de un solo uso; incluye protección contra barridos.',en:'Repeatable generators > one-shot effects; include wipe protection.'},
  slots:{es:['Generadores 10–14','Anthems 4–6','Protección 3–5'],en:['Generators 10–14','Anthems 4–6','Protection 3–5']}},
@@ -746,11 +746,11 @@ const ARCH = [
  desc:{es:'Presión desde el turno 1: criaturas baratas y daño constante antes de que la mesa se estabilice.',en:'Pressure from turn 1: cheap creatures and constant damage before the table stabilizes.'},
  how:{es:'Curva bajísima (media < 2.5), pocas tierras que entran giradas y robo que no frene el ritmo.',en:'Very low curve (avg < 2.5), few tapped lands, and draw that doesn’t slow the tempo.'},
  slots:{es:['Criaturas ≤3 maná 20–26','Impulso/robo 6–8','Remoción 6–8'],en:['Creatures ≤3 mana 20–26','Impulse/draw 6–8','Removal 6–8']}},
-{k:'equipment',name:{es:'Equipos',en:'Equipment'},spec:[['eq',10,14]],
+{k:'equipment',name:{es:'Equipment',en:'Equipment'},spec:[['eq',10,14]],
  desc:{es:'Un arsenal de equipos y portadores intercambiables: el valor vive en los objetos, no en las criaturas.',en:'An arsenal of equipment and interchangeable bearers: the value lives in the gear, not the creatures.'},
  how:{es:'Reduce costes de equipar, incluye portadores con evasión y recuperación de equipos destruidos.',en:'Cut equip costs, include evasive bearers, and recover destroyed equipment.'},
  slots:{es:['Equipos 10–14','Portadores 12–16','Tutores de equipo 2–4'],en:['Equipment 10–14','Bearers 12–16','Gear tutors 2–4']}},
-{k:'lifegain',name:{es:'Ganavidas',en:'Lifegain'},spec:[['life',10,14],['drain',4,6]],
+{k:'lifegain',name:{es:'Lifegain',en:'Lifegain'},spec:[['life',10,14],['drain',4,6]],
  desc:{es:'Convierte cada punto de vida ganado en cartas, fichas o drenaje. La vida es tu motor, no tu escudo.',en:'Turn every life point gained into cards, tokens or drain. Life is your engine, not your shield.'},
  how:{es:'Necesitas pagos (payoffs) repetibles; ganar vida sin pagos no hace nada en Commander.',en:'You need repeatable payoffs; gaining life without payoffs does nothing in Commander.'},
  slots:{es:['Fuentes de vida 10–14','Pagos 6–9','Drenajes 4–6'],en:['Life sources 10–14','Payoffs 6–9','Drains 4–6']}},
@@ -758,7 +758,7 @@ const ARCH = [
  desc:{es:'Instantáneos y conjuros en cadena, con permanentes que premian cada hechizo lanzado.',en:'Chained instants and sorceries, with permanents that reward every spell cast.'},
  how:{es:'Motores primero (Guttersnipe, Archmage), luego densidad de hechizos baratos que los alimenten. Ojo con los hechizos gratis: el pod los limita a 8 y cobran puntos desde el quinto.',en:'Engines first (Guttersnipe, Archmage), then a density of cheap spells to feed them. Watch free spells: the pod caps them at 8 and charges points from the fifth.'},
  slots:{es:['Motores 6–10','Hechizos ≤2 maná 18–24','Robo 10–14'],en:['Engines 6–10','Spells ≤2 mana 18–24','Draw 10–14']}},
-{k:'counters',name:{es:'Contadores +1/+1',en:'+1/+1 Counters'},spec:[],
+{k:'counters',name:{es:'+1/+1 Counters',en:'+1/+1 Counters'},spec:[],
  desc:{es:'Crece tus criaturas con contadores y multiplica el efecto con proliferar y señores.',en:'Grow your creatures with counters and multiply the effect with proliferate and lords.'},
  how:{es:'Sinergia > poder individual: cada carta debería poner o aprovechar contadores.',en:'Synergy > individual power: every card should add or exploit counters.'},
  slots:{es:['Fuentes de contadores 14–18','Proliferar 4–6','Pagos 6–8'],en:['Counter sources 14–18','Proliferate 4–6','Payoffs 6–8']}},
