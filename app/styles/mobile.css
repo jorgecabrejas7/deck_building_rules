@@ -1,0 +1,2 @@
+/* Mobile overrides land here (filled in the mobile pass). Desktop ≥1000px is
+   untouched by design: every rule in this file lives behind a media query. */

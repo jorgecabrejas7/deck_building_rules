@@ -1,0 +1,29 @@
+/* Page shell: header, main column, sticky summary, tab panes, modal, popovers. */
+.page{min-height:100vh;display:flex;flex-direction:column}
+
+/* header / branding */
+.hero{position:relative;overflow:hidden;background:var(--panel);border-bottom:1px solid var(--border)}
+.hero-glow1{position:absolute;right:-40px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,oklch(0.55 0.09 260 / .22),transparent 65%)}
+.hero-glow2{position:absolute;right:150px;top:-100px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,oklch(0.5 0.1 300 / .16),transparent 65%)}
+.hero-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:14px 20px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-logo{width:44px;height:44px;border-radius:11px;background:conic-gradient(oklch(0.85 0.06 95),oklch(0.65 0.11 240),oklch(0.45 0.05 300),oklch(0.6 0.16 30),oklch(0.6 0.13 150),oklch(0.85 0.06 95));display:grid;place-items:center;flex:none}
+.brand-logo-inner{width:35px;height:35px;border-radius:8px;background:var(--panel);display:grid;place-items:center;font-weight:700;font-size:20px}
+.brand-text{display:flex;flex-direction:column;line-height:1.1}
+.brand-title{font-size:19px;font-weight:700;letter-spacing:-0.01em}
+.brand-tag{font-size:10px;color:var(--muted);letter-spacing:0.14em}
+.header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* main column */
+.main{width:100%;max-width:1180px;margin:0 auto;padding:16px 20px 12px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box}
+.sticky-wrap{display:none;position:sticky;top:0;z-index:60;background:var(--bg);padding:8px 0 10px;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+.summary-row{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
+.tabbar{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab-pane{display:none;flex-direction:column;gap:16px}
+
+/* footer, modal, popover singletons */
+.footer{text-align:center;font-size:11px;color:var(--faint);padding:10px 20px 28px}
+.modal-backdrop{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);overflow:auto;padding:30px 16px;box-sizing:border-box}
+.modal-body{max-width:780px;margin:0 auto;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:26px 30px;position:relative}
+.text-pop{display:none;position:fixed;max-width:320px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 15px;font-size:12.5px;line-height:1.6;box-shadow:0 12px 34px rgba(0,0,0,.35);z-index:100;pointer-events:none}
+.card-pop{display:none;position:fixed;width:264px;height:368px;border-radius:13px;box-shadow:0 18px 50px rgba(0,0,0,.45);z-index:99;pointer-events:none;background:var(--panel) center/cover no-repeat}

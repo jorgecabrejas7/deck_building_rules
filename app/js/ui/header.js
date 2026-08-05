@@ -3,9 +3,10 @@ import { T } from '../i18n.js';
 import { $ } from './helpers.js';
 
 export function applyTheme() {
+  // Effective theme always lands as the body.dark class (kept in sync with the
+  // pre-paint script in index.html); tokens.css has a single dark block.
   const eff = state.theme ? state.theme === 'dark' : state.sysDark;
-  document.body.classList.toggle('dark', state.theme === 'dark');
-  document.body.classList.toggle('light', state.theme === 'light');
+  document.body.classList.toggle('dark', eff);
   $('themeBtn').textContent = eff ? '◑' : '◐';
 }
 
@@ -14,8 +15,6 @@ export function renderHeader() {
   $('appTag').textContent = t.appTag;
   $('copyBtn').textContent = '⧉ ' + (state.copied ? t.copied : t.copy);
   $('howBtn').textContent = '? ' + t.howBtn;
-  $('enBtn').style.background = state.lang === 'en' ? 'var(--text)' : 'transparent';
-  $('enBtn').style.color = state.lang === 'en' ? 'var(--bg)' : 'var(--muted)';
-  $('esBtn').style.background = state.lang === 'es' ? 'var(--text)' : 'transparent';
-  $('esBtn').style.color = state.lang === 'es' ? 'var(--bg)' : 'var(--muted)';
+  $('enBtn').classList.toggle('active', state.lang === 'en');
+  $('esBtn').classList.toggle('active', state.lang === 'es');
 }

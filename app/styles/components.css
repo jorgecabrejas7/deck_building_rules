@@ -1,0 +1,56 @@
+/* Shared component classes used by the static shell (index.html).
+   Section-specific classes for the JS renderers are added alongside their
+   modules as inline styles migrate here. */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.secT{font-size:12px;font-weight:700;letter-spacing:0.06em;color:var(--muted)}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+/* buttons */
+.btn-outline{border:1px solid var(--border);background:transparent;border-radius:7px;padding:7px 13px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.btn-outline-accent{border:1px solid var(--accent);background:transparent;border-radius:7px;padding:7px 13px;font-size:12.5px;font-weight:600;color:var(--accent);white-space:nowrap}
+.btn-primary{background:var(--accent);color:var(--accentFg);border:none;font-weight:600;font-size:14.5px;padding:11px 30px;border-radius:8px}
+.btn-ghost{border:1px solid var(--border);background:transparent;color:var(--muted);font-weight:600;font-size:13px;padding:10px 18px;border-radius:8px}
+.icon-btn{width:32px;height:32px;border:1px solid var(--border);background:transparent;border-radius:7px;display:grid;place-items:center;font-size:14px}
+.seg-toggle{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;font-size:12px;font-weight:600}
+.seg-toggle button{border:none;padding:6px 11px;background:transparent;color:var(--muted)}
+.seg-toggle button.active{background:var(--text);color:var(--bg)}
+
+/* load tab */
+.input-panel{padding:20px;display:flex;flex-direction:column;gap:12px}
+.deck-input{border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:12px 14px;font-size:12.5px;resize:vertical;min-height:120px}
+.input-notice{display:none;background:var(--warnBg);border:1px solid var(--warnBd);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--warnFg)}
+.chips-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lbl-muted{font-size:12px;color:var(--muted)}
+.controls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.arch-field{flex:1;min-width:220px;display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px}
+.arch-field>span{color:var(--muted);white-space:nowrap}
+.arch-select{flex:1;border:none;background:transparent;padding:10px 0;font-weight:600;cursor:pointer}
+.empty-state{border:1.5px dashed var(--border);border-radius:12px;padding:44px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.empty-pips{display:flex;gap:4px;padding-bottom:6px}
+.empty-pips>div{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--muted)}
+.empty-pips>div:nth-child(1){background:oklch(0.93 0.05 95)}
+.empty-pips>div:nth-child(2){background:oklch(0.7 0.11 240)}
+.empty-pips>div:nth-child(3){background:oklch(0.35 0.03 300)}
+.empty-pips>div:nth-child(4){background:oklch(0.6 0.17 30)}
+.empty-pips>div:nth-child(5){background:oklch(0.62 0.13 150)}
+.empty-title{font-size:16px;font-weight:700}
+.empty-text{font-size:13px;color:var(--muted);max-width:420px}
+
+/* analysis tab shell */
+.power-panel{padding:20px 22px;display:flex;flex-direction:column;gap:2px}
+.comp-panel{background:var(--compBg);border:1px solid var(--compBd);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.browser-panel{padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.row-center{display:flex;align-items:center;gap:8px}
+.seg-toggle-sm{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;font-size:11.5px;font-weight:600}
+.seg-toggle-sm button{border:none;padding:6px 13px;background:transparent;color:var(--muted)}
+.seg-toggle-sm button.active{background:var(--text);color:var(--bg)}
+.groups{display:flex;flex-direction:column;gap:22px;align-items:stretch}
+.curve-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.panel-pad{padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.panel-pad-lg{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.stack-16{display:flex;flex-direction:column;gap:16px}
+
+/* guide tab shell */
+.clip{overflow:hidden}
+.guide-title{padding:15px 22px;border-bottom:1px solid var(--border)}

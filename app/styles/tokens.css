@@ -1,3 +1,6 @@
+/* Design tokens + base element rules. Light theme is the default; dark is a
+   single body.dark block — js/ui/header.js resolves the system preference and
+   always sets/removes the class (plus a pre-paint inline script in index.html). */
 body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
 --bg:#f2f0ec;--panel:#ffffff;--panel2:#faf9f7;--border:#e4e0d9;--border2:#efece6;--text:#23211e;--muted:#8a857c;--faint:#b3aca0;--accent:oklch(0.52 0.13 260);--accentFg:#ffffff;
 --track:#efece6;--marker:#23211e;
@@ -8,16 +11,6 @@ body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--
 --badBg:oklch(0.96 0.03 25);--badBd:oklch(0.85 0.07 25);--badFg:oklch(0.45 0.13 25);
 --tipBg:oklch(0.95 0.04 260);--tipBd:oklch(0.85 0.06 260);--tipFg:oklch(0.35 0.06 260);
 --compBg:#f3f6f2;--compBd:#dde5dc;--compMut:#75846f}
-@media (prefers-color-scheme:dark){body:not(.light){
---bg:#141619;--panel:#1f2126;--panel2:#191b1f;--border:#2b2e34;--border2:#24272c;--text:#e8e6e1;--muted:#7c828c;--faint:#565b64;--accent:oklch(0.62 0.14 260);--accentFg:#ffffff;
---track:#2b2e34;--marker:#e8e6e1;
---zoneA:oklch(0.45 0.09 145);--zoneB:oklch(0.5 0.1 85);--zoneC:oklch(0.48 0.12 25);
---good:oklch(0.75 0.1 145);--warn:oklch(0.78 0.1 85);--bad:oklch(0.72 0.13 25);
---okBg:oklch(0.3 0.08 145);--okBd:oklch(0.45 0.1 145);--okFg:oklch(0.82 0.1 145);
---warnBg:oklch(0.28 0.06 85);--warnBd:oklch(0.42 0.09 85);--warnFg:oklch(0.85 0.1 85);
---badBg:oklch(0.25 0.07 25);--badBd:oklch(0.4 0.11 25);--badFg:oklch(0.85 0.08 25);
---tipBg:oklch(0.24 0.05 260);--tipBd:oklch(0.38 0.07 260);--tipFg:oklch(0.85 0.05 260);
---compBg:#1a211c;--compBd:#28332b;--compMut:#8fa38b}}
 body.dark{
 --bg:#141619;--panel:#1f2126;--panel2:#191b1f;--border:#2b2e34;--border2:#24272c;--text:#e8e6e1;--muted:#7c828c;--faint:#565b64;--accent:oklch(0.62 0.14 260);--accentFg:#ffffff;
 --track:#2b2e34;--marker:#e8e6e1;
@@ -31,7 +24,4 @@ body.dark{
 a{color:var(--accent)}a:hover{opacity:.8}
 button,select,textarea,input{font:inherit;color:inherit}
 textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px}
-.secT{font-size:12px;font-weight:700;letter-spacing:0.06em;color:var(--muted)}
-.mono{font-family:'IBM Plex Mono',monospace}
 button{cursor:pointer}
