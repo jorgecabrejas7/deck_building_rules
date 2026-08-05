@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Dev-only parity test: loads app/engine.js in Node and checks that
+ * Dev-only parity test: loads app/js/engine/ in Node and checks that
  *   (a) the selftest cases pass (same expectations as tier_rules.py --selftest)
  *   (b) all 36 precon decks get the same stats/points/tier as the Python pipeline
  *       (expected values generated on the fly via python3).
@@ -8,12 +8,13 @@
  * Usage: node scripts/test_engine_parity.js [--selftest]
  * Users of the HTML app never need this.
  */
-const fs = require("fs");
-const path = require("path");
-const { execFileSync } = require("child_process");
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import * as PodEngine from "../app/js/engine/index.js";
 
-const ROOT = path.resolve(__dirname, "..");
-const PodEngine = require(path.join(ROOT, "app", "engine.js"));
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RULES = JSON.parse(fs.readFileSync(path.join(ROOT, "rules", "pod_rules.json"), "utf8"));
 // Rules now live ONLY in rules/pod_rules.json (the app fetches it at runtime),
 // so the old HTML-inline drift check is obsolete.
