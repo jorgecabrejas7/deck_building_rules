@@ -50,6 +50,16 @@ def dial_points(value, spec, overflow):
     return (value - spec["baseline_max"]) * overflow
 
 
+def combo_points(sizes, spec):
+    """Size-weighted per-combo pricing: each combo priced by piece count
+    (2-card 3pts, 3-card 2pts, 4+ 1pt by default), first `free_combos` free —
+    the free slots absorb the most expensive combos first."""
+    size_pts = spec.get("size_points", {})
+    default_pts = spec.get("default_size_points", 1)
+    priced = sorted((size_pts.get(str(s), default_pts) for s in sizes), reverse=True)
+    return sum(priced[spec.get("free_combos", 0):])
+
+
 def _names_in_deck(flagged, banned_names):
     """Banned-list hits among the deck's cards. flagged values are (name, qty) lists;
     the union of all flagged names misses unflagged cards, so callers pass a full
@@ -101,15 +111,20 @@ def evaluate_deck(stats, flagged, rules, card_names=None):
     overflow = rules.get("overflow_per_unit", 1)
     for dial, spec in rules["dials"].items():
         value = stats.get(dial, 0)
-        if spec.get("forbidden"):
-            if value > 0:
-                violations.append(f"{dial} = {value}: forbidden in this pod")
-                driving[dial] = flagged.get(dial, [])
+        pts = 0
+        if spec.get("scoring") == "per_combo_size":
+            pts = combo_points(stats.get("combo_sizes") or [], spec)
         elif value > spec["baseline_max"]:
             pts = dial_points(value, spec, overflow)
+        if spec.get("forbidden") and value > 0:
+            # Violation AND points: going over pod level never stops the counting.
+            violations.append(f"{dial} = {value}: forbidden in this pod")
+            driving[dial] = flagged.get(dial, [])
+        if pts:
             points += pts
             point_breakdown[dial] = pts
-            driving[dial] = flagged.get(dial, [])
+            if dial not in driving:
+                driving[dial] = flagged.get(dial, [])
         if spec.get("flag_if_over_zero") and value > 0:
             flags.append(spec["flag_if_over_zero"])
 
@@ -192,9 +207,10 @@ def selftest():
         ("three tutors = 5+1 overflow = 6pts", _fake({"tutors": 3}), "tier2"),
         ("five tutors = 5+3 = 8pts busts budget", _fake({"tutors": 5}), "above"),
         ("two extra turns = 3+1 = 4pts", _fake({"extra_turns": 2}), "tier2"),
-        ("two infinite combos free (precon norm)", _fake({"combos": 2}), "tier1"),
-        ("three infinite combos = 1pt", _fake({"combos": 3}), "tier1"),
-        ("five infinite combos = 2+1 = 3pts", _fake({"combos": 5}), "tier2"),
+        ("two combos free (precon norm)", _fake({"combos": 2, "combo_sizes": [2, 3]}), "tier1"),
+        ("four 2-card combos = 3+3 = 6pts", _fake({"combos": 4, "combo_sizes": [2, 2, 2, 2]}), "tier2"),
+        ("combos [2,3,3,3] = 2+2 = 4pts", _fake({"combos": 4, "combo_sizes": [2, 3, 3, 3]}), "tier2"),
+        ("combo + tutor conditional", _fake({"combos": 1, "combo_sizes": [2], "tutors": 1}), "above"),
         ("mass land denial", _fake({"mass_land_denial": 1}), "above"),
         ("banned fast mana card", _fake({}, None, {"Mana Crypt"}), "above"),
         ("banned turn recursion", _fake({"extra_turns": 1}, None, {"Nexus of Fate"}), "above"),
@@ -235,17 +251,18 @@ def calibrate():
     # Commander Spellbook combo counts per deck (see combo_analysis.json; the
     # 'combos' dial is externally measured — inject when the analysis exists).
     combo_path = REPO_ROOT / "out" / "precon_decks" / "combo_analysis.json"
-    combo_counts = {}
+    combo_sizes = {}
     if combo_path.exists():
         for row in json.loads(combo_path.read_text()):
             inc = row.get("included") or []
-            combo_counts[row["deck"]] = sum(1 for c in inc if c.get("infinite"))
+            combo_sizes[row["deck"]] = [c["n"] for c in inc if c.get("infinite")]
     rows = []
     for report in sorted((REPO_ROOT / "out" / "precon_decks").glob("*.report.json")):
         data = json.loads(report.read_text())
         for deck in data.get("decks", []):
             stats, flagged = compute_deck_stats(deck["cards"], cache)
-            stats["combos"] = combo_counts.get(deck["deck_title"], 0)
+            stats["combo_sizes"] = combo_sizes.get(deck["deck_title"], [])
+            stats["combos"] = len(stats["combo_sizes"])
             names = {c["name"] for c in deck["cards"]}
             res = evaluate_deck(stats, flagged, rules, card_names=names)
             rows.append((deck["deck_title"], report.stem.split(".")[0], stats, res))

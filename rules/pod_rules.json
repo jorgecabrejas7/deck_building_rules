@@ -120,14 +120,18 @@
       "hard_max": 2
     },
     "combos": {
-      "baseline_max": 2,
-      "point_steps": {
-        "3": 1,
-        "4": 2
-      },
-      "hard_max": 4,
       "external": true,
-      "note": "Included infinite combos per Commander Spellbook (find-my-combos). Not computable from oracle text: the checker fetches it (opt-in, via proxy) or you count by hand. Calibration: 12/36 precons ship combos, up to 4 (Living Energy, Witherbloom Pestilence); 2-card combos are precon-normal."
+      "scoring": "per_combo_size",
+      "free_combos": 2,
+      "size_points": {
+        "2": 3,
+        "3": 2
+      },
+      "default_size_points": 1,
+      "baseline_max": 2,
+      "point_steps": {},
+      "hard_max": 4,
+      "note": "Included infinite combos per Commander Spellbook, every combo counted separately (no dedup by shared cards). First 2 free (precon-normal: 12/36 precons ship combos, up to 4). Each combo beyond: 2-card +3, 3-card +2, 4+ +1 — free slots absorb the most expensive combos first. Calibration: Witherbloom Pestilence & Living Energy land in Tier 2 (6/4 pts), the honest outcome for the comboiest precons."
     }
   },
   "hard_bans": {
@@ -195,6 +199,22 @@
       "then": [
         {
           "dial": "game_changers",
+          "op": "<=",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "combos_gate_tutors",
+      "description": "Tutors turn a 2-card combo into every-game consistency: with any infinite combo, no unconditional tutors.",
+      "if": {
+        "dial": "combos",
+        "op": ">=",
+        "value": 1
+      },
+      "then": [
+        {
+          "dial": "tutors",
           "op": "<=",
           "value": 0
         }

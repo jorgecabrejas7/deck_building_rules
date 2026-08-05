@@ -170,14 +170,18 @@ button{cursor:pointer}
       "hard_max": 2
     },
     "combos": {
-      "baseline_max": 2,
-      "point_steps": {
-        "3": 1,
-        "4": 2
-      },
-      "hard_max": 4,
       "external": true,
-      "note": "Included infinite combos per Commander Spellbook (find-my-combos). Not computable from oracle text: the checker fetches it (opt-in, via proxy) or you count by hand. Calibration: 12/36 precons ship combos, up to 4 (Living Energy, Witherbloom Pestilence); 2-card combos are precon-normal."
+      "scoring": "per_combo_size",
+      "free_combos": 2,
+      "size_points": {
+        "2": 3,
+        "3": 2
+      },
+      "default_size_points": 1,
+      "baseline_max": 2,
+      "point_steps": {},
+      "hard_max": 4,
+      "note": "Included infinite combos per Commander Spellbook, every combo counted separately (no dedup by shared cards). First 2 free (precon-normal: 12/36 precons ship combos, up to 4). Each combo beyond: 2-card +3, 3-card +2, 4+ +1 — free slots absorb the most expensive combos first. Calibration: Witherbloom Pestilence & Living Energy land in Tier 2 (6/4 pts), the honest outcome for the comboiest precons."
     }
   },
   "hard_bans": {
@@ -213,6 +217,7 @@ button{cursor:pointer}
   "conditionals": [
     {
       "id": "gc_locks_price",
+      "description": "A game changer must be the deck's only luxury: no elevated price bands alongside it.",
       "if": {
         "dial": "game_changers",
         "op": ">=",
@@ -233,6 +238,7 @@ button{cursor:pointer}
     },
     {
       "id": "tutors_gate_gc",
+      "description": "Tutors turn any strong card into multiple virtual copies: no game changers alongside tutors.",
       "if": {
         "dial": "tutors",
         "op": ">=",
@@ -247,7 +253,24 @@ button{cursor:pointer}
       ]
     },
     {
+      "id": "combos_gate_tutors",
+      "description": "Tutors turn a 2-card combo into every-game consistency: with any infinite combo, no unconditional tutors.",
+      "if": {
+        "dial": "combos",
+        "op": ">=",
+        "value": 1
+      },
+      "then": [
+        {
+          "dial": "tutors",
+          "op": "<=",
+          "value": 0
+        }
+      ]
+    },
+    {
       "id": "mana_cheat_stacking",
+      "description": "Fast mana and free spells stack multiplicatively: having BOTH above baseline costs extra budget.",
       "type": "penalty",
       "penalty_points": 2,
       "if_all": [
@@ -384,6 +407,14 @@ function dialPoints(value, spec, overflow) {
   return (value - spec.baseline_max) * overflow;
 }
 
+function comboPoints(sizes, spec) {
+  const sizePts = spec.size_points || {};
+  const def = spec.default_size_points !== undefined ? spec.default_size_points : 1;
+  const priced = sizes.map(s => sizePts[String(s)] !== undefined ? sizePts[String(s)] : def)
+    .sort((a, b) => b - a);
+  return priced.slice(spec.free_combos || 0).reduce((a, b) => a + b, 0);
+}
+
 function evaluateDeck(stats, flagged, rules, cardNames) {
   const violations = [], flags = [];
   let points = 0;
@@ -411,16 +442,21 @@ function evaluateDeck(stats, flagged, rules, cardNames) {
   const overflow = rules.overflow_per_unit !== undefined ? rules.overflow_per_unit : 1;
   for (const [dial, spec] of Object.entries(rules.dials)) {
     const value = stats[dial] || 0;
-    if (spec.forbidden) {
-      if (value > 0) {
-        violations.push({ id: "dial_forbidden", dial, value });
-        driving[dial] = flagged[dial] || [];
-      }
+    let pts = 0;
+    if (spec.scoring === "per_combo_size") {
+      pts = comboPoints(stats.combo_sizes || [], spec);
     } else if (value > spec.baseline_max) {
-      const pts = dialPoints(value, spec, overflow);
+      pts = dialPoints(value, spec, overflow);
+    }
+    if (spec.forbidden && value > 0) {
+      // Violation AND points: going over pod level never stops the counting.
+      violations.push({ id: "dial_forbidden", dial, value });
+      driving[dial] = flagged[dial] || [];
+    }
+    if (pts) {
       points += pts;
       breakdown[dial] = pts;
-      driving[dial] = flagged[dial] || [];
+      if (!driving[dial]) driving[dial] = flagged[dial] || [];
     }
     if (spec.flag_if_over_zero && value > 0) {
       flags.push({ id: spec.flag_if_over_zero, dial, cards: (flagged[dial] || []).map(([n]) => n) });
@@ -846,9 +882,10 @@ function runSelfTest(rules) {
     ["three tutors = 5+1 overflow = 6pts", _fake({ tutors: 3 }), "tier2"],
     ["five tutors = 5+3 = 8pts busts budget", _fake({ tutors: 5 }), "above"],
     ["two extra turns = 3+1 = 4pts", _fake({ extra_turns: 2 }), "tier2"],
-    ["two infinite combos free (precon norm)", _fake({ combos: 2 }), "tier1"],
-    ["three infinite combos = 1pt", _fake({ combos: 3 }), "tier1"],
-    ["five infinite combos = 2+1 = 3pts", _fake({ combos: 5 }), "tier2"],
+    ["two combos free (precon norm)", _fake({ combos: 2, combo_sizes: [2, 3] }), "tier1"],
+    ["four 2-card combos = 3+3 = 6pts", _fake({ combos: 4, combo_sizes: [2, 2, 2, 2] }), "tier2"],
+    ["combos [2,3,3,3] = 2+2 = 4pts", _fake({ combos: 4, combo_sizes: [2, 3, 3, 3] }), "tier2"],
+    ["combo + tutor conditional", _fake({ combos: 1, combo_sizes: [2], tutors: 1 }), "above"],
     ["mass land denial", _fake({ mass_land_denial: 1 }), "above"],
     ["banned fast mana card", _fake({}, null, ["Mana Crypt"]), "above"],
     ["banned turn recursion", _fake({ extra_turns: 1 }, null, ["Nexus of Fate"]), "above"],
@@ -1016,8 +1053,8 @@ const DIAL_META = [
  es:'Destrucción masiva de tierras: prohibida sin excepciones. Ningún precon la lleva y este pod tampoco.',
  en:'Mass land destruction: banned, no exceptions. No precon runs it and neither does this pod.'}},
 {k:'combos',name:{es:'Combos infinitos',en:'Infinite combos'},help:{
- es:'Combos infinitos completos según Commander Spellbook (la base de combos que usa EDHREC). Los precons llevan hasta 2 combos «de juguete»: 2 gratis, el tercero cuesta 1 punto, el cuarto 2, y cada uno más +1. La comprobación es opcional y pasa por un proxy externo.',
- en:'Complete infinite combos per Commander Spellbook (the combo database EDHREC uses). Precons ship up to 2 “jank” combos: 2 free, the third costs 1 point, the fourth 2, and each extra +1. Checking is optional and goes through an external proxy.'}},
+ es:'Combos infinitos completos según Commander Spellbook (la base de combos que usa EDHREC); cada combo cuenta por separado, sin agrupar por cartas compartidas. Los 2 primeros son gratis (los precons llevan hasta 2 combos «de juguete»); cada uno más cuesta según lo compacto que sea: de 2 cartas +3, de 3 cartas +2, de 4 o más +1. Con cualquier combo, no se permiten tutores. La comprobación es opcional y pasa por un proxy externo.',
+ en:'Complete infinite combos per Commander Spellbook (the combo database EDHREC uses); every combo counts separately, no grouping by shared cards. The first 2 are free (precons ship up to 2 “jank” combos); each extra is priced by compactness: 2-card +3, 3-card +2, 4+ +1. With any combo, no tutors allowed. Checking is optional and goes through an external proxy.'}},
 {k:'price_1_5',name:{es:'Cartas €1–5',en:'Cards €1–5'},help:{
  es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24 cuestan 1–2 puntos, y cada una más suma +1.',
  en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 cost 1–2 points, and each extra adds +1.'}},
@@ -1043,7 +1080,9 @@ conditional:{
  gc_locks_price:{es:v=>'Un game changer debe ser tu único lujo: con game changer, '+dialName(v.reqDial,'es')+' debe ser ≤ '+v.reqValue+' (tienes '+v.actual+')',
                  en:v=>'A game changer must be your only luxury: with one, '+dialName(v.reqDial,'en')+' must be ≤ '+v.reqValue+' (you have '+v.actual+')'},
  tutors_gate_gc:{es:v=>'Los tutores convierten tu mejor carta en copias virtuales: con tutores no se permiten game changers (tienes '+v.actual+')',
-                 en:v=>'Tutors turn your best card into virtual copies: with tutors, no game changers allowed (you have '+v.actual+')'}},
+                 en:v=>'Tutors turn your best card in virtual copies: with tutors, no game changers allowed (you have '+v.actual+')'},
+ combos_gate_tutors:{es:v=>'Un tutor convierte tu combo en consistencia de cada partida: con combos infinitos no se permiten tutores (tienes '+v.actual+')',
+                     en:v=>'A tutor turns your combo into every-game consistency: with infinite combos, no tutors allowed (you have '+v.actual+')'}},
 budget:{es:v=>'Gasto total de '+v.points+' puntos — supera el presupuesto de Tier 2 ('+v.max+')',
         en:v=>'Total spend of '+v.points+' points — exceeds the Tier 2 budget ('+v.max+')'},
 flag_extra_turns:{es:v=>'Turno extra ('+v.cards.join(', ')+') — requiere justificación explícita en mesa',
@@ -1229,7 +1268,9 @@ function recompute(notFound) {
   const parsed = state.deck;
   const resolved = parsed.entries.filter(e => cardCache[e.name]);
   const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
-  stats.combos = (state.combosData && state.combosData.status === 'done') ? state.combosData.count : 0;
+  const _cd = state.combosData && state.combosData.status === 'done' ? state.combosData : null;
+  stats.combos = _cd ? _cd.count : 0;
+  stats.combo_sizes = _cd ? _cd.list.filter(c => c.infinite).map(c => c.n) : [];
   const evalRes = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
   const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
     cls: PodEngine.classifyCard(cardCache[e.name]) }));
