@@ -338,6 +338,8 @@ function cardFromScryfall(c) {
     price: isNaN(eur) ? null : eur,
     game_changer: !!c.game_changer,
     keywords: c.keywords || [],
+    legal_commander: (c.legalities && c.legalities.commander) || "unknown",
+    edhrec_rank: c.edhrec_rank || null,
     img_art: imgs.art_crop || "", img_normal: imgs.normal || "", img_small: imgs.small || "",
   };
 }
@@ -524,8 +526,95 @@ function validateDeck(cards, commanders, db, notFound) {
       }
     }
   }
+  for (const x of cards) {
+    if (x.card.legal_commander === "banned") issues.push({ id: "banned_official", name: x.card.name });
+  }
   for (const n of notFound || []) issues.push({ id: "not_found", name: n });
   return issues;
+}
+
+// ---- commander guess (precon convention: first legendary creature listed) ----
+function guessCommander(entries, db) {
+  for (const e of entries) {
+    const c = db[e.name];
+    if (!c) continue;
+    const front = (c.type_line || "").split(" // ")[0];
+    if (front.includes("Legendary") && (front.includes("Creature") || /can be your commander/i.test(c.oracle_text || ""))) return e.name;
+  }
+  return null;
+}
+
+// ---- what-if: recompute tier/points with one card removed ----
+function whatIfCut(entries, db, rules, cardName) {
+  const rest = entries.filter(e => e.name !== cardName);
+  const { stats, flagged } = computeDeckStats(rest, db);
+  const res = evaluateDeck(stats, flagged, rules, rest.map(e => e.name));
+  return { points: res.points, tier: res.tier, violations: res.violations.length };
+}
+
+// ---- suggestion engine: live Scryfall (EDHREC-ranked) with curated fallback ----
+const SUGGEST_QUERIES = {
+  ramp: "otag:ramp", draw: "otag:draw", rem: "otag:removal", wipe: "otag:board-wipe",
+  prot: "otag:protection", ctr: "otag:counterspell", tut: "otag:tutor",
+  sac: "otag:sacrifice-outlet", drain: "otag:life-drain",
+  tok: 'o:"create" o:"token"', mot: "otag:cast-trigger",
+  eq: "(t:equipment or t:aura)", life: "otag:lifegain", rec: "otag:reanimate",
+  anthem: "otag:anthem", burn: "otag:burn",
+};
+// Curated budget staples per category (fallback when Scryfall search fails).
+// [name, colorIdentity string ("" = colorless)]
+const CURATED_SUGGESTIONS = {
+  ramp: [["Sol Ring",""],["Arcane Signet",""],["Fellwar Stone",""],["Cultivate","G"],["Kodama's Reach","G"],["Rampant Growth","G"],["Farseek","G"],["Wayfarer's Bauble",""],["Mind Stone",""],["Solemn Simulacrum",""]],
+  draw: [["Night's Whisper","B"],["Sign in Blood","B"],["Read the Bones","B"],["Harmonize","G"],["Fact or Fiction","U"],["Brainstorm","U"],["Skullclamp",""],["Guardian Project","G"],["Phyrexian Arena","B"],["Mentor of the Meek","W"]],
+  rem: [["Swords to Plowshares","W"],["Path to Exile","W"],["Beast Within","G"],["Chaos Warp","R"],["Generous Gift","W"],["Feed the Swarm","B"],["Anguished Unmaking","WB"],["Putrefy","BG"],["Terminate","BR"],["Rapid Hybridization","U"]],
+  wipe: [["Blasphemous Act","R"],["Day of Judgment","W"],["Fumigate","W"],["Languish","B"],["Shatter the Sky","W"],["Crux of Fate","B"],["Hour of Reckoning","W"],["Ezuri's Predation","G"]],
+  prot: [["Swiftfoot Boots",""],["Lightning Greaves",""],["Heroic Intervention","G"],["Boros Charm","WR"],["Malakir Rebirth","B"],["Snakeskin Veil","G"],["Ghostly Prison","W"],["Propaganda","U"]],
+  ctr: [["Counterspell","U"],["Negate","U"],["Swan Song","U"],["Arcane Denial","U"],["Dovin's Veto","WU"],["An Offer You Can't Refuse","U"]],
+  tut: [["Diabolic Tutor","B"],["Solve the Equation","U"],["Idyllic Tutor","W"],["Sylvan Tutor","G"],["Gamble","R"]],
+  sac: [["Viscera Seer","B"],["Carrion Feeder","B"],["Ashnod's Altar",""],["Phyrexian Altar",""],["Goblin Bombardment","R"],["Woe Strider","B"]],
+  drain: [["Blood Artist","B"],["Zulaport Cutthroat","B"],["Cruel Celebrant","WB"],["Bastion of Remembrance","B"],["Suture Priest","W"],["Marauding Blight-Priest","B"]],
+  tok: [["Ministrant of Obligation","W"],["Hordeling Outburst","R"],["Spectral Procession","W"],["Dreadhorde Invasion","B"],["Saproling Migration","G"],["Talrand, Sky Summoner","U"]],
+  mot: [["Guttersnipe","R"],["Electrostatic Field","R"],["Archmage Emeritus","U"],["Storm-Kiln Artist","R"],["Young Pyromancer","R"]],
+  eq: [["Swiftfoot Boots",""],["Colossus Hammer",""],["Blackblade Reforged",""],["All That Glitters","W"],["Ancestral Mask","G"],["Bonesplitter",""]],
+  life: [["Soul Warden","W"],["Soul's Attendant","W"],["Prosperous Innkeeper","G"],["Impassioned Orator","W"],["Epicure of Blood","B"]],
+  rec: [["Animate Dead","B"],["Dread Return","B"],["Victimize","B"],["Unburial Rites","WB"],["Eternal Witness","G"],["Regrowth","G"]],
+  anthem: [["Glorious Anthem","W"],["Intangible Virtue","W"],["Shared Animosity","R"],["Beastmaster Ascension","G"]],
+  burn: [["Lightning Bolt","R"],["Chandra's Ignition","R"],["Fiery Cannonade","R"],["Pyrite Spellbomb",""]],
+};
+
+function ciFits(cardCi, deckCi) {
+  return [...cardCi].every(c => deckCi.has(c));
+}
+
+async function suggestCards({ cat, colorIdentity, excludeNames, bannedNames, maxEur = 5, limit = 6 }) {
+  const deckCi = new Set(colorIdentity && colorIdentity.length ? colorIdentity : []);
+  const excl = new Set(excludeNames || []);
+  const ban = new Set(bannedNames || []);
+  const base = SUGGEST_QUERIES[cat];
+  if (base) {
+    try {
+      const id = deckCi.size ? [...deckCi].join("") : "c";
+      const q = base + " f:commander eur<" + maxEur + " id<=" + id + " -t:land order:edhrec";
+      const res = await fetch("https://api.scryfall.com/cards/search?unique=cards&q=" + encodeURIComponent(q));
+      if (res.ok) {
+        const data = await res.json();
+        const out = [];
+        for (const raw of data.data || []) {
+          const c = cardFromScryfall(raw);
+          if (excl.has(c.name) || ban.has(c.name) || c.game_changer) continue;
+          if (c.legal_commander === "banned") continue;
+          out.push(c);
+          if (out.length >= limit) break;
+        }
+        if (out.length) return { cards: out, source: "live" };
+      }
+    } catch (e) { /* fall through to curated */ }
+  }
+  const curated = (CURATED_SUGGESTIONS[cat] || [])
+    .filter(([n, ci]) => !excl.has(n) && !ban.has(n) && ciFits(ci, deckCi))
+    .slice(0, limit)
+    .map(([n]) => ({ name: n, price: null, img_art: "", img_normal: "" }));
+  return { cards: curated, source: "curated" };
 }
 
 // ---- selftest (mirrors tier_rules.py --selftest) ----
@@ -577,6 +666,7 @@ return {
   KEYWORD_PATTERNS, PRICE_BANDS, computeDeckStats, evaluateDeck,
   detectInput, parseDecklist, cardFromScryfall, fetchCards, fetchCheapest, fetchArchidekt,
   classifyCard, typeLetter, detectArchetype, validateDeck, runSelfTest, sleep,
+  guessCommander, whatIfCut, suggestCards, CURATED_SUGGESTIONS, SUGGEST_QUERIES,
 };
 })();
 if (typeof module !== "undefined") module.exports = PodEngine;
@@ -791,10 +881,10 @@ const store = {
   set theme(v){ localStorage.setItem('pdc_theme', v); },
 };
 let cardCache = {};
-try { const raw = JSON.parse(localStorage.getItem('pdc_cards_v1') || '{}');
+try { const raw = JSON.parse(localStorage.getItem('pdc_cards_v2') || '{}');
   if (raw._ts && Date.now() - raw._ts < 30 * 864e5) cardCache = raw.cards || {};
 } catch (e) {}
-function persistCache(){ try { localStorage.setItem('pdc_cards_v1', JSON.stringify({ _ts: Date.now(), cards: cardCache })); } catch (e) {} }
+function persistCache(){ try { localStorage.setItem('pdc_cards_v2', JSON.stringify({ _ts: Date.now(), cards: cardCache })); } catch (e) {} }
 
 const state = {
   lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
