@@ -876,7 +876,7 @@ return {
   KEYWORD_PATTERNS, PRICE_BANDS, computeDeckStats, evaluateDeck,
   detectInput, parseDecklist, cardFromScryfall, fetchCards, fetchCheapest, fetchArchidekt,
   classifyCard, typeLetter, detectArchetype, validateDeck, runSelfTest, sleep,
-  guessCommander, whatIfCut, suggestCards, CURATED_SUGGESTIONS, SUGGEST_QUERIES,
+  guessCommander, whatIfCut, suggestCards, CURATED_SUGGESTIONS, SUGGEST_QUERIES, fetchCombos,
 };
 })();
 if (typeof module !== "undefined") module.exports = PodEngine;
@@ -929,6 +929,12 @@ handT:'MANO DE PRUEBA',handDraw:'Robar mano',handMull:'Mulligan',handHint:'Roba 
 tmBtn:'Modo mesa',tmT:'MODO MESA — compara hasta 4 mazos',tmRun:'Comparar mesa',tmDeck:'Mazo',
 tmHint:'Pega 2–4 listas y compara nivel y puntos de toda la mesa antes de quedar.',
 tmLoad:'Cargar en el analizador',tmRunning:'Analizando mazo',
+comboBtn:'Buscar combos infinitos',comboChecking:'Consultando Commander Spellbook…',
+comboProxyNote:'La consulta pasa por un proxy público de terceros (Commander Spellbook no permite acceso directo desde el navegador).',
+comboNone:'Sin combos infinitos completos en el mazo.',comboUnchecked:'sin comprobar',
+comboErr:'No se pudo consultar — comprueba a mano en commanderspellbook.com.',
+comboProduces:'genera',comboOthers:'combos no infinitos detectados',
+howBtn:'¿Cómo funciona?',
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Pasado de vueltas · Spellslinger'},
 en:{appTag:'POD DECK CHECKER',copy:'Copy report',copied:'Copied!',inputTitle:'ANALYZE DECK',
 inputPh:'Paste an Archidekt deck URL or a card list (one per line: "1 Sol Ring")',
@@ -967,6 +973,12 @@ handT:'SAMPLE HAND',handDraw:'Draw hand',handMull:'Mulligan',handHint:'Draw a ra
 tmBtn:'Table mode',tmT:'TABLE MODE — compare up to 4 decks',tmRun:'Compare table',tmDeck:'Deck',
 tmHint:'Paste 2–4 lists and compare tier and points for the whole table before game night.',
 tmLoad:'Load into analyzer',tmRunning:'Analyzing deck',
+comboBtn:'Find infinite combos',comboChecking:'Asking Commander Spellbook…',
+comboProxyNote:'The lookup goes through a public third-party proxy (Commander Spellbook blocks direct browser access).',
+comboNone:'No complete infinite combos in the deck.',comboUnchecked:'not checked',
+comboErr:'Lookup failed — check manually on commanderspellbook.com.',
+comboProduces:'produces',comboOthers:'non-infinite combos detected',
+howBtn:'How it works',
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Over the top · Spellslinger'}
 };
 
@@ -1003,6 +1015,9 @@ const DIAL_META = [
 {k:'mass_land_denial',name:{es:'Destrucción de tierras',en:'Mass land denial'},help:{
  es:'Destrucción masiva de tierras: prohibida sin excepciones. Ningún precon la lleva y este pod tampoco.',
  en:'Mass land destruction: banned, no exceptions. No precon runs it and neither does this pod.'}},
+{k:'combos',name:{es:'Combos infinitos',en:'Infinite combos'},help:{
+ es:'Combos infinitos completos según Commander Spellbook (la base de combos que usa EDHREC). Los precons llevan hasta 2 combos «de juguete»: 2 gratis, el tercero cuesta 1 punto, el cuarto 2, y cada uno más +1. La comprobación es opcional y pasa por un proxy externo.',
+ en:'Complete infinite combos per Commander Spellbook (the combo database EDHREC uses). Precons ship up to 2 “jank” combos: 2 free, the third costs 1 point, the fourth 2, and each extra +1. Checking is optional and goes through an external proxy.'}},
 {k:'price_1_5',name:{es:'Cartas €1–5',en:'Cards €1–5'},help:{
  es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24 cuestan 1–2 puntos, y cada una más suma +1.',
  en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 cost 1–2 points, and each extra adds +1.'}},
@@ -1171,7 +1186,7 @@ const state = {
   deck: null,        // {entries, commanders, deckName}
   result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, whatIf}
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
-  hand: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
+  hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
 };
 const TAB_KEYS = ['load', 'power', 'analysis', 'tips', 'guide'];
@@ -1199,6 +1214,7 @@ async function analyze() {
     });
     persistCache();
     state.deck = parsed;
+    state.combosData = null;
     recompute(notFound);
     state.fetchSt = 'idle';
     state.tab = 'power';
@@ -1213,6 +1229,7 @@ function recompute(notFound) {
   const parsed = state.deck;
   const resolved = parsed.entries.filter(e => cardCache[e.name]);
   const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
+  stats.combos = (state.combosData && state.combosData.status === 'done') ? state.combosData.count : 0;
   const evalRes = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
   const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
     cls: PodEngine.classifyCard(cardCache[e.name]) }));
