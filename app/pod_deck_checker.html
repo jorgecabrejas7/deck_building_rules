@@ -188,12 +188,6 @@ button{cursor:pointer}
         "Ancient Tomb",
         "Gaea's Cradle",
         "City of Traitors",
-        "Dark Ritual",
-        "Cabal Ritual",
-        "Pyretic Ritual",
-        "Desperate Ritual",
-        "Seething Song",
-        "Rite of Flame",
         "Jeska's Will"
       ],
       "extra_turn_recursion": [
@@ -1072,6 +1066,47 @@ const ARCH = [
  slots:{es:['Composición base','Curva media 3.0–3.5'],en:['Base composition','Avg curve 3.0–3.5']}}
 ];
 
+// Plain-words definition of every category, shown behind the "?" icons.
+const CAT_HELP = {
+land:{es:'Tierras: producen el maná con el que pagas todo. Un Commander típico lleva 34–38.',en:'Lands: they produce the mana that pays for everything. A typical Commander deck runs 34–38.'},
+ramp:{es:'Rampeo: cartas que aceleran tu maná (rocas como Sol Ring, buscar tierras como Cultivate). Te dejan jugar cosas caras antes de tiempo.',en:'Ramp: cards that accelerate your mana (rocks like Sol Ring, land-fetch like Cultivate). They let you cast expensive things ahead of schedule.'},
+draw:{es:'Robo: cartas que te dan más cartas. Sin robo te quedas sin mano hacia el turno 6 y dejas de jugar Magic.',en:'Card draw: cards that give you more cards. Without draw you run out of hand around turn 6 and stop playing Magic.'},
+rem:{es:'Removal: destruir o exiliar UNA amenaza concreta (Swords to Plowshares, Beast Within). Tu seguro contra la mejor carta del rival.',en:'Removal: destroying or exiling ONE specific threat (Swords to Plowshares, Beast Within). Your insurance against the opponent’s best card.'},
+burn:{es:'Daño directo: hechizos que hacen daño a criaturas o jugadores directamente (Lightning Bolt). Sirve de removal barato o de puntilla final.',en:'Burn: spells that deal damage directly to creatures or players (Lightning Bolt). Works as cheap removal or as the finishing blow.'},
+wipe:{es:'Barridos (board wipes): destruyen TODAS las criaturas a la vez (Blasphemous Act, Day of Judgment). El botón de reinicio cuando la mesa se descontrola.',en:'Board wipes: destroy ALL creatures at once (Blasphemous Act, Day of Judgment). The reset button when the board gets out of hand.'},
+prot:{es:'Protección: evita que maten tus piezas clave — antimaleficio, indestructible, botas (Swiftfoot Boots), o efectos tipo Propaganda que desaniman ataques.',en:'Protection: keeps your key pieces alive — hexproof, indestructible, boots (Swiftfoot Boots), or Propaganda-style attack deterrents.'},
+ctr:{es:'Counters (contrahechizos): niegan un hechizo mientras se lanza (Counterspell). La única respuesta que llega ANTES de que pase la cosa mala.',en:'Counterspells: deny a spell as it’s being cast (Counterspell). The only answer that arrives BEFORE the bad thing happens.'},
+tut:{es:'Tutores: buscan cualquier carta de tu biblioteca (Diabolic Tutor). Dan consistencia — y por eso cuestan puntos en este pod.',en:'Tutors: search your library for any card (Diabolic Tutor). They add consistency — which is why they cost points in this pod.'},
+sac:{es:'Sacrificio: permanentes que te dejan sacrificar tus propias criaturas a voluntad (Viscera Seer). El motor de los mazos Aristocrats.',en:'Sac outlets: permanents that let you sacrifice your own creatures at will (Viscera Seer). The engine of Aristocrats decks.'},
+drain:{es:'Drenaje: cada vez que muere una criatura tuya, los rivales pierden vida (Blood Artist). Gana partidas sin atacar.',en:'Drain: whenever your creatures die, opponents lose life (Blood Artist). Wins games without attacking.'},
+tok:{es:'Tokens: cartas que crean fichas de criatura (Spectral Procession). Material para atacar, bloquear o sacrificar.',en:'Tokens: cards that create creature tokens (Spectral Procession). Material to attack, block or sacrifice.'},
+mot:{es:'Motores: permanentes que premian lanzar hechizos (Guttersnipe, magecraft). El corazón de los mazos spellslinger.',en:'Engines: permanents that reward casting spells (Guttersnipe, magecraft). The heart of spellslinger decks.'},
+eq:{es:'Equipos y auras: se pegan a una criatura para hacerla enorme o inmatable. La base de Voltron y Equipment.',en:'Equipment & Auras: attach to a creature to make it huge or unkillable. The backbone of Voltron and Equipment decks.'},
+life:{es:'Lifegain: cartas que ganan vida. Solas no hacen nada — necesitan pagos que conviertan la vida en cartas, fichas o daño.',en:'Lifegain: cards that gain life. Alone they do nothing — they need payoffs that turn life into cards, tokens or damage.'},
+rec:{es:'Recursión: recuperar cartas del cementerio a la mano o al campo (Eternal Witness, Animate Dead).',en:'Recursion: returning cards from the graveyard to hand or battlefield (Eternal Witness, Animate Dead).'},
+anthem:{es:'Anthems: encantamientos que dan +X/+X a TODAS tus criaturas (Glorious Anthem). Convierten 10 fichas 1/1 en un ejército letal.',en:'Anthems: enchantments giving +X/+X to ALL your creatures (Glorious Anthem). They turn ten 1/1 tokens into a lethal army.'},
+cre:{es:'Criaturas sin otra función detectada: tus amenazas y bloqueadores.',en:'Creatures with no other detected role: your threats and blockers.'},
+oth:{es:'Otros: cartas cuya función no encaja en las categorías automáticas. Revísalas a mano.',en:'Other: cards whose role doesn’t fit the automatic categories. Review them by hand.'},
+};
+// Short role phrase used in "why add this card" explanations.
+const CAT_ROLE = {
+ramp:{es:'acelera tu maná y adelanta tu curva',en:'accelerates your mana and speeds up your curve'},
+draw:{es:'te rellena la mano y evita quedarte sin gas',en:'refills your hand so you never run out of gas'},
+rem:{es:'respuesta flexible a la mejor amenaza del rival',en:'a flexible answer to the opponent’s best threat'},
+wipe:{es:'resetea mesas desbocadas',en:'resets runaway boards'},
+prot:{es:'mantiene vivas tus piezas clave',en:'keeps your key pieces alive'},
+ctr:{es:'respuesta universal incluso en el turno del rival',en:'a universal answer even on the opponent’s turn'},
+tut:{es:'da consistencia buscando tu pieza clave',en:'adds consistency by finding your key piece'},
+sac:{es:'salida de sacrificio repetible para tu plan',en:'a repeatable sac outlet for your plan'},
+drain:{es:'convierte cada muerte en daño a toda la mesa',en:'turns every death into table-wide damage'},
+tok:{es:'genera cuerpos para ir a lo ancho',en:'makes bodies to go wide'},
+mot:{es:'motor que premia cada hechizo que lanzas',en:'an engine that rewards every spell you cast'},
+eq:{es:'hace letal a tu portador o comandante',en:'makes your bearer or commander lethal'},
+life:{es:'fuente de vida constante para tus pagos',en:'a steady life source feeding your payoffs'},
+rec:{es:'recupera valor del cementerio',en:'recovers value from the graveyard'},
+anthem:{es:'multiplica todo tu ejército a la vez',en:'multiplies your whole army at once'},
+burn:{es:'daño directo: removal barato o puntilla final',en:'direct damage: cheap removal or the finishing blow'},
+};
 const SEGC = {cre:'oklch(0.65 0.12 300)',draw:'oklch(0.62 0.1 260)',rem:'oklch(0.75 0.09 55)',ramp:'oklch(0.7 0.1 150)',oth:'oklch(0.65 0.02 260)'};
 const PIP = {W:'oklch(0.93 0.05 95)',U:'oklch(0.7 0.11 240)',B:'oklch(0.35 0.03 300)',R:'oklch(0.6 0.17 30)',G:'oklch(0.62 0.13 150)'};
 const BADGE_OF = [['game_changers','GC','bad'],['extra_turns','EX','warn'],['tutors','TUT','warn'],['board_wipes','WIPE','ok'],['counterspells','CTR','ok'],['free_spells','FREE','warn'],['fast_mana','FM','ok'],['stax_effects','STAX','warn']];
@@ -1516,6 +1551,43 @@ function deckColorIdentity() {
   const ci = new Set();
   for (const x of r.cardsInfo) for (const c of x.card.color_identity || []) ci.add(c);
   return [...ci];
+}
+
+function helpIcon(cat) {
+  if (!CAT_HELP[cat]) return '';
+  return '<span class="catHelp" data-cat="' + cat + '" style="display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1.2px solid var(--muted);color:var(--muted);font-size:10px;font-weight:700;cursor:help;vertical-align:1px;margin-left:5px">?</span>';
+}
+function catLabel(cat, lang) { return esc(CATS[cat][lang]) + helpIcon(cat); }
+
+function whyAdd(c, cat) {
+  const lang = state.lang, parts = [];
+  if (CAT_ROLE[cat]) parts.push(CAT_ROLE[cat][lang]);
+  if (c.edhrec_rank) parts.push(lang === 'es'
+    ? (c.edhrec_rank <= 2500 ? 'de las más jugadas en EDHREC (#' + c.edhrec_rank + ')' : 'popular en EDHREC (#' + c.edhrec_rank + ')')
+    : (c.edhrec_rank <= 2500 ? 'among the most played on EDHREC (#' + c.edhrec_rank + ')' : 'popular on EDHREC (#' + c.edhrec_rank + ')'));
+  if (c.price != null) parts.push(lang === 'es' ? 'solo €' + c.price : 'only €' + c.price);
+  if (c.cmc != null && c.cmc <= 2) parts.push(lang === 'es' ? 'entra pronto (coste ' + c.cmc + ')' : 'comes down early (cost ' + c.cmc + ')');
+  return parts.join(' · ');
+}
+
+function whyCut(x, slot) {
+  const lang = state.lang, r = x.card;
+  const rank = r.edhrec_rank ? (lang === 'es' ? 'la menos jugada de tu ' + CATS[slot.cat][lang] + ' (EDHREC #' + r.edhrec_rank + ')'
+    : 'the least-played card in your ' + CATS[slot.cat][lang] + ' (EDHREC #' + r.edhrec_rank + ')') : '';
+  const over = lang === 'es' ? 'vas sobrado (' + slot.v + '/' + slot.min + '–' + slot.max + ')'
+    : 'you are over target (' + slot.v + '/' + slot.min + '–' + slot.max + ')';
+  return [rank, over].filter(Boolean).join(' y ');
+}
+
+function bigSugTile(c, cat) {
+  const price = c.price != null ? '€' + c.price : '';
+  const img = c.img_normal
+    ? '<img src="' + c.img_normal + '" loading="lazy" style="width:100%;border-radius:10px;background:var(--track);aspect-ratio:0.717" alt="">'
+    : '<div style="width:100%;aspect-ratio:0.717;border:1px solid var(--border);border-radius:10px;display:grid;place-items:center;font-size:13px;font-weight:700;padding:8px;box-sizing:border-box;text-align:center">' + esc(c.name) + '</div>';
+  return '<div class="sugTile" data-img="' + esc(c.img_normal || '') + '" style="display:flex;flex-direction:column;gap:7px">' + img +
+    '<div style="font-size:12.5px;font-weight:700;line-height:1.25">' + esc(c.name) +
+    (price ? ' <span class="mono" style="color:var(--muted);font-weight:600">' + price + '</span>' : '') + '</div>' +
+    '<div style="font-size:11.5px;color:var(--muted);line-height:1.5">' + esc(whyAdd(c, cat)) + '</div></div>';
 }
 
 function sugChip(c) {

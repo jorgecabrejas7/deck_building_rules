@@ -139,12 +139,6 @@
         "Ancient Tomb",
         "Gaea's Cradle",
         "City of Traitors",
-        "Dark Ritual",
-        "Cabal Ritual",
-        "Pyretic Ritual",
-        "Desperate Ritual",
-        "Seething Song",
-        "Rite of Flame",
         "Jeska's Will"
       ],
       "extra_turn_recursion": [
@@ -156,7 +150,7 @@
         "Ral Zarek"
       ]
     },
-    "banned_cards_note": "Curated lists, extend as the pod meets new cards. true_fast_mana: precons don't run explosive mana and neither do we. extra_turn_recursion: extra turns may never be repeatable."
+    "banned_cards_note": "Curated lists, extend as the pod meets new cards. true_fast_mana: repeatable/permanent explosive mana only — one-shot rituals (Dark Ritual etc.) are allowed and count on the fast-mana dial when cmc<=2. extra_turn_recursion: extra turns may never be repeatable."
   },
   "conditionals": [
     {

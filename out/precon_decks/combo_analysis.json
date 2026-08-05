@@ -1,0 +1,532 @@
+[
+ {
+  "deck": "Animated Army",
+  "code": "blc",
+  "included": [
+   {
+    "cards": [
+     "Kodama of the East Tree",
+     "Gruul Turf",
+     "Rampaging Baloths"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite creature tokens",
+     "Infinite ETB",
+     "Infinite landfall triggers"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 52
+ },
+ {
+  "deck": "Family Matters",
+  "code": "blc",
+  "included": [
+   {
+    "cards": [
+     "Combat Celebrant",
+     "Helm of the Host"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite combat phases",
+     "Infinite ETB",
+     "Infinite mana creatures you control can produce",
+     "Infinite tapped creature tokens"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 34
+ },
+ {
+  "deck": "Peace Offering",
+  "code": "blc",
+  "included": [],
+  "almost": 26
+ },
+ {
+  "deck": "Squirreled Away",
+  "code": "blc",
+  "included": [
+   {
+    "cards": [
+     "Hazel's Brewmaster",
+     "Gourmand's Talent",
+     "Academy Manufactor",
+     "Gilded Goose"
+    ],
+    "n": 4,
+    "features": [
+     "Infinite tapped Food tokens",
+     "Infinite tapped Treasure tokens",
+     "Infinite tapped Clue tokens"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 45
+ },
+ {
+  "deck": "Living Energy",
+  "code": "drc",
+  "included": [
+   {
+    "cards": [
+     "Lightning Runner",
+     "Aetherwind Basker"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite combat phases",
+     "Infinite energy counters",
+     "Infinite mana creatures you control can produce",
+     "Infinite untap of creatures you control"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Saheeli, Radiant Creator",
+     "Lightning Runner",
+     "Aetherwind Basker"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite LTB",
+     "Infinite ETB",
+     "Infinite sacrifice triggers",
+     "Infinite death triggers"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Saheeli, Radiant Creator",
+     "Lightning Runner",
+     "Peema Aether-Seer"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite LTB",
+     "Infinite ETB",
+     "Infinite sacrifice triggers",
+     "Infinite death triggers"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Aethertide Whale",
+     "Nissa, Worldsoul Speaker",
+     "Panharmonicon"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite LTB",
+     "Infinite ETB",
+     "Infinite storm count"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 47
+ },
+ {
+  "deck": "Eternal Might",
+  "code": "drc",
+  "included": [],
+  "almost": 15
+ },
+ {
+  "deck": "Jump Scare!",
+  "code": "dsc",
+  "included": [
+   {
+    "cards": [
+     "Zimone, Mystery Unraveler",
+     "Yedora, Grave Gardener",
+     "Whisperwood Elemental"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite LTB",
+     "Infinite sacrifice triggers",
+     "Infinite death triggers",
+     "Infinite green mana"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Zimone, Mystery Unraveler",
+     "Yedora, Grave Gardener",
+     "Sakura-Tribe Elder"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite LTB",
+     "Infinite sacrifice triggers",
+     "Infinite death triggers",
+     "Infinite green mana"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Zimone, Mystery Unraveler",
+     "Yedora, Grave Gardener",
+     "Yavimaya Elder",
+     "Retreat to Coralhelm"
+    ],
+    "n": 4,
+    "features": [
+     "Infinite card draw",
+     "Infinite draw triggers",
+     "Near-infinite LTB",
+     "Near-infinite death triggers"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 59
+ },
+ {
+  "deck": "Miracle Worker",
+  "code": "dsc",
+  "included": [
+   {
+    "cards": [
+     "Ondu Spiritdancer",
+     "Secret Arcade // Dusty Parlor"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite ETB",
+     "Infinite creature tokens"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 18
+ },
+ {
+  "deck": "Endless Punishment",
+  "code": "dsc",
+  "included": [],
+  "almost": 21
+ },
+ {
+  "deck": "Death Toll",
+  "code": "dsc",
+  "included": [],
+  "almost": 2
+ },
+ {
+  "deck": "Dance of the Elements",
+  "code": "ecc",
+  "included": [],
+  "almost": 78
+ },
+ {
+  "deck": "Blight Curse",
+  "code": "ecc",
+  "included": [
+   {
+    "cards": [
+     "Blowfly Infestation",
+     "Hapatra, Vizier of Poisons"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite death triggers",
+     "Infinite ETB",
+     "Infinite LTB"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Blowfly Infestation",
+     "Flourishing Defenses"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite ETB",
+     "Infinite LTB",
+     "Infinite death triggers"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 37
+ },
+ {
+  "deck": "World Shaper",
+  "code": "eoc",
+  "included": [
+   {
+    "cards": [
+     "The Gitrog Monster",
+     "Dakmor Salvage"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite self-mill",
+     "Near-infinite self-discard triggers"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 34
+ },
+ {
+  "deck": "Counter Intelligence",
+  "code": "eoc",
+  "included": [],
+  "almost": 45
+ },
+ {
+  "deck": "Revival Trance (FINAL FANTASY VI)",
+  "code": "fic",
+  "included": [],
+  "almost": 19
+ },
+ {
+  "deck": "Limit Break (FINAL FANTASY VII)",
+  "code": "fic",
+  "included": [],
+  "almost": 7
+ },
+ {
+  "deck": "Counter Blitz (FINAL FANTASY X)",
+  "code": "fic",
+  "included": [
+   {
+    "cards": [
+     "Gatta and Luzzu",
+     "Hardened Scales",
+     "Walking Ballista"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite damage",
+     "Infinite +1/+1 counters on a creature"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 75
+ },
+ {
+  "deck": "Scions & Spellcraft (FINAL FANTASY XIV)",
+  "code": "fic",
+  "included": [],
+  "almost": 9
+ },
+ {
+  "deck": "Riders of Rohan",
+  "code": "ltc",
+  "included": [
+   {
+    "cards": [
+     "Gilraen, D\u00fanedain Protector",
+     "Village Bell-Ringer"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite ETB",
+     "Infinite LTB",
+     "Infinite mana creatures you control can produce",
+     "Infinite untap of creatures you control"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 23
+ },
+ {
+  "deck": "Food and Fellowship",
+  "code": "ltc",
+  "included": [],
+  "almost": 19
+ },
+ {
+  "deck": "Elven Council",
+  "code": "ltc",
+  "included": [],
+  "almost": 16
+ },
+ {
+  "deck": "The Hosts of Mordor",
+  "code": "ltc",
+  "included": [],
+  "almost": 21
+ },
+ {
+  "deck": "Avengers Assemble",
+  "code": "msc",
+  "included": [],
+  "almost": 12
+ },
+ {
+  "deck": "Wakanda Forever",
+  "code": "msc",
+  "included": [],
+  "almost": 3
+ },
+ {
+  "deck": "The Fantastic Four",
+  "code": "msc",
+  "included": [],
+  "almost": 17
+ },
+ {
+  "deck": "Doom Prevails",
+  "code": "msc",
+  "included": [],
+  "almost": 16
+ },
+ {
+  "deck": "Silverquill Influence",
+  "code": "soc",
+  "included": [],
+  "almost": 10
+ },
+ {
+  "deck": "Prismari Artistry",
+  "code": "soc",
+  "included": [],
+  "almost": 79
+ },
+ {
+  "deck": "Witherbloom Pestilence",
+  "code": "soc",
+  "included": [
+   {
+    "cards": [
+     "Viscera Seer",
+     "Gorma, the Gullet"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite +1/+1 counters on a creature",
+     "Infinite ETB",
+     "Infinite LTB",
+     "Infinite death triggers"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Umbral Collar Zealot",
+     "Gorma, the Gullet"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite +1/+1 counters on a creature",
+     "Infinite ETB",
+     "Infinite LTB",
+     "Infinite death triggers"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Gorma, the Gullet",
+     "Yahenni, Undying Partisan"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite +1/+1 counters on a creature",
+     "Infinite ETB",
+     "Infinite LTB",
+     "Infinite death triggers"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Woe Strider",
+     "Gorma, the Gullet"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite +1/+1 counters on a creature",
+     "Infinite ETB",
+     "Infinite LTB",
+     "Infinite death triggers"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 91
+ },
+ {
+  "deck": "Lorehold Spirit",
+  "code": "soc",
+  "included": [],
+  "almost": 1
+ },
+ {
+  "deck": "Quandrix Unlimited",
+  "code": "soc",
+  "included": [],
+  "almost": 17
+ },
+ {
+  "deck": "Abzan Armor",
+  "code": "tdc",
+  "included": [],
+  "almost": 18
+ },
+ {
+  "deck": "Jeskai Striker",
+  "code": "tdc",
+  "included": [
+   {
+    "cards": [
+     "Narset's Reversal",
+     "Expansion // Explosion"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite magecraft triggers"
+    ],
+    "infinite": true
+   },
+   {
+    "cards": [
+     "Adaptive Training Post",
+     "Expansion // Explosion"
+    ],
+    "n": 2,
+    "features": [
+     "Infinite magecraft triggers"
+    ],
+    "infinite": true
+   }
+  ],
+  "almost": 55
+ },
+ {
+  "deck": "Sultai Arisen",
+  "code": "tdc",
+  "included": [],
+  "almost": 47
+ },
+ {
+  "deck": "Mardu Surge",
+  "code": "tdc",
+  "included": [],
+  "almost": 56
+ },
+ {
+  "deck": "Temur Roar",
+  "code": "tdc",
+  "included": [],
+  "almost": 19
+ }
+]
