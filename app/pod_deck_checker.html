@@ -647,6 +647,25 @@ async function fetchArchidekt(id) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// ---- ramp acceleration heuristics ----
+function manaProduced(card) {
+  const o = (card.oracle_text || "").replace(REMINDER_TEXT_RE, "");
+  const m = o.match(/add ([^.\n]*)/i);
+  if (!m) return 0;
+  const seg = m[1];
+  const sym = (seg.match(/\{[wubrgc0-9]\}/gi) || []).length;
+  if (sym) return sym;
+  const words = { one: 1, two: 2, three: 3, four: 4 };
+  const wm = seg.match(/\b(one|two|three|four)\b/i);
+  if (wm) return words[wm[1].toLowerCase()];
+  const dm = seg.match(/(\d+)/);
+  return dm ? Math.min(+dm[1], 6) : 1;
+}
+function isLandRamp(card) {
+  const o = (card.oracle_text || "").replace(REMINDER_TEXT_RE, "");
+  return /search (?:your|their) library for [^.]{0,60}land[^.]{0,80}onto the battlefield/i.test(o);
+}
+
 // ---- infinite combos via Commander Spellbook (CORS-blocked: callers use the proxy) ----
 async function fetchCombos(entries, commanders, useProxy) {
   const api = "https://backend.commanderspellbook.com/find-my-combos";
@@ -914,6 +933,7 @@ return {
   detectInput, parseDecklist, cardFromScryfall, fetchCards, fetchCheapest, fetchArchidekt,
   classifyCard, typeLetter, detectArchetype, validateDeck, runSelfTest, sleep,
   guessCommander, whatIfCut, suggestCards, CURATED_SUGGESTIONS, SUGGEST_QUERIES, fetchCombos,
+  manaProduced, isLandRamp,
 };
 })();
 if (typeof module !== "undefined") module.exports = PodEngine;
@@ -972,6 +992,9 @@ comboNone:'Sin combos infinitos completos en el mazo.',comboUnchecked:'sin compr
 comboErr:'No se pudo consultar — comprueba a mano en commanderspellbook.com.',
 comboProduces:'genera',comboOthers:'combos no infinitos detectados',
 howBtn:'¿Cómo funciona?',
+rampT:'ANÁLISIS DE RAMPEO',rampNone:'Este mazo no lleva aceleradores de maná detectables.',
+rampPlay:'baja',rampAvail:'maná disponible',rampAhead:'te adelanta a',rampNothing:'(no hay cartas de ese coste en el mazo)',
+rampAgg1:'aceleradores de maná',rampAgg2:'de maná extra potencial · curva media',
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Pasado de vueltas · Spellslinger'},
 en:{appTag:'POD DECK CHECKER',copy:'Copy report',copied:'Copied!',inputTitle:'ANALYZE DECK',
 inputPh:'Paste an Archidekt deck URL or a card list (one per line: "1 Sol Ring")',
@@ -1016,6 +1039,9 @@ comboNone:'No complete infinite combos in the deck.',comboUnchecked:'not checked
 comboErr:'Lookup failed — check manually on commanderspellbook.com.',
 comboProduces:'produces',comboOthers:'non-infinite combos detected',
 howBtn:'How it works',
+rampT:'RAMP ANALYSIS',rampNone:'This deck runs no detectable mana accelerators.',
+rampPlay:'play',rampAvail:'mana available',rampAhead:'gets you ahead to',rampNothing:'(no cards at that cost in the deck)',
+rampAgg1:'mana accelerators',rampAgg2:'of potential extra mana · avg curve',
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Over the top · Spellslinger'}
 };
 
@@ -1842,6 +1868,50 @@ async function fillCompAdvice() {
   state.tipsCache = { key, html: $('tips').innerHTML };
 }
 
+// ---------------- ramp castability ----------------
+function renderRamp() {
+  const t = T(), r = state.result, lang = state.lang, P = lang === 'es';
+  const ramps = r.cardsInfo.filter(x => x.cls.type !== 'L' &&
+    (x.cls.tags.includes('ramp') || PodEngine.isLandRamp(x.card)))
+    .map(x => {
+      const landR = PodEngine.isLandRamp(x.card);
+      const prod = landR ? 1 : PodEngine.manaProduced(x.card);
+      return { x, prod, landR };
+    }).filter(e => e.prod > 0)
+    .sort((a, b) => (a.x.card.cmc || 0) - (b.x.card.cmc || 0));
+  let html = '<span class="secT">' + t.rampT + helpIcon('ramp') + '</span>';
+  if (!ramps.length) {
+    html += '<div style="font-size:12.5px;color:var(--muted)">' + t.rampNone + '</div>';
+  } else {
+    const nl = r.cardsInfo.filter(x => x.cls.type !== 'L');
+    const totalProd = ramps.reduce((sum, e) => sum + e.prod * e.x.qty, 0);
+    const nlQty = nl.reduce((sum, x) => sum + x.qty, 0) || 1;
+    const avg = (nl.reduce((sum, x) => sum + (x.card.cmc || 0) * x.qty, 0) / nlQty).toFixed(2);
+    html += '<div style="font-size:12.5px;color:var(--muted)">' + ramps.length + ' ' + t.rampAgg1 + ' · +' + totalProd + ' ' + t.rampAgg2 + ' ' + avg + '</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:8px">' + ramps.map(({ x, prod, landR }) => {
+      const c = x.card;
+      const playT = Math.max(Math.ceil(c.cmc || 1), 1);
+      const nextT = playT + 1;
+      const avail = nextT + prod;  // a land per turn + this accelerator
+      const examples = nl.filter(y => Math.floor(y.card.cmc || 0) === avail && y.name !== x.name)
+        .sort((a, b) => (a.card.edhrec_rank || 1e9) - (b.card.edhrec_rank || 1e9)).slice(0, 3);
+      const exStr = examples.length
+        ? examples.map(y => '<b>' + esc(y.name) + '</b>').join(', ')
+        : '<span style="color:var(--faint)">' + t.rampNothing + '</span>';
+      const sentence = P
+        ? 'T' + playT + ': ' + t.rampPlay + ' <b>' + esc(x.name) + '</b> → T' + nextT + ': ' + avail + ' ' + t.rampAvail +
+          (landR ? ' (busca tierra)' : ' (+' + prod + ')') + ' — ' + t.rampAhead + ': ' + exStr
+        : 'T' + playT + ': ' + t.rampPlay + ' <b>' + esc(x.name) + '</b> → T' + nextT + ': ' + avail + ' ' + t.rampAvail +
+          (landR ? ' (fetches a land)' : ' (+' + prod + ')') + ' — ' + t.rampAhead + ': ' + exStr;
+      return '<div class="sugTile" data-img="' + esc(c.img_normal || '') + '" style="display:flex;gap:10px;align-items:center;border:1px solid var(--border2);border-radius:10px;padding:8px 12px">' +
+        '<span style="width:34px;height:34px;border-radius:8px;flex:none;background:var(--track) center/cover no-repeat;' + (c.img_art ? "background-image:url('" + c.img_art + "')" : '') + '"></span>' +
+        '<div style="font-size:12.5px;line-height:1.55">' + sentence + '</div></div>';
+    }).join('') + '</div>';
+  }
+  $('rampPanel').innerHTML = html;
+  bindSugPopovers($('rampPanel'));
+}
+
 // ---------------- sample hand ----------------
 function drawHand() {
   const r = state.result;
@@ -2142,7 +2212,7 @@ function renderAll() {
   if (has) {
     renderSummary(); renderBanner(); renderValidation();
     if (state.tab === 'power') renderPower();
-    if (state.tab === 'analysis') { renderComp(); renderBrowser(); renderCurve(); renderHand(); }
+    if (state.tab === 'analysis') { renderComp(); renderBrowser(); renderCurve(); renderRamp(); renderHand(); }
     if (state.tab === 'tips') renderTips();
   }
 }
@@ -2272,6 +2342,7 @@ window.addEventListener('DOMContentLoaded', () => {
       <div id="groups" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:start"></div>
     </div>
     <div id="curveWrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px"></div>
+    <div id="rampPanel" class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:12px"></div>
     <div id="handPanel" class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:14px"></div>
   </div>
 
