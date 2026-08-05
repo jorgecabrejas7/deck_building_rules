@@ -1698,6 +1698,7 @@ function renderBrowser() {
   $('groups').style.flexDirection = 'column';
   $('groups').style.gap = '22px';
   $('groups').style.gridTemplateColumns = '';
+  $('groups').style.alignItems = 'stretch';
   for (const tile of $('groups').querySelectorAll('.cardTile')) {
     tile.onmouseenter = () => {
       const c = cardCache[tile.dataset.name]; if (!c || !c.img_normal) return;
