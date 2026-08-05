@@ -1,0 +1,77 @@
+{
+  "products": [
+    {
+      "code": "ltc",
+      "name": "The Lord of the Rings: Tales of Middle-earth Commander",
+      "status": "ok",
+      "deck_count": 4
+    },
+    {
+      "code": "blc",
+      "name": "Bloomburrow Commander",
+      "status": "ok",
+      "deck_count": 4
+    },
+    {
+      "code": "dsc",
+      "name": "Duskmourn: House of Horror Commander",
+      "status": "ok",
+      "deck_count": 4
+    },
+    {
+      "code": "drc",
+      "name": "Aetherdrift Commander",
+      "status": "ok",
+      "deck_count": 2
+    },
+    {
+      "code": "tdc",
+      "name": "Tarkir: Dragonstorm Commander",
+      "status": "ok",
+      "deck_count": 5
+    },
+    {
+      "code": "fic",
+      "name": "Final Fantasy Commander",
+      "status": "ok",
+      "deck_count": 4
+    },
+    {
+      "code": "eoc",
+      "name": "Edge of Eternities Commander",
+      "status": "ok",
+      "deck_count": 2
+    },
+    {
+      "code": "ecc",
+      "name": "Lorwyn Eclipsed Commander",
+      "status": "ok",
+      "deck_count": 2
+    },
+    {
+      "code": "soc",
+      "name": "Secrets of Strixhaven Commander",
+      "status": "ok",
+      "deck_count": 5
+    },
+    {
+      "code": "msc",
+      "name": "Marvel Super Heroes Commander",
+      "status": "ok",
+      "deck_count": 4
+    },
+    {
+      "code": "frc",
+      "name": "Reality Fracture Commander",
+      "status": "not_yet_published",
+      "deck_count": 0
+    },
+    {
+      "code": "trc",
+      "name": "Star Trek Commander",
+      "status": "not_yet_published",
+      "deck_count": 0
+    }
+  ],
+  "generated_at": "2026-08-03T14:53:16.644623Z"
+}

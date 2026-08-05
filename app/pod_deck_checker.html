@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pod Deck Checker — La guía del Yoryi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
+--bg:#f2f0ec;--panel:#ffffff;--panel2:#faf9f7;--border:#e4e0d9;--border2:#efece6;--text:#23211e;--muted:#8a857c;--faint:#b3aca0;--accent:oklch(0.52 0.13 260);--accentFg:#ffffff;
+--track:#efece6;--marker:#23211e;
+--zoneA:oklch(0.85 0.09 145);--zoneB:oklch(0.88 0.1 85);--zoneC:oklch(0.85 0.1 25);
+--good:oklch(0.48 0.1 145);--warn:oklch(0.52 0.11 85);--bad:oklch(0.52 0.15 25);
+--okBg:oklch(0.92 0.06 145);--okBd:oklch(0.8 0.1 145);--okFg:oklch(0.38 0.1 145);
+--warnBg:oklch(0.95 0.05 85);--warnBd:oklch(0.85 0.08 85);--warnFg:oklch(0.42 0.09 85);
+--badBg:oklch(0.96 0.03 25);--badBd:oklch(0.85 0.07 25);--badFg:oklch(0.45 0.13 25);
+--tipBg:oklch(0.95 0.04 260);--tipBd:oklch(0.85 0.06 260);--tipFg:oklch(0.35 0.06 260);
+--compBg:#f3f6f2;--compBd:#dde5dc;--compMut:#75846f}
+@media (prefers-color-scheme:dark){body:not(.light){
+--bg:#141619;--panel:#1f2126;--panel2:#191b1f;--border:#2b2e34;--border2:#24272c;--text:#e8e6e1;--muted:#7c828c;--faint:#565b64;--accent:oklch(0.62 0.14 260);--accentFg:#ffffff;
+--track:#2b2e34;--marker:#e8e6e1;
+--zoneA:oklch(0.45 0.09 145);--zoneB:oklch(0.5 0.1 85);--zoneC:oklch(0.48 0.12 25);
+--good:oklch(0.75 0.1 145);--warn:oklch(0.78 0.1 85);--bad:oklch(0.72 0.13 25);
+--okBg:oklch(0.3 0.08 145);--okBd:oklch(0.45 0.1 145);--okFg:oklch(0.82 0.1 145);
+--warnBg:oklch(0.28 0.06 85);--warnBd:oklch(0.42 0.09 85);--warnFg:oklch(0.85 0.1 85);
+--badBg:oklch(0.25 0.07 25);--badBd:oklch(0.4 0.11 25);--badFg:oklch(0.85 0.08 25);
+--tipBg:oklch(0.24 0.05 260);--tipBd:oklch(0.38 0.07 260);--tipFg:oklch(0.85 0.05 260);
+--compBg:#1a211c;--compBd:#28332b;--compMut:#8fa38b}}
+body.dark{
+--bg:#141619;--panel:#1f2126;--panel2:#191b1f;--border:#2b2e34;--border2:#24272c;--text:#e8e6e1;--muted:#7c828c;--faint:#565b64;--accent:oklch(0.62 0.14 260);--accentFg:#ffffff;
+--track:#2b2e34;--marker:#e8e6e1;
+--zoneA:oklch(0.45 0.09 145);--zoneB:oklch(0.5 0.1 85);--zoneC:oklch(0.48 0.12 25);
+--good:oklch(0.75 0.1 145);--warn:oklch(0.78 0.1 85);--bad:oklch(0.72 0.13 25);
+--okBg:oklch(0.3 0.08 145);--okBd:oklch(0.45 0.1 145);--okFg:oklch(0.82 0.1 145);
+--warnBg:oklch(0.28 0.06 85);--warnBd:oklch(0.42 0.09 85);--warnFg:oklch(0.85 0.1 85);
+--badBg:oklch(0.25 0.07 25);--badBd:oklch(0.4 0.11 25);--badFg:oklch(0.85 0.08 25);
+--tipBg:oklch(0.24 0.05 260);--tipBd:oklch(0.38 0.07 260);--tipFg:oklch(0.85 0.05 260);
+--compBg:#1a211c;--compBd:#28332b;--compMut:#8fa38b}
+a{color:var(--accent)}a:hover{opacity:.8}
+button,select,textarea,input{font:inherit;color:inherit}
+textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.secT{font-size:12px;font-weight:700;letter-spacing:0.06em;color:var(--muted)}
+.mono{font-family:'IBM Plex Mono',monospace}
+button{cursor:pointer}
+</style>
+</head>
+<body>
+
+<script type="application/json" id="pod-rules">
+{
+  "version": 1,
+  "tiers": {
+    "tier1": {"label": "Tier 1 (Precon)", "max_points": 2},
+    "tier2": {"label": "Tier 2 (Slightly above precon)", "max_points": 7},
+    "above": {"label": "Above pod power level"}
+  },
+  "dials": {
+    "game_changers": {"baseline_max": 0, "point_steps": {"1": 2}, "hard_max": 1},
+    "extra_turns": {"baseline_max": 0, "point_steps": {"1": 3}, "hard_max": 1,
+      "flag_if_over_zero": "extra_turns"},
+    "tutors": {"baseline_max": 0, "point_steps": {"1": 2, "2": 5}, "hard_max": 2},
+    "stax_effects": {"baseline_max": 1, "point_steps": {"2": 1, "3": 3}, "hard_max": 3},
+    "counterspells": {"baseline_max": 5, "point_steps": {"6": 1, "7": 2}, "hard_max": 7},
+    "board_wipes": {"baseline_max": 4, "point_steps": {"5": 1, "6": 2}, "hard_max": 6},
+    "free_spells": {"baseline_max": 4, "point_steps": {"5": 1, "6": 2, "7": 3, "8": 4}, "hard_max": 8},
+    "fast_mana": {"baseline_max": 8, "point_steps": {"9": 1, "10": 2, "11": 3, "12": 4, "13": 5, "14": 6}, "hard_max": 14},
+    "mass_land_denial": {"baseline_max": 0, "point_steps": {}, "hard_max": 0},
+    "price_1_5": {"baseline_max": 18, "point_steps": {"19": 1, "20": 1, "21": 1, "22": 2, "23": 2, "24": 2}, "hard_max": 24},
+    "price_10_20": {"baseline_max": 3, "point_steps": {"4": 1, "5": 2, "6": 3}, "hard_max": 6},
+    "price_20_30": {"baseline_max": 0, "point_steps": {"1": 3, "2": 5}, "hard_max": 2}
+  },
+  "hard_bans": {
+    "max_card_price_eur": 30.0,
+    "banned_cards": {
+      "true_fast_mana": [
+        "Mana Crypt", "Mana Vault", "Grim Monolith", "Jeweled Lotus", "Lotus Petal",
+        "Lion's Eye Diamond", "Chrome Mox", "Mox Diamond", "Mox Amber", "Mox Opal",
+        "Dockside Extortionist", "Ancient Tomb", "Gaea's Cradle", "City of Traitors",
+        "Dark Ritual", "Cabal Ritual", "Pyretic Ritual", "Desperate Ritual",
+        "Seething Song", "Rite of Flame", "Jeska's Will"
+      ],
+      "extra_turn_recursion": [
+        "Nexus of Fate", "Sage of Hours", "Timestream Navigator",
+        "Magistrate's Scepter", "Wanderwine Prophets", "Ral Zarek"
+      ]
+    }
+  },
+  "conditionals": [
+    {"id": "gc_locks_price",
+     "if": {"dial": "game_changers", "op": ">=", "value": 1},
+     "then": [{"dial": "price_10_20", "op": "<=", "value": 3},
+              {"dial": "price_20_30", "op": "<=", "value": 0}]},
+    {"id": "tutors_gate_gc",
+     "if": {"dial": "tutors", "op": ">=", "value": 1},
+     "then": [{"dial": "game_changers", "op": "<=", "value": 0}]},
+    {"id": "mana_cheat_stacking", "type": "penalty", "penalty_points": 2,
+     "if_all": [{"dial": "fast_mana", "op": ">", "value": 8},
+                {"dial": "free_spells", "op": ">", "value": 4}]}
+  ]
+}
+</script>
+
+<script>
+/* ENGINE-START */
+// PodEngine: pure logic, no DOM. Mirrors scripts/power_metrics.py + scripts/tier_rules.py —
+// keep semantics in lockstep (scripts/test_engine_parity.js checks this against the Python outputs).
+const PodEngine = (() => {
+
+const KEYWORD_PATTERNS = {
+  tutors: /search your library for a card/i,
+  extra_turns: /extra turn/i,
+  board_wipes: /destroy all creatures|damage to each creature|each creature (?:gets|is destroyed)/i,
+  single_target_removal: /(?:destroy|exile) target (?:creature|permanent|artifact|enchantment|planeswalker|attacking or blocking creature)/i,
+  counterspells: /counter target spell/i,
+  stax_effects: /players can't|opponents can't|skip (?:your|their) (?:draw|untap|upkeep)/i,
+  mass_land_denial: /destroy all lands|search .* library for .* lands? and (?:exile|put)/i,
+  free_spells: /without paying its mana cost|rather than pay|\bcascade\b/i,
+  card_advantage: /draw (?:a card|two cards|three cards|cards equal to)/i,
+  protection_effects: /hexproof|indestructible|protection from/i,
+};
+const REMINDER_TEXT_RE = /\([^)]*\)/g;
+const FAST_MANA_CMC_MAX = 2;
+const FAST_MANA_RE = /add (?:\{[wubrgc0-9]\}|one mana|[a-z]+ mana|\$?\d+ mana)/i;
+
+const PRICE_BANDS = [
+  ["price_under_1", p => p < 1],
+  ["price_1_5", p => p >= 1 && p < 5],
+  ["price_5_10", p => p >= 5 && p < 10],
+  ["price_10_20", p => p >= 10 && p < 20],
+  ["price_20_30", p => p >= 20 && p < 30],
+  ["price_30_plus", p => p >= 30],
+];
+
+const OPS = {
+  ">=": (a, b) => a >= b, "<=": (a, b) => a <= b,
+  ">": (a, b) => a > b, "<": (a, b) => a < b, "==": (a, b) => a === b,
+};
+
+// ---- deck stats (port of power_metrics.compute_deck_stats) ----
+function computeDeckStats(entries, db) {
+  const counter = new Map();
+  for (const e of entries) counter.set(e.name, (counter.get(e.name) || 0) + e.quantity);
+
+  let totalPrice = 0, maxCardPrice = 0, pricedQty = 0, landQty = 0, basicQty = 0;
+  const cmcValues = [];
+  const flagged = {};
+  for (const k of Object.keys(KEYWORD_PATTERNS)) flagged[k] = [];
+  const gameChangers = [], fastMana = [], unpriced = [];
+  const priceBands = {};
+  for (const [label] of PRICE_BANDS) priceBands[label] = [];
+
+  for (const [name, qty] of counter) {
+    const info = db[name] || {};
+    const price = info.price;
+    if (price !== undefined && price !== null) {
+      totalPrice += price * qty;
+      maxCardPrice = Math.max(maxCardPrice, price);
+      pricedQty += qty;
+      for (const [label, test] of PRICE_BANDS) if (test(price)) { priceBands[label].push([name, qty]); break; }
+    } else unpriced.push(name);
+
+    const typeLine = info.type_line || "";
+    const oracle = (info.oracle_text || "").replace(REMINDER_TEXT_RE, "");
+    const cmc = info.cmc;
+    const isLand = typeLine.includes("Land");
+    if (isLand) {
+      landQty += qty;
+      if (typeLine.includes("Basic Land")) basicQty += qty;
+    } else {
+      if (cmc !== undefined && cmc !== null) {
+        for (let i = 0; i < qty; i++) cmcValues.push(cmc);
+        if (cmc <= FAST_MANA_CMC_MAX && FAST_MANA_RE.test(oracle)) fastMana.push([name, qty]);
+      }
+    }
+    if (info.game_changer) gameChangers.push([name, qty]);
+    for (const [label, re] of Object.entries(KEYWORD_PATTERNS)) {
+      if (re.test(oracle)) flagged[label].push([name, qty]);
+    }
+  }
+
+  const totalCards = [...counter.values()].reduce((a, b) => a + b, 0);
+  const stats = {
+    total_cards: totalCards,
+    unique_cards: counter.size,
+    total_price_eur: Math.round(totalPrice * 100) / 100,
+    max_card_price_eur: Math.round(maxCardPrice * 100) / 100,
+    avg_price_per_card: pricedQty ? Math.round(totalPrice / pricedQty * 100) / 100 : null,
+    unpriced_cards: unpriced.length,
+    unpriced_names: unpriced,
+    land_count: landQty,
+    basic_land_count: basicQty,
+    nonbasic_land_count: landQty - basicQty,
+    avg_cmc: cmcValues.length ? Math.round(cmcValues.reduce((a, b) => a + b, 0) / cmcValues.length * 100) / 100 : null,
+    game_changers: gameChangers.reduce((s, [, q]) => s + q, 0),
+    fast_mana: fastMana.reduce((s, [, q]) => s + q, 0),
+  };
+  for (const label of Object.keys(KEYWORD_PATTERNS)) stats[label] = flagged[label].reduce((s, [, q]) => s + q, 0);
+  for (const [label] of PRICE_BANDS) stats[label] = priceBands[label].reduce((s, [, q]) => s + q, 0);
+  flagged.game_changers = gameChangers;
+  flagged.fast_mana = fastMana;
+  Object.assign(flagged, priceBands);
+  return { stats, flagged };
+}
+
+// ---- tier evaluation (port of tier_rules.evaluate_deck) ----
+// Violations/flags are structured {id, ...params}; the UI localizes them.
+function evaluateDeck(stats, flagged, rules, cardNames) {
+  const violations = [], flags = [];
+  let points = 0;
+  const breakdown = {};
+  const driving = {};
+  const names = cardNames ? new Set(cardNames)
+    : new Set(Object.values(flagged).flat().map(([n]) => n));
+
+  const bans = rules.hard_bans || {};
+  const maxPrice = bans.max_card_price_eur;
+  if (maxPrice !== undefined) {
+    const over = flagged.price_30_plus || [];
+    const deckMax = stats.max_card_price_eur;
+    if (over.length || (deckMax !== undefined && deckMax > maxPrice)) {
+      violations.push({ id: "price_cap", cap: maxPrice, cards: over.map(([n]) => n), deckMax });
+      driving.price_30_plus = over;
+    }
+  }
+  for (const [listName, list] of Object.entries(bans.banned_cards || {})) {
+    const hits = list.filter(n => names.has(n)).sort();
+    if (hits.length) violations.push({ id: "banned", list: listName, cards: hits });
+  }
+  for (const [dial, spec] of Object.entries(rules.dials)) {
+    const value = stats[dial] || 0;
+    if (value > spec.hard_max) {
+      violations.push({ id: "dial_over", dial, value, max: spec.hard_max });
+      driving[dial] = flagged[dial] || [];
+    } else if (value > spec.baseline_max) {
+      const pts = spec.point_steps[String(value)] || 0;
+      points += pts;
+      breakdown[dial] = pts;
+      driving[dial] = flagged[dial] || [];
+    }
+    if (spec.flag_if_over_zero && value > 0) {
+      flags.push({ id: spec.flag_if_over_zero, dial, cards: (flagged[dial] || []).map(([n]) => n) });
+    }
+  }
+  for (const cond of rules.conditionals || []) {
+    if (cond.type === "penalty") {
+      if (cond.if_all.every(t => OPS[t.op](stats[t.dial] || 0, t.value))) {
+        points += cond.penalty_points;
+        breakdown[cond.id] = cond.penalty_points;
+        for (const t of cond.if_all) if (!driving[t.dial]) driving[t.dial] = flagged[t.dial] || [];
+      }
+      continue;
+    }
+    const pre = cond.if;
+    if (OPS[pre.op](stats[pre.dial] || 0, pre.value)) {
+      for (const req of cond.then) {
+        const actual = stats[req.dial] || 0;
+        if (!OPS[req.op](actual, req.value)) {
+          violations.push({ id: "conditional", condId: cond.id, ifDial: pre.dial, ifValue: stats[pre.dial] || 0,
+            reqDial: req.dial, reqOp: req.op, reqValue: req.value, actual });
+          if (!driving[pre.dial]) driving[pre.dial] = flagged[pre.dial] || [];
+          if (!driving[req.dial]) driving[req.dial] = flagged[req.dial] || [];
+        }
+      }
+    }
+  }
+  const tiers = rules.tiers;
+  let tier;
+  if (violations.length) tier = "above";
+  else if (points <= tiers.tier1.max_points) tier = "tier1";
+  else if (points <= tiers.tier2.max_points) tier = "tier2";
+  else { tier = "above"; violations.push({ id: "budget", points, max: tiers.tier2.max_points }); }
+  return { tier, points, breakdown, violations, flags, driving };
+}
+
+// ---- decklist / URL parsing ----
+const LINE_RE = /^\s*(\d+)\s*x?\s+(.+?)\s*$/;
+const SET_SUFFIX_RE = /\s+\(([A-Za-z0-9]{2,6})\)(\s+[\w-★]+)?(\s+\*[FE]\*)?\s*$/;
+const HEADER_RE = /^(commander|deck|mainboard|sideboard|maybeboard|considering|companion|tokens?)s?\s*(\(\d+\))?\s*:?$/i;
+
+function detectInput(text) {
+  const t = text.trim();
+  let m = t.match(/archidekt\.com\/decks\/(\d+)/i);
+  if (m) return { kind: "archidekt", id: m[1] };
+  if (/moxfield\.com/i.test(t)) return { kind: "moxfield" };
+  return { kind: "list" };
+}
+
+function parseDecklist(text) {
+  const entries = new Map();
+  const commanders = [];
+  let section = "main";
+  for (let raw of text.split(/\r?\n/)) {
+    let line = raw.trim();
+    if (!line || line.startsWith("#") || line.startsWith("//")) continue;
+    const cm = line.match(/^commanders?\s*:\s*(.+)$/i);
+    if (cm) { commanders.push(stripLine(cm[1]).name); addEntry(entries, stripLine(cm[1])); continue; }
+    const hm = line.match(HEADER_RE);
+    if (hm) {
+      section = /commander/i.test(hm[1]) ? "commander"
+        : /sideboard|maybeboard|considering|token/i.test(hm[1]) ? "skip" : "main";
+      continue;
+    }
+    if (section === "skip") continue;
+    const e = stripLine(line);
+    if (!e.name) continue;
+    if (section === "commander") commanders.push(e.name);
+    addEntry(entries, e);
+  }
+  return { entries: [...entries.entries()].map(([name, quantity]) => ({ name, quantity })), commanders };
+}
+function stripLine(line) {
+  const m = line.match(LINE_RE);
+  let qty = 1, name = line;
+  if (m) { qty = parseInt(m[1], 10); name = m[2]; }
+  name = name.replace(SET_SUFFIX_RE, "").trim();
+  return { name, quantity: qty };
+}
+function addEntry(map, e) { map.set(e.name, (map.get(e.name) || 0) + e.quantity); }
+
+// ---- Scryfall card fetching ----
+function cardFromScryfall(c) {
+  const faces = c.card_faces && c.card_faces.length ? c.card_faces : null;
+  const oracle = c.oracle_text !== undefined && c.oracle_text !== null && c.oracle_text !== ""
+    ? c.oracle_text
+    : faces ? faces.map(f => f.oracle_text || "").join(" // ") : "";
+  const imgs = c.image_uris || (faces && faces[0].image_uris) || {};
+  const mana = c.mana_cost !== undefined && c.mana_cost !== "" ? c.mana_cost
+    : faces ? (faces[0].mana_cost || "") : "";
+  const eur = c.prices && (parseFloat(c.prices.eur) || parseFloat(c.prices.eur_foil)) || null;
+  return {
+    name: c.name, cmc: c.cmc, mana_cost: mana,
+    type_line: c.type_line || (faces ? faces.map(f => f.type_line).join(" // ") : ""),
+    oracle_text: oracle,
+    colors: c.colors || (faces ? faces.flatMap(f => f.colors || []) : []),
+    color_identity: c.color_identity || [],
+    price: isNaN(eur) ? null : eur,
+    game_changer: !!c.game_changer,
+    keywords: c.keywords || [],
+    img_art: imgs.art_crop || "", img_normal: imgs.normal || "", img_small: imgs.small || "",
+  };
+}
+
+async function fetchCards(names, cache, onProgress) {
+  const need = names.filter(n => !cache[n]);
+  const notFound = [];
+  for (let i = 0; i < need.length; i += 75) {
+    const batch = need.slice(i, i + 75);
+    if (onProgress) onProgress({ done: i, total: need.length });
+    const res = await fetch("https://api.scryfall.com/cards/collection", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identifiers: batch.map(name => ({ name })) }),
+    });
+    if (!res.ok) throw new Error("Scryfall " + res.status);
+    const data = await res.json();
+    for (const c of data.data || []) {
+      const card = cardFromScryfall(c);
+      cache[card.name] = card;
+      // also key by requested (possibly front-face) name
+      for (const n of batch) {
+        if (!cache[n] && (card.name === n || card.name.startsWith(n + " //") || card.name.split(" // ")[0] === n)) cache[n] = card;
+      }
+    }
+    for (const nf of data.not_found || []) notFound.push(nf.name);
+    await sleep(120);
+  }
+  // fuzzy fallback for renamed/flavor cards
+  for (const n of [...notFound]) {
+    try {
+      const res = await fetch("https://api.scryfall.com/cards/named?fuzzy=" + encodeURIComponent(n));
+      if (res.ok) {
+        cache[n] = cardFromScryfall(await res.json());
+        notFound.splice(notFound.indexOf(n), 1);
+      }
+      await sleep(120);
+    } catch (e) { /* keep as not found */ }
+  }
+  return { notFound };
+}
+
+async function fetchCheapest(names, cache, onProgress, isCancelled) {
+  const targets = names.filter(n => cache[n] && cache[n].price !== null && cache[n].price >= 1 && !cache[n].cheapest);
+  for (let i = 0; i < targets.length; i++) {
+    if (isCancelled && isCancelled()) return { done: i, total: targets.length, cancelled: true };
+    const n = targets[i];
+    if (onProgress) onProgress({ done: i, total: targets.length, card: n });
+    try {
+      const q = '!"' + n.replace(/"/g, '') + '"';
+      const res = await fetch("https://api.scryfall.com/cards/search?unique=prints&order=eur&dir=asc&q=" + encodeURIComponent(q));
+      if (res.ok) {
+        const data = await res.json();
+        let best = null;
+        for (const c of data.data || []) {
+          for (const p of [parseFloat(c.prices && c.prices.eur), parseFloat(c.prices && c.prices.eur_foil)]) {
+            if (!isNaN(p) && (best === null || p < best)) best = p;
+          }
+        }
+        if (best !== null && best < cache[n].price) cache[n].price = best;
+      }
+      cache[n].cheapest = true;
+    } catch (e) { /* leave default price */ }
+    await sleep(90);
+  }
+  if (onProgress) onProgress({ done: targets.length, total: targets.length });
+  return { done: targets.length, total: targets.length, cancelled: false };
+}
+
+async function fetchArchidekt(id) {
+  const res = await fetch("https://archidekt.com/api/decks/" + id + "/");
+  if (!res.ok) throw new Error("Archidekt " + res.status);
+  const data = await res.json();
+  const excluded = new Set((data.categories || []).filter(c => c.includedInDeck === false).map(c => c.name));
+  const entries = [];
+  const commanders = [];
+  for (const c of data.cards || []) {
+    const cats = c.categories || [];
+    if (cats.some(k => excluded.has(k))) continue;
+    const name = (c.card && c.card.oracleCard && c.card.oracleCard.name) || (c.card && c.card.name);
+    if (!name) continue;
+    entries.push({ name, quantity: c.quantity || 1 });
+    if (cats.some(k => /^commander$/i.test(k))) commanders.push(name);
+  }
+  return { name: data.name || ("Archidekt #" + id), entries, commanders };
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ---- functional categorization (Archidekt-style, heuristic) ----
+const CAT_RULES = [
+  ["land", c => c.type_line.includes("Land") && !c.type_line.split(" // ")[0].includes("Creature")],
+  ["wipe", c => /destroy all creatures|damage to each creature|each creature (?:gets|is destroyed)|exile all creatures|destroy all (?:other )?(?:nonland )?permanents/i.test(c._o)],
+  ["ctr", c => /counter target/i.test(c._o)],
+  ["ramp", c => /search (?:your|their) library for (?:a|up to \w+|two)?\s?(?:basic )?lands?\b/i.test(c._o)
+      || (!c.type_line.includes("Land") && c.cmc <= 4 && FAST_MANA_RE.test(c._o))
+      || /put (?:a|that|those|them|it) (?:land|lands)? ?(?:cards? )?onto the battlefield/i.test(c._o) && /land/i.test(c._o)],
+  ["tut", c => /search your library for a card/i.test(c._o)],
+  ["rem", c => /(?:destroy|exile) target (?:creature|permanent|artifact|enchantment|planeswalker|attacking or blocking creature)/i.test(c._o)
+      || /deals? \d+ damage to (?:target creature|target planeswalker|any target)/i.test(c._o)],
+  ["burn", c => /deals? (?:\d+|x) damage to (?:any target|each opponent|target player|target opponent|each player)/i.test(c._o)],
+  ["eq", c => /\bEquipment\b/.test(c.type_line) || /\bAura\b/.test(c.type_line)],
+  ["drain", c => /each opponent loses \d+ life|opponents? lose (?:\d+|x) life/i.test(c._o) || (/loses? \d+ life/i.test(c._o) && /you gain \d+ life/i.test(c._o))],
+  ["sac", c => /sacrifice (?:a|another|two|x) (?:creature|artifact|permanent|token)/i.test(c._o)],
+  ["tok", c => /create[sd]? .{0,80}\btokens?\b/i.test(c._o)],
+  ["life", c => /(?:you )?gain (?:\d+|x|that much) life|\blifelink\b/i.test(c._o)],
+  ["rec", c => /return .{0,60} from your graveyard to (?:your hand|the battlefield)/i.test(c._o)],
+  ["prot", c => /hexproof|indestructible|protection from|\bward\b|can't be targeted/i.test(c._o)],
+  ["draw", c => /draw (?:a card|two cards|three cards|x cards|cards equal to|that many cards)/i.test(c._o)],
+  ["mot", c => /whenever you cast|magecraft|prowess/i.test(c._o)],
+  ["anthem", c => /creatures you control get \+/i.test(c._o)],
+];
+
+function typeLetter(typeLine) {
+  const front = typeLine.split(" // ")[0];
+  if (front.includes("Land")) return "L";
+  if (front.includes("Creature")) return "C";
+  if (front.includes("Planeswalker")) return "P";
+  if (front.includes("Instant")) return "I";
+  if (front.includes("Sorcery")) return "S";
+  if (front.includes("Artifact")) return "A";
+  if (front.includes("Enchantment")) return "E";
+  if (front.includes("Battle")) return "B";
+  return "O";
+}
+
+function classifyCard(card) {
+  const c = { ...card, _o: (card.oracle_text || "").replace(REMINDER_TEXT_RE, "") };
+  const tags = [];
+  for (const [key, test] of CAT_RULES) { try { if (test(c)) tags.push(key); } catch (e) {} }
+  const primary = tags.length ? tags[0] : (c.type_line.includes("Creature") ? "cre" : "oth");
+  return { type: typeLetter(card.type_line || ""), cat: primary, tags };
+}
+
+// ---- archetype detection ----
+function detectArchetype(cards) {
+  // cards: [{card, qty, cls}]
+  const n = (fn) => cards.reduce((s, x) => s + (fn(x) ? x.qty : 0), 0);
+  const o = (re) => cards.reduce((s, x) => s + (re.test((x.card.oracle_text || "")) ? x.qty : 0), 0);
+  const tag = (t) => cards.reduce((s, x) => s + (x.cls.tags.includes(t) ? x.qty : 0), 0);
+  const nonland = cards.filter(x => x.cls.type !== "L");
+  const nlQty = nonland.reduce((s, x) => s + x.qty, 0) || 1;
+  const avgCmc = nonland.reduce((s, x) => s + (x.card.cmc || 0) * x.qty, 0) / nlQty;
+  const creLow = n(x => x.cls.type === "C" && (x.card.cmc || 0) <= 3);
+  const instSorc = n(x => x.cls.type === "I" || x.cls.type === "S");
+  const equipOnly = n(x => /\bEquipment\b/.test(x.card.type_line || ""));
+  const scores = {
+    voltron: (equipOnly + n(x => /\bAura\b/.test(x.card.type_line || ""))) * 1.5 + tag("prot") * 0.5,
+    aristocrats: tag("sac") * 2 + tag("drain") * 2 + o(/whenever .{0,40}(?:dies|is put into a graveyard)/i) * 0.7,
+    control: tag("ctr") * 2 + tag("wipe") * 1.5 + (avgCmc > 3 ? 2 : 0),
+    tokens: tag("tok") * 1.4,
+    aggro: (avgCmc < 2.8 ? creLow * 0.7 : 0) + o(/\bhaste\b/i) * 0.5,
+    equipment: equipOnly * 2.5,
+    lifegain: tag("life") * 1.2,
+    spellslinger: (instSorc >= 22 ? instSorc * 0.4 : 0) + o(/whenever you cast (?:an instant|a sorcery|an instant or sorcery|a noncreature)/i) * 2 + o(/magecraft/i) * 2,
+    counters: o(/\+1\/\+1 counter/i) * 0.8 + o(/proliferate/i) * 1.5,
+    reanimator: o(/return .{0,60}creature .{0,40}graveyard .{0,20}(?:to the )?battlefield/i) * 2.5 + o(/\bmill\b|discard .{0,30}card/i) * 0.5,
+  };
+  let best = "generic", bestScore = 11; // threshold: below this, call it generic
+  for (const [k, v] of Object.entries(scores)) if (v > bestScore) { best = k; bestScore = v; }
+  return { key: best, scores };
+}
+
+// ---- deck validation ----
+function validateDeck(cards, commanders, db, notFound) {
+  const issues = [];
+  const total = cards.reduce((s, x) => s + x.qty, 0);
+  if (total !== 100) issues.push({ id: "count", total });
+  for (const x of cards) {
+    if (x.qty > 1) {
+      const t = x.card.type_line || "";
+      const o = x.card.oracle_text || "";
+      if (!t.includes("Basic Land") && !/any number of cards named/i.test(o)) {
+        issues.push({ id: "singleton", name: x.card.name, qty: x.qty });
+      }
+    }
+  }
+  if (commanders && commanders.length) {
+    const ci = new Set();
+    for (const cn of commanders) { const c = db[cn]; if (c) for (const col of c.color_identity || []) ci.add(col); }
+    if (commanders.every(cn => db[cn])) {
+      for (const x of cards) {
+        const bad = (x.card.color_identity || []).filter(col => !ci.has(col));
+        if (bad.length) issues.push({ id: "identity", name: x.card.name, colors: bad });
+      }
+    }
+  }
+  for (const n of notFound || []) issues.push({ id: "not_found", name: n });
+  return issues;
+}
+
+// ---- selftest (mirrors tier_rules.py --selftest) ----
+function _fake(over, flaggedOver, names) {
+  const dials = ["game_changers","extra_turns","tutors","stax_effects","counterspells","board_wipes",
+    "free_spells","fast_mana","mass_land_denial","price_1_5","price_10_20","price_20_30","price_30_plus"];
+  const stats = {}; for (const d of dials) stats[d] = 0;
+  stats.max_card_price_eur = 5.0;
+  Object.assign(stats, over);
+  const flagged = {}; for (const d of dials) flagged[d] = [];
+  Object.assign(flagged, flaggedOver || {});
+  return [stats, flagged, names || null];
+}
+
+function runSelfTest(rules) {
+  const cases = [
+    ["stock precon", _fake({ board_wipes: 2, fast_mana: 6, free_spells: 1 }), "tier1"],
+    ["one game changer only", _fake({ game_changers: 1 }), "tier1"],
+    ["gc + 5th board wipe = 3pts", _fake({ game_changers: 1, board_wipes: 5 }), "tier2"],
+    ["5 counterspells still precon", _fake({ counterspells: 5 }), "tier1"],
+    ["20 cards of 1-5 EUR = 1pt", _fake({ price_1_5: 20 }), "tier1"],
+    ["25 cards of 1-5 EUR busts hard max", _fake({ price_1_5: 25 }), "above"],
+    ["31 EUR card", _fake({ max_card_price_eur: 31.0 }, { price_30_plus: [["Pricy", 1]] }), "above"],
+    ["two game changers", _fake({ game_changers: 2 }), "above"],
+    ["mass land denial", _fake({ mass_land_denial: 1 }), "above"],
+    ["banned fast mana card", _fake({}, null, ["Mana Crypt"]), "above"],
+    ["banned turn recursion", _fake({ extra_turns: 1 }, null, ["Nexus of Fate"]), "above"],
+    ["tutor + gc conditional", _fake({ tutors: 1, game_changers: 1 }), "above"],
+    ["gc + pricey conditional", _fake({ game_changers: 1, price_10_20: 4 }), "above"],
+    ["fast mana 9 + free 5 = 1+1+2 penalty pts", _fake({ fast_mana: 9, free_spells: 5 }), "tier2"],
+    ["fast mana 12 + free 5 = 4+1+2 pts, top of T2", _fake({ fast_mana: 12, free_spells: 5 }), "tier2"],
+    ["fast mana 12 + free 6 = 4+2+2 pts, busted budget", _fake({ fast_mana: 12, free_spells: 6 }), "above"],
+    ["fast mana 15 over hard max", _fake({ fast_mana: 15 }), "above"],
+    ["budget blowout 2 tutors + 2 pricey", _fake({ tutors: 2, price_20_30: 1 }), "above"],
+    ["tier2 spend: 2 pricey 20-30", _fake({ price_20_30: 2 }), "tier2"],
+    ["extra turn flagged", _fake({ extra_turns: 1 }), "tier2"],
+  ];
+  const results = [];
+  for (const [label, [stats, flagged, names], expected] of cases) {
+    const res = evaluateDeck(stats, flagged, rules, names);
+    let pass = res.tier === expected;
+    if (label === "extra turn flagged" && !res.flags.length) pass = false;
+    results.push({ label, expected, got: res.tier, points: res.points, pass });
+  }
+  return { pass: results.every(r => r.pass), results };
+}
+
+return {
+  KEYWORD_PATTERNS, PRICE_BANDS, computeDeckStats, evaluateDeck,
+  detectInput, parseDecklist, cardFromScryfall, fetchCards, fetchCheapest, fetchArchidekt,
+  classifyCard, typeLetter, detectArchetype, validateDeck, runSelfTest, sleep,
+};
+})();
+if (typeof module !== "undefined") module.exports = PodEngine;
+/* ENGINE-END */
+</script>
+
+<script>
+if (typeof document !== "undefined") { (() => {
+"use strict";
+const RULES = JSON.parse(document.getElementById("pod-rules").textContent);
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ================= i18n =================
+const L = {
+es:{appTag:'POD DECK CHECKER',copy:'Copiar informe',copied:'¡Copiado!',inputTitle:'ANALIZAR MAZO',
+inputPh:'Pega una URL de Archidekt o una lista de cartas (una por línea: "1 Sol Ring")',
+tryLabel:'Prueba con un ejemplo:',archLabel:'Arquetipo',auto:'Detección automática',analyze:'Analizar mazo',
+analyzing:'Analizando…',fetchingCards:'Descargando cartas de Scryfall…',
+mox:'Moxfield bloquea el acceso directo desde el navegador — pega la exportación de texto del mazo en su lugar (Export → Text).',
+archErr:'Archidekt bloquea la lectura directa desde el navegador — en tu mazo usa Export → Copy to clipboard (o «Text») y pega aquí la lista.',
+netErr:'Error de red hablando con Scryfall — ¿hay conexión a internet?',
+tierWord:'NIVEL',tier1:'Tier 1 · Precon',tier2:'Tier 2 · Algo sobre precon',above:'Sobre el nivel del pod',
+pts:'PUNTOS',price:'PRECIO',cardsN:'CARTAS',archetype:'ARQUETIPO',autoTag:'(auto)',
+priceNote:'Los precios mostrados son de la impresión por defecto, no la más barata — el informe de poder puede ser pesimista.',
+fetchBtn:'Buscar precios más baratos',fetchDone:'Precios más baratos aplicados — informe recalculado.',
+power:'ANÁLISIS DE PODER',ptsOf:'pts gastados de',viols:'VIOLACIONES',flags:'AVISOS',tipT:'Consejo del pod',
+budget:'PRESUPUESTO DE PUNTOS',comp:'COMPOSICIÓN DEL MAZO',compTargets:'objetivos:',
+compHint:'Clic en una fila resalta sus cartas en el navegador ↓',clear:'Limpiar',few:'Pocas',ok:'OK',many:'Muchas',
+browser:'NAVEGADOR DEL MAZO',groupBy:'Agrupar por:',byType:'Tipo de carta',byCat:'Categoría',
+curve:'CURVA DE MANÁ',avg:'media',all:'Todas',cre:'Criaturas',draw:'Robo',rem:'Remoción',ramp:'Rampa',oth:'Otros',
+nonlands:'no-tierras',pips:'PIPS DE COLOR',bands:'BANDAS DE PRECIO',guide:'GUÍA DE ARQUETIPOS',
+build:'Construir este arquetipo →',slots:'Huecos clave:',
+emptyT:'Sin mazo que analizar todavía',
+emptyX:'Pega una lista o una URL de Archidekt arriba, elige arquetipo si quieres, y pulsa «Analizar mazo». O carga uno de los ejemplos.',
+footer:'hecho para el pod · reglas del pod v'+RULES.version+' · precios Cardmarket vía Scryfall',
+validT:'AVISOS DE CONSTRUCCIÓN',
+podCap:'(límite del pod: ',
+banLabel:{true_fast_mana:'maná rápido explosivo',extra_turn_recursion:'turnos extra recurrentes'},
+s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Pasado de vueltas · Spellslinger'},
+en:{appTag:'POD DECK CHECKER',copy:'Copy report',copied:'Copied!',inputTitle:'ANALYZE DECK',
+inputPh:'Paste an Archidekt deck URL or a card list (one per line: "1 Sol Ring")',
+tryLabel:'Try a sample:',archLabel:'Archetype',auto:'Auto-detect',analyze:'Analyze deck',
+analyzing:'Analyzing…',fetchingCards:'Downloading cards from Scryfall…',
+mox:'Moxfield blocks direct access from browsers — paste the deck’s text export instead (Export → Text).',
+archErr:'Archidekt blocks direct reads from browsers — in your deck use Export → Copy to clipboard (or "Text") and paste the list here.',
+netErr:'Network error talking to Scryfall — is there an internet connection?',
+tierWord:'TIER',tier1:'Tier 1 · Precon',tier2:'Tier 2 · Slightly above precon',above:'Above pod power level',
+pts:'POINTS',price:'PRICE',cardsN:'CARDS',archetype:'ARCHETYPE',autoTag:'(auto)',
+priceNote:'Prices shown are default printings, not the cheapest — the power report may be pessimistic.',
+fetchBtn:'Fetch cheapest prices',fetchDone:'Cheapest prices applied — report recalculated.',
+power:'POWER ANALYSIS',ptsOf:'pts spent of',viols:'VIOLATIONS',flags:'FLAGS',tipT:'Pod tip',
+budget:'POINTS BUDGET',comp:'DECK COMPOSITION',compTargets:'targets:',
+compHint:'Click a row to highlight its cards in the browser ↓',clear:'Clear',few:'Too few',ok:'OK',many:'Too many',
+browser:'DECK BROWSER',groupBy:'Group by:',byType:'Card type',byCat:'Category',
+curve:'MANA CURVE',avg:'avg',all:'All',cre:'Creatures',draw:'Draw',rem:'Removal',ramp:'Ramp',oth:'Other',
+nonlands:'nonland',pips:'COLOR PIPS',bands:'PRICE BANDS',guide:'ARCHETYPE GUIDE',
+build:'Build this archetype →',slots:'Key slots:',
+emptyT:'No deck to analyze yet',
+emptyX:'Paste a list or an Archidekt URL above, pick an archetype if you like, and hit "Analyze deck". Or load a sample.',
+footer:'made for the pod · pod rules v'+RULES.version+' · Cardmarket prices via Scryfall',
+validT:'DECKBUILDING NOTES',
+podCap:'(pod cap: ',
+banLabel:{true_fast_mana:'explosive fast mana',extra_turn_recursion:'repeatable extra turns'},
+s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Over the top · Spellslinger'}
+};
+
+const TYPES = {C:{es:'Criaturas',en:'Creatures'},I:{es:'Instantáneos',en:'Instants'},S:{es:'Conjuros',en:'Sorceries'},A:{es:'Artefactos',en:'Artifacts'},E:{es:'Encantamientos',en:'Enchantments'},P:{es:'Planeswalkers',en:'Planeswalkers'},B:{es:'Batallas',en:'Battles'},L:{es:'Tierras',en:'Lands'},O:{es:'Otros',en:'Other'}};
+const TYPE_ORDER = ['C','I','S','A','E','P','B','L','O'];
+const CATS = {land:{es:'Tierras',en:'Lands'},ramp:{es:'Rampa',en:'Ramp'},draw:{es:'Robo de cartas',en:'Card draw'},rem:{es:'Remoción',en:'Removal'},burn:{es:'Daño directo',en:'Burn'},wipe:{es:'Barridos',en:'Board wipes'},prot:{es:'Protección',en:'Protection'},ctr:{es:'Contrahechizos',en:'Counterspells'},tut:{es:'Tutores',en:'Tutors'},sac:{es:'Sacrificio',en:'Sac outlets'},drain:{es:'Drenaje',en:'Drain'},tok:{es:'Fichas',en:'Tokens'},mot:{es:'Motores',en:'Engines'},eq:{es:'Equipos y auras',en:'Equipment & Auras'},life:{es:'Ganar vida',en:'Lifegain'},rec:{es:'Recursión',en:'Recursion'},anthem:{es:'Anthems',en:'Anthems'},cre:{es:'Criaturas',en:'Creatures'},oth:{es:'Otros',en:'Other'}};
+
+// Dial display: order, names and help texts describing the REAL pod rules (v1.1).
+const DIAL_META = [
+{k:'game_changers',name:{es:'Cambia-partidas',en:'Game changers'},help:{
+ es:'Cartas de la lista oficial de game changers de Wizards: generan una ventaja desproporcionada por sí solas. Uno cuesta 2 puntos; dos están prohibidos. Además, si llevas uno no puedes subir de 3 cartas de €10–20 ni llevar ninguna de €20–30 — es tu único lujo.',
+ en:'Cards on Wizards’ official game-changer list: they generate outsized advantage on their own. One costs 2 points; two are forbidden. And if you run one you can’t exceed 3 cards at €10–20 or run any at €20–30 — it must be your only luxury.'}},
+{k:'extra_turns',name:{es:'Turnos extra',en:'Extra turns'},help:{
+ es:'Los turnos extra dejan a la mesa mirando. Uno (de un solo uso) cuesta 3 puntos y exige justificación en mesa; dos o cualquier forma de repetirlos está prohibido.',
+ en:'Extra turns leave the table watching. One (one-shot) costs 3 points and needs table justification; two, or any way to repeat them, is forbidden.'}},
+{k:'tutors',name:{es:'Tutores',en:'Tutors'},help:{
+ es:'Los tutores incondicionales convierten tu mejor carta en varias copias virtuales. El primero cuesta 2 puntos, el segundo sube a 5 en total, y el tercero está prohibido. Con tutores no se permiten game changers.',
+ en:'Unconditional tutors turn your best card into several virtual copies. The first costs 2 points, the second raises it to 5 total, and a third is forbidden. With tutors, no game changers allowed.'}},
+{k:'stax_effects',name:{es:'Stax',en:'Stax'},help:{
+ es:'Las piezas de stax frenan a toda la mesa, no solo al que va ganando. La primera es gratis (los precons llevan alguna); la segunda cuesta 1 punto, la tercera 3, y la cuarta está prohibida.',
+ en:'Stax pieces slow the whole table, not just whoever is winning. The first is free (precons run some); the second costs 1 point, the third 3, and a fourth is forbidden.'}},
+{k:'counterspells',name:{es:'Contrahechizos',en:'Counterspells'},help:{
+ es:'Hasta 5 contrahechizos son defensa propia razonable a nivel precon. El sexto cuesta 1 punto, el séptimo 2, y más de 7 está fuera del pod.',
+ en:'Up to 5 counterspells is reasonable self-defense at precon level. The sixth costs 1 point, the seventh 2, and more than 7 is out of pod range.'}},
+{k:'board_wipes',name:{es:'Barridos',en:'Board wipes'},help:{
+ es:'Los barridos mantienen la mesa sana en mazos lentos. Hasta 4 gratis; el quinto cuesta 1 punto, el sexto 2, y más de 6 está fuera. Ojo: un barrido premium tipo Farewell es además game changer y paga por esa vía.',
+ en:'Board wipes keep the table healthy in slower decks. Up to 4 free; the fifth costs 1 point, the sixth 2, more than 6 is out. Note: a premium wipe like Farewell is also a game changer and pays through that dial.'}},
+{k:'free_spells',name:{es:'Hechizos gratis',en:'Free spells'},help:{
+ es:'Los hechizos gratis rompen la regla básica del maná: puedes responder incluso sin maná abierto. Hasta 4 gratis (los precons llevan alguno); del quinto al octavo, 1–4 puntos acumulados; más de 8, prohibido.',
+ en:'Free spells break the basic rule of mana: you can respond even fully tapped out. Up to 4 free (precons run a few); the fifth through eighth cost 1–4 cumulative points; more than 8 is forbidden.'}},
+{k:'fast_mana',name:{es:'Maná rápido',en:'Fast mana'},help:{
+ es:'Rocas y criaturas de maná de coste ≤2 (Sol Ring, sellos…). Hasta 8 es el paquete normal de un precon. De 9 a 14, 1–6 puntos acumulados; más de 14, fuera. El maná explosivo real (Mana Crypt, rituales…) está directamente prohibido. Y si además llevas hechizos gratis por encima de 4, pagas +2 puntos extra.',
+ en:'Mana rocks and dorks costing ≤2 (Sol Ring, signets…). Up to 8 is a normal precon package. From 9 to 14, 1–6 cumulative points; beyond 14, out. Real explosive mana (Mana Crypt, rituals…) is outright banned. And if you also run free spells above 4, you pay +2 extra points.'}},
+{k:'mass_land_denial',name:{es:'Destrucción de tierras',en:'Mass land denial'},help:{
+ es:'Destrucción masiva de tierras: prohibida sin excepciones. Ningún precon la lleva y este pod tampoco.',
+ en:'Mass land destruction: banned, no exceptions. No precon runs it and neither does this pod.'}},
+{k:'price_1_5',name:{es:'Cartas €1–5',en:'Cards €1–5'},help:{
+ es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24, 1–2 puntos; más de 24, fuera.',
+ en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 costs 1–2 points; beyond 24, out.'}},
+{k:'price_10_20',name:{es:'Cartas €10–20',en:'Cards €10–20'},help:{
+ es:'Las cartas de €10–20 suelen ser los staples que suben el techo del mazo. Hasta 3 gratis (los precons llegan a 3); de la cuarta a la sexta, 1–3 puntos; más de 6, fuera.',
+ en:'€10–20 cards are usually the staples that raise the deck’s ceiling. Up to 3 free (precons reach 3); the fourth through sixth cost 1–3 points; more than 6, out.'}},
+{k:'price_20_30',name:{es:'Cartas €20–30',en:'Cards €20–30'},help:{
+ es:'El escalón antes del límite duro de €30. Ningún precon tiene cartas aquí: la primera cuesta 3 puntos, la segunda 5 en total, y la tercera está prohibida. Por encima de €30 hace falta aprobación explícita de la mesa.',
+ en:'The step before the hard €30 cap. No precon has cards here: the first costs 3 points, the second 5 total, and a third is forbidden. Above €30 needs explicit table approval.'}}
+];
+
+// Localized names for point-breakdown entries that aren't dials
+const EXTRA_PTS = { mana_cheat_stacking: {es:'Maná rápido + hechizos gratis (acumulación)', en:'Fast mana + free spells (stacking)'} };
+
+const MSG = {
+price_cap:{es:v=>'Carta(s) de más de €'+v.cap+': '+v.cards.join(', ')+' — necesita aprobación explícita de la mesa',
+           en:v=>'Card(s) over €'+v.cap+': '+v.cards.join(', ')+' — needs explicit table approval'},
+banned:{es:v=>'Carta prohibida ('+(L.es.banLabel[v.list]||v.list)+'): '+v.cards.join(', '),
+        en:v=>'Banned card ('+(L.en.banLabel[v.list]||v.list)+'): '+v.cards.join(', ')},
+dial_over:{es:v=>dialName(v.dial,'es')+' = '+v.value+', por encima del máximo del pod ('+v.max+')',
+           en:v=>dialName(v.dial,'en')+' = '+v.value+', over the pod maximum ('+v.max+')'},
+conditional:{
+ gc_locks_price:{es:v=>'Un game changer debe ser tu único lujo: con game changer, '+dialName(v.reqDial,'es')+' debe ser ≤ '+v.reqValue+' (tienes '+v.actual+')',
+                 en:v=>'A game changer must be your only luxury: with one, '+dialName(v.reqDial,'en')+' must be ≤ '+v.reqValue+' (you have '+v.actual+')'},
+ tutors_gate_gc:{es:v=>'Los tutores convierten tu mejor carta en copias virtuales: con tutores no se permiten game changers (tienes '+v.actual+')',
+                 en:v=>'Tutors turn your best card into virtual copies: with tutors, no game changers allowed (you have '+v.actual+')'}},
+budget:{es:v=>'Gasto total de '+v.points+' puntos — supera el presupuesto de Tier 2 ('+v.max+')',
+        en:v=>'Total spend of '+v.points+' points — exceeds the Tier 2 budget ('+v.max+')'},
+flag_extra_turns:{es:v=>'Turno extra ('+v.cards.join(', ')+') — requiere justificación explícita en mesa',
+                  en:v=>'Extra turn ('+v.cards.join(', ')+') — requires explicit table justification'},
+flag_near_cap:{es:v=>v.cards.join(', ')+': en €20–30 — con subidas de precio pueden cruzar el límite de €30',
+               en:v=>v.cards.join(', ')+': in €20–30 — price spikes could push them over the €30 cap'},
+valid_count:{es:v=>'El mazo tiene '+v.total+' cartas (Commander son 100 con el comandante)',
+             en:v=>'The deck has '+v.total+' cards (Commander is 100 including the commander)'},
+valid_singleton:{es:v=>v.name+' ×'+v.qty+' — Commander es singleton (salvo tierras básicas)',
+                 en:v=>v.name+' ×'+v.qty+' — Commander is singleton (except basic lands)'},
+valid_identity:{es:v=>v.name+' está fuera de la identidad de color del comandante ('+v.colors.join('')+')',
+                en:v=>v.name+' is outside the commander’s color identity ('+v.colors.join('')+')'},
+valid_not_found:{es:v=>'No se encontró en Scryfall: «'+v.name+'» — revisa el nombre',
+                 en:v=>'Not found on Scryfall: “'+v.name+'” — check the spelling'},
+};
+function dialName(k, lang){ const m = DIAL_META.find(d=>d.k===k); return m? m.name[lang] : k; }
+
+const BASECOMP = [['land',34,38],['ramp',8,12],['draw',8,12],['rem',8,11],['wipe',2,4],['prot',2,5]];
+const ARCH = [
+{k:'voltron',name:{es:'Voltron',en:'Voltron'},spec:[['prot',6,10],['eq',8,12]],
+ desc:{es:'Un solo atacante enorme: tu comandante cargado de auras y equipos hasta matar de 21 de daño de comandante.',en:'One huge attacker: your commander stacked with auras and equipment until 21 commander damage kills.'},
+ how:{es:'Prioriza protección barata (botas, capas) y robo que recargue la mano tras un barrido enemigo.',en:'Prioritize cheap protection (boots, capes) and draw that refills your hand after an enemy wipe.'},
+ slots:{es:['Equipos/Auras 8–12','Protección 6–10','Robo 8–10'],en:['Equipment/Auras 8–12','Protection 6–10','Draw 8–10']}},
+{k:'aristocrats',name:{es:'Aristócratas',en:'Aristocrats'},spec:[['sac',5,8],['drain',4,6],['tok',8,12]],
+ desc:{es:'Sacrifica tus propias criaturas para drenar vida a toda la mesa. Gana sin atacar.',en:'Sacrifice your own creatures to drain the whole table. Wins without attacking.'},
+ how:{es:'Necesitas tres patas: salidas de sacrificio, material sacrificable (fichas) y drenajes tipo Blood Artist. Recursión antes que cartas caras.',en:'You need three legs: sac outlets, sac fodder (tokens) and Blood Artist–style drains. Recursion over expensive cards.'},
+ slots:{es:['Salidas de sacrificio 5–8','Drenajes 4–6','Fichas 8–12'],en:['Sac outlets 5–8','Drains 4–6','Tokens 8–12']}},
+{k:'control',name:{es:'Control',en:'Control'},spec:[['ctr',5,7]],
+ desc:{es:'Frena a la mesa con contrahechizos y barridos hasta cerrar con un finisher tardío.',en:'Slow the table with counterspells and wipes until a late finisher closes the game.'},
+ how:{es:'Roba más que nadie, contesta solo lo que te mata y respeta el límite de contrahechizos del pod (máximo 7, y del sexto en adelante cuestan puntos).',en:'Draw more than anyone, answer only what kills you, and respect the pod’s counterspell cap (7 max, and the sixth onward cost points).'},
+ slots:{es:['Contrahechizos 5–7 (límite del pod)','Barridos 3–5','Robo 10–14'],en:['Counterspells 5–7 (pod cap)','Wipes 3–5','Draw 10–14']}},
+{k:'midrange',name:{es:'Midrange',en:'Midrange'},spec:[],
+ desc:{es:'Cartas de valor jugadas en curva: cada permanente genera ventaja por sí solo.',en:'Value cards played on curve: every permanent generates advantage on its own.'},
+ how:{es:'Curva 2–4 densa, remoción flexible y amenazas que sobreviven a un barrido.',en:'Dense 2–4 curve, flexible removal, and threats that survive a wipe.'},
+ slots:{es:['Amenazas de valor 12–16','Remoción 8–11','Rampa 8–10'],en:['Value threats 12–16','Removal 8–11','Ramp 8–10']}},
+{k:'tokens',name:{es:'Fichas a lo ancho',en:'Go-Wide Tokens'},spec:[['tok',10,14],['anthem',4,6]],
+ desc:{es:'Inunda la mesa de fichas y gana con anthems que las convierten en un ejército real.',en:'Flood the board with tokens and win with anthems that turn them into a real army.'},
+ how:{es:'Generadores repetibles > efectos de un solo uso; incluye protección contra barridos.',en:'Repeatable generators > one-shot effects; include wipe protection.'},
+ slots:{es:['Generadores 10–14','Anthems 4–6','Protección 3–5'],en:['Generators 10–14','Anthems 4–6','Protection 3–5']}},
+{k:'aggro',name:{es:'Aggro',en:'Aggro'},spec:[],
+ desc:{es:'Presión desde el turno 1: criaturas baratas y daño constante antes de que la mesa se estabilice.',en:'Pressure from turn 1: cheap creatures and constant damage before the table stabilizes.'},
+ how:{es:'Curva bajísima (media < 2.5), pocas tierras que entran giradas y robo que no frene el ritmo.',en:'Very low curve (avg < 2.5), few tapped lands, and draw that doesn’t slow the tempo.'},
+ slots:{es:['Criaturas ≤3 maná 20–26','Impulso/robo 6–8','Remoción 6–8'],en:['Creatures ≤3 mana 20–26','Impulse/draw 6–8','Removal 6–8']}},
+{k:'equipment',name:{es:'Equipos',en:'Equipment'},spec:[['eq',10,14]],
+ desc:{es:'Un arsenal de equipos y portadores intercambiables: el valor vive en los objetos, no en las criaturas.',en:'An arsenal of equipment and interchangeable bearers: the value lives in the gear, not the creatures.'},
+ how:{es:'Reduce costes de equipar, incluye portadores con evasión y recuperación de equipos destruidos.',en:'Cut equip costs, include evasive bearers, and recover destroyed equipment.'},
+ slots:{es:['Equipos 10–14','Portadores 12–16','Tutores de equipo 2–4'],en:['Equipment 10–14','Bearers 12–16','Gear tutors 2–4']}},
+{k:'lifegain',name:{es:'Ganavidas',en:'Lifegain'},spec:[['life',10,14],['drain',4,6]],
+ desc:{es:'Convierte cada punto de vida ganado en cartas, fichas o drenaje. La vida es tu motor, no tu escudo.',en:'Turn every life point gained into cards, tokens or drain. Life is your engine, not your shield.'},
+ how:{es:'Necesitas pagos (payoffs) repetibles; ganar vida sin pagos no hace nada en Commander.',en:'You need repeatable payoffs; gaining life without payoffs does nothing in Commander.'},
+ slots:{es:['Fuentes de vida 10–14','Pagos 6–9','Drenajes 4–6'],en:['Life sources 10–14','Payoffs 6–9','Drains 4–6']}},
+{k:'spellslinger',name:{es:'Spellslinger',en:'Spellslinger'},spec:[['mot',6,10]],
+ desc:{es:'Instantáneos y conjuros en cadena, con permanentes que premian cada hechizo lanzado.',en:'Chained instants and sorceries, with permanents that reward every spell cast.'},
+ how:{es:'Motores primero (Guttersnipe, Archmage), luego densidad de hechizos baratos que los alimenten. Ojo con los hechizos gratis: el pod los limita a 8 y cobran puntos desde el quinto.',en:'Engines first (Guttersnipe, Archmage), then a density of cheap spells to feed them. Watch free spells: the pod caps them at 8 and charges points from the fifth.'},
+ slots:{es:['Motores 6–10','Hechizos ≤2 maná 18–24','Robo 10–14'],en:['Engines 6–10','Spells ≤2 mana 18–24','Draw 10–14']}},
+{k:'counters',name:{es:'Contadores +1/+1',en:'+1/+1 Counters'},spec:[],
+ desc:{es:'Crece tus criaturas con contadores y multiplica el efecto con proliferar y señores.',en:'Grow your creatures with counters and multiply the effect with proliferate and lords.'},
+ how:{es:'Sinergia > poder individual: cada carta debería poner o aprovechar contadores.',en:'Synergy > individual power: every card should add or exploit counters.'},
+ slots:{es:['Fuentes de contadores 14–18','Proliferar 4–6','Pagos 6–8'],en:['Counter sources 14–18','Proliferate 4–6','Payoffs 6–8']}},
+{k:'reanimator',name:{es:'Reanimator',en:'Reanimator'},spec:[['rec',6,9]],
+ desc:{es:'Tira criaturas enormes al cementerio y devuélvelas a la mesa por una fracción de su coste.',en:'Dump huge creatures into the graveyard and return them to play for a fraction of their cost.'},
+ how:{es:'Equilibra tres partes: descarte/molino propio, hechizos de reanimación y objetivos que ganen solos. Recuerda que los tutores incondicionales cobran puntos en este pod.',en:'Balance three parts: self-discard/mill, reanimation spells, and targets that win on their own. Remember unconditional tutors cost points in this pod.'},
+ slots:{es:['Reanimación 6–9','Autodescarte 8–10','Objetivos gordos 6–8'],en:['Reanimation 6–9','Self-discard 8–10','Fat targets 6–8']}},
+{k:'generic',name:{es:'Genérico',en:'Generic'},spec:[],
+ desc:{es:'Un poco de todo: bueno para precons y primeros mazos. Sin plan dominante.',en:'A bit of everything: good for precons and first decks. No dominant plan.'},
+ how:{es:'Cumple los mínimos de composición base y busca poco a poco una identidad.',en:'Meet the base composition minimums and slowly find an identity.'},
+ slots:{es:['Composición base','Curva media 3.0–3.5'],en:['Base composition','Avg curve 3.0–3.5']}}
+];
+
+const SEGC = {cre:'oklch(0.65 0.12 300)',draw:'oklch(0.62 0.1 260)',rem:'oklch(0.75 0.09 55)',ramp:'oklch(0.7 0.1 150)',oth:'oklch(0.65 0.02 260)'};
+const PIP = {W:'oklch(0.93 0.05 95)',U:'oklch(0.7 0.11 240)',B:'oklch(0.35 0.03 300)',R:'oklch(0.6 0.17 30)',G:'oklch(0.62 0.13 150)'};
+const BADGE_OF = [['game_changers','GC','bad'],['extra_turns','EX','warn'],['tutors','TUT','warn'],['board_wipes','WIPE','ok'],['counterspells','CTR','ok'],['free_spells','FREE','warn'],['fast_mana','FM','ok'],['stax_effects','STAX','warn']];
+
+// ================= samples =================
+const SAMPLES = {
+s1:'1x Zinnia, Valley\'s Voice\n1x Arthur, Marigold Knight\n1x Elspeth, Sun\'s Champion\n1x Jazal Goldmane\n1x Martial Coup\n1x Storm of Souls\n1x Selfless Spirit\n1x Murmuration\n1x Blade Splicer\n1x Hanged Executioner\n1x Loyal Warhound\n1x Restoration Angel\n1x Jacked Rabbit\n1x Skyclave Apparition\n1x Dusk // Dawn\n1x Boss\'s Chauffeur\n1x Angel of the Ruins\n1x Luminous Broodmoth\n1x Sun Titan\n1x Pollywog Prodigy\n1x Fortune Teller\'s Talent\n1x Aether Channeler\n1x Pull from Tomorrow\n1x Shield Broker\n1x Stolen by the Fae\n1x Rapid Augmenter\n1x Bident of Thassa\n1x Curiosity Crafter\n1x Devilish Valet\n1x Siege-Gang Commander\n1x Echoing Assault\n1x Agate Instigator\n1x Calamity of Cinders\n1x Rose Room Treasurer\n1x Combat Celebrant\n1x Inferno Titan\n1x Time Wipe\n1x Solemn Simulacrum\n1x Helm of the Host\n1x Glacial Fortress\n1x Adarkar Wastes\n1x Temple of Enlightenment\n1x Castle Ardenvale\n1x Seachrome Coast\n1x Sulfur Falls\n1x Cascade Bluffs\n1x Exotic Orchard\n1x Clifftop Retreat\n1x Shivan Reef\n1x Temple of Triumph\n1x Battlefield Forge\n1x Skycloud Expanse\n1x Temple of Epiphany\n1x Ferrous Lake\n1x Rugged Prairie\n1x Sunscorched Divide\n1x Spirited Companion\n1x Inspiring Overseer\n1x Cut a Deal\n1x Path to Exile\n1x Illusory Ambusher\n1x Rowdy Research\n1x Plumecreed Escort\n1x Rapid Hybridization\n1x Junk Winder\n1x Aetherize\n1x Chart a Course\n1x Tetsuko Umezawa, Fugitive\n1x Thopter Engineer\n1x Cloudblazer\n1x Arcane Signet\n1x Boros Signet\n1x Ornithopter of Paradise\n1x Azorius Signet\n1x Izzet Signet\n1x Circuit Mender\n1x Fellwar Stone\n1x Sol Ring\n1x Mind Stone\n1x Terramorphic Expanse\n1x Path of Ancestry\n1x Thriving Heath\n1x Evolving Wilds\n1x Thriving Isle\n1x Thriving Bluff\n1x Command Tower\n1x Mystic Monastery\n5x Plains\n4x Island\n4x Mountain',
+s2:'1x Bello, Bard of the Brambles\n1x Wildsear, Scouring Maw\n1x Domri, Anarch of Bolas\n1x Etali, Primal Storm\n1x Prosperous Bandit\n1x Pyreswipe Hawk\n1x Alchemist\'s Talent\n1x Berserkers\' Onslaught\n1x Outpost Siege\n1x Rain of Riches\n1x Chaos Warp\n1x Sunbird\'s Invocation\n1x Gratuitous Violence\n1x Warstorm Surge\n1x Starstorm\n1x Lotus Cobra\n1x Evercoat Ursine\n1x Brightcap Badger\n1x Trailtracker Scout\n1x Thickest in the Thicket\n1x Ghalta, Primal Hunger\n1x Esika\'s Chariot\n1x Unnatural Growth\n1x Greater Good\n1x Kodama of the East Tree\n1x Grothama, All-Devouring\n1x Rampaging Baloths\n1x Bootleggers\' Stash\n1x Primeval Bounty\n1x Gilded Lotus\n1x Spine of Ish Sah\n1x Temple of Abandon\n1x Karplusan Forest\n1x Exotic Orchard\n1x Sheltered Thicket\n1x Game Trail\n1x Raging Ravine\n1x Copperline Gorge\n1x Mossfire Valley\n1x Cinder Glade\n1x Rootbound Crag\n1x Mosswort Bridge\n1x Blasphemous Act\n1x Llanowar Loamspeaker\n1x Tendershoot Dryad\n1x Goreclaw, Terror of Qal Sisma\n1x Path of Discovery\n1x Decimate\n1x Rolling Hamsphere\n1x Teapot Slinger\n1x Explore\n1x Farseek\n1x Cultivate\n1x Grumgully, the Generous\n1x Wandertale Mentor\n1x Thought Vessel\n1x Arcane Signet\n1x Wooded Ridgeline\n1x Big Score\n1x Abrade\n1x Rampant Growth\n1x Sakura-Tribe Elder\n1x Beast Within\n1x Garruk\'s Packleader\n1x Harmonize\n1x Garruk\'s Uprising\n1x Gruul Signet\n1x Burnished Hart\n1x Hedron Archive\n1x Fellwar Stone\n1x Thran Dynamo\n1x Sol Ring\n1x Mind Stone\n1x Talisman of Impulse\n1x Terramorphic Expanse\n1x Path of Ancestry\n1x Gruul Turf\n1x Evolving Wilds\n1x Forgotten Cave\n1x Tranquil Thicket\n1x Command Tower\n1x Reliquary Tower\n8x Mountain\n10x Forest',
+s3:'1x Niv-Mizzet, Parun\n1x Temporal Manipulation\n1x Fierce Guardianship\n1x Deflecting Swat\n1x Mana Crypt\n1x Jeska\'s Will\n1x Sol Ring\n1x Mana Vault\n1x Counterspell\n1x Negate\n1x An Offer You Can\'t Refuse\n1x Blasphemous Act\n1x Chain Reaction\n1x Mystical Tutor\n1x Ponder\n1x Preordain\n1x Brainstorm\n1x Opt\n1x Treasure Cruise\n1x Fact or Fiction\n1x Pull from Tomorrow\n1x Izzet Charm\n1x Expressive Iteration\n1x Light Up the Stage\n1x Big Score\n1x Unexpected Windfall\n1x Seize the Spoils\n1x Thrill of Possibility\n1x Valakut Awakening\n1x Curiosity\n1x Steam Augury\n1x Talrand, Sky Summoner\n1x Murmuring Mystic\n1x Young Pyromancer\n1x Third Path Iconoclast\n1x Sprite Dragon\n1x Improbable Alliance\n1x Archmage Emeritus\n1x Storm-Kiln Artist\n1x Birgi, God of Storytelling\n1x Goldspan Dragon\n1x Arcane Signet\n1x Izzet Signet\n1x Talisman of Creativity\n1x Mind Stone\n1x Fellwar Stone\n1x Lightning Bolt\n1x Chaos Warp\n1x Abrade\n1x Prismari Command\n1x Guttersnipe\n1x Electrostatic Field\n1x Firebrand Archer\n1x Kessig Flamebreather\n1x Thousand-Year Storm\n1x Dualcaster Mage\n1x Increasing Vengeance\n1x Bonus Round\n1x Reverberate\n1x Jace\'s Sanctum\n1x Ral, Storm Conduit\n1x Stormwing Entity\n1x Narset\'s Reversal\n1x Slip Out the Back\n1x Bolt Bend\n1x Command Tower\n1x Steam Vents\n1x Spirebluff Canal\n1x Shivan Reef\n1x Temple of Epiphany\n1x Izzet Boilerworks\n1x Evolving Wilds\n1x Mystic Sanctuary\n1x Desolate Lighthouse\n1x Sulfur Falls\n1x Cascade Bluffs\n1x Riverglide Pathway\n1x Frostboil Snarl\n13x Island\n9x Mountain'
+};
+
+// ================= state =================
+const store = {
+  get lang(){ return localStorage.getItem('pdc_lang') || 'es'; },
+  set lang(v){ localStorage.setItem('pdc_lang', v); },
+  get theme(){ return localStorage.getItem('pdc_theme') || ''; },
+  set theme(v){ localStorage.setItem('pdc_theme', v); },
+};
+let cardCache = {};
+try { const raw = JSON.parse(localStorage.getItem('pdc_cards_v1') || '{}');
+  if (raw._ts && Date.now() - raw._ts < 30 * 864e5) cardCache = raw.cards || {};
+} catch (e) {}
+function persistCache(){ try { localStorage.setItem('pdc_cards_v1', JSON.stringify({ _ts: Date.now(), cards: cardCache })); } catch (e) {} }
+
+const state = {
+  lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
+  arch: 'auto', grp: 'type', cf: 'all', hl: null, openArch: null,
+  deck: null,        // {entries, commanders, deckName}
+  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation}
+  fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
+};
+const T = () => L[state.lang];
+
+// ================= analysis pipeline =================
+async function analyze() {
+  const text = $('deckText').value;
+  const det = PodEngine.detectInput(text);
+  if (det.kind === 'moxfield') { state.error = 'mox'; renderInput(); return; }
+  state.busy = true; state.error = null; renderInput();
+  try {
+    let parsed;
+    if (det.kind === 'archidekt') {
+      try { parsed = await PodEngine.fetchArchidekt(det.id); }
+      catch (e) { state.error = 'archErr'; state.busy = false; renderInput(); return; }
+    } else {
+      parsed = PodEngine.parseDecklist(text);
+    }
+    if (!parsed.entries.length) { state.busy = false; renderInput(); return; }
+    const names = [...new Set(parsed.entries.map(e => e.name))];
+    const { notFound } = await PodEngine.fetchCards(names, cardCache, p => {
+      state.fi = { done: p.done, total: p.total, card: '' }; renderInput();
+    });
+    persistCache();
+    state.deck = parsed;
+    recompute(notFound);
+    state.fetchSt = 'idle';
+  } catch (e) {
+    console.error(e); state.error = 'netErr';
+  }
+  state.busy = false;
+  renderAll();
+}
+
+function recompute(notFound) {
+  const parsed = state.deck;
+  const resolved = parsed.entries.filter(e => cardCache[e.name]);
+  const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
+  const evalRes = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
+  const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
+    cls: PodEngine.classifyCard(cardCache[e.name]) }));
+  const detected = PodEngine.detectArchetype(cardsInfo);
+  const validation = PodEngine.validateDeck(cardsInfo, parsed.commanders, cardCache,
+    notFound !== undefined ? notFound : (state.result ? state.result.notFound : []));
+  state.result = { stats, flagged, evalRes, cardsInfo, detected,
+    notFound: notFound !== undefined ? notFound : (state.result ? state.result.notFound : []), validation };
+}
+
+let fetchCancelled = false;
+async function startCheapest() {
+  if (state.fetchSt !== 'idle' || !state.result) return;
+  state.fetchSt = 'fetching'; fetchCancelled = false; renderBanner();
+  const names = [...new Set(state.deck.entries.map(e => e.name))];
+  await PodEngine.fetchCheapest(names, cardCache, p => {
+    state.fi = { done: p.done, total: p.total, card: p.card || '' }; renderBanner();
+  }, () => fetchCancelled);
+  persistCache();
+  recompute();
+  state.fetchSt = 'done';
+  renderAll();
+}
+
+// ================= advice (tip) =================
+function buildTip() {
+  const r = state.result, lang = state.lang, ev = r.evalRes;
+  const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
+  const entries = Object.entries(ev.breakdown).sort((a, b) => b[1] - a[1]);
+  const nameOf = k => EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang);
+  const listCards = k => (ev.driving[k] || []).slice(0, 3).map(([n]) => n).join(', ');
+  if (ev.tier === 'above') {
+    const cuts = entries.slice(0, 2).map(([k, p]) => nameOf(k) + ' (−' + p + ' pts: ' + (listCards(k) || '') + ')').join('; ');
+    return lang === 'es'
+      ? 'Este mazo necesita recortes para sentarse en el pod. Empieza por las violaciones de arriba' + (cuts ? ', y después por lo que más puntos cuesta: ' + cuts : '') + '.'
+      : 'This deck needs cuts to sit at the pod. Start with the violations above' + (cuts ? ', then with what costs the most points: ' + cuts : '') + '.';
+  }
+  if (ev.tier === 'tier2') {
+    const need = ev.points - t1;
+    const cuts = entries.map(([k, p]) => nameOf(k) + ' (+' + p + ': ' + (listCards(k) || '—') + ')').join('; ');
+    return lang === 'es'
+      ? 'Tier 2 con ' + ev.points + '/' + t2 + ' puntos. Para bajar a Tier 1 suelta ' + need + ' punto' + (need > 1 ? 's' : '') + ': ' + cuts + '.'
+      : 'Tier 2 at ' + ev.points + '/' + t2 + ' points. To drop to Tier 1, shed ' + need + ' point' + (need > 1 ? 's' : '') + ': ' + cuts + '.';
+  }
+  const margin = t1 - ev.points;
+  return lang === 'es'
+    ? 'Mazo limpio de Tier 1: ' + ev.points + ' punto' + (ev.points === 1 ? '' : 's') + ' de los ' + t1 + ' permitidos. ' + (margin > 0 ? 'Tienes ' + margin + ' punto' + (margin > 1 ? 's' : '') + ' de margen para una mejora puntual sin salir de Tier 1.' : 'Estás justo en el límite de Tier 1.')
+    : 'Clean Tier 1 deck: ' + ev.points + ' point' + (ev.points === 1 ? '' : 's') + ' of the ' + t1 + ' allowed. ' + (margin > 0 ? 'You have ' + margin + ' point' + (margin > 1 ? 's' : '') + ' of headroom for one targeted upgrade without leaving Tier 1.' : 'You are right at the Tier 1 limit.');
+}
+
+// ================= rendering =================
+function applyTheme() {
+  const eff = state.theme ? state.theme === 'dark' : state.sysDark;
+  document.body.classList.toggle('dark', state.theme === 'dark');
+  document.body.classList.toggle('light', state.theme === 'light');
+  $('themeBtn').textContent = eff ? '◑' : '◐';
+}
+
+function renderHeader() {
+  const t = T();
+  $('appTag').textContent = t.appTag;
+  $('copyBtn').textContent = '⧉ ' + (state.copied ? t.copied : t.copy);
+  $('enBtn').style.background = state.lang === 'en' ? 'var(--text)' : 'transparent';
+  $('enBtn').style.color = state.lang === 'en' ? 'var(--bg)' : 'var(--muted)';
+  $('esBtn').style.background = state.lang === 'es' ? 'var(--text)' : 'transparent';
+  $('esBtn').style.color = state.lang === 'es' ? 'var(--bg)' : 'var(--muted)';
+}
+
+function renderInput() {
+  const t = T();
+  $('inputTitle').textContent = t.inputTitle;
+  $('deckText').placeholder = t.inputPh;
+  $('tryLabel').textContent = t.tryLabel;
+  $('archLabel').textContent = t.archLabel;
+  $('analyzeBtn').textContent = state.busy
+    ? (state.fi.total ? t.fetchingCards + ' ' + state.fi.done + '/' + state.fi.total : t.analyzing)
+    : t.analyze;
+  $('analyzeBtn').disabled = state.busy;
+  const sel = $('archSel');
+  const cur = state.arch;
+  sel.innerHTML = '<option value="auto">' + esc(t.auto) + '</option>' +
+    ARCH.map(a => '<option value="' + a.k + '">' + esc(a.name[state.lang]) + '</option>').join('');
+  sel.value = cur;
+  $('samples').innerHTML = ['s1', 's2', 's3'].map(k =>
+    '<button data-sample="' + k + '" style="border:1px dashed var(--border);background:transparent;border-radius:99px;padding:5px 13px;font-size:12px;font-weight:600;color:var(--muted)">' + esc(t[k]) + '</button>').join('');
+  for (const b of $('samples').querySelectorAll('[data-sample]'))
+    b.onclick = () => { $('deckText').value = SAMPLES[b.dataset.sample]; state.error = null; renderInput(); };
+  const notice = $('inputNotice');
+  if (state.error) { notice.style.display = ''; notice.textContent = t[state.error] || state.error; }
+  else if (PodEngine.detectInput($('deckText').value).kind === 'moxfield') { notice.style.display = ''; notice.textContent = t.mox; }
+  else notice.style.display = 'none';
+}
+
+function tierColors(k) {
+  return { tier1: ['var(--okBg)', 'var(--okBd)', 'var(--okFg)'], tier2: ['var(--warnBg)', 'var(--warnBd)', 'var(--warnFg)'], above: ['var(--badBg)', 'var(--badBd)', 'var(--badFg)'] }[k];
+}
+function archKey() {
+  if (state.arch !== 'auto') return state.arch;
+  return state.result ? state.result.detected.key : 'generic';
+}
+function archName() {
+  const a = ARCH.find(x => x.k === archKey()) || ARCH[ARCH.length - 1];
+  return a.name[state.lang] + (state.arch === 'auto' ? ' ' + T().autoTag : '');
+}
+
+function renderSummary() {
+  const t = T(), r = state.result, ev = r.evalRes;
+  const [bg, bd, fg] = tierColors(ev.tier);
+  const budgetN = RULES.tiers.tier2.max_points;
+  $('summary').innerHTML =
+    '<div style="background:' + bg + ';border:1px solid ' + bd + ';border-radius:12px;padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:210px">' +
+      '<span style="font-size:10.5px;font-weight:600;letter-spacing:0.06em;color:' + fg + ';opacity:.75">' + t.tierWord + '</span>' +
+      '<span style="font-size:19px;font-weight:700;color:' + fg + '">' + t[ev.tier] + '</span></div>' +
+    '<div style="flex:1;min-width:300px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">' +
+      stat(t.pts, ev.points + ' / ' + budgetN) +
+      stat(t.price, '€' + Math.round(r.stats.total_price_eur)) +
+      stat(t.cardsN, r.stats.total_cards) +
+      '<div class="panel" style="padding:11px 16px"><div style="font-size:10.5px;color:var(--muted)">' + t.archetype + '</div><div style="font-size:14.5px;font-weight:600;padding-top:3px">' + esc(archName()) + '</div></div></div>';
+  function stat(lbl, val) {
+    return '<div class="panel" style="padding:11px 16px"><div style="font-size:10.5px;color:var(--muted)">' + lbl + '</div><div class="mono" style="font-weight:700;font-size:19px">' + val + '</div></div>';
+  }
+}
+
+function renderBanner() {
+  const t = T(), el = $('banner');
+  if (!state.result) { el.innerHTML = ''; return; }
+  if (state.fetchSt === 'idle') {
+    el.innerHTML = '<div style="background:var(--warnBg);border:1px solid var(--warnBd);border-radius:12px;padding:13px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--warnFg)">' +
+      '<span style="flex:1;min-width:260px">' + t.priceNote + '</span>' +
+      '<button id="fetchBtn" style="border:1px solid var(--warnBd);background:transparent;color:var(--warnFg);border-radius:7px;padding:7px 16px;font-weight:600;font-size:12.5px;white-space:nowrap">' + t.fetchBtn + '</button></div>';
+    $('fetchBtn').onclick = startCheapest;
+  } else if (state.fetchSt === 'fetching') {
+    const fi = state.fi, pct = fi.total ? Math.round(fi.done / fi.total * 100) : 0;
+    el.innerHTML = '<div style="background:var(--warnBg);border:1px solid var(--warnBd);border-radius:12px;padding:13px 18px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--warnFg)">' +
+      '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span style="flex:1;min-width:180px">' + t.fetchBtn + '…</span>' +
+      '<span class="mono" style="font-weight:600">' + fi.done + ' / ' + fi.total + (fi.card ? ' · ' + esc(fi.card) : '') + '…</span></div>' +
+      '<div style="height:6px;background:var(--warnBd);border-radius:3px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:var(--warnFg);transition:width .1s linear"></div></div></div>';
+  } else {
+    el.innerHTML = '<div style="background:var(--okBg);border:1px solid var(--okBd);border-radius:12px;padding:13px 18px;font-size:13px;color:var(--okFg)">✓ ' + t.fetchDone + '</div>';
+  }
+}
+
+function renderPower() {
+  const t = T(), r = state.result, ev = r.evalRes, lang = state.lang;
+  const budgetN = RULES.tiers.tier2.max_points, t1N = RULES.tiers.tier1.max_points;
+  let html = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding-bottom:8px">' +
+    '<span class="secT">' + t.power + '</span><span class="mono" style="font-size:11.5px;color:var(--muted)">' + ev.points + ' ' + t.ptsOf + ' ' + budgetN + '</span></div>';
+  for (const m of DIAL_META) {
+    const spec = RULES.dials[m.k];
+    const value = r.stats[m.k] || 0;
+    const axis = Math.max(spec.hard_max, 1) * 1.3;
+    const z0 = (spec.baseline_max + 0.5) / axis, z1 = (spec.hard_max - spec.baseline_max) / axis, z2 = Math.max(1 - z0 - z1, 0.05);
+    const pos = Math.min(value / axis * 100, 98);
+    const pts = ev.breakdown[m.k] || 0;
+    const over = value > spec.hard_max;
+    const ptsLabel = over ? '✕' : (pts > 0 ? '+' + pts + (pts === 1 ? ' pt' : ' pts') : '0');
+    const ptsColor = over ? 'var(--bad)' : pts === 0 ? 'var(--good)' : pts >= 3 ? 'var(--bad)' : 'var(--warn)';
+    const chips = (value > spec.baseline_max ? (r.flagged[m.k] || []) : []).slice(0, 10);
+    html += '<div style="display:flex;flex-direction:column;gap:12px;padding:14px 0;border-top:1px solid var(--border2)">' +
+      '<div style="display:grid;grid-template-columns:minmax(120px,150px) 30px 1fr 56px;gap:12px;align-items:center;font-size:13px">' +
+      '<span style="font-weight:600">' + m.name[lang] + '</span>' +
+      '<span class="mono" style="font-weight:600;font-size:15px">' + value + '</span>' +
+      '<div style="position:relative;height:9px;display:flex;gap:2px">' +
+      '<div style="flex:' + z0.toFixed(3) + ';background:var(--zoneA);border-radius:4px"></div>' +
+      '<div style="flex:' + z1.toFixed(3) + ';background:var(--zoneB);border-radius:4px"></div>' +
+      '<div style="flex:' + z2.toFixed(3) + ';background:var(--zoneC);border-radius:4px"></div>' +
+      '<div style="position:absolute;left:' + pos.toFixed(1) + '%;top:-3px;width:2.5px;height:15px;background:var(--marker);border-radius:2px"></div></div>' +
+      '<span class="mono" style="font-weight:600;font-size:12.5px;color:' + ptsColor + ';text-align:right">' + ptsLabel + '</span></div>' +
+      '<div style="display:flex;gap:14px"><div style="width:3px;border-radius:2px;background:var(--border);flex:none"></div>' +
+      '<div style="flex:1;display:flex;flex-direction:column;gap:8px">' +
+      '<div style="font-size:12.5px;line-height:1.6;color:var(--muted);max-width:760px">' + m.help[lang] + '</div>' +
+      (chips.length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + chips.map(([n]) => {
+        const c = cardCache[n] || {};
+        return '<span style="display:flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--panel2);border-radius:99px;padding:4px 12px 4px 5px;font-size:11.5px;font-weight:600">' +
+          '<span style="width:24px;height:24px;border-radius:99px;flex:none;background:var(--track) center/cover no-repeat;' + (c.img_art ? 'background-image:url(\'' + c.img_art + '\')' : '') + '"></span>' +
+          esc(n) + ' <span class="mono" style="color:var(--muted)">' + (c.price != null ? '€' + c.price : '—') + '</span></span>';
+      }).join('') + '</div>' : '') + '</div></div></div>';
+  }
+  // violations + flags
+  const viols = ev.violations.map(v => {
+    if (v.id === 'conditional') return (MSG.conditional[v.condId] ? MSG.conditional[v.condId][lang](v) : v.condId);
+    return MSG[v.id] ? MSG[v.id][lang](v) : JSON.stringify(v);
+  });
+  const flags = ev.flags.map(f => MSG['flag_' + f.id] ? MSG['flag_' + f.id][lang](f) : f.id);
+  const nearCap = (r.flagged.price_20_30 || []).map(([n]) => n);
+  if (nearCap.length) flags.push(MSG.flag_near_cap[lang]({ cards: nearCap }));
+  if (viols.length) html += '<div style="margin-top:12px;background:var(--badBg);border:1px solid var(--badBd);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:6px">' +
+    '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--badFg)">✕ ' + t.viols + '</span>' +
+    viols.map(v => '<div style="font-size:13px;line-height:1.55;color:var(--badFg)">' + esc(v) + '</div>').join('') + '</div>';
+  if (flags.length) html += '<div style="margin-top:10px;background:var(--warnBg);border:1px solid var(--warnBd);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:6px">' +
+    '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--warnFg)">⚠ ' + t.flags + '</span>' +
+    flags.map(f => '<div style="font-size:13px;line-height:1.55;color:var(--warnFg)">' + esc(f) + '</div>').join('') + '</div>';
+  html += '<div style="margin-top:12px;background:var(--tipBg);border:1px solid var(--tipBd);border-radius:10px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start">' +
+    '<span class="mono" style="font-weight:700;font-size:9.5px;background:var(--tipFg);color:var(--tipBg);border-radius:5px;padding:3px 6px;flex:none;margin-top:2px">TIP</span>' +
+    '<div style="font-size:12.5px;line-height:1.6;color:var(--tipFg)"><b>' + t.tipT + ':</b> ' + esc(buildTip()) + '</div></div>';
+  // budget gauge — scale spans 0..(t2+3) so overspending stays visible
+  const gMax = budgetN + 3;
+  const pct = Math.min(ev.points / gMax * 100, 100);
+  html += '<div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">' +
+    '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--muted)">' + t.budget + '</span>' +
+    '<div style="position:relative;height:14px;background:var(--track);border-radius:7px">' +
+    '<div style="position:absolute;left:0;top:0;bottom:0;width:' + pct.toFixed(1) + '%;background:linear-gradient(90deg,oklch(0.7 0.12 145),oklch(0.78 0.11 85) 60%,oklch(0.62 0.15 25));border-radius:7px"></div>' +
+    '<div style="position:absolute;left:' + (t1N / gMax * 100).toFixed(1) + '%;top:-4px;bottom:-4px;width:2px;background:var(--muted)"></div>' +
+    '<div style="position:absolute;left:' + (budgetN / gMax * 100).toFixed(1) + '%;top:-4px;bottom:-4px;width:2px;background:var(--muted)"></div></div>' +
+    '<div class="mono" style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted)"><span>0</span><span>Tier 1 ≤' + t1N + '</span><span>Tier 2 ≤' + budgetN + '</span><span>' + gMax + '</span></div></div>';
+  $('power').innerHTML = html;
+}
+
+function renderValidation() {
+  const t = T(), r = state.result, lang = state.lang, el = $('validation');
+  if (!r.validation.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = '<div style="background:var(--panel);border:1px dashed var(--warnBd);border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:6px">' +
+    '<span style="font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--muted)">' + t.validT + '</span>' +
+    r.validation.slice(0, 12).map(v => '<div style="font-size:12.5px;line-height:1.5;color:var(--muted)">· ' + esc(MSG['valid_' + v.id][lang](v)) + '</div>').join('') +
+    (r.validation.length > 12 ? '<div style="font-size:12px;color:var(--faint)">+' + (r.validation.length - 12) + '…</div>' : '') + '</div>';
+}
+
+function compSlots() {
+  const a = ARCH.find(x => x.k === archKey());
+  const merged = new Map(BASECOMP.map(([c, mn, mx]) => [c, [mn, mx]]));
+  for (const [c, mn, mx] of (a && a.spec) || []) merged.set(c, [mn, mx]);
+  return [...merged.entries()].map(([cat, [mn, mx]]) => ({ cat, min: mn, max: mx }));
+}
+function tagCount(cat) {
+  return state.result.cardsInfo.reduce((s, x) => s + ((x.cls.cat === cat || x.cls.tags.includes(cat)) ? x.qty : 0), 0);
+}
+
+function renderComp() {
+  const t = T(), lang = state.lang;
+  let html = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">' +
+    '<span style="font-size:12px;font-weight:700;letter-spacing:0.06em;color:var(--compMut)">' + t.comp + '</span>' +
+    '<span style="font-size:11px;color:var(--compMut)">' + t.compTargets + ' ' + esc(archName()) + '</span></div><div style="display:flex;flex-direction:column">';
+  for (const s of compSlots()) {
+    const v = tagCount(s.cat);
+    const scale = Math.max(s.max * 1.5, v * 1.15, 1);
+    const status = v < s.min ? 'few' : v > s.max ? 'many' : 'ok';
+    html += '<div data-hl="' + s.cat + '" style="display:grid;grid-template-columns:minmax(90px,130px) 1fr minmax(120px,auto);gap:12px;align-items:center;font-size:13px;padding:9px 10px;border-radius:8px;cursor:pointer;background:' + (state.hl === s.cat ? 'var(--panel)' : 'transparent') + '">' +
+      '<span style="font-weight:600">' + CATS[s.cat][lang] + '</span>' +
+      '<div style="position:relative;height:9px;background:var(--compBd);border-radius:5px">' +
+      '<div style="position:absolute;left:' + (s.min / scale * 100).toFixed(1) + '%;width:' + ((s.max - s.min) / scale * 100).toFixed(1) + '%;top:0;bottom:0;background:' + (state.hl === s.cat ? 'var(--accent)' : 'var(--faint)') + ';border-radius:5px"></div>' +
+      '<div style="position:absolute;left:' + Math.min(v / scale * 100, 98).toFixed(1) + '%;top:-3px;width:2.5px;height:15px;background:var(--marker);border-radius:2px"></div></div>' +
+      '<span style="justify-self:end;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:' + (status === 'ok' ? 'var(--okBg)' : 'var(--warnBg)') + ';color:' + (status === 'ok' ? 'var(--okFg)' : 'var(--warnFg)') + '">' + t[status] + ' · ' + v + '/' + s.min + '–' + s.max + '</span></div>';
+  }
+  html += '</div><div style="display:flex;gap:10px;align-items:center;font-size:11.5px;color:var(--compMut)"><span>' + t.compHint + '</span>' +
+    (state.hl ? '<button id="clearHl" style="border:1px solid var(--compBd);background:transparent;color:var(--compMut);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:600">✕ ' + t.clear + ': ' + CATS[state.hl][lang] + '</button>' : '') + '</div>';
+  $('comp').innerHTML = html;
+  for (const row of $('comp').querySelectorAll('[data-hl]'))
+    row.onclick = () => { state.hl = state.hl === row.dataset.hl ? null : row.dataset.hl; renderComp(); renderBrowser(); };
+  const cl = $('clearHl'); if (cl) cl.onclick = () => { state.hl = null; renderComp(); renderBrowser(); };
+}
+
+function badgeFor(name) {
+  const r = state.result;
+  for (const [dial, label, tone] of BADGE_OF) {
+    const spec = RULES.dials[dial];
+    if (!spec) continue;
+    const inDial = (r.flagged[dial] || []).some(([n]) => n === name);
+    if (inDial && ((r.stats[dial] || 0) > spec.baseline_max || dial === 'game_changers')) {
+      const bg = tone === 'bad' ? 'var(--badBg)' : tone === 'warn' ? 'var(--warnBg)' : 'var(--border2)';
+      const fg = tone === 'bad' ? 'var(--badFg)' : tone === 'warn' ? 'var(--warnFg)' : 'var(--muted)';
+      return { label, bg, fg };
+    }
+  }
+  return null;
+}
+
+function renderBrowser() {
+  const t = T(), lang = state.lang, r = state.result;
+  const byT = state.grp === 'type';
+  $('gtBtn').style.background = byT ? 'var(--text)' : 'transparent'; $('gtBtn').style.color = byT ? 'var(--bg)' : 'var(--muted)';
+  $('gcBtn').style.background = !byT ? 'var(--text)' : 'transparent'; $('gcBtn').style.color = !byT ? 'var(--bg)' : 'var(--muted)';
+  $('browserT').textContent = t.browser; $('groupByLbl').textContent = t.groupBy;
+  $('gtBtn').textContent = t.byType; $('gcBtn').textContent = t.byCat;
+  const gmap = {};
+  for (const x of r.cardsInfo) { const g = byT ? x.cls.type : x.cls.cat; (gmap[g] = gmap[g] || []).push(x); }
+  const cnt = {}; for (const [g, arr] of Object.entries(gmap)) cnt[g] = arr.reduce((s, x) => s + x.qty, 0);
+  const order = byT ? TYPE_ORDER.filter(k => gmap[k]) : Object.keys(gmap).sort((a, b) => cnt[b] - cnt[a]);
+  $('groups').innerHTML = order.map(g => {
+    const label = byT ? TYPES[g][lang] : (CATS[g] ? CATS[g][lang] : g);
+    return '<div style="display:flex;flex-direction:column;gap:7px">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:5px;letter-spacing:0.05em">' + esc(label.toUpperCase()) + ' · ' + cnt[g] + '</div>' +
+      gmap[g].sort((a, b) => (a.card.cmc || 0) - (b.card.cmc || 0)).map(x => {
+        const badge = badgeFor(x.name);
+        const dim = state.hl && x.cls.cat !== state.hl && !x.cls.tags.includes(state.hl);
+        const hit = state.hl && !dim;
+        const mana = (x.card.mana_cost || '').replace(/[{}]/g, '') || '—';
+        return '<div class="cardTile" data-name="' + esc(x.name) + '" style="display:flex;gap:9px;align-items:center;background:var(--panel2);border:1.5px solid ' + (hit ? 'var(--accent)' : 'var(--border)') + ';border-radius:8px;padding:5px;opacity:' + (dim ? 0.45 : 1) + '">' +
+          '<img src="' + (x.card.img_art || '') + '" loading="lazy" style="width:52px;height:38px;object-fit:cover;border-radius:5px;flex:none;background:var(--track)" alt="">' +
+          '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.name) + '</div>' +
+          '<div class="mono" style="font-size:10px;color:var(--muted)">' + esc(mana) + ' · ' + (x.card.price != null ? '€' + x.card.price : '—') + (x.qty > 1 ? ' · x' + x.qty : '') + '</div></div>' +
+          (badge ? '<span style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:' + badge.bg + ';color:' + badge.fg + ';flex:none">' + badge.label + '</span>' : '') + '</div>';
+      }).join('') + '</div>';
+  }).join('');
+  for (const tile of $('groups').querySelectorAll('.cardTile')) {
+    tile.onmouseenter = (e) => {
+      const c = cardCache[tile.dataset.name]; if (!c || !c.img_normal) return;
+      const rect = tile.getBoundingClientRect();
+      let x = rect.right + 12; if (x + 276 > innerWidth) x = Math.max(8, rect.left - 288);
+      const y = Math.max(10, Math.min(rect.top - 60, innerHeight - 390));
+      const pop = $('popover');
+      pop.style.display = ''; pop.style.left = x + 'px'; pop.style.top = y + 'px';
+      pop.style.backgroundImage = "url('" + c.img_normal + "')";
+    };
+    tile.onmouseleave = () => { $('popover').style.display = 'none'; };
+    for (const img of tile.querySelectorAll('img')) img.onerror = () => {
+      img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="52" height="38"><rect width="52" height="38" fill="#8a8794"/><text x="26" y="25" font-family="monospace" font-size="16" fill="#fff" text-anchor="middle">' + tile.dataset.name.charAt(0) + '</text></svg>');
+    };
+  }
+}
+
+function segOf(x) {
+  if (x.cls.type === 'C') return 'cre';
+  const k = x.cls.cat;
+  if (k === 'draw') return 'draw';
+  if (k === 'rem' || k === 'wipe' || k === 'burn') return 'rem';
+  if (k === 'ramp') return 'ramp';
+  return 'oth';
+}
+
+function renderCurve() {
+  const t = T(), r = state.result;
+  const nl = r.cardsInfo.filter(x => x.cls.type !== 'L');
+  const bins = Array.from({ length: 8 }, () => ({ cre: 0, draw: 0, rem: 0, ramp: 0, oth: 0 }));
+  for (const x of nl) bins[Math.min(Math.floor(x.card.cmc || 0), 7)][segOf(x)] += x.qty;
+  const segKeys = state.cf === 'all' ? ['cre', 'draw', 'rem', 'ramp', 'oth'] : [state.cf];
+  const totals = bins.map(b => segKeys.reduce((s, k) => s + b[k], 0));
+  const maxT = Math.max(...totals, 1);
+  const nlQty = nl.reduce((s, x) => s + x.qty, 0) || 1;
+  const avgCmc = (nl.reduce((s, x) => s + (x.card.cmc || 0) * x.qty, 0) / nlQty).toFixed(2);
+  let html = '<div style="grid-column:1/-1;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
+    '<span class="secT" style="font-size:11.5px">' + t.curve + '</span>' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">' + ['all', 'cre', 'draw', 'rem', 'ramp'].map(k =>
+      '<button data-cf="' + k + '" style="padding:4px 12px;border-radius:99px;border:1px solid ' + (state.cf === k ? 'var(--text)' : 'var(--border)') + ';background:' + (state.cf === k ? 'var(--text)' : 'transparent') + ';color:' + (state.cf === k ? 'var(--bg)' : 'var(--muted)') + ';font-size:11px;font-weight:600">' + t[k] + '</button>').join('') + '</div></div>' +
+    '<div style="display:flex;align-items:flex-end;gap:8px;height:120px">' +
+    bins.map((b, i) => '<div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:3px">' +
+      '<div style="display:flex;flex-direction:column;justify-content:flex-end;border-radius:4px 4px 0 0;overflow:hidden">' +
+      segKeys.filter(k => b[k] > 0).map(k => '<div style="height:' + Math.round(b[k] / maxT * 100) + 'px;background:' + SEGC[k] + '"></div>').join('') + '</div>' +
+      '<span class="mono" style="font-size:10px;color:var(--muted);text-align:center">' + (i === 7 ? '7+' : i) + '</span></div>').join('') + '</div>' +
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);border-top:1px solid var(--border2);padding-top:10px">' +
+    ['cre', 'draw', 'rem', 'ramp', 'oth'].map(k => '<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:' + SEGC[k] + '"></span>' + t[k] + '</span>').join('') +
+    '<span class="mono" style="margin-left:auto">' + t.avg + ' ' + avgCmc + ' · ' + nlQty + ' ' + t.nonlands + '</span></div></div>';
+  // pips
+  const pipCnt = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+  for (const x of r.cardsInfo) {
+    const mana = x.card.mana_cost || '';
+    for (const ch of mana.replace(/[{}/]/g, '')) if (pipCnt[ch] !== undefined) pipCnt[ch] += x.qty;
+  }
+  const pipTot = Object.values(pipCnt).reduce((a, b) => a + b, 0) || 1;
+  html += '<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">' +
+    '<span class="secT" style="font-size:11.5px">' + t.pips + '</span><div style="display:flex;flex-direction:column;gap:9px;font-size:12px">' +
+    ['W', 'U', 'B', 'R', 'G'].filter(k => pipCnt[k] > 0).map(k => {
+      const pc = Math.round(pipCnt[k] / pipTot * 100);
+      const bar = k === 'W' ? 'oklch(0.8 0.07 95)' : PIP[k];
+      return '<div style="display:flex;align-items:center;gap:9px"><div style="width:15px;height:15px;border-radius:50%;background:' + PIP[k] + ';border:1px solid var(--muted);flex:none"></div>' +
+        '<div style="flex:1;height:8px;background:var(--track);border-radius:4px"><div style="width:' + pc + '%;height:100%;background:' + bar + ';border-radius:4px"></div></div>' +
+        '<span class="mono" style="font-size:10.5px;color:var(--muted);width:36px;text-align:right">' + pc + '%</span></div>';
+    }).join('') + '</div></div>';
+  // price bands
+  const bandDefs = [['<€1', p => p < 1, 'oklch(0.7 0.11 150)'], ['€1–5', p => p >= 1 && p < 5, 'oklch(0.75 0.1 85)'], ['€5–10', p => p >= 5 && p < 10, 'oklch(0.72 0.11 70)'], ['€10–20', p => p >= 10 && p < 20, 'oklch(0.68 0.12 55)'], ['€20–30', p => p >= 20 && p < 30, 'oklch(0.64 0.13 40)'], ['>€30', p => p >= 30, 'oklch(0.6 0.15 25)']];
+  const bandCounts = bandDefs.map(([, f]) => r.cardsInfo.filter(x => x.card.price != null && f(x.card.price)).reduce((s, x) => s + x.qty, 0));
+  const maxB = Math.max(...bandCounts, 1);
+  html += '<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">' +
+    '<span class="secT" style="font-size:11.5px">' + t.bands + '</span><div class="mono" style="display:flex;flex-direction:column;gap:9px;font-size:11px;color:var(--muted)">' +
+    bandDefs.map(([lbl, , c], i) => '<div style="display:flex;align-items:center;gap:9px"><span style="width:48px">' + lbl + '</span>' +
+      '<div style="flex:1;height:8px;background:var(--track);border-radius:4px"><div style="width:' + Math.round(bandCounts[i] / maxB * 100) + '%;height:100%;background:' + c + ';border-radius:4px"></div></div>' +
+      '<span style="width:26px;text-align:right">' + bandCounts[i] + '</span></div>').join('') + '</div></div>';
+  $('curveWrap').innerHTML = html;
+  for (const b of $('curveWrap').querySelectorAll('[data-cf]')) b.onclick = () => { state.cf = b.dataset.cf; renderCurve(); };
+}
+
+function renderGuide() {
+  const t = T(), lang = state.lang;
+  $('guideT').textContent = t.guide;
+  $('guideBody').innerHTML = ARCH.map(a => {
+    const open = state.openArch === a.k;
+    return '<div style="border-bottom:1px solid var(--border2)">' +
+      '<div data-arch="' + a.k + '" style="display:flex;justify-content:space-between;align-items:center;padding:13px 22px;font-size:14px;cursor:pointer">' +
+      '<span style="font-weight:600">' + esc(a.name[lang]) + '</span><span style="color:var(--muted);font-size:16px">' + (open ? '−' : '＋') + '</span></div>' +
+      (open ? '<div style="padding:0 22px 16px;display:flex;flex-direction:column;gap:10px;background:var(--panel2)">' +
+        '<div style="font-size:13px;line-height:1.6;max-width:720px;padding-top:12px">' + a.desc[lang] + '</div>' +
+        '<div style="font-size:12.5px;line-height:1.6;color:var(--muted);max-width:720px">' + a.how[lang] + '</div>' +
+        '<div class="mono" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:10.5px">' +
+        '<span style="color:var(--muted)">' + t.slots + '</span>' +
+        a.slots[lang].map(s => '<span style="border:1px solid var(--border);border-radius:99px;padding:3px 11px">' + esc(s) + '</span>').join('') +
+        '<button data-build="' + a.k + '" style="background:var(--accent);color:var(--accentFg);border:none;border-radius:99px;padding:5px 14px;font:600 11px \'IBM Plex Sans\',sans-serif">' + t.build + '</button></div></div>' : '') + '</div>';
+  }).join('');
+  for (const h of $('guideBody').querySelectorAll('[data-arch]'))
+    h.onclick = () => { state.openArch = state.openArch === h.dataset.arch ? null : h.dataset.arch; renderGuide(); };
+  for (const b of $('guideBody').querySelectorAll('[data-build]'))
+    b.onclick = (e) => { e.stopPropagation(); state.arch = b.dataset.build; state.openArch = null; $('archSel').value = state.arch;
+      renderGuide(); if (state.result) { renderSummary(); renderComp(); } };
+}
+
+function copyReport() {
+  if (!state.result) return;
+  const t = T(), lang = state.lang, ev = state.result.evalRes;
+  const lines = ['La guía del Yoryi — ' + t.power,
+    t.tierWord + ': ' + t[ev.tier],
+    t.pts + ': ' + ev.points + ' / ' + RULES.tiers.tier2.max_points,
+    t.price + ': €' + Math.round(state.result.stats.total_price_eur),
+    t.cardsN + ': ' + state.result.stats.total_cards,
+    t.archetype + ': ' + archName()];
+  for (const v of ev.violations) lines.push('✕ ' + (v.id === 'conditional' ? MSG.conditional[v.condId][lang](v) : MSG[v.id][lang](v)));
+  for (const f of ev.flags) lines.push('⚠ ' + (MSG['flag_' + f.id] ? MSG['flag_' + f.id][lang](f) : f.id));
+  for (const [k, p] of Object.entries(ev.breakdown)) lines.push('· ' + (EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang)) + ': +' + p + ' pts');
+  try { navigator.clipboard.writeText(lines.join('\n')); } catch (e) {}
+  state.copied = true; renderHeader();
+  setTimeout(() => { state.copied = false; renderHeader(); }, 1600);
+}
+
+function renderAll() {
+  applyTheme(); renderHeader(); renderInput(); renderGuide();
+  const t = T();
+  $('emptyT').textContent = t.emptyT; $('emptyX').textContent = t.emptyX;
+  $('footer').textContent = t.footer;
+  const has = !!state.result;
+  $('empty').style.display = has ? 'none' : '';
+  $('resultWrap').style.display = has ? '' : 'none';
+  if (has) { renderSummary(); renderBanner(); renderValidation(); renderPower(); renderComp(); renderBrowser(); renderCurve(); }
+}
+
+// ================= boot =================
+window.addEventListener('DOMContentLoaded', () => {
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => { state.sysDark = e.matches; applyTheme(); });
+  $('themeBtn').onclick = () => { const eff = state.theme ? state.theme === 'dark' : state.sysDark;
+    state.theme = eff ? 'light' : 'dark'; store.theme = state.theme; applyTheme(); };
+  $('esBtn').onclick = () => { state.lang = 'es'; store.lang = 'es'; renderAll(); };
+  $('enBtn').onclick = () => { state.lang = 'en'; store.lang = 'en'; renderAll(); };
+  $('copyBtn').onclick = copyReport;
+  $('analyzeBtn').onclick = analyze;
+  $('archSel').onchange = (e) => { state.arch = e.target.value; if (state.result) { renderSummary(); renderComp(); } };
+  $('deckText').oninput = () => { state.error = null; renderInput(); };
+  $('gtBtn').onclick = () => { state.grp = 'type'; renderBrowser(); };
+  $('gcBtn').onclick = () => { state.grp = 'cat'; renderBrowser(); };
+  const st = PodEngine.runSelfTest(RULES);
+  if (!st.pass) console.warn('PodEngine selftest FAILED', st.results.filter(r => !r.pass));
+  renderAll();
+});
+})(); }
+</script>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+<div style="position:relative;overflow:hidden;background:var(--panel);border-bottom:1px solid var(--border)">
+  <div style="position:absolute;right:-40px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,oklch(0.55 0.09 260 / .22),transparent 65%)"></div>
+  <div style="position:absolute;right:150px;top:-100px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,oklch(0.5 0.1 300 / .16),transparent 65%)"></div>
+  <div style="position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:14px 20px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:44px;height:44px;border-radius:11px;background:conic-gradient(oklch(0.85 0.06 95),oklch(0.65 0.11 240),oklch(0.45 0.05 300),oklch(0.6 0.16 30),oklch(0.6 0.13 150),oklch(0.85 0.06 95));display:grid;place-items:center;flex:none">
+        <div class="mono" style="width:35px;height:35px;border-radius:8px;background:var(--panel);display:grid;place-items:center;font-weight:700;font-size:20px">Y</div>
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.1">
+        <span style="font-size:19px;font-weight:700;letter-spacing:-0.01em">La guía del Yoryi</span>
+        <span id="appTag" class="mono" style="font-size:10px;color:var(--muted);letter-spacing:0.14em">POD DECK CHECKER</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button id="copyBtn" style="border:1px solid var(--border);background:transparent;border-radius:7px;padding:7px 13px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap">⧉</button>
+      <div style="display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;font-size:12px;font-weight:600">
+        <button id="enBtn" style="border:none;padding:6px 11px">EN</button>
+        <button id="esBtn" style="border:none;padding:6px 11px">ES</button>
+      </div>
+      <button id="themeBtn" title="Tema" style="width:32px;height:32px;border:1px solid var(--border);background:transparent;border-radius:7px;display:grid;place-items:center;font-size:14px">◐</button>
+    </div>
+  </div>
+</div>
+<main style="width:100%;max-width:1180px;margin:0 auto;padding:24px 20px 12px;display:flex;flex-direction:column;gap:20px;box-sizing:border-box">
+  <div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:12px">
+    <div id="inputTitle" class="secT">ANALIZAR MAZO</div>
+    <textarea id="deckText" rows="6" class="mono" style="border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:12px 14px;font-size:12.5px;resize:vertical;min-height:72px"></textarea>
+    <div id="inputNotice" style="display:none;background:var(--warnBg);border:1px solid var(--warnBd);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--warnFg)"></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span id="tryLabel" style="font-size:12px;color:var(--muted)"></span>
+      <span id="samples" style="display:contents"></span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <label style="flex:1;min-width:220px;display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px">
+        <span id="archLabel" style="color:var(--muted);white-space:nowrap"></span>
+        <select id="archSel" style="flex:1;border:none;background:transparent;padding:10px 0;font-weight:600;cursor:pointer"></select>
+      </label>
+      <button id="analyzeBtn" style="background:var(--accent);color:var(--accentFg);border:none;font-weight:600;font-size:14.5px;padding:11px 30px;border-radius:8px"></button>
+    </div>
+  </div>
+
+  <div id="empty" style="border:1.5px dashed var(--border);border-radius:12px;padding:44px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
+    <div style="display:flex;gap:4px;padding-bottom:6px">
+      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.93 0.05 95);border:1.5px solid var(--muted)"></div>
+      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.7 0.11 240);border:1.5px solid var(--muted)"></div>
+      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.35 0.03 300);border:1.5px solid var(--muted)"></div>
+      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.6 0.17 30);border:1.5px solid var(--muted)"></div>
+      <div style="width:14px;height:14px;border-radius:50%;background:oklch(0.62 0.13 150);border:1.5px solid var(--muted)"></div>
+    </div>
+    <div id="emptyT" style="font-size:16px;font-weight:700"></div>
+    <div id="emptyX" style="font-size:13px;color:var(--muted);max-width:420px"></div>
+  </div>
+
+  <div id="resultWrap" style="display:none;flex-direction:column;gap:20px">
+    <div id="summary" style="display:flex;gap:14px;align-items:stretch;flex-wrap:wrap"></div>
+    <div id="banner"></div>
+    <div id="validation" style="display:none"></div>
+    <div id="power" class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:2px"></div>
+    <div id="comp" style="background:var(--compBg);border:1px solid var(--compBd);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:12px"></div>
+    <div class="panel" style="padding:20px 22px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="browserT" class="secT"></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="groupByLbl" style="font-size:11.5px;color:var(--muted)"></span>
+          <div style="display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;font-size:11.5px;font-weight:600">
+            <button id="gtBtn" style="border:none;padding:6px 13px"></button>
+            <button id="gcBtn" style="border:none;padding:6px 13px"></button>
+          </div>
+        </div>
+      </div>
+      <div id="groups" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:start"></div>
+    </div>
+    <div id="curveWrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px"></div>
+  </div>
+
+  <div class="panel" style="overflow:hidden">
+    <div id="guideT" class="secT" style="padding:15px 22px;border-bottom:1px solid var(--border)"></div>
+    <div id="guideBody"></div>
+  </div>
+</main>
+<div id="footer" class="mono" style="text-align:center;font-size:11px;color:var(--faint);padding:10px 20px 28px"></div>
+<div id="popover" style="display:none;position:fixed;width:264px;height:368px;border-radius:13px;box-shadow:0 18px 50px rgba(0,0,0,.45);z-index:99;pointer-events:none;background:var(--panel) center/cover no-repeat"></div>
+</div>
+</body>
+</html>

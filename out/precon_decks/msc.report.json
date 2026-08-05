@@ -1,0 +1,1411 @@
+{
+  "commander_code": "msc",
+  "commander_name": "Marvel Super Heroes Commander",
+  "expansion_code": "msh",
+  "expansion_name": "Marvel Super Heroes",
+  "released_at": "2026-06-26",
+  "source_url": "https://magic.wizards.com/en/news/announcements/marvel-super-heroes-commander-decklists",
+  "decks": [
+    {
+      "deck_title": "Avengers Assemble",
+      "commanders": [
+        "Captain America, Team Leader"
+      ],
+      "cards": [
+        {
+          "quantity": 1,
+          "name": "Captain America, Team Leader"
+        },
+        {
+          "quantity": 1,
+          "name": "Avenge"
+        },
+        {
+          "quantity": 1,
+          "name": "Falcon and Redwing"
+        },
+        {
+          "quantity": 1,
+          "name": "Hercules, Olympian Hero"
+        },
+        {
+          "quantity": 1,
+          "name": "Heroic Return"
+        },
+        {
+          "quantity": 1,
+          "name": "Heroic Sacrifice"
+        },
+        {
+          "quantity": 1,
+          "name": "Methods of the Mighty"
+        },
+        {
+          "quantity": 1,
+          "name": "Winter Soldier, Reborn Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Iron Man, Armored Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Jarvis, Earth's Mightiest Butler"
+        },
+        {
+          "quantity": 1,
+          "name": "Professor Hulk"
+        },
+        {
+          "quantity": 1,
+          "name": "The Wasp, Winsome Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "West Coast Expansion"
+        },
+        {
+          "quantity": 1,
+          "name": "Firebird, Blazing Ranger"
+        },
+        {
+          "quantity": 1,
+          "name": "Photon, Mighty Marvel"
+        },
+        {
+          "quantity": 1,
+          "name": "She-Hulk, Wallbreaker"
+        },
+        {
+          "quantity": 1,
+          "name": "War Machine, Avenging Arsenal"
+        },
+        {
+          "quantity": 1,
+          "name": "Ant-Man, Elusive Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Black Widow, Agile Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Captain Marvel, Apex Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Director Nick Fury"
+        },
+        {
+          "quantity": 1,
+          "name": "Hawkeye, Avenging Archer"
+        },
+        {
+          "quantity": 1,
+          "name": "Love on the Battlefield"
+        },
+        {
+          "quantity": 1,
+          "name": "Quicksilver, Speedster"
+        },
+        {
+          "quantity": 1,
+          "name": "Scarlet Witch, Chaotic Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Shang-Chi and the Ten Rings"
+        },
+        {
+          "quantity": 1,
+          "name": "Avengers Quinjet"
+        },
+        {
+          "quantity": 1,
+          "name": "Hulkbuster Armor"
+        },
+        {
+          "quantity": 1,
+          "name": "Jocasta, Automaton Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Vision, Synthezoid Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Austere Command"
+        },
+        {
+          "quantity": 1,
+          "name": "Bastion Protector"
+        },
+        {
+          "quantity": 1,
+          "name": "Dismantling Wave"
+        },
+        {
+          "quantity": 1,
+          "name": "Folk Hero"
+        },
+        {
+          "quantity": 1,
+          "name": "Gift of Immortality"
+        },
+        {
+          "quantity": 1,
+          "name": "Kindred Discovery"
+        },
+        {
+          "quantity": 1,
+          "name": "Door of Destinies"
+        },
+        {
+          "quantity": 1,
+          "name": "Metallic Mimic"
+        },
+        {
+          "quantity": 1,
+          "name": "Tome of Legends"
+        },
+        {
+          "quantity": 1,
+          "name": "Clifftop Retreat"
+        },
+        {
+          "quantity": 1,
+          "name": "Coastal Peak"
+        },
+        {
+          "quantity": 1,
+          "name": "Exotic Orchard"
+        },
+        {
+          "quantity": 1,
+          "name": "Frostboil Snarl"
+        },
+        {
+          "quantity": 1,
+          "name": "Furycalm Snarl"
+        },
+        {
+          "quantity": 1,
+          "name": "Glacial Fortress"
+        },
+        {
+          "quantity": 1,
+          "name": "Glittering Massif"
+        },
+        {
+          "quantity": 1,
+          "name": "Irrigated Farmland"
+        },
+        {
+          "quantity": 1,
+          "name": "Plaza of Heroes"
+        },
+        {
+          "quantity": 1,
+          "name": "Port Town"
+        },
+        {
+          "quantity": 1,
+          "name": "Prairie Stream"
+        },
+        {
+          "quantity": 1,
+          "name": "Radiant Summit"
+        },
+        {
+          "quantity": 1,
+          "name": "Scavenger Grounds"
+        },
+        {
+          "quantity": 1,
+          "name": "Scorched Geyser"
+        },
+        {
+          "quantity": 1,
+          "name": "Spectator Seating"
+        },
+        {
+          "quantity": 1,
+          "name": "Sulfur Falls"
+        },
+        {
+          "quantity": 1,
+          "name": "Raise the Palisade"
+        },
+        {
+          "quantity": 1,
+          "name": "Thor, Asgard's Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Captain Mar-Vell, Space-Born"
+        },
+        {
+          "quantity": 1,
+          "name": "Patriot, Shield Wielder"
+        },
+        {
+          "quantity": 1,
+          "name": "Speed, Young Avenger"
+        },
+        {
+          "quantity": 1,
+          "name": "Captain America, Living Legend"
+        },
+        {
+          "quantity": 1,
+          "name": "Avengers Tower"
+        },
+        {
+          "quantity": 1,
+          "name": "Destroy Evil"
+        },
+        {
+          "quantity": 1,
+          "name": "Make Your Move"
+        },
+        {
+          "quantity": 1,
+          "name": "Swords to Plowshares"
+        },
+        {
+          "quantity": 1,
+          "name": "Arcane Denial"
+        },
+        {
+          "quantity": 1,
+          "name": "Reconnaissance Mission"
+        },
+        {
+          "quantity": 1,
+          "name": "Rip Apart"
+        },
+        {
+          "quantity": 1,
+          "name": "Arcane Signet Avengers"
+        },
+        {
+          "quantity": 1,
+          "name": "Hero's Blade"
+        },
+        {
+          "quantity": 1,
+          "name": "Relic of Legends"
+        },
+        {
+          "quantity": 1,
+          "name": "Sol Ring Avengers"
+        },
+        {
+          "quantity": 1,
+          "name": "Talisman of Conviction"
+        },
+        {
+          "quantity": 1,
+          "name": "Talisman of Creativity"
+        },
+        {
+          "quantity": 1,
+          "name": "Talisman of Progress"
+        },
+        {
+          "quantity": 1,
+          "name": "Thought Vessel"
+        },
+        {
+          "quantity": 1,
+          "name": "Command Tower Avengers"
+        },
+        {
+          "quantity": 1,
+          "name": "Mystic Monastery"
+        },
+        {
+          "quantity": 1,
+          "name": "Path of Ancestry"
+        },
+        {
+          "quantity": 1,
+          "name": "Secluded Courtyard"
+        },
+        {
+          "quantity": 1,
+          "name": "Unclaimed Territory"
+        },
+        {
+          "quantity": 1,
+          "name": "Fellwar Stone"
+        },
+        {
+          "quantity": 1,
+          "name": "Herald's Horn"
+        },
+        {
+          "quantity": 1,
+          "name": "Rescue, Pepper Potts"
+        },
+        {
+          "quantity": 6,
+          "name": "Plains"
+        },
+        {
+          "quantity": 5,
+          "name": "Island"
+        },
+        {
+          "quantity": 5,
+          "name": "Mountain"
+        }
+      ],
+      "total_cards": 100
+    },
+    {
+      "deck_title": "Wakanda Forever",
+      "commanders": [
+        "T'Challa, the Black Panther"
+      ],
+      "cards": [
+        {
+          "quantity": 1,
+          "name": "T'Challa, the Black Panther"
+        },
+        {
+          "quantity": 1,
+          "name": "Dora Milaje Elite"
+        },
+        {
+          "quantity": 1,
+          "name": "Everett K. Ross, Hapless Attaché"
+        },
+        {
+          "quantity": 1,
+          "name": "Hatut Zeraze Strike Force"
+        },
+        {
+          "quantity": 1,
+          "name": "King Solomon's Frogs"
+        },
+        {
+          "quantity": 1,
+          "name": "Midnight Angel Armor"
+        },
+        {
+          "quantity": 1,
+          "name": "Queen Mother Ramonda"
+        },
+        {
+          "quantity": 1,
+          "name": "Royal Talon Fighter Jet"
+        },
+        {
+          "quantity": 1,
+          "name": "The Spear of Bashenga"
+        },
+        {
+          "quantity": 1,
+          "name": "Ancestral Communion"
+        },
+        {
+          "quantity": 1,
+          "name": "Fight for the Throne"
+        },
+        {
+          "quantity": 1,
+          "name": "M'Baku, Jabari Chieftain"
+        },
+        {
+          "quantity": 1,
+          "name": "Nakia, Wakandan Operative"
+        },
+        {
+          "quantity": 1,
+          "name": "W'Kabi, Shield of the Nation"
+        },
+        {
+          "quantity": 1,
+          "name": "Wakanda Forever!"
+        },
+        {
+          "quantity": 1,
+          "name": "Zuri, Warrior of Wakanda"
+        },
+        {
+          "quantity": 1,
+          "name": "Bast, Panther Goddess"
+        },
+        {
+          "quantity": 1,
+          "name": "Okoye, Mighty and Adored"
+        },
+        {
+          "quantity": 1,
+          "name": "Shuri, the Black Panther"
+        },
+        {
+          "quantity": 1,
+          "name": "Storm, Queen of Wakanda"
+        },
+        {
+          "quantity": 1,
+          "name": "T'Chaka, Venerable King"
+        },
+        {
+          "quantity": 1,
+          "name": "Heart-Shaped Herb"
+        },
+        {
+          "quantity": 1,
+          "name": "Kimoyo Beads"
+        },
+        {
+          "quantity": 1,
+          "name": "N'Yami-Class Mother Ship"
+        },
+        {
+          "quantity": 1,
+          "name": "Panther Habit"
+        },
+        {
+          "quantity": 1,
+          "name": "Panther Robot"
+        },
+        {
+          "quantity": 1,
+          "name": "Shuri's Fabricator"
+        },
+        {
+          "quantity": 1,
+          "name": "Vibranium Mining Mech"
+        },
+        {
+          "quantity": 1,
+          "name": "Vibranium Strike Gauntlets"
+        },
+        {
+          "quantity": 1,
+          "name": "The Great Mound"
+        },
+        {
+          "quantity": 1,
+          "name": "Divine Visitation"
+        },
+        {
+          "quantity": 1,
+          "name": "Loyal Retainers"
+        },
+        {
+          "quantity": 1,
+          "name": "Martial Coup"
+        },
+        {
+          "quantity": 1,
+          "name": "Vanquish the Horde"
+        },
+        {
+          "quantity": 1,
+          "name": "Birds of Paradise"
+        },
+        {
+          "quantity": 1,
+          "name": "Conduit of Worlds"
+        },
+        {
+          "quantity": 1,
+          "name": "Greater Good"
+        },
+        {
+          "quantity": 1,
+          "name": "Nature's Lore"
+        },
+        {
+          "quantity": 1,
+          "name": "Overwhelming Stampede"
+        },
+        {
+          "quantity": 1,
+          "name": "Coveted Jewel"
+        },
+        {
+          "quantity": 1,
+          "name": "Gilded Lotus"
+        },
+        {
+          "quantity": 1,
+          "name": "Helm of the Host"
+        },
+        {
+          "quantity": 1,
+          "name": "Metalwork Colossus"
+        },
+        {
+          "quantity": 1,
+          "name": "Solemn Simulacrum"
+        },
+        {
+          "quantity": 1,
+          "name": "Trading Post"
+        },
+        {
+          "quantity": 1,
+          "name": "Bountiful Promenade"
+        },
+        {
+          "quantity": 1,
+          "name": "Canopy Vista"
+        },
+        {
+          "quantity": 1,
+          "name": "Fortified Village"
+        },
+        {
+          "quantity": 1,
+          "name": "Razorverge Thicket"
+        },
+        {
+          "quantity": 1,
+          "name": "Scattered Groves"
+        },
+        {
+          "quantity": 1,
+          "name": "Scavenger Grounds"
+        },
+        {
+          "quantity": 1,
+          "name": "Sungrass Prairie"
+        },
+        {
+          "quantity": 1,
+          "name": "Sunpetal Grove"
+        },
+        {
+          "quantity": 1,
+          "name": "Throne of the High City"
+        },
+        {
+          "quantity": 1,
+          "name": "Scourglass"
+        },
+        {
+          "quantity": 1,
+          "name": "Fleecemane Lion"
+        },
+        {
+          "quantity": 1,
+          "name": "Hammer of Nazahn"
+        },
+        {
+          "quantity": 1,
+          "name": "Mind's Eye"
+        },
+        {
+          "quantity": 1,
+          "name": "Sword of the Animist"
+        },
+        {
+          "quantity": 1,
+          "name": "Thran Dynamo"
+        },
+        {
+          "quantity": 1,
+          "name": "Dispatch"
+        },
+        {
+          "quantity": 1,
+          "name": "Generous Gift"
+        },
+        {
+          "quantity": 1,
+          "name": "Ingenious Smith"
+        },
+        {
+          "quantity": 1,
+          "name": "Palace Jailer"
+        },
+        {
+          "quantity": 1,
+          "name": "Valorous Stance"
+        },
+        {
+          "quantity": 1,
+          "name": "Beast Within"
+        },
+        {
+          "quantity": 1,
+          "name": "Harmonize"
+        },
+        {
+          "quantity": 1,
+          "name": "Loyal Guardian"
+        },
+        {
+          "quantity": 1,
+          "name": "Arcane Signet Wakanda"
+        },
+        {
+          "quantity": 1,
+          "name": "Meteor Golem"
+        },
+        {
+          "quantity": 1,
+          "name": "Sol Ring Wakanda"
+        },
+        {
+          "quantity": 1,
+          "name": "Whispersilk Cloak"
+        },
+        {
+          "quantity": 1,
+          "name": "Command Tower Wakanda"
+        },
+        {
+          "quantity": 1,
+          "name": "Evolving Wilds"
+        },
+        {
+          "quantity": 1,
+          "name": "Path of Ancestry"
+        },
+        {
+          "quantity": 1,
+          "name": "Terramorphic Expanse"
+        },
+        {
+          "quantity": 12,
+          "name": "Plains"
+        },
+        {
+          "quantity": 12,
+          "name": "Forest"
+        }
+      ],
+      "total_cards": 100
+    },
+    {
+      "deck_title": "The Fantastic Four",
+      "commanders": [
+        "Invisible Woman",
+        "Mister Fantastic",
+        "Human Torch",
+        "The Thing"
+      ],
+      "cards": [
+        {
+          "quantity": 1,
+          "name": "Invisible Woman"
+        },
+        {
+          "quantity": 1,
+          "name": "Mister Fantastic"
+        },
+        {
+          "quantity": 1,
+          "name": "Human Torch"
+        },
+        {
+          "quantity": 1,
+          "name": "The Thing"
+        },
+        {
+          "quantity": 1,
+          "name": "Galactus, Devourer of Worlds"
+        },
+        {
+          "quantity": 1,
+          "name": "Silver Surfer, Galactus's Herald"
+        },
+        {
+          "quantity": 1,
+          "name": "Invisible Force Field"
+        },
+        {
+          "quantity": 1,
+          "name": "Ultimate Nullification"
+        },
+        {
+          "quantity": 1,
+          "name": "Council of Reeds"
+        },
+        {
+          "quantity": 1,
+          "name": "Fantastic Elasticity"
+        },
+        {
+          "quantity": 1,
+          "name": "Lockjaw, Slobbering Teleporter"
+        },
+        {
+          "quantity": 1,
+          "name": "Valeria Richards, Precocious"
+        },
+        {
+          "quantity": 1,
+          "name": "Alicia Masters, Skilled Sculptor"
+        },
+        {
+          "quantity": 1,
+          "name": "Flame On!"
+        },
+        {
+          "quantity": 1,
+          "name": "Franklin Richards, Ascendant"
+        },
+        {
+          "quantity": 1,
+          "name": "Nova Flame"
+        },
+        {
+          "quantity": 1,
+          "name": "It's Clobberin' Time!"
+        },
+        {
+          "quantity": 1,
+          "name": "Medusa, Inhuman Queen"
+        },
+        {
+          "quantity": 1,
+          "name": "Black Bolt, Inhuman King"
+        },
+        {
+          "quantity": 1,
+          "name": "Cosmic Crucible"
+        },
+        {
+          "quantity": 1,
+          "name": "Crystal, Inhuman Princess"
+        },
+        {
+          "quantity": 1,
+          "name": "Dragon Man, Reformed Robot"
+        },
+        {
+          "quantity": 1,
+          "name": "First Family"
+        },
+        {
+          "quantity": 1,
+          "name": "Namor, Atlantean King"
+        },
+        {
+          "quantity": 1,
+          "name": "Power Pack"
+        },
+        {
+          "quantity": 1,
+          "name": "Willie Lumpkin, Postman"
+        },
+        {
+          "quantity": 1,
+          "name": "The Fantasticar"
+        },
+        {
+          "quantity": 1,
+          "name": "H.E.R.B.I.E., Lovable Robot"
+        },
+        {
+          "quantity": 1,
+          "name": "Negative Zone Portal"
+        },
+        {
+          "quantity": 1,
+          "name": "Unstable Molecule Suit"
+        },
+        {
+          "quantity": 1,
+          "name": "Cleansing Nova"
+        },
+        {
+          "quantity": 1,
+          "name": "Clever Concealment"
+        },
+        {
+          "quantity": 1,
+          "name": "Collective Effort"
+        },
+        {
+          "quantity": 1,
+          "name": "Monologue Tax"
+        },
+        {
+          "quantity": 1,
+          "name": "Promise of Loyalty"
+        },
+        {
+          "quantity": 1,
+          "name": "Tragic Arrogance"
+        },
+        {
+          "quantity": 1,
+          "name": "Quantum Misalignment"
+        },
+        {
+          "quantity": 1,
+          "name": "Recurring Insight"
+        },
+        {
+          "quantity": 1,
+          "name": "Into the Time Vortex"
+        },
+        {
+          "quantity": 1,
+          "name": "Seize the Day"
+        },
+        {
+          "quantity": 1,
+          "name": "Path of Discovery"
+        },
+        {
+          "quantity": 1,
+          "name": "Galvanic Iteration"
+        },
+        {
+          "quantity": 1,
+          "name": "Taunt from the Rampart"
+        },
+        {
+          "quantity": 1,
+          "name": "Whirlwind of Thought"
+        },
+        {
+          "quantity": 1,
+          "name": "Chromatic Lantern"
+        },
+        {
+          "quantity": 1,
+          "name": "Mirage Mirror"
+        },
+        {
+          "quantity": 1,
+          "name": "Canopy Vista"
+        },
+        {
+          "quantity": 1,
+          "name": "Cinder Glade"
+        },
+        {
+          "quantity": 1,
+          "name": "Clifftop Retreat"
+        },
+        {
+          "quantity": 1,
+          "name": "Exotic Orchard"
+        },
+        {
+          "quantity": 1,
+          "name": "Fabled Passage"
+        },
+        {
+          "quantity": 1,
+          "name": "Glacial Fortress"
+        },
+        {
+          "quantity": 1,
+          "name": "Hinterland Harbor"
+        },
+        {
+          "quantity": 1,
+          "name": "Prairie Stream"
+        },
+        {
+          "quantity": 1,
+          "name": "Radiant Summit"
+        },
+        {
+          "quantity": 1,
+          "name": "Rejuvenating Springs"
+        },
+        {
+          "quantity": 1,
+          "name": "Rootbound Crag"
+        },
+        {
+          "quantity": 1,
+          "name": "Scorched Geyser"
+        },
+        {
+          "quantity": 1,
+          "name": "Sodden Verdure"
+        },
+        {
+          "quantity": 1,
+          "name": "Sulfur Falls"
+        },
+        {
+          "quantity": 1,
+          "name": "Sunpetal Grove"
+        },
+        {
+          "quantity": 1,
+          "name": "Terramorphic Expanse"
+        },
+        {
+          "quantity": 1,
+          "name": "Mind's Dilation"
+        },
+        {
+          "quantity": 1,
+          "name": "Annie Joins Up"
+        },
+        {
+          "quantity": 1,
+          "name": "Genesis Ultimatum"
+        },
+        {
+          "quantity": 1,
+          "name": "Mister Fantastic, Reed Richards"
+        },
+        {
+          "quantity": 1,
+          "name": "Baxter Building"
+        },
+        {
+          "quantity": 1,
+          "name": "Bovine Intervention"
+        },
+        {
+          "quantity": 1,
+          "name": "Cut a Deal"
+        },
+        {
+          "quantity": 1,
+          "name": "Path to Exile"
+        },
+        {
+          "quantity": 1,
+          "name": "Deep Analysis"
+        },
+        {
+          "quantity": 1,
+          "name": "Cultivate"
+        },
+        {
+          "quantity": 1,
+          "name": "Farseek"
+        },
+        {
+          "quantity": 1,
+          "name": "Terramorph"
+        },
+        {
+          "quantity": 1,
+          "name": "Three Visits"
+        },
+        {
+          "quantity": 1,
+          "name": "Expressive Iteration"
+        },
+        {
+          "quantity": 1,
+          "name": "Hull Breach"
+        },
+        {
+          "quantity": 1,
+          "name": "Arcane Signet The Fantastic Four"
+        },
+        {
+          "quantity": 1,
+          "name": "Lightning Greaves"
+        },
+        {
+          "quantity": 1,
+          "name": "Sol Ring The Fantastic Four"
+        },
+        {
+          "quantity": 1,
+          "name": "Command Tower The Fantastic Four"
+        },
+        {
+          "quantity": 1,
+          "name": "Evolving Wilds"
+        },
+        {
+          "quantity": 1,
+          "name": "Path of Ancestry"
+        },
+        {
+          "quantity": 5,
+          "name": "Plains"
+        },
+        {
+          "quantity": 4,
+          "name": "Island"
+        },
+        {
+          "quantity": 3,
+          "name": "Mountain"
+        },
+        {
+          "quantity": 5,
+          "name": "Forest"
+        }
+      ],
+      "total_cards": 100
+    },
+    {
+      "deck_title": "Doom Prevails",
+      "commanders": [
+        "Doctor Doom, King of Latveria"
+      ],
+      "cards": [
+        {
+          "quantity": 1,
+          "name": "Doctor Doom, King of Latveria"
+        },
+        {
+          "quantity": 1,
+          "name": "Molecule Man"
+        },
+        {
+          "quantity": 1,
+          "name": "Extract Power"
+        },
+        {
+          "quantity": 1,
+          "name": "Glorious Purpose"
+        },
+        {
+          "quantity": 1,
+          "name": "Helmut Zemo, Mastermind"
+        },
+        {
+          "quantity": 1,
+          "name": "Kang Dynasty"
+        },
+        {
+          "quantity": 1,
+          "name": "Age of Ultron"
+        },
+        {
+          "quantity": 1,
+          "name": "Damocles Base, Sword of Kang"
+        },
+        {
+          "quantity": 1,
+          "name": "Endless Ranks of HYDRA"
+        },
+        {
+          "quantity": 1,
+          "name": "The Frightful Four"
+        },
+        {
+          "quantity": 1,
+          "name": "Iron Monger, Sadistic Tycoon"
+        },
+        {
+          "quantity": 1,
+          "name": "Klaw, Master of Sound"
+        },
+        {
+          "quantity": 1,
+          "name": "Abomination, World Ravager"
+        },
+        {
+          "quantity": 1,
+          "name": "Batroc the Leaper"
+        },
+        {
+          "quantity": 1,
+          "name": "Killmonger, Ruthless Usurper"
+        },
+        {
+          "quantity": 1,
+          "name": "Lady Loki, Agent of Chaos"
+        },
+        {
+          "quantity": 1,
+          "name": "Living Laser"
+        },
+        {
+          "quantity": 1,
+          "name": "Loki's Scepter"
+        },
+        {
+          "quantity": 1,
+          "name": "Puppet Master, String Puller"
+        },
+        {
+          "quantity": 1,
+          "name": "Stilt-Man, Towering Terror"
+        },
+        {
+          "quantity": 1,
+          "name": "Titania, Proud Pummeler"
+        },
+        {
+          "quantity": 1,
+          "name": "Archnemesis"
+        },
+        {
+          "quantity": 1,
+          "name": "Kang Prime"
+        },
+        {
+          "quantity": 1,
+          "name": "Loki, the Deceiver"
+        },
+        {
+          "quantity": 1,
+          "name": "Red Ghost, Intangible Genius"
+        },
+        {
+          "quantity": 1,
+          "name": "The Squadron Sinister"
+        },
+        {
+          "quantity": 1,
+          "name": "Typhoid Mary, Fractured"
+        },
+        {
+          "quantity": 1,
+          "name": "Ultron, Unlimited"
+        },
+        {
+          "quantity": 1,
+          "name": "Doom's Time Platform"
+        },
+        {
+          "quantity": 1,
+          "name": "Tri-Sentinel, Act of Vengeance"
+        },
+        {
+          "quantity": 1,
+          "name": "Black Market Connections"
+        },
+        {
+          "quantity": 1,
+          "name": "Kindred Dominance"
+        },
+        {
+          "quantity": 1,
+          "name": "Lethal Scheme"
+        },
+        {
+          "quantity": 1,
+          "name": "Toxic Deluge"
+        },
+        {
+          "quantity": 1,
+          "name": "Blasphemous Act"
+        },
+        {
+          "quantity": 1,
+          "name": "Chaos Warp"
+        },
+        {
+          "quantity": 1,
+          "name": "Bedevil"
+        },
+        {
+          "quantity": 1,
+          "name": "Currency Converter"
+        },
+        {
+          "quantity": 1,
+          "name": "Progenitor's Icon"
+        },
+        {
+          "quantity": 1,
+          "name": "Skullclamp"
+        },
+        {
+          "quantity": 1,
+          "name": "Canyon Slough"
+        },
+        {
+          "quantity": 1,
+          "name": "Choked Estuary"
+        },
+        {
+          "quantity": 1,
+          "name": "Coastal Peak"
+        },
+        {
+          "quantity": 1,
+          "name": "Dragonskull Summit"
+        },
+        {
+          "quantity": 1,
+          "name": "Drowned Catacomb"
+        },
+        {
+          "quantity": 1,
+          "name": "Exotic Orchard"
+        },
+        {
+          "quantity": 1,
+          "name": "Fetid Pools"
+        },
+        {
+          "quantity": 1,
+          "name": "Foreboding Ruins"
+        },
+        {
+          "quantity": 1,
+          "name": "Frostboil Snarl"
+        },
+        {
+          "quantity": 1,
+          "name": "Luxury Suite"
+        },
+        {
+          "quantity": 1,
+          "name": "Scavenger Grounds"
+        },
+        {
+          "quantity": 1,
+          "name": "Scorched Geyser"
+        },
+        {
+          "quantity": 1,
+          "name": "Smoldering Marsh"
+        },
+        {
+          "quantity": 1,
+          "name": "Sulfur Falls"
+        },
+        {
+          "quantity": 1,
+          "name": "Sunken Hollow"
+        },
+        {
+          "quantity": 1,
+          "name": "Spark Double"
+        },
+        {
+          "quantity": 1,
+          "name": "Titan of Littjara"
+        },
+        {
+          "quantity": 1,
+          "name": "Baron Strucker, HYDRA Overlord"
+        },
+        {
+          "quantity": 1,
+          "name": "Moonstone, Harsh Mistress"
+        },
+        {
+          "quantity": 1,
+          "name": "Kang, Temporal Tyrant"
+        },
+        {
+          "quantity": 1,
+          "name": "Madame Hydra"
+        },
+        {
+          "quantity": 1,
+          "name": "Villainous Hideout"
+        },
+        {
+          "quantity": 1,
+          "name": "Containment Construct"
+        },
+        {
+          "quantity": 1,
+          "name": "Chameleon, Master of Disguise"
+        },
+        {
+          "quantity": 1,
+          "name": "Propaganda"
+        },
+        {
+          "quantity": 1,
+          "name": "Night's Whisper"
+        },
+        {
+          "quantity": 1,
+          "name": "Syphon Mind"
+        },
+        {
+          "quantity": 1,
+          "name": "Tombstone, Career Criminal"
+        },
+        {
+          "quantity": 1,
+          "name": "Withering Torment"
+        },
+        {
+          "quantity": 1,
+          "name": "Superior Foes of Spider-Man"
+        },
+        {
+          "quantity": 1,
+          "name": "Vandalblast"
+        },
+        {
+          "quantity": 1,
+          "name": "Prowler, Clawed Thief"
+        },
+        {
+          "quantity": 1,
+          "name": "Terminate"
+        },
+        {
+          "quantity": 1,
+          "name": "Arcane Signet (Villains)"
+        },
+        {
+          "quantity": 1,
+          "name": "Patchwork Banner"
+        },
+        {
+          "quantity": 1,
+          "name": "Sol Ring (Villains)"
+        },
+        {
+          "quantity": 1,
+          "name": "Swiftfoot Boots"
+        },
+        {
+          "quantity": 1,
+          "name": "Talisman of Dominance"
+        },
+        {
+          "quantity": 1,
+          "name": "Talisman of Indulgence"
+        },
+        {
+          "quantity": 1,
+          "name": "Command Tower (Villains)"
+        },
+        {
+          "quantity": 1,
+          "name": "Crumbling Necropolis"
+        },
+        {
+          "quantity": 1,
+          "name": "Path of Ancestry"
+        },
+        {
+          "quantity": 1,
+          "name": "Secluded Courtyard"
+        },
+        {
+          "quantity": 1,
+          "name": "Terramorphic Expanse"
+        },
+        {
+          "quantity": 1,
+          "name": "Unclaimed Territory"
+        },
+        {
+          "quantity": 4,
+          "name": "Island"
+        },
+        {
+          "quantity": 6,
+          "name": "Swamp"
+        },
+        {
+          "quantity": 5,
+          "name": "Mountain"
+        }
+      ],
+      "total_cards": 100
+    }
+  ],
+  "status": "ok",
+  "generated_at": "2026-08-03T14:53:16.643219Z"
+}

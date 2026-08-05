@@ -1,0 +1,13 @@
+# Example rules for evaluating decks
+
+max_high_price_cards:
+  threshold_usd: 15.0  # what counts as "high price"
+  max_count: 3         # maximum allowed high-price card copies
+
+min_card_types:
+  types_required: 3
+
+ban_keywords:
+  keywords:
+    - "exile"
+    - "destroy"

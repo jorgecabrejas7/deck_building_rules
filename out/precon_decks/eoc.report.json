@@ -1,0 +1,756 @@
+{
+  "commander_code": "eoc",
+  "commander_name": "Edge of Eternities Commander",
+  "expansion_code": "eoe",
+  "expansion_name": "Edge of Eternities",
+  "released_at": "2025-08-01",
+  "source_url": "https://magic.wizards.com/en/news/announcements/edge-of-eternities-commander-decklists",
+  "decks": [
+    {
+      "deck_title": "World Shaper",
+      "commanders": [
+        "Hearthhull, the Worldseed",
+        "Szarel, Genesis Shepherd"
+      ],
+      "cards": [
+        {
+          "quantity": 1,
+          "name": "Hearthhull, the Worldseed"
+        },
+        {
+          "quantity": 1,
+          "name": "Szarel, Genesis Shepherd"
+        },
+        {
+          "quantity": 1,
+          "name": "Eumidian Wastewaker"
+        },
+        {
+          "quantity": 1,
+          "name": "Evendo Brushrazer"
+        },
+        {
+          "quantity": 1,
+          "name": "Planetary Annihilation"
+        },
+        {
+          "quantity": 1,
+          "name": "Baloth Prime"
+        },
+        {
+          "quantity": 1,
+          "name": "Exploration Broodship"
+        },
+        {
+          "quantity": 1,
+          "name": "Horizon Explorer"
+        },
+        {
+          "quantity": 1,
+          "name": "Scouring Swarm"
+        },
+        {
+          "quantity": 1,
+          "name": "Eumidian Hatchery"
+        },
+        {
+          "quantity": 1,
+          "name": "Festering Thicket"
+        },
+        {
+          "quantity": 1,
+          "name": "Vernal Fen"
+        },
+        {
+          "quantity": 1,
+          "name": "Fabled Passage"
+        },
+        {
+          "quantity": 1,
+          "name": "Braids, Arisen Nightmare"
+        },
+        {
+          "quantity": 1,
+          "name": "God-Eternal Bontu"
+        },
+        {
+          "quantity": 1,
+          "name": "Blasphemous Act"
+        },
+        {
+          "quantity": 1,
+          "name": "Hammer of Purphoros"
+        },
+        {
+          "quantity": 1,
+          "name": "Moraug, Fury of Akoum"
+        },
+        {
+          "quantity": 1,
+          "name": "Augur of Autumn"
+        },
+        {
+          "quantity": 1,
+          "name": "Centaur Vinecrasher"
+        },
+        {
+          "quantity": 1,
+          "name": "Formless Genesis"
+        },
+        {
+          "quantity": 1,
+          "name": "Loamcrafter Faun"
+        },
+        {
+          "quantity": 1,
+          "name": "Multani, Yavimaya's Avatar"
+        },
+        {
+          "quantity": 1,
+          "name": "Oracle of Mul Daya"
+        },
+        {
+          "quantity": 1,
+          "name": "Pest Infestation"
+        },
+        {
+          "quantity": 1,
+          "name": "Rampaging Baloths"
+        },
+        {
+          "quantity": 1,
+          "name": "Splendid Reclamation"
+        },
+        {
+          "quantity": 1,
+          "name": "Tireless Tracker"
+        },
+        {
+          "quantity": 1,
+          "name": "Titania, Protector of Argoth"
+        },
+        {
+          "quantity": 1,
+          "name": "World Breaker"
+        },
+        {
+          "quantity": 1,
+          "name": "Escape to the Wilds"
+        },
+        {
+          "quantity": 1,
+          "name": "Gaze of Granite"
+        },
+        {
+          "quantity": 1,
+          "name": "The Gitrog Monster"
+        },
+        {
+          "quantity": 1,
+          "name": "Korvold, Fae-Cursed King"
+        },
+        {
+          "quantity": 1,
+          "name": "Mazirek, Kraul Death Priest"
+        },
+        {
+          "quantity": 1,
+          "name": "Omnath, Locus of Rage"
+        },
+        {
+          "quantity": 1,
+          "name": "Soul of Windgrace"
+        },
+        {
+          "quantity": 1,
+          "name": "Windgrace's Judgment"
+        },
+        {
+          "quantity": 1,
+          "name": "Worldsoul's Rage"
+        },
+        {
+          "quantity": 1,
+          "name": "Canyon Slough"
+        },
+        {
+          "quantity": 1,
+          "name": "Cinder Glade"
+        },
+        {
+          "quantity": 1,
+          "name": "Karplusan Forest"
+        },
+        {
+          "quantity": 1,
+          "name": "Llanowar Wastes"
+        },
+        {
+          "quantity": 1,
+          "name": "Sheltered Thicket"
+        },
+        {
+          "quantity": 1,
+          "name": "Smoldering Marsh"
+        },
+        {
+          "quantity": 1,
+          "name": "Sulfurous Springs"
+        },
+        {
+          "quantity": 1,
+          "name": "Twilight Mire"
+        },
+        {
+          "quantity": 1,
+          "name": "Viridescent Bog"
+        },
+        {
+          "quantity": 1,
+          "name": "Farseek"
+        },
+        {
+          "quantity": 1,
+          "name": "Springbloom Druid"
+        },
+        {
+          "quantity": 1,
+          "name": "Binding the Old Gods"
+        },
+        {
+          "quantity": 1,
+          "name": "Arcane Signet"
+        },
+        {
+          "quantity": 1,
+          "name": "Sol Ring"
+        },
+        {
+          "quantity": 1,
+          "name": "Command Tower"
+        },
+        {
+          "quantity": 1,
+          "name": "Mountain Valley"
+        },
+        {
+          "quantity": 1,
+          "name": "Terramorphic Expanse"
+        },
+        {
+          "quantity": 1,
+          "name": "Infernal Grasp"
+        },
+        {
+          "quantity": 1,
+          "name": "Night's Whisper"
+        },
+        {
+          "quantity": 1,
+          "name": "Sprouting Goblin"
+        },
+        {
+          "quantity": 1,
+          "name": "Aftermath Analyst"
+        },
+        {
+          "quantity": 1,
+          "name": "Beast Within"
+        },
+        {
+          "quantity": 1,
+          "name": "Cultivate"
+        },
+        {
+          "quantity": 1,
+          "name": "Groundskeeper"
+        },
+        {
+          "quantity": 1,
+          "name": "Harrow"
+        },
+        {
+          "quantity": 1,
+          "name": "Nature's Lore"
+        },
+        {
+          "quantity": 1,
+          "name": "Roiling Regrowth"
+        },
+        {
+          "quantity": 1,
+          "name": "Satyr Wayfinder"
+        },
+        {
+          "quantity": 1,
+          "name": "Skyshroud Claim"
+        },
+        {
+          "quantity": 1,
+          "name": "Tear Asunder"
+        },
+        {
+          "quantity": 1,
+          "name": "Juri, Master of the Revue"
+        },
+        {
+          "quantity": 1,
+          "name": "Mayhem Devil"
+        },
+        {
+          "quantity": 1,
+          "name": "Putrefy"
+        },
+        {
+          "quantity": 1,
+          "name": "Rakdos Charm"
+        },
+        {
+          "quantity": 1,
+          "name": "Uurg, Spawn of Turg"
+        },
+        {
+          "quantity": 1,
+          "name": "Bojuka Bog"
+        },
+        {
+          "quantity": 1,
+          "name": "Cabaretti Courtyard"
+        },
+        {
+          "quantity": 1,
+          "name": "Dakmor Salvage"
+        },
+        {
+          "quantity": 1,
+          "name": "Escape Tunnel"
+        },
+        {
+          "quantity": 1,
+          "name": "Evolving Wilds"
+        },
+        {
+          "quantity": 1,
+          "name": "Maestros Theater"
+        },
+        {
+          "quantity": 1,
+          "name": "Myriad Landscape"
+        },
+        {
+          "quantity": 1,
+          "name": "Riveteers Overlook"
+        },
+        {
+          "quantity": 1,
+          "name": "Rocky Tar Pit"
+        },
+        {
+          "quantity": 1,
+          "name": "Wastes"
+        },
+        {
+          "quantity": 5,
+          "name": "Swamp"
+        },
+        {
+          "quantity": 3,
+          "name": "Mountain"
+        },
+        {
+          "quantity": 8,
+          "name": "Forest"
+        }
+      ],
+      "total_cards": 100
+    },
+    {
+      "deck_title": "Counter Intelligence",
+      "commanders": [
+        "Inspirit, Flagship Vessel",
+        "Kilo, Apogee Mind"
+      ],
+      "cards": [
+        {
+          "quantity": 1,
+          "name": "Inspirit, Flagship Vessel"
+        },
+        {
+          "quantity": 1,
+          "name": "Kilo, Apogee Mind"
+        },
+        {
+          "quantity": 1,
+          "name": "Patrolling Peacemaker"
+        },
+        {
+          "quantity": 1,
+          "name": "Insight Engine"
+        },
+        {
+          "quantity": 1,
+          "name": "Uthros Research Craft"
+        },
+        {
+          "quantity": 1,
+          "name": "Depthshaker Titan"
+        },
+        {
+          "quantity": 1,
+          "name": "Long-Range Sensor"
+        },
+        {
+          "quantity": 1,
+          "name": "Moxite Refinery"
+        },
+        {
+          "quantity": 1,
+          "name": "Solar Array"
+        },
+        {
+          "quantity": 1,
+          "name": "Surge Conductor"
+        },
+        {
+          "quantity": 1,
+          "name": "Glittering Massif"
+        },
+        {
+          "quantity": 1,
+          "name": "Radiant Summit"
+        },
+        {
+          "quantity": 1,
+          "name": "Swan Song"
+        },
+        {
+          "quantity": 1,
+          "name": "Chaos Warp"
+        },
+        {
+          "quantity": 1,
+          "name": "Cloud Key"
+        },
+        {
+          "quantity": 1,
+          "name": "Gavel of the Righteous"
+        },
+        {
+          "quantity": 1,
+          "name": "Battlefield Forge"
+        },
+        {
+          "quantity": 1,
+          "name": "Angel of the Ruins"
+        },
+        {
+          "quantity": 1,
+          "name": "Fumigate"
+        },
+        {
+          "quantity": 1,
+          "name": "Organic Extinction"
+        },
+        {
+          "quantity": 1,
+          "name": "Resourceful Defense"
+        },
+        {
+          "quantity": 1,
+          "name": "Chrome Host Seedshark"
+        },
+        {
+          "quantity": 1,
+          "name": "Cyberdrive Awakener"
+        },
+        {
+          "quantity": 1,
+          "name": "Deepglow Skate"
+        },
+        {
+          "quantity": 1,
+          "name": "Emry, Lurker of the Loch"
+        },
+        {
+          "quantity": 1,
+          "name": "Kappa Cannoneer"
+        },
+        {
+          "quantity": 1,
+          "name": "Phyrexian Metamorph"
+        },
+        {
+          "quantity": 1,
+          "name": "Pull from Tomorrow"
+        },
+        {
+          "quantity": 1,
+          "name": "Ripples of Potential"
+        },
+        {
+          "quantity": 1,
+          "name": "Tekuthal, Inquiry Dominus"
+        },
+        {
+          "quantity": 1,
+          "name": "Thought Monitor"
+        },
+        {
+          "quantity": 1,
+          "name": "Universal Surveillance"
+        },
+        {
+          "quantity": 1,
+          "name": "Chain Reaction"
+        },
+        {
+          "quantity": 1,
+          "name": "Alibou, Ancient Witness"
+        },
+        {
+          "quantity": 1,
+          "name": "Jhoira, Weatherlight Captain"
+        },
+        {
+          "quantity": 1,
+          "name": "Wake the Past"
+        },
+        {
+          "quantity": 1,
+          "name": "Astral Cornucopia"
+        },
+        {
+          "quantity": 1,
+          "name": "Crystalline Crawler"
+        },
+        {
+          "quantity": 1,
+          "name": "Darksteel Reactor"
+        },
+        {
+          "quantity": 1,
+          "name": "Empowered Autogenerator"
+        },
+        {
+          "quantity": 1,
+          "name": "Hangarback Walker"
+        },
+        {
+          "quantity": 1,
+          "name": "Lux Artillery"
+        },
+        {
+          "quantity": 1,
+          "name": "Lux Cannon"
+        },
+        {
+          "quantity": 1,
+          "name": "Steel Overseer"
+        },
+        {
+          "quantity": 1,
+          "name": "Threefold Thunderhulk"
+        },
+        {
+          "quantity": 1,
+          "name": "Titan Forge"
+        },
+        {
+          "quantity": 1,
+          "name": "Adarkar Wastes"
+        },
+        {
+          "quantity": 1,
+          "name": "Cascade Bluffs"
+        },
+        {
+          "quantity": 1,
+          "name": "Clifftop Retreat"
+        },
+        {
+          "quantity": 1,
+          "name": "Exotic Orchard"
+        },
+        {
+          "quantity": 1,
+          "name": "Glacial Fortress"
+        },
+        {
+          "quantity": 1,
+          "name": "Irrigated Farmland"
+        },
+        {
+          "quantity": 1,
+          "name": "Karn's Bastion"
+        },
+        {
+          "quantity": 1,
+          "name": "The Mycosynth Gardens"
+        },
+        {
+          "quantity": 1,
+          "name": "Rugged Prairie"
+        },
+        {
+          "quantity": 1,
+          "name": "Shivan Reef"
+        },
+        {
+          "quantity": 1,
+          "name": "Skycloud Expanse"
+        },
+        {
+          "quantity": 1,
+          "name": "Spire of Industry"
+        },
+        {
+          "quantity": 1,
+          "name": "Sulfur Falls"
+        },
+        {
+          "quantity": 1,
+          "name": "Temple of Enlightenment"
+        },
+        {
+          "quantity": 1,
+          "name": "Temple of Epiphany"
+        },
+        {
+          "quantity": 1,
+          "name": "Temple of Triumph"
+        },
+        {
+          "quantity": 1,
+          "name": "Swords to Plowshares"
+        },
+        {
+          "quantity": 1,
+          "name": "Tezzeret's Gambit"
+        },
+        {
+          "quantity": 1,
+          "name": "Thirst for Knowledge"
+        },
+        {
+          "quantity": 1,
+          "name": "Arcane Signet"
+        },
+        {
+          "quantity": 1,
+          "name": "Pentad Prism"
+        },
+        {
+          "quantity": 1,
+          "name": "Sol Ring"
+        },
+        {
+          "quantity": 1,
+          "name": "Command Tower"
+        },
+        {
+          "quantity": 1,
+          "name": "Dispatch"
+        },
+        {
+          "quantity": 1,
+          "name": "Etherium Sculptor"
+        },
+        {
+          "quantity": 1,
+          "name": "Experimental Augury"
+        },
+        {
+          "quantity": 1,
+          "name": "Thrummingbird"
+        },
+        {
+          "quantity": 1,
+          "name": "Enthusiastic Mechanaut"
+        },
+        {
+          "quantity": 1,
+          "name": "Coretapper"
+        },
+        {
+          "quantity": 1,
+          "name": "Etched Oracle"
+        },
+        {
+          "quantity": 1,
+          "name": "Everflowing Chalice"
+        },
+        {
+          "quantity": 1,
+          "name": "Golem Foundry"
+        },
+        {
+          "quantity": 1,
+          "name": "Mindless Automaton"
+        },
+        {
+          "quantity": 1,
+          "name": "Soul-Guide Lantern"
+        },
+        {
+          "quantity": 1,
+          "name": "Ancient Den"
+        },
+        {
+          "quantity": 1,
+          "name": "Buried Ruin"
+        },
+        {
+          "quantity": 1,
+          "name": "Evolving Wilds"
+        },
+        {
+          "quantity": 1,
+          "name": "Great Furnace"
+        },
+        {
+          "quantity": 1,
+          "name": "Lonely Sandbar"
+        },
+        {
+          "quantity": 1,
+          "name": "Mystic Monastery"
+        },
+        {
+          "quantity": 1,
+          "name": "Razortide Bridge"
+        },
+        {
+          "quantity": 1,
+          "name": "Rustvale Bridge"
+        },
+        {
+          "quantity": 1,
+          "name": "Seat of the Synod"
+        },
+        {
+          "quantity": 1,
+          "name": "Secluded Steppe"
+        },
+        {
+          "quantity": 1,
+          "name": "Silverbluff Bridge"
+        },
+        {
+          "quantity": 3,
+          "name": "Plains"
+        },
+        {
+          "quantity": 3,
+          "name": "Island"
+        },
+        {
+          "quantity": 3,
+          "name": "Mountain"
+        }
+      ],
+      "total_cards": 100
+    }
+  ],
+  "status": "ok",
+  "generated_at": "2026-08-03T14:53:16.640164Z"
+}
