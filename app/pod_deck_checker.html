@@ -1592,7 +1592,7 @@ function renderComp() {
     const scale = Math.max(s.max * 1.5, v * 1.15, 1);
     const status = v < s.min ? 'few' : v > s.max ? 'many' : 'ok';
     html += '<div data-hl="' + s.cat + '" style="display:grid;grid-template-columns:minmax(90px,130px) 1fr minmax(120px,auto);gap:12px;align-items:center;font-size:13px;padding:9px 10px;border-radius:8px;cursor:pointer;background:' + (state.hl === s.cat ? 'var(--panel)' : 'transparent') + '">' +
-      '<span style="font-weight:600">' + CATS[s.cat][lang] + '</span>' +
+      '<span style="font-weight:600">' + catLabel(s.cat, lang) + '</span>' +
       '<div style="position:relative;height:9px;background:var(--compBd);border-radius:5px">' +
       '<div style="position:absolute;left:' + (s.min / scale * 100).toFixed(1) + '%;width:' + ((s.max - s.min) / scale * 100).toFixed(1) + '%;top:0;bottom:0;background:' + (state.hl === s.cat ? 'var(--accent)' : 'var(--faint)') + ';border-radius:5px"></div>' +
       '<div style="position:absolute;left:' + Math.min(v / scale * 100, 98).toFixed(1) + '%;top:-3px;width:2.5px;height:15px;background:var(--marker);border-radius:2px"></div></div>' +
@@ -1791,37 +1791,44 @@ function renderTips() {
 async function fillCompAdvice() {
   const t = T(), r = state.result, lang = state.lang;
   const key = tipsKey();
-  const slots = compSlots().map(s => ({ ...s, v: tagCount(s.cat) }));
-  const few = slots.filter(s => s.v < s.min && s.cat !== 'land');
-  const many = slots.filter(s => s.v > s.max);
+  const slots = compSlots().map(sl => ({ ...sl, v: tagCount(sl.cat) }));
+  const few = slots.filter(sl => sl.v < sl.min && sl.cat !== 'land');
+  const many = slots.filter(sl => sl.v > sl.max);
   const ci = deckColorIdentity();
   const inDeck = r.cardsInfo.map(x => x.name);
   const banned = Object.values(RULES.hard_bans.banned_cards).flat();
   let body = '', usedCurated = false;
-  for (const s of few) {
+  const cutCandsOf = (m) => r.cardsInfo
+    .filter(x => (x.cls.cat === m.cat || x.cls.tags.includes(m.cat)) && x.cls.type !== 'L')
+    .sort((a, b) => (b.card.edhrec_rank || 1e9) - (a.card.edhrec_rank || 1e9)).slice(0, 3);
+  for (const sl of few) {
     let sug = { cards: [], source: 'live' };
-    try { sug = await PodEngine.suggestCards({ cat: s.cat, colorIdentity: ci, excludeNames: inDeck, bannedNames: banned }); } catch (e) {}
+    try { sug = await PodEngine.suggestCards({ cat: sl.cat, colorIdentity: ci, excludeNames: inDeck, bannedNames: banned }); } catch (e) {}
     if (sug.source === 'curated') usedCurated = true;
-    const cutRows = many.map(m => {
-      const cands = r.cardsInfo.filter(x => (x.cls.cat === m.cat || x.cls.tags.includes(m.cat)) && x.cls.type !== 'L')
-        .sort((a, b) => (b.card.edhrec_rank || 1e9) - (a.card.edhrec_rank || 1e9)).slice(0, 3);
-      return cands.length ? esc(CATS[m.cat][lang]) + ' (' + t.tipsCutCands + ': ' + cands.map(x => esc(x.name)).join(', ') + ')' : '';
-    }).filter(Boolean).join(' · ');
-    body += '<div style="display:flex;flex-direction:column;gap:8px;border:1px solid var(--border2);border-radius:10px;padding:12px 14px">' +
-      '<div style="font-size:13px"><b>' + esc(CATS[s.cat][lang]) + '</b> — ' + s.v + '/' + s.min + '–' + s.max +
-      ' <span style="color:var(--warnFg);font-weight:600">' + t.few + '</span></div>' +
-      (sug.cards.length ? '<div style="font-size:12px;color:var(--muted)">' + t.tipsAdd + ' ' + esc(CATS[s.cat][lang]).toLowerCase() + ':</div>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap">' + sug.cards.map(sugChip).join('') + '</div>' : '') +
-      (cutRows ? '<div style="font-size:12px;color:var(--muted)">' + t.tipsCutFrom + ': ' + cutRows + '</div>' : '') + '</div>';
+    body += '<div style="display:flex;flex-direction:column;gap:12px;border:1px solid var(--border2);border-radius:12px;padding:16px 18px">' +
+      '<div style="font-size:14.5px"><b>' + catLabel(sl.cat, lang) + '</b> — ' + sl.v + '/' + sl.min + '–' + sl.max +
+      ' <span style="color:var(--warnFg);font-weight:700">' + t.few + '</span></div>';
+    if (sug.cards.length) {
+      body += '<div style="font-size:12.5px;color:var(--muted)">' + t.tipsAdd + ' ' + esc(CATS[sl.cat][lang]).toLowerCase() + ':</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px">' +
+        sug.cards.map(c => bigSugTile(c, sl.cat)).join('') + '</div>';
+    }
+    const cutBlocks = many.map(m => {
+      const cands = cutCandsOf(m);
+      if (!cands.length) return '';
+      return '<div style="font-size:12.5px;color:var(--muted);line-height:1.6">' + t.tipsCutFrom + ' <b>' + catLabel(m.cat, lang) + '</b>: ' +
+        cands.map(x => esc(x.name) + ' <span style="color:var(--faint)">(' + esc(whyCut(x, m)) + ')</span>').join(' · ') + '</div>';
+    }).filter(Boolean).join('');
+    body += cutBlocks + '</div>';
   }
   if (!few.length) {
     if (many.length) {
-      body += '<div style="font-size:13px;color:var(--muted)">' + many.map(m => {
-        const cands = r.cardsInfo.filter(x => (x.cls.cat === m.cat || x.cls.tags.includes(m.cat)) && x.cls.type !== 'L')
-          .sort((a, b) => (b.card.edhrec_rank || 1e9) - (a.card.edhrec_rank || 1e9)).slice(0, 3);
-        return '<b>' + esc(CATS[m.cat][lang]) + '</b> ' + m.v + '/' + m.min + '–' + m.max + ' (' + t.many.toLowerCase() + ') — ' +
-          t.tipsCutLabel + ': ' + cands.map(x => esc(x.name)).join(', ');
-      }).join('<br>') + '</div>';
+      body += many.map(m => {
+        const cands = cutCandsOf(m);
+        return '<div style="font-size:13px;color:var(--muted);line-height:1.7"><b>' + catLabel(m.cat, lang) + '</b> ' + m.v + '/' + m.min + '–' + m.max +
+          ' (' + t.many.toLowerCase() + ') — ' + t.tipsCutLabel + ': ' +
+          cands.map(x => esc(x.name) + ' <span style="color:var(--faint)">(' + esc(whyCut(x, m)) + ')</span>').join(' · ') + '</div>';
+      }).join('');
     } else {
       body += '<div style="font-size:13px;color:var(--muted)">' + t.tipsNone + '</div>';
     }
@@ -1960,7 +1967,7 @@ function renderCurve() {
       segKeys.filter(k => b[k] > 0).map(k => '<div style="height:' + Math.round(b[k] / maxT * 100) + 'px;background:' + SEGC[k] + '"></div>').join('') + '</div>' +
       '<span class="mono" style="font-size:10px;color:var(--muted);text-align:center">' + (i === 7 ? '7+' : i) + '</span></div>').join('') + '</div>' +
     '<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);border-top:1px solid var(--border2);padding-top:10px">' +
-    ['cre', 'draw', 'rem', 'ramp', 'oth'].map(k => '<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:' + SEGC[k] + '"></span>' + t[k] + '</span>').join('') +
+    ['cre', 'draw', 'rem', 'ramp', 'oth'].map(k => '<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:' + SEGC[k] + '"></span>' + t[k] + helpIcon(k) + '</span>').join('') +
     '<span class="mono" style="margin-left:auto">' + t.avg + ' ' + avgCmc + ' · ' + nlQty + ' ' + t.nonlands + '</span></div></div>';
   // pips
   const pipCnt = { W: 0, U: 0, B: 0, R: 0, G: 0 };
@@ -2060,6 +2067,21 @@ window.addEventListener('DOMContentLoaded', () => {
   $('gtBtn').onclick = () => { state.grp = 'type'; renderBrowser(); };
   $('gcBtn').onclick = () => { state.grp = 'cat'; renderBrowser(); };
   $('tableModeBtn').onclick = () => { state.tableOpen = !state.tableOpen; renderAll(); };
+  document.addEventListener('mouseover', (e) => {
+    const el = e.target.closest && e.target.closest('.catHelp');
+    if (!el) return;
+    const help = CAT_HELP[el.dataset.cat];
+    if (!help) return;
+    const tp = $('textPop'), rect = el.getBoundingClientRect();
+    tp.textContent = help[state.lang];
+    tp.style.display = '';
+    let x = rect.left; if (x + 330 > innerWidth) x = Math.max(8, innerWidth - 335);
+    tp.style.left = x + 'px';
+    tp.style.top = Math.min(rect.bottom + 8, innerHeight - 120) + 'px';
+  });
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest && e.target.closest('.catHelp')) $('textPop').style.display = 'none';
+  });
   const st = PodEngine.runSelfTest(RULES);
   if (!st.pass) console.warn('PodEngine selftest FAILED', st.results.filter(r => !r.pass));
   renderAll();
@@ -2167,6 +2189,7 @@ window.addEventListener('DOMContentLoaded', () => {
   </div>
 </main>
 <div id="footer" class="mono" style="text-align:center;font-size:11px;color:var(--faint);padding:10px 20px 28px"></div>
+<div id="textPop" style="display:none;position:fixed;max-width:320px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 15px;font-size:12.5px;line-height:1.6;box-shadow:0 12px 34px rgba(0,0,0,.35);z-index:100;pointer-events:none"></div>
 <div id="popover" style="display:none;position:fixed;width:264px;height:368px;border-radius:13px;box-shadow:0 18px 50px rgba(0,0,0,.45);z-index:99;pointer-events:none;background:var(--panel) center/cover no-repeat"></div>
 </div>
 </body>
