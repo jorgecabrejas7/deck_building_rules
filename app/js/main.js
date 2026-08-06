@@ -13,6 +13,7 @@ import { renderTabbar, renderBanner } from './ui/tabbar.js';
 import { renderPower } from './ui/power.js';
 import { renderValidation } from './ui/validation.js';
 import { renderComp } from './ui/comp.js';
+import { renderVerdict } from './ui/verdict.js';
 import { renderBrowser } from './ui/browser.js';
 import { renderTips } from './ui/tips.js';
 import { renderRamp } from './ui/ramp.js';
@@ -20,6 +21,7 @@ import { renderHand } from './ui/hand.js';
 import { renderTableMode } from './ui/table.js';
 import { renderCurve } from './ui/curve.js';
 import { renderGuide } from './ui/guide.js';
+import { renderPod } from './ui/pod.js';
 import { openHow, closeHow } from './ui/how.js';
 import { copyReport } from './ui/report.js';
 import { initHelpPopovers } from './ui/popover.js';
@@ -36,9 +38,10 @@ export function renderAll() {
   if (has) {
     renderSummary(); renderBanner(); renderValidation();
     if (state.tab === 'power') renderPower();
-    if (state.tab === 'analysis') { renderComp(); renderBrowser(); renderCurve(); renderRamp(); renderHand(); }
+    if (state.tab === 'analysis') { renderVerdict(); renderComp(); renderBrowser(); renderCurve(); renderRamp(); renderHand(); }
     if (state.tab === 'tips') renderTips();
   }
+  if (state.tab === 'pod') renderPod();
 }
 
 // ================= boot =================

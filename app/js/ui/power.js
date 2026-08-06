@@ -1,10 +1,11 @@
-import * as PodEngine from '../engine/index.js';
 import { state, cardCache } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
-import { DIAL_META, MSG } from './constants.js';
+import { DIAL_META, MSG, BLOCK_MSG, dialName } from './constants.js';
 import { $, esc } from './helpers.js';
-import { buildTip, recompute } from '../pipeline.js';
+import { checkCombos } from '../pipeline.js';
+import { orderedCuts, powerUpOptions } from '../advice.js';
+import { bindSugPopovers } from './popover.js';
 import { renderAll } from '../main.js';
 
 export function renderPower() {
@@ -64,9 +65,7 @@ export function renderPower() {
   if (flags.length) html += '<div class="alert tone-warn">' +
     '<span class="alert-title">⚠ ' + t.flags + '</span>' +
     flags.map(f => '<div class="alert-line">' + esc(f) + '</div>').join('') + '</div>';
-  html += '<div class="tip-box">' +
-    '<span class="mono tip-tag">TIP</span>' +
-    '<div class="tip-text"><b>' + t.tipT + ':</b> ' + esc(buildTip()) + '</div></div>';
+  html += adviceSections();
   // budget gauge — scale spans 0..(t2+3) so overspending stays visible
   const gMax = budgetN + 3;
   const pct = Math.min(ev.points / gMax * 100, 100);
@@ -78,9 +77,81 @@ export function renderPower() {
     '<div class="gauge-tick" style="--x:' + (budgetN / gMax * 100).toFixed(1) + '%"></div></div>' +
     '<div class="mono gauge-scale"><span>0</span><span>Tier 1 ≤' + t1N + '</span><span>Tier 2 ≤' + budgetN + '</span><span>' + gMax + '</span></div></div>';
   $('power').innerHTML = html;
+  bindSugPopovers($('power'));
   const cb = document.getElementById('comboBtn');
   if (cb) cb.onclick = checkCombos;
+  for (const b of $('power').querySelectorAll('[data-goto-tips]'))
+    b.onclick = () => { state.tab = 'tips'; renderAll(); };
 }
+
+// The two clearly separated advice blocks: shed points down to Tier 1 (or back
+// to pod level), and spend remaining budget up to Tier 2.
+function adviceSections() {
+  const t = T(), r = state.result, ev = r.evalRes, lang = state.lang, es = lang === 'es';
+  const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
+  let html = '';
+  if (ev.tier !== 'tier1') {
+    const need = ev.tier === 'above' ? Math.max(ev.points - t2, 0) : ev.points - t1;
+    const cuts = orderedCuts(r).slice(0, 6);
+    html += '<div class="adv-box adv-down">' +
+      '<div class="adv-head"><span class="adv-arrow">▼</span><span class="secT">' +
+      (ev.tier === 'above' ? t.advDownPod : t.advDownT1) + '</span>' +
+      '<span class="mono adv-need">' + (ev.tier === 'above'
+        ? (ev.violations.length ? (es ? 'arregla las violaciones' : 'fix the violations') + (need ? ' · −' + need + ' pts' : '') : '−' + need + ' pts')
+        : '−' + need + ' pt' + (need > 1 ? 's' : '')) + '</span></div>';
+    if (cuts.length) {
+      html += '<ol class="adv-cuts">' + cuts.map(c => {
+        const card = cardCache[c.name] || {};
+        const rk = card.edhrec_rank ? ' · EDHREC #' + fmtRank(card.edhrec_rank) : '';
+        return '<li><span class="sugTile card-chip" data-img="' + esc(card.img_normal || '') + '">' +
+          '<span class="chip-art"' + (card.img_art ? ' style="background-image:url(\'' + card.img_art + '\')"' : '') + '></span>' +
+          esc(c.name) + '</span>' +
+          '<span class="adv-why mono">' + (c.dPts > 0 ? '−' + c.dPts + ' pts' : '') +
+          (c.fixes ? (c.dPts > 0 ? ' · ' : '') + (es ? 'arregla violación' : 'fixes violation') : '') +
+          ' · ' + esc(dialName(c.dial, lang)) + rk + '</span></li>';
+      }).join('') + '</ol>' +
+      '<div class="adv-note">' + t.advCutOrder + '</div>';
+    }
+    html += '<button data-goto-tips class="btn-ghost-sm">' + t.advSeeCards + '</button></div>';
+  }
+  if (ev.tier !== 'above') {
+    const { room, options } = powerUpOptions(r);
+    const affordable = options.filter(o => !o.blocked && o.cost <= room);
+    const open = [...affordable.filter(o => o.cost > 0).sort((a, b) => a.cost - b.cost),
+      ...affordable.filter(o => o.cost === 0)].slice(0, 5);
+    const blocked = options.filter(o => o.blocked);
+    html += '<div class="adv-box adv-up">' +
+      '<div class="adv-head"><span class="adv-arrow">▲</span><span class="secT">' + t.advUp + '</span>' +
+      '<span class="mono adv-need">' + room + ' pt' + (room !== 1 ? 's' : '') + ' ' + (es ? 'de margen' : 'of headroom') + '</span></div>';
+    if (ev.tier === 'tier1' && t1 - ev.points > 0) {
+      html += '<div class="adv-note">' + (es
+        ? 'Sin salir de Tier 1 aún te caben ' + (t1 - ev.points) + ' pts; a partir de ahí entras en Tier 2 (≤' + t2 + ').'
+        : 'You can still add ' + (t1 - ev.points) + ' pts without leaving Tier 1; beyond that you enter Tier 2 (≤' + t2 + ').') + '</div>';
+    }
+    html += '<div class="adv-ups">' + open.map(o =>
+      '<div class="adv-up-row"><span class="mono adv-cost">' + (o.cost === 0 ? t.advFree : '+' + o.cost + ' pt' + (o.cost > 1 ? 's' : '')) + '</span>' +
+      '<span>' + esc(upLabel(o, lang)) + '</span></div>').join('') + '</div>';
+    if (blocked.length) {
+      html += '<div class="adv-blocked">' + blocked.map(o =>
+        '<div class="adv-up-row muted"><span class="adv-lock">🔒</span><span>' + esc(dialName(o.dial, lang)) + ' — ' +
+        esc(BLOCK_MSG[o.blocked] ? BLOCK_MSG[o.blocked][lang] : o.blocked) + '</span></div>').join('') + '</div>';
+    }
+    html += '<button data-goto-tips class="btn-ghost-sm">' + t.advSeeCards + '</button></div>';
+  }
+  return html;
+}
+
+function upLabel(o, lang) {
+  const es = lang === 'es';
+  const name = dialName(o.dial, lang);
+  if (o.dial === 'combos') {
+    return es ? (o.cost === 0 ? 'Un combo infinito — los 2 primeros son gratis (llevas ' + o.value + ')' : 'Otro combo infinito (llevas ' + o.value + ')')
+      : (o.cost === 0 ? 'An infinite combo — the first 2 are free (you run ' + o.value + ')' : 'Another infinite combo (you run ' + o.value + ')');
+  }
+  return es ? (name + ': de ' + o.value + ' a ' + (o.value + 1)) : (name + ': from ' + o.value + ' to ' + (o.value + 1));
+}
+
+function fmtRank(r) { return r >= 1000 ? Math.round(r / 1000) + 'k' : String(r); }
 
 function comboBlock() {
   const t = T(), cd = state.combosData;
@@ -89,9 +160,8 @@ function comboBlock() {
     return '<div class="stack-8">' +
       (isFile ? '<div class="note-warn">' + t.fileProto + '</div>' : '') +
       (cd && cd.status === 'error' ? '<div class="note-bad">' + t.comboErr + '</div>' : '') +
-      '<div class="combo-row">' +
-      '<button id="comboBtn" class="btn-accent-sm">' + t.comboBtn + '</button>' +
-      '<span class="note-sm">⚠ ' + t.comboProxyNote + '</span></div></div>';
+      (isFile ? '' : '<div class="combo-row">' +
+        '<button id="comboBtn" class="btn-accent-sm">' + t.comboRetry + '</button></div>') + '</div>';
   }
   if (cd.status === 'checking') return '<div class="note-muted">' + t.comboChecking + '</div>';
   const inf = cd.list.filter(c => c.infinite);
@@ -100,21 +170,4 @@ function comboBlock() {
   return '<div class="stack-6">' + inf.map(c =>
     '<div class="combo-line"><b>' + c.cards.map(esc).join(' + ') + '</b>' +
     ' <span class="txt-muted">→ ' + esc(c.features[0] || '') + '</span></div>').join('') + '</div>';
-}
-
-let comboDb = null;
-export async function checkCombos() {
-  if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
-  state.combosData = { status: 'checking', list: [], count: 0 };
-  renderPower();
-  try {
-    if (!comboDb) comboDb = await (await fetch('../data/combos.json')).json();
-    const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), comboDb);
-    state.combosData = { status: 'done', list, count: list.length, dbVersion: comboDb.version };
-    recompute();
-  } catch (e) {
-    console.error(e);
-    state.combosData = { status: 'error', list: [], count: 0 };
-  }
-  renderAll();
 }

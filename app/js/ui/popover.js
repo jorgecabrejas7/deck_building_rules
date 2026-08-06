@@ -14,7 +14,7 @@ export function showCardPopover(anchor, src) {
   let x = rect.right + 12; if (x + 276 > innerWidth) x = Math.max(8, rect.left - 288);
   const y = Math.max(10, Math.min(rect.top - 60, innerHeight - 390));
   const pop = $('popover');
-  pop.style.display = ''; pop.style.left = x + 'px'; pop.style.top = y + 'px';
+  pop.style.display = 'block'; pop.style.left = x + 'px'; pop.style.top = y + 'px';
   pop.style.backgroundImage = "url('" + src + "')";
 }
 export function hideCardPopover() { const pop = $('popover'); pop.style.display = 'none'; pop._owner = null; }
@@ -45,7 +45,7 @@ function showHelpPopover(el) {
   if (!help) return false;
   const tp = $('textPop'), rect = el.getBoundingClientRect();
   tp.textContent = help[state.lang];
-  tp.style.display = '';
+  tp.style.display = 'block';
   let x = rect.left; if (x + 330 > innerWidth) x = Math.max(8, innerWidth - 335);
   tp.style.left = x + 'px';
   tp.style.top = Math.min(rect.bottom + 8, innerHeight - 120) + 'px';

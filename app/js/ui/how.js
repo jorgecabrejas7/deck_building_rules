@@ -42,7 +42,7 @@ function renderHow() {
 <li>Con cualquier combo infinito: cero tutores.</li>
 <li>Maná rápido alto (9+) y hechizos gratis altos (5+) a la vez: +2 puntos extra.</li></ul>
 <h3>Precios, combos y sugerencias</h3>
-<p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5. Las URLs de Archidekt se cargan automáticamente a través de un proxy público (corsproxy.io) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
+<p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban automáticamente en cada análisis contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5 (mejoras de nivel: menos de €10). Las URLs de Archidekt se cargan automáticamente a través de un proxy público (corsproxy.io) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
   : `
 <button id="howClose" class="modal-close">✕</button>
 <h2>How this guide works</h2>
@@ -64,7 +64,7 @@ function renderHow() {
 <li>With any infinite combo: zero tutors.</li>
 <li>High fast mana (9+) and high free spells (5+) together: +2 extra points.</li></ul>
 <h3>Prices, combos and suggestions</h3>
-<p>Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5. Archidekt URLs load automatically through a public proxy (corsproxy.io) because Archidekt blocks direct browser reads; if you prefer your deck not to transit a third party, paste the list as text. Combos are checked against a database hosted on this very site — no third parties.</p>`;
+<p>Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked automatically on every analysis against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5 (tier upgrades: under €10). Archidekt URLs load automatically through a public proxy (corsproxy.io) because Archidekt blocks direct browser reads; if you prefer your deck not to transit a third party, paste the list as text. Combos are checked against a database hosted on this very site — no third parties.</p>`;
   $('howBody').innerHTML = html;
   $('howClose').onclick = closeHow;
 }

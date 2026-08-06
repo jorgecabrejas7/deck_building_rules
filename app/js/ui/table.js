@@ -39,7 +39,7 @@ export function renderTableMode() {
     b.onclick = () => { $('deckText').value = state.tableTexts.filter(x => x.trim())[+b.dataset.tmload]; analyze(); };
 }
 
-async function runTableMode() {
+export async function runTableMode() {
   if (state.tableBusy) return;
   const texts = state.tableTexts.filter(x => x.trim());
   if (!texts.length) return;

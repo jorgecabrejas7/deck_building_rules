@@ -19,5 +19,6 @@ export const state = {
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
+  podDecks: null,    // {status, decks} — lazy-loaded from data/pod_decks.json
 };
-export const TAB_KEYS = ['load', 'power', 'analysis', 'tips', 'guide'];
+export const TAB_KEYS = ['load', 'power', 'analysis', 'tips', 'pod', 'guide'];

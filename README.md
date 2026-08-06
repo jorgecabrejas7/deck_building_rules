@@ -26,12 +26,25 @@ Poder / Análisis / Consejos / Guía) with a sticky tier summary + commander
 header. Paste a decklist (Archidekt/Moxfield text export) and it fetches card
 data + Cardmarket EUR prices from Scryfall, applies the pod power rules
 (rules/pod_rules.json v2, embedded), reports tier / points / violations with
-what-if cut deltas, deck composition vs archetype targets with concrete
-EDHREC-ranked card suggestions and why-add/why-cut reasoning (curated fallback
-+ disclaimer offline), infinite-combo checking via Commander Spellbook (opt-in
-proxy), ramp castability analysis, interactive mana curve, deck browser with
-card art, sample opening hand, a 4-deck table compare mode, a how-it-works
+what-if cut deltas, ordered power-down advice (violation-fixers first, then
+most points freed) AND power-up advice (open upgrade paths toward Tier 2 with
+their point costs, conditional locks explained, and concrete EDHREC-ranked
+cards each paired with a direct cut), deck composition vs archetype targets
+with why-add/why-cut reasoning and a retry button when EDHREC/Scryfall is
+unreachable (curated fallback + disclaimer offline), automatic infinite-combo
+checking via Commander Spellbook on every analysis, an archetype verdict panel
+(what the deck does well / what it lacks), ramp castability analysis,
+interactive mana curve, deck browser with card art, sample opening hand, a
+4-deck table compare mode, a pod deck registry (see below), a how-it-works
 rules explainer, and a bilingual (ES/EN) archetype guide.
+
+Pod deck registry: reference decks live in a SQLite database managed by
+scripts/pod_decks.py (add via Archidekt URL — fetched server-side, no CORS —
+or a text-export file; rm/list/export). Every change re-exports
+data/pod_decks.json, which the app's "Pod" tab reads: analyze any stored deck
+or compare it against the currently loaded one in table mode.
+  python3 scripts/pod_decks.py add --url https://archidekt.com/decks/12345 --owner Jorge
+  python3 scripts/pod_decks.py add --file deck.txt --name "Mi mazo" --owner Ana
 
 Rules v2 semantics: points never stop counting (past a dial's last priced step
 each extra unit adds +1); only the tier budgets decide (T1<=2, T2<=7) plus hard

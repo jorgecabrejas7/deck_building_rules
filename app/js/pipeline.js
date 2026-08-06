@@ -1,7 +1,6 @@
 import * as PodEngine from './engine/index.js';
 import { RULES } from './rules.js';
 import { state, cardCache, persistCache } from './state.js';
-import { EXTRA_PTS, dialName } from './ui/constants.js';
 import { $ } from './ui/helpers.js';
 import { renderInput } from './ui/input.js';
 import { renderBanner } from './ui/tabbar.js';
@@ -37,6 +36,25 @@ export async function analyze() {
     console.error(e); state.error = 'netErr';
   }
   state.busy = false;
+  renderAll();
+  if (state.result && location.protocol !== 'file:') checkCombos();
+}
+
+// ---- infinite combos: checked automatically after every analysis ----
+let comboDb = null;
+export async function checkCombos() {
+  if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
+  state.combosData = { status: 'checking', list: [], count: 0 };
+  renderAll();
+  try {
+    if (!comboDb) comboDb = await (await fetch('../data/combos.json')).json();
+    const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), comboDb);
+    state.combosData = { status: 'done', list, count: list.length, dbVersion: comboDb.version };
+    recompute();
+  } catch (e) {
+    console.error(e);
+    state.combosData = { status: 'error', list: [], count: 0 };
+  }
   renderAll();
 }
 
@@ -86,27 +104,24 @@ export async function startCheapest() {
 }
 
 // ================= advice (tip) =================
+// One short verdict sentence; the ordered lists below it carry the detail.
 export function buildTip() {
-  const r = state.result, lang = state.lang, ev = r.evalRes;
+  const r = state.result, lang = state.lang, ev = r.evalRes, es = lang === 'es';
   const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
-  const entries = Object.entries(ev.breakdown).sort((a, b) => b[1] - a[1]);
-  const nameOf = k => EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang);
-  const listCards = k => (ev.driving[k] || []).slice(0, 3).map(([n]) => n).join(', ');
   if (ev.tier === 'above') {
-    const cuts = entries.slice(0, 2).map(([k, p]) => nameOf(k) + ' (−' + p + ' pts: ' + (listCards(k) || '') + ')').join('; ');
-    return lang === 'es'
-      ? 'Este mazo necesita recortes para sentarse en el pod. Empieza por las violaciones de arriba' + (cuts ? ', y después por lo que más puntos cuesta: ' + cuts : '') + '.'
-      : 'This deck needs cuts to sit at the pod. Start with the violations above' + (cuts ? ', then with what costs the most points: ' + cuts : '') + '.';
+    const over = Math.max(ev.points - t2, 0);
+    return es
+      ? 'Sobre el nivel del pod' + (over ? ' (+' + over + ' pts sobre Tier 2)' : '') + ': arregla las violaciones y sigue el orden de cortes.'
+      : 'Above pod level' + (over ? ' (+' + over + ' pts over Tier 2)' : '') + ': fix the violations and follow the cut order.';
   }
   if (ev.tier === 'tier2') {
-    const need = ev.points - t1;
-    const cuts = entries.map(([k, p]) => nameOf(k) + ' (+' + p + ': ' + (listCards(k) || '—') + ')').join('; ');
-    return lang === 'es'
-      ? 'Tier 2 con ' + ev.points + '/' + t2 + ' puntos. Para bajar a Tier 1 suelta ' + need + ' punto' + (need > 1 ? 's' : '') + ': ' + cuts + '.'
-      : 'Tier 2 at ' + ev.points + '/' + t2 + ' points. To drop to Tier 1, shed ' + need + ' point' + (need > 1 ? 's' : '') + ': ' + cuts + '.';
+    const need = ev.points - t1, room = t2 - ev.points;
+    return es
+      ? 'Tier 2 (' + ev.points + '/' + t2 + '). Bajar a Tier 1: −' + need + ' pts. Subir dentro de Tier 2: +' + room + ' pts de margen.'
+      : 'Tier 2 (' + ev.points + '/' + t2 + '). Drop to Tier 1: shed ' + need + ' pts. Climb within Tier 2: ' + room + ' pts of headroom.';
   }
-  const margin = t1 - ev.points;
-  return lang === 'es'
-    ? 'Mazo limpio de Tier 1: ' + ev.points + ' punto' + (ev.points === 1 ? '' : 's') + ' de los ' + t1 + ' permitidos. ' + (margin > 0 ? 'Tienes ' + margin + ' punto' + (margin > 1 ? 's' : '') + ' de margen para una mejora puntual sin salir de Tier 1.' : 'Estás justo en el límite de Tier 1.')
-    : 'Clean Tier 1 deck: ' + ev.points + ' point' + (ev.points === 1 ? '' : 's') + ' of the ' + t1 + ' allowed. ' + (margin > 0 ? 'You have ' + margin + ' point' + (margin > 1 ? 's' : '') + ' of headroom for one targeted upgrade without leaving Tier 1.' : 'You are right at the Tier 1 limit.');
+  const margin = t1 - ev.points, room = t2 - ev.points;
+  return es
+    ? 'Tier 1 limpio (' + ev.points + '/' + t1 + '). Margen: +' + margin + ' pts sin salir de Tier 1, +' + room + ' hasta el tope de Tier 2.'
+    : 'Clean Tier 1 (' + ev.points + '/' + t1 + '). Headroom: +' + margin + ' pts inside Tier 1, +' + room + ' to the Tier 2 cap.';
 }

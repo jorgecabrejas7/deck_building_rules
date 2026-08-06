@@ -7,7 +7,7 @@ const OPS = {
 
 // ---- tier evaluation (port of tier_rules.evaluate_deck) ----
 // Violations/flags are structured {id, ...params}; the UI localizes them.
-function dialPoints(value, spec, overflow) {
+export function dialPoints(value, spec, overflow) {
   const steps = spec.point_steps || {};
   if (steps[String(value)] !== undefined) return steps[String(value)];
   const keys = Object.keys(steps).map(Number);

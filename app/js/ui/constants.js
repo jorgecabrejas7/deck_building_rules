@@ -34,8 +34,8 @@ export const DIAL_META = [
  es:'Destrucción masiva de tierras: prohibida sin excepciones. Ningún precon la lleva y este pod tampoco.',
  en:'Mass land destruction: banned, no exceptions. No precon runs it and neither does this pod.'}},
 {k:'combos',name:{es:'Combos infinitos',en:'Infinite combos'},help:{
- es:'Combos infinitos completos según Commander Spellbook (la base de combos que usa EDHREC); cada combo cuenta por separado, sin agrupar por cartas compartidas. Los 2 primeros son gratis (los precons llevan hasta 2 combos «de juguete»); cada uno más cuesta según lo compacto que sea: de 2 cartas +3, de 3 cartas +2, de 4 o más +1. Con cualquier combo, no se permiten tutores. La comprobación es opcional y pasa por un proxy externo.',
- en:'Complete infinite combos per Commander Spellbook (the combo database EDHREC uses); every combo counts separately, no grouping by shared cards. The first 2 are free (precons ship up to 2 “jank” combos); each extra is priced by compactness: 2-card +3, 3-card +2, 4+ +1. With any combo, no tutors allowed. Checking is optional and goes through an external proxy.'}},
+ es:'Combos infinitos completos según Commander Spellbook (la base de combos que usa EDHREC); cada combo cuenta por separado, sin agrupar por cartas compartidas. Los 2 primeros son gratis (los precons llevan hasta 2 combos «de juguete»); cada uno más cuesta según lo compacto que sea: de 2 cartas +3, de 3 cartas +2, de 4 o más +1. Con cualquier combo, no se permiten tutores. Se comprueban automáticamente al analizar, con la base de datos alojada en esta misma web.',
+ en:'Complete infinite combos per Commander Spellbook (the combo database EDHREC uses); every combo counts separately, no grouping by shared cards. The first 2 are free (precons ship up to 2 “jank” combos); each extra is priced by compactness: 2-card +3, 3-card +2, 4+ +1. With any combo, no tutors allowed. Checked automatically on every analysis, against the database hosted on this same site.'}},
 {k:'price_1_5',name:{es:'Cartas €1–5',en:'Cards €1–5'},help:{
  es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24 cuestan 1–2 puntos, y cada una más suma +1.',
  en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 cost 1–2 points, and each extra adds +1.'}},
@@ -81,7 +81,29 @@ valid_not_found:{es:v=>'No se encontró en Scryfall: «'+v.name+'» — revisa e
 valid_banned_official:{es:v=>v.name+' está prohibida en Commander (banlist oficial de Wizards, aparte de las reglas del pod)',
                        en:v=>v.name+' is banned in Commander (official Wizards banlist, separate from pod rules)'},
 };
-export function dialName(k, lang){ const m = DIAL_META.find(d=>d.k===k); return m? m.name[lang] : k; }
+// Names for point-driving keys that are not dials (price bands, conditionals).
+const NONDIAL_NAMES = {
+  price_30_plus:{es:'Cartas >€30',en:'Cards >€30'},
+  price_under_1:{es:'Cartas <€1',en:'Cards <€1'},
+  price_5_10:{es:'Cartas €5–10',en:'Cards €5–10'},
+};
+export function dialName(k, lang){
+  const m = DIAL_META.find(d=>d.k===k);
+  if (m) return m.name[lang];
+  if (EXTRA_PTS[k]) return EXTRA_PTS[k][lang];
+  return NONDIAL_NAMES[k] ? NONDIAL_NAMES[k][lang] : k;
+}
+
+// Why an upgrade path is closed, phrased direction-neutral (each conditional
+// blocks adding either of its two dials while the other is present).
+export const BLOCK_MSG = {
+gc_locks_price:{es:'un game changer debe ser tu único lujo y ya llevas cartas de €10–30',
+                en:'a game changer must be your only luxury and you already run €10–30 cards'},
+tutors_gate_gc:{es:'tutores y game changers no pueden convivir',
+                en:'tutors and game changers cannot coexist'},
+combos_gate_tutors:{es:'combos infinitos y tutores no pueden convivir',
+                    en:'infinite combos and tutors cannot coexist'},
+};
 
 export const BASECOMP = [['land',34,38],['ramp',8,12],['draw',8,12],['rem',8,11],['wipe',2,4],['prot',2,5]];
 export const ARCH = [

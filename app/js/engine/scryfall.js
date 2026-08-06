@@ -1,4 +1,6 @@
 // ---- Scryfall card fetching ----
+import { classifyCard } from "./classify.js";
+
 function cardFromScryfall(c) {
   const faces = c.card_faces && c.card_faces.length ? c.card_faces : null;
   const oracle = c.oracle_text !== undefined && c.oracle_text !== null && c.oracle_text !== ""
@@ -158,30 +160,44 @@ function ciFits(cardCi, deckCi) {
   return [...cardCi].every(c => deckCi.has(c));
 }
 
-export async function suggestCards({ cat, colorIdentity, excludeNames, bannedNames, maxEur = 5, limit = 6 }) {
-  const deckCi = new Set(colorIdentity && colorIdentity.length ? colorIdentity : []);
+// Generic EDHREC-ordered search. requireCat re-checks results against the
+// app's own classifier so an otag can't smuggle in a card the app would file
+// elsewhere (e.g. otag:board-wipe includes artifact-only wipes like Vandalblast).
+export async function searchScryfall(q, { excludeNames, bannedNames, limit = 6, requireCat = null, allowGameChanger = false } = {}) {
   const excl = new Set(excludeNames || []);
   const ban = new Set(bannedNames || []);
+  const res = await fetch("https://api.scryfall.com/cards/search?unique=cards&q=" + encodeURIComponent(q));
+  if (!res.ok) throw new Error("Scryfall " + res.status);
+  const data = await res.json();
+  const out = [];
+  for (const raw of data.data || []) {
+    const c = cardFromScryfall(raw);
+    if (excl.has(c.name) || ban.has(c.name)) continue;
+    if (!allowGameChanger && c.game_changer) continue;
+    if (c.legal_commander === "banned") continue;
+    if (requireCat) {
+      const cls = classifyCard(c);
+      if (cls.cat !== requireCat && !cls.tags.includes(requireCat)) continue;
+    }
+    out.push(c);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+export async function suggestCards({ cat, colorIdentity, excludeNames, bannedNames, maxEur = 5, limit = 6 }) {
+  const deckCi = new Set(colorIdentity && colorIdentity.length ? colorIdentity : []);
   const base = SUGGEST_QUERIES[cat];
   if (base) {
     try {
       const id = deckCi.size ? [...deckCi].join("") : "c";
       const q = base + " f:commander eur<" + maxEur + " id<=" + id + " -t:land order:edhrec";
-      const res = await fetch("https://api.scryfall.com/cards/search?unique=cards&q=" + encodeURIComponent(q));
-      if (res.ok) {
-        const data = await res.json();
-        const out = [];
-        for (const raw of data.data || []) {
-          const c = cardFromScryfall(raw);
-          if (excl.has(c.name) || ban.has(c.name) || c.game_changer) continue;
-          if (c.legal_commander === "banned") continue;
-          out.push(c);
-          if (out.length >= limit) break;
-        }
-        if (out.length) return { cards: out, source: "live" };
-      }
+      const cards = await searchScryfall(q, { excludeNames, bannedNames, limit, requireCat: cat });
+      if (cards.length) return { cards, source: "live" };
     } catch (e) { /* fall through to curated */ }
   }
+  const excl = new Set(excludeNames || []);
+  const ban = new Set(bannedNames || []);
   const curated = (CURATED_SUGGESTIONS[cat] || [])
     .filter(([n, ci]) => !excl.has(n) && !ban.has(n) && ciFits(ci, deckCi))
     .slice(0, limit)
