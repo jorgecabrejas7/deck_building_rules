@@ -9,7 +9,7 @@ Every mutating command re-exports data/pod_decks.json, which the app reads.
 Usage:
   python3 scripts/pod_decks.py add --url https://archidekt.com/decks/12345 --owner Jorge
   python3 scripts/pod_decks.py add --file mydeck.txt --name "Mi mazo" --owner Ana
-  python3 scripts/pod_decks.py import            # reads decsk.txt at the repo root
+  python3 scripts/pod_decks.py import            # reads decks.txt at the repo root
   python3 scripts/pod_decks.py import otherfile.txt
   python3 scripts/pod_decks.py list
   python3 scripts/pod_decks.py rm 3
@@ -190,8 +190,8 @@ def main():
     a.add_argument("--name", help="deck name (default: fetched/derived)")
     a.add_argument("--owner", help="pod member the deck belongs to")
     a.set_defaults(fn=cmd_add)
-    i = sub.add_parser("import", help="bulk import/refresh from a '{url} - {name}' file (default: decsk.txt)")
-    i.add_argument("path", nargs="?", default="decsk.txt")
+    i = sub.add_parser("import", help="bulk import/refresh from a '{url} - {name}' file (default: decks.txt)")
+    i.add_argument("path", nargs="?", default="decks.txt")
     i.add_argument("--owner", help="owner recorded for newly added decks")
     i.set_defaults(fn=cmd_import)
     sub.add_parser("list", help="list stored decks").set_defaults(fn=cmd_list)
