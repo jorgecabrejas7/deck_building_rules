@@ -9,9 +9,16 @@ Every mutating command re-exports data/pod_decks.json, which the app reads.
 Usage:
   python3 scripts/pod_decks.py add --url https://archidekt.com/decks/12345 --owner Jorge
   python3 scripts/pod_decks.py add --file mydeck.txt --name "Mi mazo" --owner Ana
+  python3 scripts/pod_decks.py import            # reads decsk.txt at the repo root
+  python3 scripts/pod_decks.py import otherfile.txt
   python3 scripts/pod_decks.py list
   python3 scripts/pod_decks.py rm 3
   python3 scripts/pod_decks.py export
+
+import file format — one deck per line, blank lines and # comments ignored:
+  {archidekt url} - {display name}
+Re-running import refreshes existing decks (matched by URL) with a fresh
+decklist snapshot and the name from the file.
 """
 import argparse
 import datetime
@@ -91,6 +98,51 @@ def cmd_add(args):
     export(con)
 
 
+def cmd_import(args):
+    path = pathlib.Path(args.path)
+    if not path.is_absolute() and not path.exists():
+        path = ROOT / args.path
+    if not path.exists():
+        sys.exit(f"File not found: {path}")
+    con = connect()
+    ok = failed = 0
+    for ln, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        url, sep, name = line.partition(" - ")
+        url, name = url.strip(), name.strip()
+        m = re.search(r"archidekt\.com/decks/(\d+)", url)
+        if not sep or not m or not name:
+            print(f"line {ln}: expected '{{archidekt url}} - {{display name}}', got: {raw!r} — skipped")
+            failed += 1
+            continue
+        try:
+            _, decklist = fetch_archidekt(m.group(1))
+        except Exception as e:
+            print(f"line {ln}: could not fetch {url}: {e} — skipped")
+            failed += 1
+            continue
+        if not decklist:
+            print(f"line {ln}: {url} returned an empty deck — skipped")
+            failed += 1
+            continue
+        with con:
+            row = con.execute("SELECT id FROM decks WHERE url = ?", (url,)).fetchone()
+            if row:
+                con.execute("UPDATE decks SET name = ?, decklist = ? WHERE id = ?",
+                            (name, decklist, row[0]))
+                print(f"Refreshed #{row[0]}: {name}")
+            else:
+                cur = con.execute(
+                    "INSERT INTO decks(name, owner, url, decklist, added_at) VALUES(?,?,?,?,?)",
+                    (name, args.owner or "", url, decklist, datetime.date.today().isoformat()))
+                print(f"Stored #{cur.lastrowid}: {name}")
+        ok += 1
+    print(f"Imported/refreshed {ok} deck(s)" + (f", {failed} skipped" if failed else ""))
+    export(con)
+
+
 def cmd_list(args):
     con = connect()
     rows = con.execute("SELECT id, name, owner, url, added_at FROM decks ORDER BY id").fetchall()
@@ -138,6 +190,10 @@ def main():
     a.add_argument("--name", help="deck name (default: fetched/derived)")
     a.add_argument("--owner", help="pod member the deck belongs to")
     a.set_defaults(fn=cmd_add)
+    i = sub.add_parser("import", help="bulk import/refresh from a '{url} - {name}' file (default: decsk.txt)")
+    i.add_argument("path", nargs="?", default="decsk.txt")
+    i.add_argument("--owner", help="owner recorded for newly added decks")
+    i.set_defaults(fn=cmd_import)
     sub.add_parser("list", help="list stored decks").set_defaults(fn=cmd_list)
     r = sub.add_parser("rm", help="remove a deck by id")
     r.add_argument("id", type=int)
