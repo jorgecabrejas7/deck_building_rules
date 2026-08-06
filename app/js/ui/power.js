@@ -169,5 +169,6 @@ function comboBlock() {
     (cd.list.length ? ' (' + cd.list.length + ' ' + t.comboOthers + ')' : '') + '</div>';
   return '<div class="stack-6">' + inf.map(c =>
     '<div class="combo-line"><b>' + c.cards.map(esc).join(' + ') + '</b>' +
+    (c.templates && c.templates.length ? ' <span class="txt-muted">+ ' + c.templates.map(esc).join(' + ') + '</span>' : '') +
     ' <span class="txt-muted">→ ' + esc(c.features[0] || '') + '</span></div>').join('') + '</div>';
 }

@@ -5,17 +5,16 @@
   "included": [
    {
     "cards": [
-     "Kodama of the East Tree",
      "Gruul Turf",
+     "Kodama of the East Tree",
      "Rampaging Baloths"
     ],
     "n": 3,
     "features": [
-     "Infinite creature tokens",
-     "Infinite ETB",
-     "Infinite landfall triggers"
+     "Infinite creature tokens"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 52
@@ -31,12 +30,10 @@
     ],
     "n": 2,
     "features": [
-     "Infinite combat phases",
-     "Infinite ETB",
-     "Infinite mana creatures you control can produce",
-     "Infinite tapped creature tokens"
+     "Infinite combat phases"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 34
@@ -53,18 +50,17 @@
   "included": [
    {
     "cards": [
-     "Hazel's Brewmaster",
-     "Gourmand's Talent",
      "Academy Manufactor",
-     "Gilded Goose"
+     "Gilded Goose",
+     "Gourmand's Talent",
+     "Hazel's Brewmaster"
     ],
     "n": 4,
     "features": [
-     "Infinite tapped Food tokens",
-     "Infinite tapped Treasure tokens",
-     "Infinite tapped Clue tokens"
+     "Infinite tapped Food tokens"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 45
@@ -75,47 +71,15 @@
   "included": [
    {
     "cards": [
-     "Lightning Runner",
-     "Aetherwind Basker"
+     "Aetherwind Basker",
+     "Lightning Runner"
     ],
     "n": 2,
     "features": [
-     "Infinite combat phases",
-     "Infinite energy counters",
-     "Infinite mana creatures you control can produce",
-     "Infinite untap of creatures you control"
+     "Infinite combat phases"
     ],
-    "infinite": true
-   },
-   {
-    "cards": [
-     "Saheeli, Radiant Creator",
-     "Lightning Runner",
-     "Aetherwind Basker"
-    ],
-    "n": 3,
-    "features": [
-     "Infinite LTB",
-     "Infinite ETB",
-     "Infinite sacrifice triggers",
-     "Infinite death triggers"
-    ],
-    "infinite": true
-   },
-   {
-    "cards": [
-     "Saheeli, Radiant Creator",
-     "Lightning Runner",
-     "Peema Aether-Seer"
-    ],
-    "n": 3,
-    "features": [
-     "Infinite LTB",
-     "Infinite ETB",
-     "Infinite sacrifice triggers",
-     "Infinite death triggers"
-    ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    },
    {
     "cards": [
@@ -125,11 +89,36 @@
     ],
     "n": 3,
     "features": [
-     "Infinite LTB",
-     "Infinite ETB",
-     "Infinite storm count"
+     "Infinite creature LTB"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
+   },
+   {
+    "cards": [
+     "Aetherwind Basker",
+     "Lightning Runner",
+     "Saheeli, Radiant Creator"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite creature LTB"
+    ],
+    "infinite": true,
+    "templates": []
+   },
+   {
+    "cards": [
+     "Lightning Runner",
+     "Peema Aether-Seer",
+     "Saheeli, Radiant Creator"
+    ],
+    "n": 3,
+    "features": [
+     "Infinite creature LTB"
+    ],
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 47
@@ -146,49 +135,43 @@
   "included": [
    {
     "cards": [
-     "Zimone, Mystery Unraveler",
+     "Sakura-Tribe Elder",
      "Yedora, Grave Gardener",
-     "Whisperwood Elemental"
+     "Zimone, Mystery Unraveler"
     ],
     "n": 3,
     "features": [
-     "Infinite LTB",
-     "Infinite sacrifice triggers",
-     "Infinite death triggers",
-     "Infinite green mana"
+     "Infinite creature LTB"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    },
    {
     "cards": [
-     "Zimone, Mystery Unraveler",
+     "Whisperwood Elemental",
      "Yedora, Grave Gardener",
-     "Sakura-Tribe Elder"
+     "Zimone, Mystery Unraveler"
     ],
     "n": 3,
     "features": [
-     "Infinite LTB",
-     "Infinite sacrifice triggers",
-     "Infinite death triggers",
-     "Infinite green mana"
+     "Infinite creature LTB"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    },
    {
     "cards": [
-     "Zimone, Mystery Unraveler",
-     "Yedora, Grave Gardener",
+     "Retreat to Coralhelm",
      "Yavimaya Elder",
-     "Retreat to Coralhelm"
+     "Yedora, Grave Gardener",
+     "Zimone, Mystery Unraveler"
     ],
     "n": 4,
     "features": [
-     "Infinite card draw",
-     "Infinite draw triggers",
-     "Near-infinite LTB",
-     "Near-infinite death triggers"
+     "Infinite card draw"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 59
@@ -200,14 +183,14 @@
    {
     "cards": [
      "Ondu Spiritdancer",
-     "Secret Arcade // Dusty Parlor"
+     "Secret Arcade"
     ],
     "n": 2,
     "features": [
-     "Infinite ETB",
-     "Infinite creature tokens"
+     "Infinite creature ETB"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 18
@@ -237,28 +220,26 @@
    {
     "cards": [
      "Blowfly Infestation",
-     "Hapatra, Vizier of Poisons"
-    ],
-    "n": 2,
-    "features": [
-     "Infinite death triggers",
-     "Infinite ETB",
-     "Infinite LTB"
-    ],
-    "infinite": true
-   },
-   {
-    "cards": [
-     "Blowfly Infestation",
      "Flourishing Defenses"
     ],
     "n": 2,
     "features": [
-     "Infinite ETB",
-     "Infinite LTB",
+     "Infinite creature ETB"
+    ],
+    "infinite": true,
+    "templates": []
+   },
+   {
+    "cards": [
+     "Blowfly Infestation",
+     "Hapatra, Vizier of Poisons"
+    ],
+    "n": 2,
+    "features": [
      "Infinite death triggers"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 37
@@ -269,15 +250,15 @@
   "included": [
    {
     "cards": [
-     "The Gitrog Monster",
-     "Dakmor Salvage"
+     "Dakmor Salvage",
+     "The Gitrog Monster"
     ],
     "n": 2,
     "features": [
-     "Infinite self-mill",
-     "Near-infinite self-discard triggers"
+     "Infinite self-mill"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 34
@@ -312,10 +293,10 @@
     ],
     "n": 3,
     "features": [
-     "Infinite damage",
-     "Infinite +1/+1 counters on a creature"
+     "Infinite damage"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 75
@@ -332,17 +313,15 @@
   "included": [
    {
     "cards": [
-     "Gilraen, D\u00fanedain Protector",
+     "Gilraen, Dúnedain Protector",
      "Village Bell-Ringer"
     ],
     "n": 2,
     "features": [
-     "Infinite ETB",
-     "Infinite LTB",
-     "Infinite mana creatures you control can produce",
-     "Infinite untap of creatures you control"
+     "Infinite creature ETB"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 23
@@ -404,64 +383,7 @@
  {
   "deck": "Witherbloom Pestilence",
   "code": "soc",
-  "included": [
-   {
-    "cards": [
-     "Viscera Seer",
-     "Gorma, the Gullet"
-    ],
-    "n": 2,
-    "features": [
-     "Infinite +1/+1 counters on a creature",
-     "Infinite ETB",
-     "Infinite LTB",
-     "Infinite death triggers"
-    ],
-    "infinite": true
-   },
-   {
-    "cards": [
-     "Umbral Collar Zealot",
-     "Gorma, the Gullet"
-    ],
-    "n": 2,
-    "features": [
-     "Infinite +1/+1 counters on a creature",
-     "Infinite ETB",
-     "Infinite LTB",
-     "Infinite death triggers"
-    ],
-    "infinite": true
-   },
-   {
-    "cards": [
-     "Gorma, the Gullet",
-     "Yahenni, Undying Partisan"
-    ],
-    "n": 2,
-    "features": [
-     "Infinite +1/+1 counters on a creature",
-     "Infinite ETB",
-     "Infinite LTB",
-     "Infinite death triggers"
-    ],
-    "infinite": true
-   },
-   {
-    "cards": [
-     "Woe Strider",
-     "Gorma, the Gullet"
-    ],
-    "n": 2,
-    "features": [
-     "Infinite +1/+1 counters on a creature",
-     "Infinite ETB",
-     "Infinite LTB",
-     "Infinite death triggers"
-    ],
-    "infinite": true
-   }
-  ],
+  "included": [],
   "almost": 91
  },
  {
@@ -488,25 +410,27 @@
   "included": [
    {
     "cards": [
-     "Narset's Reversal",
-     "Expansion // Explosion"
+     "Adaptive Training Post",
+     "Expansion"
     ],
     "n": 2,
     "features": [
      "Infinite magecraft triggers"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    },
    {
     "cards": [
-     "Adaptive Training Post",
-     "Expansion // Explosion"
+     "Expansion",
+     "Narset's Reversal"
     ],
     "n": 2,
     "features": [
      "Infinite magecraft triggers"
     ],
-    "infinite": true
+    "infinite": true,
+    "templates": []
    }
   ],
   "almost": 55

@@ -49,7 +49,7 @@ or compare it against the currently loaded one in table mode.
 Rules v2 semantics: points never stop counting (past a dial's last priced step
 each extra unit adds +1); only the tier budgets decide (T1<=2, T2<=7) plus hard
 bans and conditionals. Combos: every infinite combo counts separately, first 2
-free, then 2-card +3 / 3-card +2 / 4+ +1. Calibration: 31 T1 / 5 T2 / 0 above.
+free, then 2-card +3 / 3-card +2 / 4+ +1. Calibration: 32 T1 / 4 T2 / 0 above. Combo matching is template-aware: generic slots ("a creature with persist") must actually be filled by a deck card, verified against per-template card lists resolved from Scryfall at build time.
 
 Share the link — nothing to install; the layout adapts to phones (tap the
 card tiles and "?" icons where there is no mouse hover). Rules are fetched from

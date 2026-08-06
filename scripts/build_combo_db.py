@@ -7,11 +7,27 @@ checker can match infinite combos client-side with zero CORS/proxies.
 Input : https://json.commanderspellbook.com/variants.json (downloaded here)
 Output: data/combos.json
   {"updated": "<source timestamp>", "version": "<source version>",
-   "combos": [[["Card A", "Card B"], "Infinite ..."], ...]}
+   "combos": [[["Card A", "Card B"], "Infinite ..."],                # no extra pieces
+              [["Card C", "Card D"], "Infinite ...",
+               [[1, "Creature with Persist or Undying", 73]]],       # + template pieces
+              ...],
+   "templates": {"73": ["Cauldron Haze", "Kitchen Finks", ...]}}
 
 Kept: status OK, 2-5 cards, produces at least one "Infinite ..." feature.
 Card names are front-face names (the checker normalizes DFCs the same way).
-Deduped by card-name set (first result string wins).
+
+Template requirements ("requires": generic pieces like "a creature with
+persist") are preserved as [quantity, name, templateId] triples, and every
+referenced template is resolved AT BUILD TIME into the exact list of card
+names matching its Scryfall query (the export ships the ready-made search
+URL). The checker then verifies each slot by plain name lookup — without
+this, Ashnod's Altar + Luminous Broodmoth would count as an infinite combo
+in a deck with no persist/undying creature. Variants whose template has no
+scryfallQuery, or whose query fails to resolve, are dropped: unverifiable
+slots must never produce false positives.
+
+Deduped by card-name set; the variant with the fewest template pieces wins
+(a combo that works with the named cards alone beats one needing extras).
 
 Usage:
   python3 scripts/build_combo_db.py [path/to/variants.json]
@@ -30,6 +46,24 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = REPO_ROOT / "data" / "combos.json"
 SOURCE_URL = "https://json.commanderspellbook.com/variants.json"
 MAX_CARDS = 5
+TEMPLATE_CARD_CAP = 4000  # a template matching more cards than this is dropped
+
+
+def resolve_template(api_url):
+    """Fetch every card name matching a template's Scryfall search."""
+    import time
+    names, url = [], api_url
+    while url:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "pod-deck-checker", "Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            page = json.load(r)
+        names += [c["name"].split(" // ")[0] for c in page.get("data", [])]
+        if len(names) > TEMPLATE_CARD_CAP:
+            return None
+        url = page.get("next_page") if page.get("has_more") else None
+        time.sleep(0.12)
+    return sorted(set(names))
 
 
 def iter_variants(path):
@@ -92,6 +126,7 @@ def build(src_path):
             meta[key] = text_head[j + 1:k]
 
     seen = {}
+    templates = {}  # template id -> scryfallApi URL
     total = 0
     for v in iter_variants(src_path):
         total += 1
@@ -107,14 +142,49 @@ def build(src_path):
             continue
         names = tuple(sorted(
             (u["card"]["name"].split(" // ")[0]) for u in uses if u.get("card")))
-        if len(names) < 2 or names in seen:
+        if len(names) < 2:
             continue
-        seen[names] = inf[0]
+        reqs = []
+        for r in (v.get("requires") or []):
+            tpl = r.get("template") or {}
+            tid, name = tpl.get("id"), tpl.get("name")
+            if tid is None or not name or not tpl.get("scryfallQuery"):
+                reqs = None  # unverifiable template -> drop variant
+                break
+            templates.setdefault(tid, tpl.get("scryfallApi"))
+            reqs.append([r.get("quantity") or 1, name, tid])
+        if reqs is None:
+            continue
+        pieces = sum(q for q, _, _ in reqs)
+        prev = seen.get(names)
+        if prev is None or pieces < prev[1]:
+            seen[names] = ([inf[0], reqs], pieces)
 
-    combos = [[list(names), result] for names, result in seen.items()]
+    used_tids = {tid for (result, reqs), _ in seen.values() for _, _, tid in reqs}
+    resolved, dropped_tids = {}, set()
+    print(f"resolving {len(used_tids)} templates via Scryfall ...")
+    for tid in sorted(used_tids):
+        cards = None
+        try:
+            cards = resolve_template(templates[tid])
+        except Exception as e:
+            print(f"  template {tid}: fetch failed ({e}) -> combos using it dropped")
+        if cards is None:
+            dropped_tids.add(tid)
+        else:
+            resolved[str(tid)] = cards
+
+    combos, dropped = [], 0
+    for names, ((result, reqs), _) in seen.items():
+        if any(tid in dropped_tids for _, _, tid in reqs):
+            dropped += 1
+            continue
+        combos.append([list(names), result] if not reqs else [list(names), result, reqs])
     combos.sort(key=lambda c: (len(c[0]), c[0]))
+    if dropped:
+        print(f"dropped {dropped} combos whose templates could not be resolved")
     out = {"updated": meta.get("timestamp", ""), "version": meta.get("version", ""),
-           "combos": combos}
+           "combos": combos, "templates": resolved}
     OUT_PATH.parent.mkdir(exist_ok=True)
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")),
                         encoding="utf-8")
