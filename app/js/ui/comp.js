@@ -4,12 +4,13 @@ import { ARCH, BASECOMP, CATS } from './constants.js';
 import { $, archKey, archName, catLabel, esc } from './helpers.js';
 import { renderBrowser } from './browser.js';
 
-export function compSlots() {
-  const a = ARCH.find(x => x.k === archKey());
+export function slotsFor(key) {
+  const a = ARCH.find(x => x.k === key);
   const merged = new Map(BASECOMP.map(([c, mn, mx]) => [c, [mn, mx]]));
   for (const [c, mn, mx] of (a && a.spec) || []) merged.set(c, [mn, mx]);
   return [...merged.entries()].map(([cat, [mn, mx]]) => ({ cat, min: mn, max: mx }));
 }
+export function compSlots() { return slotsFor(archKey()); }
 export function tagCount(cat) {
   return state.result.cardsInfo.reduce((s, x) => s + ((x.cls.cat === cat || x.cls.tags.includes(cat)) ? x.qty : 0), 0);
 }

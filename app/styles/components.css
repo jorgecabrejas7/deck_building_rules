@@ -337,3 +337,24 @@
 .pod-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .tips-block-head{justify-content:flex-start;align-items:center}
 .tips-block-head>span:last-child{margin-left:auto}
+
+/* table mode: side-by-side comparison matrices */
+.cmp-section{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.cmp-table{border-collapse:collapse;font-size:12.5px;min-width:100%}
+.cmp-table th,.cmp-table td{padding:8px 12px;text-align:left;vertical-align:top;border-top:1px solid var(--border2)}
+.cmp-table tr:first-child th{border-top:none}
+.cmp-deck-head{font-size:12px;white-space:nowrap}
+.cmp-deck-head .chip-art{margin-right:6px;vertical-align:middle}
+.cmp-lbl{position:sticky;left:0;background:var(--panel);font-weight:600;white-space:nowrap;color:var(--muted);min-width:110px}
+.cmp-table td:not(.cmp-lbl){min-width:170px}
+.cmp-pts{color:var(--warn);font-weight:600}
+.cmp-bad{color:var(--bad)}
+.cmp-max{font-weight:700}
+.cmp-total td{border-top:2px solid var(--border)}
+.cmp-few{color:var(--warn);font-weight:600}
+.cmp-many{color:var(--warn);font-weight:600}
+.cmp-ok{color:var(--good);font-weight:600}
+.cmp-range{color:var(--faint);font-size:11px}
+.cmp-cards-cell{max-width:320px}
+.cmp-cards-cell .card-chip{margin:2px 4px 2px 0}
+.chip-shared{border-color:var(--accent)}

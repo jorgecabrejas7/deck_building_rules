@@ -20,5 +20,6 @@ export const state = {
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
   podDecks: null,    // {status, decks} — lazy-loaded from data/pod_decks.json
+  cmpView: 'all',    // side-by-side card comparison: 'all' | 'diff'
 };
 export const TAB_KEYS = ['load', 'power', 'analysis', 'tips', 'pod', 'guide'];

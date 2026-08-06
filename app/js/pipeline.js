@@ -42,13 +42,16 @@ export async function analyze() {
 
 // ---- infinite combos: checked automatically after every analysis ----
 let comboDb = null;
+export async function getComboDb() {
+  if (!comboDb) comboDb = await (await fetch('../data/combos.json')).json();
+  return comboDb;
+}
 export async function checkCombos() {
   if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
   state.combosData = { status: 'checking', list: [], count: 0 };
   renderAll();
   try {
-    if (!comboDb) comboDb = await (await fetch('../data/combos.json')).json();
-    const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), comboDb);
+    const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), await getComboDb());
     state.combosData = { status: 'done', list, count: list.length, dbVersion: comboDb.version };
     recompute();
   } catch (e) {
