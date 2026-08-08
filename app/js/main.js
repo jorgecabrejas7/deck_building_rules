@@ -3,7 +3,8 @@
 // because every cross-module call happens inside event handlers, after eval.
 import * as PodEngine from './engine/index.js';
 import { RULES } from './rules.js';
-import { state, store } from './state.js';
+import { state, store, saveSession, loadSession, TAB_KEYS } from './state.js';
+import { deckToText } from './advice.js';
 import { T } from './i18n.js';
 import { $ } from './ui/helpers.js';
 import { applyTheme, renderHeader } from './ui/header.js';
@@ -66,16 +67,22 @@ export function renderAll() {
   renderBanner();
   if (has) {
     renderSummary(); renderValidation();
-    if (state.tab === 'power') renderPower();
-    if (state.tab === 'analysis') { renderVerdict(); renderComp(); renderBrowser(); renderCurve(); renderRamp(); renderHand(); }
-    if (state.tab === 'tips') renderTips();
+    if (state.tab === 'informe') { renderVerdict(); renderPower(); renderTips(); }
+    if (state.tab === 'detalles') { renderComp(); renderCurve(); renderRamp(); renderHand(); renderBrowser(); }
   }
   if (state.tab === 'pod') renderPod();
   restoreFocus(focus);
+  saveSession();
 }
 
 // ================= boot =================
 const __boot = () => {
+  // poisoned-cache recovery: a missing critical i18n key means the module
+  // graph mixed two deploys — force ONE cache-bypassing reload (guarded in
+  // index.html against loops), then boot with whatever we have
+  const tCheck = T();
+  if ((!tCheck || !tCheck.tabInforme) && window.__pdcRecover && window.__pdcRecover()) return;
+  try { sessionStorage.removeItem('pdc_recovered'); } catch (e) {}
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => { state.sysDark = e.matches; applyTheme(); });
   $('themeBtn').onclick = () => { const eff = state.theme ? state.theme === 'dark' : state.sysDark;
     state.theme = eff ? 'light' : 'dark'; store.theme = state.theme; applyTheme(); };
@@ -96,10 +103,16 @@ const __boot = () => {
   });
   $('analyzeBtn').onclick = analyze;
   $('archSel').onchange = (e) => { state.arch = e.target.value; renderAll(); };
-  $('deckText').oninput = () => { state.error = null; renderInput(); };
+  $('deckText').oninput = () => { state.error = null; renderInput(); saveSession(); };
   $('gtBtn').onclick = () => { state.grp = 'type'; renderBrowser(); };
   $('gcBtn').onclick = () => { state.grp = 'cat'; renderBrowser(); };
-  $('tableModeBtn').onclick = () => { state.tableOpen = !state.tableOpen; renderAll(); };
+  $('tableModeBtn').onclick = () => {
+    state.tableOpen = !state.tableOpen;
+    // opening with an analyzed deck: seat it at Mazo 1 so comparing starts ready
+    if (state.tableOpen && state.deck && !state.tableTexts[0].trim())
+      state.tableTexts[0] = deckToText(state.deck);
+    renderAll();
+  };
   initHelpPopovers();
   // collapse the sticky summary+tabbar once the page top scrolls away
   new IntersectionObserver(([e]) => {
@@ -108,7 +121,23 @@ const __boot = () => {
   }).observe($('stickySentinel'));
   const st = PodEngine.runSelfTest(RULES);
   if (!st.pass) console.warn('PodEngine selftest FAILED', st.results.filter(r => !r.pass));
+  // restore the previous session's inputs, then re-derive the analysis
+  const sess = loadSession();
+  if (sess) {
+    if (typeof sess.deckText === 'string') $('deckText').value = sess.deckText;
+    if (typeof sess.arch === 'string') state.arch = sess.arch;
+    if (Array.isArray(sess.tableTexts))
+      state.tableTexts = [0, 1, 2, 3].map(i => typeof sess.tableTexts[i] === 'string' ? sess.tableTexts[i] : '');
+  }
   renderAll();
+  if (sess && typeof sess.deckText === 'string' && sess.deckText.trim()) {
+    analyze().then(() => {
+      // land on the saved tab unless the user already navigated meanwhile
+      if (state.result && state.tab === 'informe' && TAB_KEYS.includes(sess.tab)) { state.tab = sess.tab; renderAll(); }
+    });
+  } else if (sess && ['load', 'guide', 'pod'].includes(sess.tab)) {
+    state.tab = sess.tab; renderAll();
+  }
 };
 if (document.readyState !== 'loading') __boot();
 else window.addEventListener('DOMContentLoaded', __boot);

@@ -17,7 +17,11 @@ export function renderPod() {
     fetch('../data/pod_decks.json')
       .then(r => { if (!r.ok) throw new Error('pod_decks ' + r.status); return r.json(); })
       .then(d => { state.podDecks = { status: 'done', decks: d.decks || [] }; })
-      .catch(() => { state.podDecks = { status: 'error', decks: [] }; })
+      .catch((e) => {
+        // maintainer hint stays in the console; players see t.podErr
+        console.warn('pod deck list failed: data/pod_decks.json (maintained with scripts/pod_decks.py)', e);
+        state.podDecks = { status: 'error', decks: [] };
+      })
       .then(() => { if (state.tab === 'pod') renderPod(); });
   }
   const pd = state.podDecks;
@@ -35,7 +39,7 @@ export function renderPod() {
     '<button data-pod-load="' + d.id + '" class="btn-accent-sm">' + t.podLoad + '</button>' +
     (state.deck ? '<button data-pod-cmp="' + d.id + '" class="btn-ghost-sm">' + t.podCompare + '</button>' : '') +
     '</div></div>').join('') + '</div>';
-  el.innerHTML = '<div class="panel panel-pad-lg"><h2 class="secT">' + t.podT + '</h2>' +
+  el.innerHTML = '<div class="panel panel-pad-lg"><h2 class="secT secT-lg">' + t.podT + '</h2>' +
     '<div class="lbl-muted">' + esc(t.podHint) + '</div>' + body + '</div>';
   for (const b of el.querySelectorAll('[data-pod-load]')) b.onclick = () => {
     const d = pd.decks.find(x => x.id === +b.dataset.podLoad);

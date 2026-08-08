@@ -14,15 +14,15 @@
   .summary-row::-webkit-scrollbar{display:none}
   .summary-row .cmd-tile{order:1}
   .tier-box{min-width:132px;padding:8px 14px;flex:none}
-  .tier-box-value{font-size:13.5px}
+  .tier-box-value{font-size:var(--fs-ui)}
   .cmd-tile{min-width:0;flex:none;padding:4px 10px 4px 4px}
   .cmd-tile img{width:42px;height:31px}
-  .cmd-name{font-size:12px;white-space:nowrap}
+  .cmd-name{font-size:var(--fs-caption);white-space:nowrap}
   .stat-grid{display:flex;flex:none;gap:8px;min-width:0}
   .stat-tile{flex:none;padding:6px 10px}
-  .stat-value{font-size:14px}
-  .stat-arch{font-size:12px;white-space:nowrap}
-  .banner-box{padding:10px 14px;font-size:12px}
+  .stat-value{font-size:var(--fs-ui)}
+  .stat-arch{font-size:var(--fs-caption);white-space:nowrap}
+  .banner-box{padding:10px 14px;font-size:var(--fs-caption)}
 
   /* scrollable tab bar */
   .tabbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -52,14 +52,12 @@
   .card-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
   .sug-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
   .hand-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
-  .tile-name{font-size:11px}
-  .tile-sub{font-size:9.5px}
+  .tile-name{font-size:var(--fs-micro)}
 
   /* readable curve */
   .curve-wrap{grid-template-columns:1fr}
   .curve-bins{gap:4px;height:186px}
-  .bin-label{font-size:9.5px}
-  .bin-count{font-size:10px}
+  .bin-count{font-size:var(--fs-micro)}
 
   /* modal */
   .modal-backdrop{padding:16px 8px}
@@ -69,22 +67,25 @@
   .tab-btn,.btn-primary,.btn-ghost,.btn-accent,.btn-accent-sm,.btn-outline,
   .btn-outline-accent,.btn-tone-outline,.btn-ghost-sm,.chip-dashed,.cf-btn,
   .comp-clear,.pill-clear,.btn-build,.seg-toggle button,.seg-toggle-sm button,
-  .modal-close,.price-pill,.banner-x{min-height:44px}
+  .modal-close,.price-pill,.banner-x,.valid-jump{min-height:44px}
   .icon-btn{width:44px;height:44px}
-  .catHelp{width:22px;height:22px;font-size:12px}
+  .catHelp{width:22px;height:22px;font-size:var(--fs-caption)}
 }
 
 @media (max-width: 999px) {
   .verdict-cols{grid-template-columns:1fr;gap:10px}
-  .adv-why{white-space:normal}
   .pod-row{gap:8px}
   .pod-actions{margin-left:0;width:100%}
 }
 
 @media (max-width: 480px) {
-  .brand-title{font-size:16px}
-  .header-actions{gap:6px}
-  .btn-outline,.btn-outline-accent{padding:7px 9px;font-size:11.5px}
+  .brand-title{font-size:var(--fs-lead)}
+  /* header: exactly two rows — brand, then ONE icon-only actions row */
+  .hero-inner{row-gap:8px}
+  .header-actions{gap:6px;flex-wrap:nowrap;width:100%;justify-content:flex-end}
+  .header-actions .btn-txt{display:none}
+  .btn-outline,.btn-outline-accent{padding:7px 9px;font-size:var(--fs-caption)}
+  .header-actions .btn-outline,.header-actions .btn-outline-accent{min-width:44px;padding:0;font-size:var(--fs-ui)}
   .card-grid{grid-template-columns:repeat(3,1fr);gap:6px}
   .hand-grid{grid-template-columns:repeat(3,1fr)}
   .sug-grid{grid-template-columns:repeat(2,1fr)}

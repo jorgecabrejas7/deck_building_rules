@@ -4,7 +4,7 @@ import { $, esc } from './helpers.js';
 import { startCheapest } from '../pipeline.js';
 import { renderAll } from '../main.js';
 
-const TAB_LABEL = { load: 'tabLoad', power: 'tabPower', analysis: 'tabAnalysis', tips: 'tabTips', pod: 'tabPod', guide: 'tabGuide' };
+const TAB_LABEL = { load: 'tabLoad', informe: 'tabInforme', detalles: 'tabDetalles', pod: 'tabPod', guide: 'tabGuide' };
 
 export function renderTabbar() {
   const t = T();

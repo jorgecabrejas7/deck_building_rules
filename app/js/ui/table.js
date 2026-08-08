@@ -1,5 +1,5 @@
 import * as PodEngine from '../engine/index.js';
-import { state, cardCache, persistCache } from '../state.js';
+import { state, cardCache, persistCache, saveSession } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { ARCH, DIAL_META, CATS } from './constants.js';
@@ -16,7 +16,7 @@ export function renderTableMode() {
   if (!state.tableOpen) { el.style.display = 'none'; return; }
   el.style.display = '';
   let html = '<div class="panel tm-panel">' +
-    '<h2 class="secT">' + t.tmT + '</h2>' +
+    '<h2 class="secT secT-lg">' + t.tmT + '</h2>' +
     '<div class="lbl-muted">' + t.tmHint + '</div>' +
     '<div class="tm-grid">' +
     [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="mono tm-ta" placeholder="' + t.tmDeck + ' ' + (i + 1) + '" aria-label="' + t.tmDeck + ' ' + (i + 1) + '">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
@@ -37,7 +37,7 @@ export function renderTableMode() {
   html += '</div>';
   el.innerHTML = html;
   for (const ta of el.querySelectorAll('[data-tm]'))
-    ta.oninput = () => { state.tableTexts[+ta.dataset.tm] = ta.value; };
+    ta.oninput = () => { state.tableTexts[+ta.dataset.tm] = ta.value; saveSession(); };
   $('tmRunBtn').onclick = runTableMode;
   for (const b of el.querySelectorAll('[data-tmload]'))
     b.onclick = () => { $('deckText').value = state.tableTexts.filter(x => x.trim())[+b.dataset.tmload]; analyze(); };
@@ -55,7 +55,7 @@ function deckHeads(res) {
   }).join('') + '</tr>';
 }
 function section(title, extra, table) {
-  return '<div class="cmp-section"><div class="row-between"><h3 class="secT secT-sm">' + title + '</h3>' + (extra || '') + '</div>' +
+  return '<div class="cmp-section"><div class="row-between"><h3 class="secT">' + title + '</h3>' + (extra || '') + '</div>' +
     '<div class="table-scroll"><table class="cmp-table">' + table + '</table></div></div>';
 }
 

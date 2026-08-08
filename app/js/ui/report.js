@@ -15,7 +15,7 @@ export function copyReport() {
     t.cardsN + ': ' + state.result.stats.total_cards,
     t.archetype + ': ' + archName()];
   for (const v of ev.violations) lines.push('✕ ' + (v.id === 'conditional' ? MSG.conditional[v.condId][lang](v) : MSG[v.id][lang](v)));
-  for (const f of ev.flags) lines.push('⚠ ' + (MSG['flag_' + f.id] ? MSG['flag_' + f.id][lang](f) : f.id));
+  for (const f of ev.flags) lines.push('⚠ ' + (MSG['flag_' + f.dial] ? MSG['flag_' + f.dial][lang](f) : f.id));
   for (const [k, p] of Object.entries(ev.breakdown)) lines.push('· ' + (EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang)) + ': +' + p + ' pts');
   try { navigator.clipboard.writeText(lines.join('\n')); } catch (e) {}
   state.copied = true; renderHeader();

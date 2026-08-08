@@ -14,6 +14,33 @@
 <body>
 <script>/* pre-paint theme: keep in sync with js/ui/header.js applyTheme() */
 if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');</script>
+<script>/* module-cache recovery. sw.js makes every same-origin fetch revalidate
+against the network, so one reload through it repairs a mixed-version module
+graph (stale i18n.js next to a fresh tabbar.js after a deploy). This hook
+forces that ONE reload — guarded by sessionStorage against loops — either
+when a module throws at load time (below) or when boot detects a missing
+critical i18n key (main.js). */
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+window.__pdcRecover = function () {
+  try {
+    if (sessionStorage.getItem('pdc_recovered')) return false;
+    sessionStorage.setItem('pdc_recovered', '1');
+  } catch (e) { return false; }
+  var go = function () { go = function () {}; location.reload(); };
+  if ('serviceWorker' in navigator && !navigator.serviceWorker.controller) {
+    /* first visit: wait for the SW to take control so the reload is served
+       network-first; time-boxed in case registration fails */
+    var tm = setTimeout(function () { go(); }, 2000);
+    navigator.serviceWorker.ready.then(function () { clearTimeout(tm); go(); },
+      function () { clearTimeout(tm); go(); });
+  } else go();
+  return true;
+};
+window.addEventListener('error', function (e) {
+  var src = e.filename || (e.target && e.target.src) || '';
+  if (/\/js\//.test(String(src))) window.__pdcRecover();
+}, true);
+</script>
 <div class="page">
 <div class="hero">
   <div class="hero-glow1"></div>
@@ -48,7 +75,7 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
 
   <div id="tab-load" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-load">
     <div class="panel input-panel">
-      <h2 id="inputTitle" class="secT">ANALIZAR MAZO</h2>
+      <h2 id="inputTitle" class="secT secT-lg">ANALIZAR MAZO</h2>
       <textarea id="deckText" rows="10" class="mono deck-input"></textarea>
       <div id="inputNotice" class="input-notice"></div>
       <div class="chips-row">
@@ -62,6 +89,7 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
         </label>
         <button id="analyzeBtn" class="btn-primary"></button>
         <button id="tableModeBtn" class="btn-ghost"></button>
+        <button id="validJump" type="button" class="valid-jump" style="display:none"></button>
       </div>
     </div>
     <div id="validation" style="display:none"></div>
@@ -75,13 +103,24 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
     </div>
   </div>
 
-  <div id="tab-power" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-power">
+  <!-- Informe: one scrolling report — verdict, then the why (dials), then what to do -->
+  <div id="tab-informe" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-informe">
+    <div id="verdict"></div>
     <div id="power" class="panel power-panel"></div>
+    <div id="tips" class="stack-16">
+      <div id="tipsMain" class="panel panel-pad-lg"></div>
+      <div id="tipsUp" class="panel panel-pad-lg" aria-live="polite"></div>
+      <div id="tipsComp" class="panel panel-pad-lg" aria-live="polite"></div>
+    </div>
+    <div id="informeEnd"></div>
   </div>
 
-  <div id="tab-analysis" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-analysis">
-    <div id="verdict"></div>
+  <!-- Detalles: reference and exploration — insight panels first, the 100-card browser last -->
+  <div id="tab-detalles" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-detalles">
     <div id="comp" class="comp-panel"></div>
+    <div id="curveWrap" class="curve-wrap"></div>
+    <div id="rampPanel" class="panel panel-pad"></div>
+    <div id="handPanel" class="panel panel-pad-lg"></div>
     <div class="panel browser-panel">
       <div class="row-between">
         <h2 id="browserT" class="secT"></h2>
@@ -95,17 +134,6 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
       </div>
       <div id="groups" class="groups"></div>
     </div>
-    <div id="curveWrap" class="curve-wrap"></div>
-    <div id="rampPanel" class="panel panel-pad"></div>
-    <div id="handPanel" class="panel panel-pad-lg"></div>
-  </div>
-
-  <div id="tab-tips" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-tips">
-    <div id="tips" class="stack-16">
-      <div id="tipsMain" class="panel panel-pad-lg"></div>
-      <div id="tipsUp" class="panel panel-pad-lg" aria-live="polite"></div>
-      <div id="tipsComp" class="panel panel-pad-lg" aria-live="polite"></div>
-    </div>
   </div>
 
   <div id="tab-pod" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-pod">
@@ -114,7 +142,7 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
 
   <div id="tab-guide" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-guide">
     <div class="panel clip">
-      <h2 id="guideT" class="secT guide-title"></h2>
+      <h2 id="guideT" class="secT secT-lg guide-title"></h2>
       <div id="guideBody"></div>
     </div>
   </div>
@@ -122,7 +150,7 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
 <div id="srStatus" class="vh" aria-live="polite"></div>
 <div id="footer" class="footer mono"></div>
 <div id="howModal" class="modal-backdrop">
-  <div id="howBody" class="modal-body"></div>
+  <div id="howBody" class="modal-body" role="dialog" aria-modal="true" aria-labelledby="howTitle"></div>
 </div>
 <div id="textPop" class="text-pop" role="tooltip" aria-live="polite"></div>
 <div id="popover" class="card-pop" aria-hidden="true"></div>

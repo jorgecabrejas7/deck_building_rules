@@ -22,12 +22,15 @@ export function renderSummary() {
       '<span class="tier-box-value">' + t[ev.tier] + '</span></div>' +
     cmdTile +
     '<div class="stat-grid">' +
-      stat(t.pts, ev.points + ' / ' + budgetN) +
+      // the cap gets its name so "23 / 7" can't read as 23-of-7 anything;
+      // over budget the tile takes the tier tone instead of staying neutral
+      stat(t.pts, ev.points + ' <span class="stat-cap">· ' + t.capWord + ' ' + budgetN + '</span>',
+        ev.points > budgetN ? 'toned ' + tierTone(ev.tier) : '') +
       stat(t.price, '€' + Math.round(r.stats.total_price_eur)) +
       stat(t.cardsN, r.stats.total_cards) +
       '<div class="panel stat-tile"><div class="tile-label">' + t.archetype + '</div><div class="stat-arch">' + esc(archName()) + '</div></div></div>';
-  function stat(lbl, val) {
-    return '<div class="panel stat-tile"><div class="tile-label">' + lbl + '</div><div class="mono stat-value">' + val + '</div></div>';
+  function stat(lbl, val, cls) {
+    return '<div class="panel stat-tile' + (cls ? ' ' + cls : '') + '"><div class="tile-label">' + lbl + '</div><div class="mono stat-value">' + val + '</div></div>';
   }
   // right-edge fade while more tiles remain off-screen (strip scrolls on mobile / when collapsed)
   const row = $('summary');

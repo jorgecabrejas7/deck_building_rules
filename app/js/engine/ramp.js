@@ -16,5 +16,7 @@ export function manaProduced(card) {
 }
 export function isLandRamp(card) {
   const o = (card.oracle_text || "").replace(REMINDER_TEXT_RE, "");
-  return /search (?:your|their) library for [^.]{0,60}land[^.]{0,80}onto the battlefield/i.test(o);
+  // Only YOUR library: opponent-facing land fetch ("its controller may search
+  // their library…", Path to Exile / Ghost Quarter) ramps the target, not you.
+  return /search your library for [^.]{0,60}land[^.]{0,80}onto the battlefield/i.test(o);
 }

@@ -16,11 +16,16 @@ export function applyTheme() {
 export function renderHeader() {
   const t = T();
   $('appTag').textContent = t.appTag;
-  const copyBtn = $('copyBtn');
-  copyBtn.textContent = '⧉ ' + (state.copied ? t.copied : t.copy);
+  // labels live in a .btn-txt span that ≤480px CSS hides (icon-only keeps the
+  // actions on one row); aria-label carries the full text at every width
+  const copyBtn = $('copyBtn'), copyTxt = state.copied ? t.copied : t.copy;
+  copyBtn.innerHTML = '⧉<span class="btn-txt"> ' + copyTxt + '</span>';
+  copyBtn.setAttribute('aria-label', copyTxt);
   copyBtn.disabled = !state.result;
   copyBtn.title = state.result ? '' : t.copyHint;
-  $('howBtn').textContent = '? ' + t.howBtn;
+  const howBtn = $('howBtn');
+  howBtn.innerHTML = '?<span class="btn-txt"> ' + t.howBtn + '</span>';
+  howBtn.setAttribute('aria-label', t.howBtn);
   $('enBtn').classList.toggle('active', state.lang === 'en');
   $('esBtn').classList.toggle('active', state.lang === 'es');
   $('enBtn').setAttribute('aria-pressed', String(state.lang === 'en'));

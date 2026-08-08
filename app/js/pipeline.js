@@ -32,7 +32,7 @@ export async function analyze() {
     state.combosData = null;
     recompute(notFound);
     state.fetchSt = 'idle';
-    state.tab = 'power';
+    state.tab = 'informe';
   } catch (e) {
     console.error(e); state.error = 'netErr';
   }

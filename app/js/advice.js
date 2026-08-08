@@ -1,8 +1,10 @@
 // Advice engine: pure helpers for power-down / power-up guidance. No DOM.
 // Everything derives from rules/pod_rules.json so rules changes need no edits here.
 import * as PodEngine from './engine/index.js';
+import { KEYWORD_PATTERNS, FAST_MANA_RE, REMINDER_TEXT_RE } from './engine/stats.js';
 import { RULES } from './rules.js';
-import { cardCache } from './state.js';
+import { cardCache, persistCache } from './state.js';
+import { getSynergy } from './synergy.js';
 
 const OPS = {
   '>=': (a, b) => a >= b, '<=': (a, b) => a <= b,
@@ -143,6 +145,112 @@ export async function fetchUpgradeCards(dial, result, limit = 4, extraExclude = 
     bannedNames: banned,
     limit, requireCat: meta.cat || null, allowGameChanger: !!meta.gc,
   });
+}
+
+// ---- synergy-first advice (the default "improve my deck" answer) ----
+// Backbone: EDHREC per-commander synergy scores (see synergy.js). Suggestions
+// are filtered to pod-legal, budget-affordable cards not already in the deck;
+// cuts are the deck's least plan-relevant cards per the same synergy table.
+
+// Point-scoring dials one added card could bump. game_changers is absent on
+// purpose: game changers are excluded from default suggestions entirely.
+const ADD_DIALS = ['tutors', 'extra_turns', 'board_wipes', 'counterspells', 'free_spells', 'stax_effects', 'mass_land_denial'];
+const PRICE_DIALS = [
+  ['price_1_5', p => p >= 1 && p < 5],
+  ['price_10_20', p => p >= 10 && p < 20],
+  ['price_20_30', p => p >= 20 && p < 30],
+];
+
+export function cardDials(card) {
+  const oracle = (card.oracle_text || '').replace(REMINDER_TEXT_RE, '');
+  const dials = [];
+  for (const d of ADD_DIALS) if (KEYWORD_PATTERNS[d].test(oracle)) dials.push(d);
+  const isLand = (card.type_line || '').includes('Land');
+  if (!isLand && card.cmc !== undefined && card.cmc !== null && card.cmc <= 2 && FAST_MANA_RE.test(oracle)) dials.push('fast_mana');
+  if (card.price !== null && card.price !== undefined)
+    for (const [d, test] of PRICE_DIALS) if (test(card.price)) { dials.push(d); break; }
+  return dials;
+}
+
+// Points that adding this one card would cost right now, or null when a pod
+// rule forbids it outright (forbidden dial, active conditional).
+export function cardAddCost(card, stats) {
+  let cost = 0;
+  const s = { ...stats };
+  for (const dial of cardDials(card)) {
+    const spec = RULES.dials[dial];
+    if (spec && spec.forbidden) return null;
+    if (upgradeBlock(dial, s)) return null;
+    cost += dialUnitCost(dial, s[dial] || 0) + upgradePenalty(dial, s);
+    s[dial] = (s[dial] || 0) + 1;
+  }
+  return cost;
+}
+
+const frontFace = n => n.split(' // ')[0];
+
+// Cut candidates ordered least-plan-relevant first: lowest EDHREC synergy with
+// this commander (absent from the commander's page = below every listed card),
+// least-played on ties. Never lands, commanders, or cards from a category the
+// deck is short on.
+export function synergyCuts(result, synCards, shortfallCats) {
+  const synOf = new Map();
+  for (const s of synCards) synOf.set(frontFace(s.n), { s: s.s, i: s.pd ? s.nd / s.pd : 0 });
+  const short = new Set(shortfallCats || []);
+  const cmd = new Set((result.commanders || []).map(frontFace));
+  return result.cardsInfo
+    .filter(x => {
+      if (x.cls.type === 'L' || cmd.has(frontFace(x.name)) || x.cls.cat === 'land') return false;
+      if (short.has(x.cls.cat) || x.cls.tags.some(c => short.has(c))) return false;
+      // staple guard: low synergy but high inclusion means "everyone runs it"
+      // (Sol Ring scores ~0% synergy by construction) — never nominate those
+      const e = synOf.get(frontFace(x.name));
+      return !e || e.i < 0.3;
+    })
+    .map(x => { const e = synOf.get(frontFace(x.name)); return { x, syn: e ? e.s : null }; })
+    .sort((a, b) => {
+      const sa = a.syn === null ? -1 : a.syn, sb = b.syn === null ? -1 : b.syn;
+      return sa - sb || (b.x.card.edhrec_rank || 0) - (a.x.card.edhrec_rank || 0);
+    });
+}
+
+// The synergy picks themselves. Returns null when EDHREC has no page for this
+// commander; throws on network errors (caller degrades to category advice).
+// Filters: not in deck, pod-legal (bans, €30 cap, color identity, no game
+// changers, no forbidden/blocked dials), and never past the Tier 2 point
+// budget — an over-budget deck only gets 0-point picks.
+export async function synergyAdvice(result, shortfallCats, limit = 6) {
+  const syn = await getSynergy(result.commanders);
+  if (!syn) return null;
+  const inDeck = new Set(result.cardsInfo.map(x => frontFace(x.name)));
+  const banned = new Set(Object.values(RULES.hard_bans.banned_cards).flat().map(frontFace));
+  const pool = syn.cards
+    .filter(c => c.s > 0 && !inDeck.has(frontFace(c.n)) && !banned.has(frontFace(c.n)))
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 60);
+  await PodEngine.fetchCards(pool.map(c => c.n), cardCache);
+  persistCache();
+  const ci = new Set(deckColorIdentity(result));
+  const cap = RULES.hard_bans.max_card_price_eur;
+  const budget = Math.max(RULES.tiers.tier2.max_points - result.evalRes.points, 0);
+  const short = new Set(shortfallCats || []);
+  const picks = [];
+  for (const s of pool) {
+    const card = cardCache[s.n] || cardCache[frontFace(s.n)];
+    if (!card || card.game_changer || card.legal_commander === 'banned') continue;
+    if (banned.has(frontFace(card.name))) continue;
+    if (card.price === null || card.price > cap) continue;
+    if ((card.type_line || '').includes('Land')) continue;
+    if (![...(card.color_identity || [])].every(c => ci.has(c))) continue;
+    const cost = cardAddCost(card, result.stats);
+    if (cost === null || cost > budget) continue;
+    const cls = PodEngine.classifyCard(card);
+    const fills = [cls.cat, ...cls.tags].find(c => short.has(c)) || null;
+    picks.push({ card, cls, cost, fills, synergy: s.s, incl: s.pd ? s.nd / s.pd : null,
+      score: s.s + (fills ? 0.12 : 0) - cost * 0.05 });
+  }
+  picks.sort((a, b) => b.score - a.score);
+  return { picks: picks.slice(0, limit), cuts: synergyCuts(result, syn.cards, shortfallCats), slug: syn.slug };
 }
 
 export function deckColorIdentity(result) {

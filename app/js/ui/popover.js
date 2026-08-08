@@ -1,4 +1,5 @@
 import { state } from '../state.js';
+import { T } from '../i18n.js';
 import { CAT_HELP, DIAL_META } from './constants.js';
 import { $ } from './helpers.js';
 
@@ -19,20 +20,41 @@ addEventListener('scroll', () => {
   hideCardPopover(); hideHelpPopover();
 }, { capture: true, passive: true });
 
-export function showCardPopover(anchor, src) {
+// grace=true (focus/tap opens) keeps the popover through the scroll a focus
+// jump causes; hover opens pass grace=false so any scroll dismisses at once
+// (otherwise the card can strand over the sticky header mid-scroll).
+export function showCardPopover(anchor, src, grace = true) {
   if (!src) return;
   const rect = anchor.getBoundingClientRect();
   let x = rect.right + 12; if (x + 276 > innerWidth) x = Math.max(8, rect.left - 288);
   const y = Math.max(10, Math.min(rect.top - 60, innerHeight - 390));
   const pop = $('popover');
+  let img = pop.firstElementChild;
+  if (!img) { img = document.createElement('div'); img.className = 'card-pop-img'; pop.appendChild(img); }
   pop.style.display = 'block'; pop.style.left = x + 'px'; pop.style.top = y + 'px';
-  pop.style.backgroundImage = "url('" + src + "')";
-  popOpenAt = performance.now();
+  // the frame shows a card-back-like placeholder; the art fades in once loaded
+  if (pop._src !== src) {
+    pop._src = src;
+    img.classList.remove('in'); img.style.backgroundImage = '';
+    const pre = new Image();
+    pre.onload = () => {
+      if (pop._src !== src) return; // a different card took over meanwhile
+      img.style.backgroundImage = "url('" + src + "')";
+      img.classList.add('in');
+    };
+    pre.src = src;
+  }
+  popOpenAt = grace ? performance.now() : -Infinity;
 }
 export function hideCardPopover() { const pop = $('popover'); pop.style.display = 'none'; pop._owner = null; }
 
 function bindTarget(el, getSrc) {
   el.tabIndex = 0; // card previews must be reachable from the keyboard
+  // announce the tile: card name + action (focus lands on something named)
+  if (el.dataset.name && !el.hasAttribute('role')) {
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', el.dataset.name + ' — ' + T().previewAria);
+  }
   if (TOUCH) {
     const toggle = () => {
       const pop = $('popover');
@@ -47,10 +69,9 @@ function bindTarget(el, getSrc) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
     });
   } else {
-    const show = () => showCardPopover(el, getSrc());
-    el.onmouseenter = show;
+    el.onmouseenter = () => showCardPopover(el, getSrc(), false);
     el.onmouseleave = hideCardPopover;
-    el.onfocus = show;
+    el.onfocus = () => showCardPopover(el, getSrc());
     el.onblur = hideCardPopover;
   }
 }
@@ -68,7 +89,7 @@ function helpTextFor(el) {
   return null;
 }
 
-function showHelpPopover(el) {
+function showHelpPopover(el, grace = true) {
   const text = helpTextFor(el);
   if (!text) return false;
   const tp = $('textPop'), rect = el.getBoundingClientRect();
@@ -77,7 +98,7 @@ function showHelpPopover(el) {
   let x = rect.left; if (x + 330 > innerWidth) x = Math.max(8, innerWidth - 335);
   tp.style.left = x + 'px';
   tp.style.top = Math.max(8, Math.min(rect.bottom + 8, innerHeight - tp.offsetHeight - 10)) + 'px';
-  popOpenAt = performance.now();
+  popOpenAt = grace ? performance.now() : -Infinity;
   return true;
 }
 
@@ -108,7 +129,7 @@ export function initHelpPopovers() {
   }
   document.addEventListener('mouseover', (e) => {
     const el = e.target.closest && e.target.closest('.catHelp');
-    if (el) showHelpPopover(el);
+    if (el) showHelpPopover(el, false);
   });
   document.addEventListener('mouseout', (e) => {
     if (e.target.closest && e.target.closest('.catHelp')) hideHelpPopover();

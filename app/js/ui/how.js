@@ -23,7 +23,7 @@ function renderHow() {
   const bans = RULES.hard_bans.banned_cards;
   const html = P ? `
 <button id="howClose" class="modal-close" aria-label="Cerrar">✕</button>
-<h2>¿Cómo funciona esta guía?</h2>
+<h2 id="howTitle">¿Cómo funciona esta guía?</h2>
 <p class="lead">Las reglas del pod sustituyen a los brackets oficiales. La referencia es sencilla: <b>Tier 1 = un precon de caja</b>. Están calibradas con datos reales de 36 precons oficiales (2024–2026).</p>
 <h3>El presupuesto de puntos</h3>
 <p>Cada mazo gasta puntos al pasarse de lo que hace un precon en cada «dial». <b>Tier 1: hasta ${t1} puntos. Tier 2: hasta ${t2}.</b> Más de ${t2}: por encima del nivel del pod. Los puntos <b>nunca dejan de contarse</b>: pasado el último escalón de un dial, cada unidad extra suma +1. Puedes concentrar todo tu presupuesto en un solo eje (p. ej. dos game changers), pero entonces el resto del mazo debe quedarse a nivel precon.</p>
@@ -45,7 +45,7 @@ function renderHow() {
 <p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban automáticamente en cada análisis contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5 (mejoras de nivel: menos de €10). Las URLs de Archidekt se cargan automáticamente a través de un proxy público (corsproxy.io) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
   : `
 <button id="howClose" class="modal-close" aria-label="Close">✕</button>
-<h2>How this guide works</h2>
+<h2 id="howTitle">How this guide works</h2>
 <p class="lead">The pod rules replace the official brackets. The reference is simple: <b>Tier 1 = a boxed precon</b>. Everything is calibrated on real data from 36 official precons (2024–2026).</p>
 <h3>The point budget</h3>
 <p>A deck spends points whenever it exceeds what precons do on each "dial". <b>Tier 1: up to ${t1} points. Tier 2: up to ${t2}.</b> More than ${t2}: above pod level. Points <b>never stop counting</b>: past a dial's last priced step, each extra unit adds +1. You may pour the whole budget into one axis (say, two game changers) — but then the rest of the deck must stay at precon level.</p>
@@ -68,5 +68,35 @@ function renderHow() {
   $('howBody').innerHTML = html;
   $('howClose').onclick = closeHow;
 }
-export function openHow() { renderHow(); $('howModal').style.display = 'block'; }
-export function closeHow() { $('howModal').style.display = 'none'; }
+// Dialog semantics: focus moves into the modal on open, Tab cycles inside it,
+// and closing hands focus back to the opener. Esc (wired in main.js) closes.
+let opener = null;
+function trapTab(e) {
+  if (e.key !== 'Tab') return;
+  const focusables = [...$('howBody').querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])')]
+    .filter(el => el.offsetParent !== null);
+  if (!focusables.length) return;
+  const first = focusables[0], last = focusables[focusables.length - 1];
+  const active = document.activeElement;
+  if (e.shiftKey && (active === first || !$('howBody').contains(active))) {
+    e.preventDefault(); last.focus();
+  } else if (!e.shiftKey && (active === last || !$('howBody').contains(active))) {
+    e.preventDefault(); first.focus();
+  }
+}
+export function openHow() {
+  renderHow();
+  opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const m = $('howModal');
+  m.style.display = 'block';
+  m.addEventListener('keydown', trapTab);
+  $('howClose').focus();
+}
+export function closeHow() {
+  const m = $('howModal');
+  if (m.style.display !== 'block') return;
+  m.style.display = 'none';
+  m.removeEventListener('keydown', trapTab);
+  if (opener && opener.isConnected) opener.focus();
+  opener = null;
+}
