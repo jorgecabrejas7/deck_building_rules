@@ -46,12 +46,12 @@ export function renderVerdict() {
 
   const line = (cls, ic, txt) => '<div class="v-line ' + cls + '"><span class="v-ic">' + ic + '</span><span>' + txt + '</span></div>';
   let html = '<div class="panel panel-pad">' +
-    '<div class="row-between"><span class="secT">' + t.verdictT + '</span>' +
+    '<div class="row-between"><h2 class="secT">' + t.verdictT + '</h2>' +
     '<span class="comp-sub">' + esc(archName()) + '</span></div>' +
     '<div class="verdict-cols">' +
-    '<div class="verdict-col"><span class="mini-title">' + t.verdictGood + '</span>' +
+    '<div class="verdict-col"><h3 class="mini-title">' + t.verdictGood + '</h3>' +
     (good.length ? good.map(g => line('v-good', '✓', g)).join('') : line('v-good', '·', '—')) + '</div>' +
-    '<div class="verdict-col"><span class="mini-title">' + t.verdictBad + '</span>' +
+    '<div class="verdict-col"><h3 class="mini-title">' + t.verdictBad + '</h3>' +
     (bad.length ? bad.map(b => line('v-bad', '→', b)).join('')
       : line('v-good', '✓', t.verdictNoneBad)) + '</div></div>' +
     (bad.length ? '<button id="verdictTips" class="btn-ghost-sm">' + t.verdictGoTips + '</button>' : '') +

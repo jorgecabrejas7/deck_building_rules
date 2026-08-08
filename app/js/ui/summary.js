@@ -29,4 +29,9 @@ export function renderSummary() {
   function stat(lbl, val) {
     return '<div class="panel stat-tile"><div class="tile-label">' + lbl + '</div><div class="mono stat-value">' + val + '</div></div>';
   }
+  // right-edge fade while more tiles remain off-screen (strip scrolls on mobile / when collapsed)
+  const row = $('summary');
+  const updFade = () => row.classList.toggle('fade-end', row.scrollLeft + row.clientWidth < row.scrollWidth - 4);
+  row.onscroll = updFade;
+  updFade();
 }

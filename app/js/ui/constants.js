@@ -199,7 +199,8 @@ anthem:{es:'multiplica todo tu ejército a la vez',en:'multiplies your whole arm
 burn:{es:'daño directo: removal barato o puntilla final',en:'direct damage: cheap removal or the finishing blow'},
 };
 export const SEGC = {cre:'oklch(0.65 0.12 300)',draw:'oklch(0.62 0.1 260)',rem:'oklch(0.75 0.09 55)',ramp:'oklch(0.7 0.1 150)',oth:'oklch(0.65 0.02 260)'};
-export const PIP = {W:'oklch(0.93 0.05 95)',U:'oklch(0.7 0.11 240)',B:'oklch(0.35 0.03 300)',R:'oklch(0.6 0.17 30)',G:'oklch(0.62 0.13 150)'};
+// WUBRG pip colors live in tokens.css (--pipB is lighter in dark theme).
+export const PIP = {W:'var(--pipW)',U:'var(--pipU)',B:'var(--pipB)',R:'var(--pipR)',G:'var(--pipG)'};
 export const BADGE_OF = [['game_changers','GC','bad'],['extra_turns','EX','warn'],['tutors','TUT','warn'],['board_wipes','WIPE','ok'],['counterspells','CTR','ok'],['free_spells','FREE','warn'],['fast_mana','FM','ok'],['stax_effects','STAX','warn']];
 
 // ================= samples =================

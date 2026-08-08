@@ -33,6 +33,10 @@ export function badgeFor(name) {
 
 export function helpIcon(cat) {
   if (!CAT_HELP[cat]) return '';
-  return '<span class="catHelp" data-cat="' + cat + '">?</span>';
+  return '<button type="button" class="catHelp" data-cat="' + cat +
+    '" aria-label="' + esc(T().helpAria + ': ' + CATS[cat][state.lang]) + '">?</button>';
 }
 export function catLabel(cat, lang) { return esc(CATS[cat][lang]) + helpIcon(cat); }
+
+// Screen-reader status line (#srStatus is a visually-hidden aria-live region).
+export function announce(msg) { const el = $('srStatus'); if (el) el.textContent = msg; }

@@ -60,18 +60,21 @@ function retryRow() {
 
 export function renderTips() {
   const t = T(), r = state.result, lang = state.lang, ev = r.evalRes;
+  // #tipsMain/#tipsUp/#tipsComp are static shells (index.html); the async ones
+  // are aria-live, so swapping their innerHTML announces loading → results.
   if (state.tipsCache && state.tipsCache.key === tipsKey()) {
-    $('tips').innerHTML = state.tipsCache.html;
+    $('tipsMain').innerHTML = state.tipsCache.main;
+    $('tipsUp').innerHTML = state.tipsCache.up;
+    $('tipsComp').innerHTML = state.tipsCache.comp;
     bindTips();
     return;
   }
   // sync skeleton first: verdict + ordered power-down cuts; async panels fill in
-  let html = '<div class="panel panel-pad-lg">' +
-    '<span class="secT">' + t.tipsT + '</span>' +
+  let html = '<h2 class="secT">' + t.tipsT + '</h2>' +
     '<div class="tip-note">' + esc(buildTip()) + '</div>';
   const cuts = orderedCuts(r);
   if (cuts.length || ev.violations.length) {
-    html += '<span class="secT secT-sm">' + (ev.tier === 'above' ? t.advDownPod : t.advDownT1) + '</span>';
+    html += '<h3 class="secT secT-sm">' + (ev.tier === 'above' ? t.advDownPod : t.advDownT1) + '</h3>';
     html += '<div class="stack-8">' + cuts.slice(0, 10).map((c, i) => {
       const card = cardCache[c.name] || { name: c.name };
       return '<div class="tips-block"><div class="tips-block-head">' +
@@ -86,12 +89,9 @@ export function renderTips() {
     }).join('') + '</div>' +
     '<div class="adv-note">' + t.advCutOrder + '</div>';
   }
-  html += '</div>';
-  html += '<div class="panel panel-pad-lg" id="tipsUp">' +
-    '<span class="secT">' + t.tipsUp + '</span><div class="note-muted">' + t.tipsLoading + '</div></div>';
-  html += '<div class="panel panel-pad-lg" id="tipsComp">' +
-    '<span class="secT">' + t.tipsComp + '</span><div class="note-muted">' + t.tipsLoading + '</div></div>';
-  $('tips').innerHTML = html;
+  $('tipsMain').innerHTML = html;
+  $('tipsUp').innerHTML = '<h2 class="secT">' + t.tipsUp + '</h2><div class="note-muted">' + t.tipsLoading + '</div>';
+  $('tipsComp').innerHTML = '<h2 class="secT">' + t.tipsComp + '</h2><div class="note-muted">' + t.tipsLoading + '</div>';
   bindTips();
   fillAsync();
 }
@@ -106,8 +106,9 @@ async function fillAsync() {
   const key = tipsKey();
   const upOk = await fillUpgrades(key);
   const compOk = await fillCompAdvice(key);
-  if (tipsKey() !== key || !$('tipsUp')) return;
-  if (upOk && compOk) state.tipsCache = { key, html: $('tips').innerHTML };
+  if (tipsKey() !== key) return;
+  if (upOk && compOk) state.tipsCache = { key,
+    main: $('tipsMain').innerHTML, up: $('tipsUp').innerHTML, comp: $('tipsComp').innerHTML };
 }
 
 // ---- climb to Tier 2: concrete cards per open upgrade path ----
@@ -122,6 +123,7 @@ async function fillUpgrades(key) {
   } else if (room <= 0) {
     body = '<div class="note-muted">' + t.tipsUpNone + '</div>';
   } else {
+    body += '<div class="up-note">' + esc(t.tipsUpFrame) + '</div>';
     body += '<div class="up-note">' + (es
       ? 'Margen: ' + room + ' pt' + (room !== 1 ? 's' : '') + ' hasta el tope de Tier 2 (≤' + RULES.tiers.tier2.max_points + '). Cartas de <€10 para no tocar las bandas de precio.'
       : 'Headroom: ' + room + ' pt' + (room !== 1 ? 's' : '') + ' to the Tier 2 cap (≤' + RULES.tiers.tier2.max_points + '). Cards under €10 so price bands stay untouched.') + '</div>';
@@ -160,7 +162,7 @@ async function fillUpgrades(key) {
   if (failed) body += retryRow();
   const el = $('tipsUp');
   if (!el || tipsKey() !== key) return false;
-  el.innerHTML = '<span class="secT">' + t.tipsUp + '</span>' + body;
+  el.innerHTML = '<h2 class="secT">' + t.tipsUp + '</h2>' + body;
   bindTips();
   return !failed;
 }
@@ -208,7 +210,7 @@ async function fillCompAdvice(key) {
   if (usedCurated) body += retryRow();
   const el = $('tipsComp');
   if (!el || tipsKey() !== key) return false;
-  el.innerHTML = '<span class="secT">' + t.tipsComp + '</span>' + body;
+  el.innerHTML = '<h2 class="secT">' + t.tipsComp + '</h2>' + body;
   bindTips();
   return !usedCurated;
 }

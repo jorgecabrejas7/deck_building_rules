@@ -14,7 +14,7 @@ export function renderRamp() {
       return { x, prod, landR };
     }).filter(e => e.prod > 0)
     .sort((a, b) => (a.x.card.cmc || 0) - (b.x.card.cmc || 0));
-  let html = '<span class="secT">' + t.rampT + helpIcon('ramp') + '</span>';
+  let html = '<h2 class="secT">' + t.rampT + helpIcon('ramp') + '</h2>';
   if (!ramps.length) {
     html += '<div class="note-muted">' + t.rampNone + '</div>';
   } else {
@@ -32,7 +32,7 @@ export function renderRamp() {
         .sort((a, b) => (a.card.edhrec_rank || 1e9) - (b.card.edhrec_rank || 1e9)).slice(0, 3);
       const exStr = examples.length
         ? examples.map(y => '<b>' + esc(y.name) + '</b>').join(', ')
-        : '<span class="txt-faint">' + t.rampNothing + '</span>';
+        : '<span class="txt-muted">' + t.rampNothing + '</span>';
       const sentence = P
         ? 'T' + playT + ': ' + t.rampPlay + ' <b>' + esc(x.name) + '</b> → T' + nextT + ': ' + avail + ' ' + t.rampAvail +
           (landR ? ' (busca tierra)' : ' (+' + prod + ')') + ' — ' + t.rampAhead + ': ' + exStr

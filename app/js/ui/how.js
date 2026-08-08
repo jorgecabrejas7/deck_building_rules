@@ -22,7 +22,7 @@ function renderHow() {
   }).join('');
   const bans = RULES.hard_bans.banned_cards;
   const html = P ? `
-<button id="howClose" class="modal-close">✕</button>
+<button id="howClose" class="modal-close" aria-label="Cerrar">✕</button>
 <h2>¿Cómo funciona esta guía?</h2>
 <p class="lead">Las reglas del pod sustituyen a los brackets oficiales. La referencia es sencilla: <b>Tier 1 = un precon de caja</b>. Están calibradas con datos reales de 36 precons oficiales (2024–2026).</p>
 <h3>El presupuesto de puntos</h3>
@@ -44,7 +44,7 @@ function renderHow() {
 <h3>Precios, combos y sugerencias</h3>
 <p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban automáticamente en cada análisis contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5 (mejoras de nivel: menos de €10). Las URLs de Archidekt se cargan automáticamente a través de un proxy público (corsproxy.io) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
   : `
-<button id="howClose" class="modal-close">✕</button>
+<button id="howClose" class="modal-close" aria-label="Close">✕</button>
 <h2>How this guide works</h2>
 <p class="lead">The pod rules replace the official brackets. The reference is simple: <b>Tier 1 = a boxed precon</b>. Everything is calibrated on real data from 36 official precons (2024–2026).</p>
 <h3>The point budget</h3>
@@ -68,5 +68,5 @@ function renderHow() {
   $('howBody').innerHTML = html;
   $('howClose').onclick = closeHow;
 }
-export function openHow() { renderHow(); $('howModal').style.display = ''; }
+export function openHow() { renderHow(); $('howModal').style.display = 'block'; }
 export function closeHow() { $('howModal').style.display = 'none'; }

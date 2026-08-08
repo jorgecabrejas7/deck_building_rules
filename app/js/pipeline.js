@@ -1,7 +1,8 @@
 import * as PodEngine from './engine/index.js';
 import { RULES } from './rules.js';
 import { state, cardCache, persistCache } from './state.js';
-import { $ } from './ui/helpers.js';
+import { T } from './i18n.js';
+import { $, announce } from './ui/helpers.js';
 import { renderInput } from './ui/input.js';
 import { renderBanner } from './ui/tabbar.js';
 import { renderAll } from './main.js';
@@ -37,6 +38,11 @@ export async function analyze() {
   }
   state.busy = false;
   renderAll();
+  // announce the verdict to screen readers (result panels are not live regions)
+  if (state.result && !state.error) {
+    const t = T(), ev = state.result.evalRes;
+    announce(t.tierWord + ': ' + t[ev.tier] + ' · ' + ev.points + ' pts');
+  }
   if (state.result && location.protocol !== 'file:') checkCombos();
 }
 
@@ -54,9 +60,12 @@ export async function checkCombos() {
     const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), await getComboDb());
     state.combosData = { status: 'done', list, count: list.length, dbVersion: comboDb.version };
     recompute();
+    const inf = list.filter(c => c.infinite).length;
+    announce(inf ? T().srCombos + ' ' + inf : T().comboNone);
   } catch (e) {
     console.error(e);
     state.combosData = { status: 'error', list: [], count: 0 };
+    announce(T().comboErr);
   }
   renderAll();
 }

@@ -3,6 +3,8 @@ export const store = {
   set lang(v){ localStorage.setItem('pdc_lang', v); },
   get theme(){ return localStorage.getItem('pdc_theme') || ''; },
   set theme(v){ localStorage.setItem('pdc_theme', v); },
+  get priceNoteSeen(){ return localStorage.getItem('pdc_price_note') === '1'; },
+  set priceNoteSeen(v){ localStorage.setItem('pdc_price_note', v ? '1' : ''); },
 };
 
 export let cardCache = {};

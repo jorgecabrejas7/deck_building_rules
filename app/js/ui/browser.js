@@ -9,6 +9,8 @@ export function renderBrowser() {
   const byT = state.grp === 'type';
   $('gtBtn').classList.toggle('active', byT);
   $('gcBtn').classList.toggle('active', !byT);
+  $('gtBtn').setAttribute('aria-pressed', String(byT));
+  $('gcBtn').setAttribute('aria-pressed', String(!byT));
   $('browserT').textContent = t.browser; $('groupByLbl').textContent = t.groupBy;
   $('gtBtn').textContent = t.byType; $('gcBtn').textContent = t.byCat;
   const gmap = {};
@@ -18,8 +20,8 @@ export function renderBrowser() {
   $('groups').innerHTML = order.map(g => {
     const label = byT ? TYPES[g][lang] : (CATS[g] ? CATS[g][lang] : g);
     return '<div class="group">' +
-      '<div class="group-head">' +
-      esc(label.toUpperCase()) + ' · ' + cnt[g] + (!byT ? helpIcon(g) : '') + '</div>' +
+      '<h3 class="group-head">' +
+      esc(label.toUpperCase()) + ' · ' + cnt[g] + (!byT ? helpIcon(g) : '') + '</h3>' +
       '<div class="card-grid">' +
       gmap[g].sort((a, b) => (a.card.cmc || 0) - (b.card.cmc || 0) || a.name.localeCompare(b.name)).map(x => {
         const badge = badgeFor(x.name);

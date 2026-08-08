@@ -8,6 +8,7 @@ export function renderInput() {
   const t = T();
   $('inputTitle').textContent = t.inputTitle;
   $('deckText').placeholder = t.inputPh;
+  $('deckText').setAttribute('aria-label', t.inputAria);
   $('tryLabel').textContent = t.tryLabel;
   $('archLabel').textContent = t.archLabel;
   $('analyzeBtn').textContent = state.busy

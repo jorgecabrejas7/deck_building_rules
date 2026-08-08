@@ -7,10 +7,12 @@
   img{max-width:100%}
   .tile-name,.cmd-name,.sug-name,.combo-line,.ramp-text{overflow-wrap:anywhere}
 
-  /* compact sticky summary: one horizontally scrollable strip */
-  .sticky-wrap{padding:6px 0 8px}
+  /* compact sticky summary: one horizontally scrollable strip.
+     NIVEL + PUNTOS stay first; commander art is what gets pushed off-screen. */
+  .sticky-wrap{padding:6px 0 0}
   .summary-row{flex-wrap:nowrap;overflow-x:auto;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .summary-row::-webkit-scrollbar{display:none}
+  .summary-row .cmd-tile{order:1}
   .tier-box{min-width:132px;padding:8px 14px;flex:none}
   .tier-box-value{font-size:13.5px}
   .cmd-tile{min-width:0;flex:none;padding:4px 10px 4px 4px}
@@ -38,6 +40,7 @@
   .dial-row .dial-pts{grid-column:3;grid-row:1}
   .dial-row .dial-meter{grid-column:1/-1;grid-row:2}
   .dial-detail{gap:10px}
+  .qrow{grid-template-columns:minmax(0,1fr) 52px auto;gap:8px}
 
   /* composition rows: pill on top right, band below */
   .comp-row{grid-template-columns:1fr auto;gap:8px 10px;min-height:44px}
@@ -66,7 +69,7 @@
   .tab-btn,.btn-primary,.btn-ghost,.btn-accent,.btn-accent-sm,.btn-outline,
   .btn-outline-accent,.btn-tone-outline,.btn-ghost-sm,.chip-dashed,.cf-btn,
   .comp-clear,.pill-clear,.btn-build,.seg-toggle button,.seg-toggle-sm button,
-  .modal-close{min-height:44px}
+  .modal-close,.price-pill,.banner-x{min-height:44px}
   .icon-btn{width:44px;height:44px}
   .catHelp{width:22px;height:22px;font-size:12px}
 }

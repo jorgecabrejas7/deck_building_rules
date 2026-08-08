@@ -16,10 +16,10 @@ export function renderTableMode() {
   if (!state.tableOpen) { el.style.display = 'none'; return; }
   el.style.display = '';
   let html = '<div class="panel tm-panel">' +
-    '<span class="secT">' + t.tmT + '</span>' +
+    '<h2 class="secT">' + t.tmT + '</h2>' +
     '<div class="lbl-muted">' + t.tmHint + '</div>' +
     '<div class="tm-grid">' +
-    [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="mono tm-ta" placeholder="' + t.tmDeck + ' ' + (i + 1) + '">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
+    [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="mono tm-ta" placeholder="' + t.tmDeck + ' ' + (i + 1) + '" aria-label="' + t.tmDeck + ' ' + (i + 1) + '">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
     '<div><button id="tmRunBtn" ' + (state.tableBusy ? 'disabled' : '') + ' class="btn-accent">' +
     (state.tableBusy ? t.tmRunning + '…' : t.tmRun) + '</button></div>';
   const res = state.tableResults;
@@ -55,7 +55,7 @@ function deckHeads(res) {
   }).join('') + '</tr>';
 }
 function section(title, extra, table) {
-  return '<div class="cmp-section"><div class="row-between"><span class="secT secT-sm">' + title + '</span>' + (extra || '') + '</div>' +
+  return '<div class="cmp-section"><div class="row-between"><h3 class="secT secT-sm">' + title + '</h3>' + (extra || '') + '</div>' +
     '<div class="table-scroll"><table class="cmp-table">' + table + '</table></div></div>';
 }
 
@@ -129,8 +129,8 @@ function cmpCards(res) {
   rows += '<tr><td class="cmp-lbl">' + esc(CATS.land[lang]) + '</td>' +
     res.map(d => '<td class="mono">' + d.stats.land_count + '</td>').join('') + '</tr>';
   const toggle = '<div class="seg-toggle-sm">' +
-    '<button data-cmpview="all" class="' + (diff ? '' : 'active') + '">' + t.cmpAll + '</button>' +
-    '<button data-cmpview="diff" class="' + (diff ? 'active' : '') + '">' + t.cmpDiff + '</button></div>';
+    '<button data-cmpview="all" aria-pressed="' + !diff + '" class="' + (diff ? '' : 'active') + '">' + t.cmpAll + '</button>' +
+    '<button data-cmpview="diff" aria-pressed="' + diff + '" class="' + (diff ? 'active' : '') + '">' + t.cmpDiff + '</button></div>';
   return section(t.cmpCards, toggle, deckHeads(res) + rows) +
     '<div class="note-sm">' + t.cmpSharedNote + '</div>';
 }

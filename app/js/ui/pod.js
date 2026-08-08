@@ -35,7 +35,7 @@ export function renderPod() {
     '<button data-pod-load="' + d.id + '" class="btn-accent-sm">' + t.podLoad + '</button>' +
     (state.deck ? '<button data-pod-cmp="' + d.id + '" class="btn-ghost-sm">' + t.podCompare + '</button>' : '') +
     '</div></div>').join('') + '</div>';
-  el.innerHTML = '<div class="panel panel-pad-lg"><span class="secT">' + t.podT + '</span>' +
+  el.innerHTML = '<div class="panel panel-pad-lg"><h2 class="secT">' + t.podT + '</h2>' +
     '<div class="lbl-muted">' + esc(t.podHint) + '</div>' + body + '</div>';
   for (const b of el.querySelectorAll('[data-pod-load]')) b.onclick = () => {
     const d = pd.decks.find(x => x.id === +b.dataset.podLoad);

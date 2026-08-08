@@ -22,7 +22,7 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
     <div class="brand">
       <div class="brand-logo"><div class="brand-logo-inner mono">Y</div></div>
       <div class="brand-text">
-        <span class="brand-title">La guía del Yoryi</span>
+        <h1 class="brand-title">La guía del Yoryi</h1>
         <span id="appTag" class="brand-tag mono">POD DECK CHECKER</span>
       </div>
     </div>
@@ -30,24 +30,25 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
       <button id="copyBtn" class="btn-outline">⧉</button>
       <button id="howBtn" class="btn-outline-accent">?</button>
       <div class="seg-toggle">
-        <button id="enBtn">EN</button>
         <button id="esBtn">ES</button>
+        <button id="enBtn">EN</button>
       </div>
       <button id="themeBtn" class="icon-btn" title="Tema">◐</button>
     </div>
   </div>
 </div>
 <main class="main">
+  <div id="stickySentinel" class="sticky-sentinel"></div>
   <div id="stickyWrap" class="sticky-wrap">
     <div id="summary" class="summary-row"></div>
-    <div id="banner"></div>
+    <nav id="tabbar" class="tabbar" role="tablist"></nav>
   </div>
 
-  <nav id="tabbar" class="tabbar"></nav>
+  <div id="banner" aria-live="polite"></div>
 
-  <div id="tab-load" class="tab-pane">
+  <div id="tab-load" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-load">
     <div class="panel input-panel">
-      <div id="inputTitle" class="secT">ANALIZAR MAZO</div>
+      <h2 id="inputTitle" class="secT">ANALIZAR MAZO</h2>
       <textarea id="deckText" rows="10" class="mono deck-input"></textarea>
       <div id="inputNotice" class="input-notice"></div>
       <div class="chips-row">
@@ -74,16 +75,16 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
     </div>
   </div>
 
-  <div id="tab-power" class="tab-pane">
+  <div id="tab-power" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-power">
     <div id="power" class="panel power-panel"></div>
   </div>
 
-  <div id="tab-analysis" class="tab-pane">
+  <div id="tab-analysis" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-analysis">
     <div id="verdict"></div>
     <div id="comp" class="comp-panel"></div>
     <div class="panel browser-panel">
       <div class="row-between">
-        <span id="browserT" class="secT"></span>
+        <h2 id="browserT" class="secT"></h2>
         <div class="row-center">
           <span id="groupByLbl" class="lbl-muted"></span>
           <div class="seg-toggle-sm">
@@ -99,27 +100,32 @@ if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'd
     <div id="handPanel" class="panel panel-pad-lg"></div>
   </div>
 
-  <div id="tab-tips" class="tab-pane">
-    <div id="tips" class="stack-16"></div>
+  <div id="tab-tips" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-tips">
+    <div id="tips" class="stack-16">
+      <div id="tipsMain" class="panel panel-pad-lg"></div>
+      <div id="tipsUp" class="panel panel-pad-lg" aria-live="polite"></div>
+      <div id="tipsComp" class="panel panel-pad-lg" aria-live="polite"></div>
+    </div>
   </div>
 
-  <div id="tab-pod" class="tab-pane">
+  <div id="tab-pod" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-pod">
     <div id="podPanel"></div>
   </div>
 
-  <div id="tab-guide" class="tab-pane">
+  <div id="tab-guide" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-guide">
     <div class="panel clip">
-      <div id="guideT" class="secT guide-title"></div>
+      <h2 id="guideT" class="secT guide-title"></h2>
       <div id="guideBody"></div>
     </div>
   </div>
 </main>
+<div id="srStatus" class="vh" aria-live="polite"></div>
 <div id="footer" class="footer mono"></div>
 <div id="howModal" class="modal-backdrop">
   <div id="howBody" class="modal-body"></div>
 </div>
-<div id="textPop" class="text-pop"></div>
-<div id="popover" class="card-pop"></div>
+<div id="textPop" class="text-pop" role="tooltip" aria-live="polite"></div>
+<div id="popover" class="card-pop" aria-hidden="true"></div>
 </div>
 
 <script type="module" src="js/main.js"></script>

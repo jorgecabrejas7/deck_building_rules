@@ -11,18 +11,38 @@
 .brand-logo-inner{width:35px;height:35px;border-radius:8px;background:var(--panel);display:grid;place-items:center;font-weight:700;font-size:20px}
 .brand-text{display:flex;flex-direction:column;line-height:1.1}
 .brand-title{font-size:19px;font-weight:700;letter-spacing:-0.01em}
-.brand-tag{font-size:10px;color:var(--muted);letter-spacing:0.14em}
+.brand-tag{font-size:11px;color:var(--muted);letter-spacing:0.14em}
 .header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
 /* main column */
-.main{width:100%;max-width:1180px;margin:0 auto;padding:16px 20px 12px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box}
-.sticky-wrap{display:none;position:sticky;top:0;z-index:60;background:var(--bg);padding:8px 0 10px;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+.main{position:relative;width:100%;max-width:1180px;margin:0 auto;padding:16px 20px 12px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box}
+.sticky-sentinel{position:absolute;top:0;left:0;width:1px;height:1px}
+.sticky-wrap{position:sticky;top:0;z-index:60;background:var(--bg);padding:8px 0 0;display:flex;flex-direction:column;gap:10px}
 .summary-row{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
 .tabbar{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0}
+#banner:empty{display:none}
+
+/* collapsed sticky chrome once the page is scrolled (class toggled in main.js) */
+.sticky-wrap.stuck{box-shadow:0 10px 18px -14px rgba(0,0,0,.4)}
+.sticky-wrap.stuck .summary-row{flex-wrap:nowrap;overflow-x:auto;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sticky-wrap.stuck .summary-row::-webkit-scrollbar{display:none}
+.sticky-wrap.stuck .tier-box{min-width:0;flex:none;flex-direction:row;align-items:baseline;gap:8px;padding:6px 12px}
+.sticky-wrap.stuck .tier-box-value{font-size:13px;white-space:nowrap}
+.sticky-wrap.stuck .cmd-tile{min-width:0;flex:none;padding:6px 12px}
+.sticky-wrap.stuck .cmd-tile img,.sticky-wrap.stuck .ci-pips{display:none}
+.sticky-wrap.stuck .cmd-tile>div{display:flex;align-items:baseline;gap:7px}
+.sticky-wrap.stuck .cmd-name{font-size:12px;white-space:nowrap}
+.sticky-wrap.stuck .tile-label{font-size:9.5px}
+.sticky-wrap.stuck .stat-grid{display:flex;flex:none;min-width:0;gap:8px}
+.sticky-wrap.stuck .stat-tile{flex:none;display:flex;align-items:baseline;gap:7px;padding:6px 12px}
+.sticky-wrap.stuck .stat-value{font-size:13px;white-space:nowrap}
+.sticky-wrap.stuck .stat-arch{font-size:12px;padding-top:0;white-space:nowrap}
+/* right-edge fade while more tiles remain off-screen (class toggled in summary.js) */
+.summary-row.fade-end{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
 .tab-pane{display:none;flex-direction:column;gap:16px}
 
 /* footer, modal, popover singletons */
-.footer{text-align:center;font-size:11px;color:var(--faint);padding:10px 20px 28px}
+.footer{text-align:center;font-size:12px;color:var(--muted);padding:10px 20px 28px}
 .modal-backdrop{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);overflow:auto;padding:30px 16px;box-sizing:border-box}
 .modal-body{max-width:780px;margin:0 auto;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:26px 30px;position:relative}
 .text-pop{display:none;position:fixed;max-width:320px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 15px;font-size:12.5px;line-height:1.6;box-shadow:0 12px 34px rgba(0,0,0,.35);z-index:100;pointer-events:none}

@@ -2,8 +2,9 @@
    single body.dark block — js/ui/header.js resolves the system preference and
    always sets/removes the class (plus a pre-paint inline script in index.html). */
 body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);color-scheme:light;
---bg:#f2f0ec;--panel:#ffffff;--panel2:#faf9f7;--border:#e4e0d9;--border2:#efece6;--text:#23211e;--muted:#8a857c;--faint:#b3aca0;--accent:oklch(0.52 0.13 260);--accentFg:#ffffff;
+--bg:#f2f0ec;--panel:#ffffff;--panel2:#faf9f7;--border:#e4e0d9;--border2:#efece6;--text:#23211e;--muted:#726d64;--faint:#b3aca0;--accent:oklch(0.52 0.13 260);--accentBtn:oklch(0.52 0.13 260);--accentFg:#ffffff;
 --track:#efece6;--marker:#23211e;
+--pipW:oklch(0.93 0.05 95);--pipU:oklch(0.7 0.11 240);--pipB:oklch(0.35 0.03 300);--pipR:oklch(0.6 0.17 30);--pipG:oklch(0.62 0.13 150);
 --zoneA:oklch(0.85 0.09 145);--zoneB:oklch(0.88 0.1 85);--zoneC:oklch(0.85 0.1 25);
 --good:oklch(0.48 0.1 145);--warn:oklch(0.52 0.11 85);--bad:oklch(0.52 0.15 25);
 --okBg:oklch(0.92 0.06 145);--okBd:oklch(0.8 0.1 145);--okFg:oklch(0.38 0.1 145);
@@ -12,8 +13,9 @@ body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--
 --tipBg:oklch(0.95 0.04 260);--tipBd:oklch(0.85 0.06 260);--tipFg:oklch(0.35 0.06 260);
 --compBg:#f3f6f2;--compBd:#dde5dc;--compMut:#75846f}
 body.dark{color-scheme:dark;
---bg:#141619;--panel:#1f2126;--panel2:#191b1f;--border:#2b2e34;--border2:#24272c;--text:#e8e6e1;--muted:#7c828c;--faint:#565b64;--accent:oklch(0.62 0.14 260);--accentFg:#ffffff;
+--bg:#141619;--panel:#1f2126;--panel2:#191b1f;--border:#2b2e34;--border2:#24272c;--text:#e8e6e1;--muted:#858c97;--faint:#565b64;--accent:oklch(0.62 0.14 260);--accentBtn:oklch(0.56 0.14 260);--accentFg:#ffffff;
 --track:#2b2e34;--marker:#e8e6e1;
+--pipW:oklch(0.93 0.05 95);--pipU:oklch(0.7 0.11 240);--pipB:oklch(0.52 0.04 300);--pipR:oklch(0.6 0.17 30);--pipG:oklch(0.62 0.13 150);
 --zoneA:oklch(0.45 0.09 145);--zoneB:oklch(0.5 0.1 85);--zoneC:oklch(0.48 0.12 25);
 --good:oklch(0.75 0.1 145);--warn:oklch(0.78 0.1 85);--bad:oklch(0.72 0.13 25);
 --okBg:oklch(0.3 0.08 145);--okBd:oklch(0.45 0.1 145);--okFg:oklch(0.82 0.1 145);
@@ -22,6 +24,8 @@ body.dark{color-scheme:dark;
 --tipBg:oklch(0.24 0.05 260);--tipBd:oklch(0.38 0.07 260);--tipFg:oklch(0.85 0.05 260);
 --compBg:#1a211c;--compBd:#28332b;--compMut:#8fa38b}
 a{color:var(--accent)}a:hover{opacity:.8}
+h1,h2,h3{margin:0}
 button,select,textarea,input{font:inherit;color:inherit}
 textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button{cursor:pointer}

@@ -26,14 +26,14 @@ export function renderCurve() {
   const H = 200;
   let html = '<div class="curve-card span">' +
     '<div class="row-between">' +
-    '<span class="secT">' + t.curve + '</span>' +
+    '<h2 class="secT">' + t.curve + '</h2>' +
     '<div class="curve-filters">' + ['all', 'cre', 'draw', 'rem', 'ramp'].map(k =>
-      '<button data-cf="' + k + '" class="cf-btn' + (state.cf === k ? ' active' : '') + '">' + t[k] + '</button>').join('') + '</div></div>' +
+      '<button data-cf="' + k + '" aria-pressed="' + (state.cf === k) + '" class="cf-btn' + (state.cf === k ? ' active' : '') + '">' + t[k] + '</button>').join('') + '</div></div>' +
     '<div class="curve-bins">' +
     bins.map((b, i) => {
       const total = totals[i];
       const sel = state.curveBin === i;
-      return '<div data-bin="' + i + '" class="curve-bin' + (sel ? ' sel' : '') + '">' +
+      return '<div data-bin="' + i + '" role="button" tabindex="0" aria-pressed="' + sel + '" class="curve-bin' + (sel ? ' sel' : '') + '">' +
         '<span class="mono bin-count' + (total ? ' has' : '') + '">' + (total || '') + '</span>' +
         '<div class="bin-stack">' +
         segKeys.filter(k => b[k] > 0).map(k => '<div title="' + t[k] + ': ' + b[k] + '" class="bin-seg" style="--h:' + Math.round(b[k] / maxT * H) + 'px;--c:' + SEGC[k] + '"></div>').join('') + '</div>' +
@@ -65,7 +65,7 @@ export function renderCurve() {
   }
   const pipTot = Object.values(pipCnt).reduce((a, b) => a + b, 0) || 1;
   html += '<div class="curve-card">' +
-    '<span class="secT">' + t.pips + '</span><div class="pip-rows">' +
+    '<h2 class="secT">' + t.pips + '</h2><div class="pip-rows">' +
     ['W', 'U', 'B', 'R', 'G'].filter(k => pipCnt[k] > 0).map(k => {
       const pc = Math.round(pipCnt[k] / pipTot * 100);
       const bar = k === 'W' ? 'oklch(0.8 0.07 95)' : PIP[k];
@@ -78,13 +78,15 @@ export function renderCurve() {
   const bandCounts = bandDefs.map(([, f]) => r.cardsInfo.filter(x => x.card.price != null && f(x.card.price)).reduce((sum, x) => sum + x.qty, 0));
   const maxB = Math.max(...bandCounts, 1);
   html += '<div class="curve-card">' +
-    '<span class="secT">' + t.bands + '</span><div class="mono band-rows">' +
+    '<h2 class="secT">' + t.bands + '</h2><div class="mono band-rows">' +
     bandDefs.map(([lbl, , c], i) => '<div class="band-row"><span>' + lbl + '</span>' +
       '<div class="pip-track"><div class="pip-fill" style="--w:' + Math.round(bandCounts[i] / maxB * 100) + '%;--c:' + c + '"></div></div>' +
       '<span>' + bandCounts[i] + '</span></div>').join('') + '</div></div>';
   $('curveWrap').innerHTML = html;
-  for (const b of $('curveWrap').querySelectorAll('[data-cf]')) b.onclick = (e) => { e.stopPropagation(); state.cf = b.dataset.cf; renderCurve(); };
-  for (const b of $('curveWrap').querySelectorAll('[data-bin]')) b.onclick = () => { state.curveBin = state.curveBin === +b.dataset.bin ? null : +b.dataset.bin; renderCurve(); };
+  // partial renders bypass renderAll's focus restore: put focus back on the control
+  const refocus = (attr, val) => { const el = $('curveWrap').querySelector('[' + attr + '="' + val + '"]'); if (el) el.focus({ preventScroll: true }); };
+  for (const b of $('curveWrap').querySelectorAll('[data-cf]')) b.onclick = (e) => { e.stopPropagation(); state.cf = b.dataset.cf; renderCurve(); refocus('data-cf', b.dataset.cf); };
+  for (const b of $('curveWrap').querySelectorAll('[data-bin]')) b.onclick = () => { state.curveBin = state.curveBin === +b.dataset.bin ? null : +b.dataset.bin; renderCurve(); refocus('data-bin', b.dataset.bin); };
   const bc = document.getElementById('binClear'); if (bc) bc.onclick = (e) => { e.stopPropagation(); state.curveBin = null; renderCurve(); };
   bindSugPopovers($('curveWrap'));
 }

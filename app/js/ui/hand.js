@@ -20,7 +20,7 @@ function drawHand() {
 export function renderHand() {
   const t = T();
   let html = '<div class="hand-head">' +
-    '<span class="secT">' + t.handT + '</span>' +
+    '<h2 class="secT">' + t.handT + '</h2>' +
     '<button id="handDrawBtn" class="btn-accent-sm">' + (state.hand ? t.handMull : t.handDraw) + '</button></div>';
   if (!state.hand) html += '<div class="note-muted">' + t.handHint + '</div>';
   else html += '<div class="hand-grid">' +
