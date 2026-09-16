@@ -84,6 +84,7 @@ console.log(`Precon parity: ${expected.length - fails}/${expected.length} decks 
 // subset of that list — and for a real partner pair, both halves.
 const combos = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "combos.json"), "utf8"));
 let cmdFails = 0, b3Fits = 0;
+const earlyCombos = [];
 const b3Reasons = {};
 for (const exp of expected) {
   const entries = exp.cards.map(c => ({ name: c.name, quantity: c.quantity }));
@@ -102,15 +103,36 @@ for (const exp of expected) {
     loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
   if (b3.fits) b3Fits++;
   else for (const id of b3.failed) (b3Reasons[id] ||= []).push(exp.deck);
+  for (const c of b3.checks.find(x => x.id === "early_combos").combos)
+    earlyCombos.push({ deck: exp.deck, ...c });
 }
 console.log(`Commander detection: ${expected.length - cmdFails}/${expected.length} precons resolved to a listed commander`);
 console.log(`Bracket 3: ${b3Fits}/${expected.length} precons fit; misses ${JSON.stringify(
   Object.fromEntries(Object.entries(b3Reasons).map(([k, v]) => [k, v.length])))}`);
+for (const c of earlyCombos) console.log(`  early combo: ${c.deck}: ${c.cards.join(" + ")} (${c.mana} mana)`);
 // Precons are Bracket 2 decks, so a Bracket-3 miss on anything other than the
 // (genuine, unintended) early combos some of them ship means the check drifted.
 const unexpected = Object.keys(b3Reasons).filter(k => k !== "early_combos");
 if (unexpected.length) {
   console.log(`UNEXPECTED Bracket 3 failures on precons: ${unexpected.join(", ")}`);
   fails++;
+}
+// early_combos is whitelisted above, so it needs its own guard: every flagged
+// combo must have been PRICED, not defaulted. A piece the lookup misses used
+// to score 0 mana and drag the combo under the threshold (split and modal
+// cards are keyed by their full "A // B" name, the combo DB by the front face).
+for (const c of earlyCombos) {
+  const priced = c.cards.every(n => {
+    const card = db[n] || Object.values(db).find(x => x && String(x.name).split(" // ")[0] === n);
+    return card && typeof card.cmc === "number";
+  });
+  const sum = c.cards.reduce((s, n) => {
+    const card = db[n] || Object.values(db).find(x => x && String(x.name).split(" // ")[0] === n);
+    return s + (card && typeof card.cmc === "number" ? card.cmc : NaN);
+  }, 0);
+  if (!priced || sum !== c.mana) {
+    console.log(`UNPRICED early combo in ${c.deck}: ${c.cards.join(" + ")} reported ${c.mana}, real ${sum}`);
+    fails++;
+  }
 }
 process.exit(fails || cmdFails ? 1 : 0);

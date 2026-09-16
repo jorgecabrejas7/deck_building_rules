@@ -79,17 +79,21 @@ function restIdentity(entries, db, exclude) {
 
 // Keeps only the names that really can lead THIS deck together, so a stale
 // pick (saved session, edited list) degrades to auto-detection instead of
-// poisoning the colour-identity check.
+// poisoning the colour-identity check. The card that CAN lead alone always
+// takes the first seat: a declared list is not ordered (Archidekt's follows
+// its arbitrary card order), so a Background listed first must not knock out
+// the creature that chose it, nor end up named as "the" commander.
 export function normalizeCommanders(names, entries, db) {
   const cands = new Map(commanderCandidates(entries, db).map(c => [c.name, c]));
-  const picked = [];
+  const listed = [];
   for (const n of names || []) {
     const c = cands.get(n);
-    if (!c || picked.some(p => p.name === n)) continue;
-    if (!picked.length) { if (c.solo) picked.push(c); continue; }
-    if (picked.length === 1 && canPair(picked[0].card, c.card)) picked.push(c);
+    if (c && !listed.includes(c)) listed.push(c);
   }
-  return picked.map(c => c.name);
+  const lead = listed.find(c => c.solo);
+  if (!lead) return [];
+  const second = listed.find(c => c !== lead && canPair(lead.card, c.card));
+  return second ? [lead.name, second.name] : [lead.name];
 }
 
 // Auto-detection. A declared Commander section (text header or Archidekt
@@ -114,7 +118,9 @@ export function pickCommanders(parsed, db) {
     for (let j = i + 1; j < cands.length; j++) {
       const a = cands[i], b = cands[j];
       if ((!a.solo && !b.solo) || !canPair(a.card, b.card)) continue;
-      options.push(score([a, b], Math.max(i, j)));
+      // solo-first: commanders[0] is what the report, the EDHREC/Spellbook
+      // links and the table-mode label name, and a Background is never that
+      options.push(score(a.solo ? [a, b] : [b, a], Math.max(i, j)));
     }
   }
   if (!options.length) return [];

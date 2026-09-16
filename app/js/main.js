@@ -128,7 +128,7 @@ const __boot = () => {
   if (sess) {
     if (typeof sess.deckText === 'string') $('deckText').value = sess.deckText;
     if (typeof sess.arch === 'string') state.arch = sess.arch;
-    if (Array.isArray(sess.cmdPick)) state.cmdPick = sess.cmdPick;
+    if (sess.cmdPick && Array.isArray(sess.cmdPick.names)) state.cmdPick = sess.cmdPick;
     if (Array.isArray(sess.tableTexts))
       state.tableTexts = [0, 1, 2, 3].map(i => typeof sess.tableTexts[i] === 'string' ? sess.tableTexts[i] : '');
   }

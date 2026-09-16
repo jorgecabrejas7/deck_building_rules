@@ -30,8 +30,9 @@ export function renderTableMode() {
         return '<tr><td>' + esc(d.name) + '</td>' +
           '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + t[d.tier] + '</span></td>' +
           '<td class="mono">' + d.pts + '</td>' +
-          '<td><span class="tier-pill ' + (d.bracket3.fits ? 'tone-ok' : 'tone-bad') + '">' +
-            (d.bracket3.fits ? '✓ ' + t.brYes : '✕ ' + t.brNo) + '</span></td>' +
+          '<td><span class="tier-pill ' + (!d.bracket3.fits ? 'tone-bad' : d.bracket3.pending ? 'tone-warn' : 'tone-ok') +
+            '" title="' + (d.bracket3.pending ? esc(t.brPending) : '') + '">' +
+            (!d.bracket3.fits ? '✕ ' + t.brNo : d.bracket3.pending ? t.brChecking : '✓ ' + t.brYes) + '</span></td>' +
           '<td class="mono">€' + Math.round(d.price) + '</td><td>' + esc(d.arch) + '</td>' +
           '<td><button data-tmload="' + i + '" class="btn-ghost-sm">' + t.tmLoad + '</button></td></tr>';
       }).join('') + '</table></div>';
@@ -150,7 +151,7 @@ export async function runTableMode() {
     for (const text of texts) {
       const parsed = PodEngine.parseDecklist(text);
       const names = [...new Set(parsed.entries.map(e => e.name))];
-      await PodEngine.fetchCards(names, cardCache, () => {});
+      const { notFound } = await PodEngine.fetchCards(names, cardCache, () => {});
       const resolved = parsed.entries.filter(e => cardCache[e.name]);
       const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
       let comboList = null;
@@ -164,11 +165,12 @@ export async function runTableMode() {
       const det = PodEngine.detectArchetype(cardsInfo);
       const commanders = PodEngine.pickCommanders(parsed, cardCache);
       const cmd = commanders[0] || null;
-      const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, []);
+      const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, notFound);
       const bracket3 = PodEngine.evaluateBracket3({
         stats, flagged, db: cardCache, validation,
         combos: comboDb ? comboList : null,
         loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
+        unresolved: notFound.length,
       });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),

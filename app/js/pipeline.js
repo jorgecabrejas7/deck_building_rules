@@ -79,18 +79,22 @@ export function recompute(notFound) {
   const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
     cls: PodEngine.classifyCard(cardCache[e.name]) }));
   const detected = PodEngine.detectArchetype(cardsInfo);
-  // A user pick overrules detection; it is re-validated against this list, so a
-  // stale one (edited deck, restored session) falls back to auto-detection.
-  const picked = PodEngine.normalizeCommanders(state.cmdPick, resolved, cardCache);
+  // A user pick overrules detection, but only for the deck it was made on:
+  // the same legend can sit in someone else's 99, so matching by name alone
+  // would silently re-derive THEIR deck around YOUR commander.
+  const pick = state.cmdPick && state.cmdPick.key === PodEngine.deckFingerprint(parsed.entries)
+    ? state.cmdPick.names : null;
+  const picked = PodEngine.normalizeCommanders(pick, resolved, cardCache);
   const commanders = picked.length ? picked : PodEngine.pickCommanders(parsed, cardCache);
   const commander = commanders[0] || null;
   const candidates = PodEngine.commanderCandidates(resolved, cardCache);
-  const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache,
-    notFound !== undefined ? notFound : (state.result ? state.result.notFound : []));
+  const missing = notFound !== undefined ? notFound : (state.result ? state.result.notFound : []);
+  const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, missing);
   const bracket3 = PodEngine.evaluateBracket3({
     stats, flagged, db: cardCache, validation,
     combos: _cd ? _cd.list : null,
     loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
+    unresolved: missing.length,
   });
   // what-if cut deltas for every card that drives a points dial or violation
   const drivingNames = new Set();
@@ -103,8 +107,7 @@ export function recompute(notFound) {
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
   state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, candidates,
-    bracket3, whatIf,
-    notFound: notFound !== undefined ? notFound : (state.result ? state.result.notFound : []), validation };
+    bracket3, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;
 }
@@ -112,7 +115,9 @@ export function recompute(notFound) {
 // The command zone drives colour identity, synergy advice and the archetype
 // read, so changing it re-derives the whole report. null = back to detection.
 export function setCommanders(names) {
-  state.cmdPick = names && names.length ? names : null;
+  state.cmdPick = names && names.length
+    ? { key: PodEngine.deckFingerprint(state.deck.entries), names }
+    : null;
   recompute();
   renderAll();
 }

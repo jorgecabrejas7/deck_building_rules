@@ -2,7 +2,7 @@
 // browser-importable (app). Mirrors scripts/power_metrics.py + scripts/tier_rules.py.
 export { computeDeckStats } from "./stats.js";
 export { evaluateDeck, validateDeck, whatIfCut, dialPoints } from "./rules.js";
-export { detectInput, parseDecklist } from "./decks.js";
+export { detectInput, parseDecklist, deckFingerprint } from "./decks.js";
 export { fetchCards, fetchCheapest, suggestCards, searchScryfall } from "./scryfall.js";
 export { fetchArchidekt } from "./archidekt.js";
 export { isLegalCommander, isBackground, canPair, pairKinds, commanderCandidates,

@@ -59,11 +59,29 @@ function loopsTurns(card, loopList) {
   return RECURRING_TRIGGER_RE.test(oracle) && !CONSUMES_SELF_RE.test(oracle);
 }
 
-function comboMana(combo, db) {
+// The combo database names cards by their front face, while the card cache is
+// keyed by the full Scryfall name ("Expansion // Explosion"), so pricing a
+// combo needs a front-face index — without it every split, modal and
+// transforming piece resolves to nothing, and a combo that silently scores 0
+// mana always looks early.
+function frontFaceIndex(db) {
+  const idx = new Map();
+  for (const key of Object.keys(db)) {
+    const card = db[key];
+    if (!card) continue;
+    const front = String(card.name || key).split(" // ")[0];
+    if (!idx.has(front)) idx.set(front, card);
+  }
+  return idx;
+}
+
+// null when a piece cannot be priced: an unknown cost must never read as free.
+function comboMana(combo, db, idx) {
   let mv = 0;
   for (const n of combo.cards) {
-    const c = db[n] || db[String(n).split(" // ")[0]];
-    if (c && typeof c.cmc === "number") mv += c.cmc;
+    const c = db[n] || idx.get(String(n).split(" // ")[0]);
+    if (!c || typeof c.cmc !== "number") return null;
+    mv += c.cmc;
   }
   return mv;
 }
@@ -76,7 +94,9 @@ const LEGALITY_IDS = new Set(["count", "singleton", "identity", "banned_official
 // the combo criterion then reports as pending instead of silently passing.
 // loopCards: card names known to chain extra turns (the pod rules already keep
 // this list; passing it in keeps this module free of the pod's rules shape).
-export function evaluateBracket3({ stats, flagged, combos, db, validation, loopCards }) {
+// unresolved: how many cards Scryfall could not identify — a deck missing a
+// card only because of a typo is not an illegal deck.
+export function evaluateBracket3({ stats, flagged, combos, db, validation, loopCards, unresolved = 0 }) {
   const loopList = new Set(loopCards || []);
   const checks = [];
 
@@ -94,14 +114,22 @@ export function evaluateBracket3({ stats, flagged, combos, db, validation, loopC
   checks.push({ id: "extra_turns", ok: !looped.length && turns <= BRACKET3.extra_turns_max,
     value: turns, max: BRACKET3.extra_turns_max, cards: turnCards, looped });
 
-  const early = combos
-    ? combos.filter(c => c.infinite && c.n === 2 && c.cards.length === 2 && comboMana(c, db) <= BRACKET3.early_combo_mana)
-        .map(c => ({ cards: c.cards, mana: comboMana(c, db), feature: c.features[0] || "" }))
-    : [];
+  const early = [];
+  if (combos) {
+    const idx = frontFaceIndex(db);
+    for (const c of combos) {
+      if (!c.infinite || c.n !== 2 || c.cards.length !== 2) continue;
+      const mana = comboMana(c, db, idx);
+      if (mana === null || mana > BRACKET3.early_combo_mana) continue;
+      early.push({ cards: c.cards, mana, feature: c.features[0] || "" });
+    }
+  }
   checks.push({ id: "early_combos", ok: !early.length, pending: !combos,
     max: BRACKET3.early_combo_mana, combos: early });
 
-  const issues = (validation || []).filter(v => LEGALITY_IDS.has(v.id));
+  // A card the lookup could not identify shrinks the deck's countable size, so
+  // the 100-card rule would fail on a typo rather than on an illegal deck.
+  const issues = (validation || []).filter(v => LEGALITY_IDS.has(v.id) && !(v.id === "count" && unresolved));
   checks.push({ id: "legality", ok: !issues.length, issues });
 
   const failed = checks.filter(c => !c.ok);

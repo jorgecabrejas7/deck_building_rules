@@ -55,10 +55,15 @@ export function renderBracket() {
     '<div class="br-rows">' + rows + '</div></div>';
 }
 
-// Compact yes/no for the sticky summary strip.
+// Compact yes/no for the sticky summary strip. A criterion still waiting on the
+// combo check cannot be called a pass, so the tile stays neutral until it lands
+// (and stays neutral for good under file://, where the check never runs).
 export function bracketTile() {
   const t = T(), b = state.result.bracket3;
-  return '<div class="panel stat-tile toned ' + (b.fits ? 'tone-ok' : 'tone-bad') + '">' +
+  const tone = !b.fits ? 'tone-bad' : b.pending ? '' : 'tone-ok';
+  const value = !b.fits ? '✕ ' + t.brNo : b.pending ? t.brChecking : '✓ ' + t.brYes;
+  return '<div class="panel stat-tile' + (tone ? ' toned ' + tone : '') + '"' +
+    (b.pending ? ' title="' + esc(t.brPending) + '"' : '') + '>' +
     '<div class="tile-label">' + t.brTile + '</div>' +
-    '<div class="mono stat-value">' + (b.fits ? '✓ ' + t.brYes : '✕ ' + t.brNo) + '</div></div>';
+    '<div class="mono stat-value">' + value + '</div></div>';
 }

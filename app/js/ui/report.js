@@ -15,7 +15,7 @@ export function copyReport() {
     t.cardsN + ': ' + state.result.stats.total_cards,
     t.archetype + ': ' + archName()];
   const b = state.result.bracket3;
-  lines.push(t.brTile + ': ' + (b.fits ? t.brYes : t.brNo));
+  lines.push(t.brTile + ': ' + (!b.fits ? t.brNo : b.pending ? t.brPending : t.brYes));
   for (const c of b.checks) if (!c.ok) lines.push('  ✕ ' + t['br_' + c.id]);
   for (const v of ev.violations) lines.push('✕ ' + (v.id === 'conditional' ? MSG.conditional[v.condId][lang](v) : MSG[v.id][lang](v)));
   for (const f of ev.flags) lines.push('⚠ ' + (MSG['flag_' + f.dial] ? MSG['flag_' + f.dial][lang](f) : f.id));

@@ -42,3 +42,12 @@ function stripLine(line) {
   return { name, quantity: qty };
 }
 function addEntry(map, e) { map.set(e.name, (map.get(e.name) || 0) + e.quantity); }
+
+// Identity of a decklist, so state tied to a deck (the user's commander pick)
+// can tell "same deck, new session" from "a different deck in the same box".
+export function deckFingerprint(entries) {
+  const s = entries.map(e => e.name).sort().join("|");
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
+  return entries.length + ":" + (h >>> 0).toString(36);
+}
