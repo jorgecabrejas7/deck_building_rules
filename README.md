@@ -32,11 +32,35 @@ their point costs, conditional locks explained, and concrete EDHREC-ranked
 cards each paired with a direct cut), deck composition vs archetype targets
 with why-add/why-cut reasoning and a retry button when EDHREC/Scryfall is
 unreachable (curated fallback + disclaimer offline), automatic infinite-combo
-checking via Commander Spellbook on every analysis, an archetype verdict panel
+checking via Commander Spellbook on every analysis, a Bracket 3 verdict (see
+below), a commander picker (see below), an archetype verdict panel
 (what the deck does well / what it lacks), ramp castability analysis,
 interactive mana curve, deck browser with card art, sample opening hand, a
 4-deck table compare mode, a pod deck registry (see below), a how-it-works
 rules explainer, and a bilingual (ES/EN) archetype guide.
+
+Bracket 3: alongside the pod's point budget, every deck is also checked
+against Wizards' official Bracket 3 "Upgraded" — up to 3 Game Changers, no mass
+land denial, extra turns in low quantities and never chained or looped, no
+early-game two-card infinite combo (both halves costing 6 mana or less
+together), plus ordinary Commander legality. The two verdicts are independent
+on purpose: a deck can blow the pod budget and still be a legal Bracket 3 deck,
+which is what most tables outside the pod ask for. It shows as a yes/no tile in
+the sticky summary, a full criterion-by-criterion panel in the report (naming
+the offending cards and combos), a column per deck in table mode, and a line in
+the copied report. Rules live in app/js/engine/bracket.js.
+
+Commander detection and picker: the command zone decides colour identity,
+the EDHREC synergy page and half the advice, so a declared Commander section
+(text header or Archidekt category) always wins, and otherwise the deck's own
+colours pick the legend — a commander must cover the colour identity of all 99,
+and among the legends that do, the tightest fit wins with list order breaking
+ties. Partner / Friends forever / Doctor's companion / Background pairs are
+detected as pairs. Whatever it guesses, the report's COMMANDER panel lists every
+card in the list that could legally sit in the command zone and one click
+re-derives the whole report around it (the pick is saved with the session).
+Rules live in app/js/engine/commander.js; verified against all 36 precons
+(36/36 correct, including the one real partner pair).
 
 Pod deck registry: reference decks live in a SQLite database managed by
 scripts/pod_decks.py (add via Archidekt URL — fetched server-side, no CORS —
@@ -57,8 +81,15 @@ rules/pod_rules.json (single source of truth) and infinite combos are matched
 client-side against data/combos.json, a compact index distilled from Commander
 Spellbook's bulk export by scripts/build_combo_db.py and refreshed weekly by a
 GitHub Action — same-origin, no CORS, no proxies. Archidekt/Moxfield still
-block direct browser reads, so deck URLs fall back to paste-the-text-export
-(with an opt-in public-proxy retry for Archidekt).
+block direct browser reads. Archidekt URLs therefore load through a chain of
+public CORS proxies (r.jina.ai, allorigins, codetabs) tried in order: each
+attempt is time-boxed and a response only counts once it parses as a real
+Archidekt deck, so a proxy answering 200 with an error body of its own falls
+through instead of silently loading an empty deck. Public proxies keep
+disappearing or growing API keys — to depend on nobody, deploy
+tools/cors-worker.js to your own Cloudflare account and put it first in the
+PROXIES list of app/js/engine/archidekt.js (instructions are in the file).
+Pasting the text export always works and never touches a third party.
 
 Dev checks (users never need these):
   node scripts/test_engine_parity.js   # JS engine == Python rules on all 36 precons

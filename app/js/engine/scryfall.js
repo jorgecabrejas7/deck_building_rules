@@ -89,41 +89,6 @@ export async function fetchCheapest(names, cache, onProgress, isCancelled) {
   return { done: targets.length, total: targets.length, cancelled: false };
 }
 
-const PROXIES = [
-  (u) => "https://corsproxy.io/?url=" + encodeURIComponent(u),
-  (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
-];
-async function fetchViaProxies(url, opts) {
-  let lastErr = null;
-  for (const wrap of PROXIES) {
-    try {
-      const res = await fetch(wrap(url), opts);
-      if (res.ok) return res;
-      lastErr = new Error("proxy " + res.status);
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr || new Error("all proxies failed");
-}
-
-export async function fetchArchidekt(id, useProxy) {
-  const api = "https://archidekt.com/api/decks/" + id + "/";
-  const res = useProxy ? await fetchViaProxies(api) : await fetch(api);
-  if (!res.ok) throw new Error("Archidekt " + res.status);
-  const data = await res.json();
-  const excluded = new Set((data.categories || []).filter(c => c.includedInDeck === false).map(c => c.name));
-  const entries = [];
-  const commanders = [];
-  for (const c of data.cards || []) {
-    const cats = c.categories || [];
-    if (cats.some(k => excluded.has(k))) continue;
-    const name = (c.card && c.card.oracleCard && c.card.oracleCard.name) || (c.card && c.card.name);
-    if (!name) continue;
-    entries.push({ name, quantity: c.quantity || 1 });
-    if (cats.some(k => /^commander$/i.test(k))) commanders.push(name);
-  }
-  return { name: data.name || ("Archidekt #" + id), entries, commanders };
-}
-
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ---- suggestion engine: live Scryfall (EDHREC-ranked) with curated fallback ----

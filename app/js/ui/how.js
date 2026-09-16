@@ -1,6 +1,7 @@
 import { state } from '../state.js';
 import { RULES } from '../rules.js';
 import { DIAL_META } from './constants.js';
+import { BRACKET3 } from '../engine/bracket.js';
 import { $, esc } from './helpers.js';
 
 function renderHow() {
@@ -41,8 +42,16 @@ function renderHow() {
 <li>Con tutores: cero game changers.</li>
 <li>Con cualquier combo infinito: cero tutores.</li>
 <li>Maná rápido alto (9+) y hechizos gratis altos (5+) a la vez: +2 puntos extra.</li></ul>
+<h3>Bracket 3 (el sistema oficial de Wizards)</h3>
+<p>Aparte de los puntos del pod, cada mazo se comprueba contra el <b>Bracket 3 «Upgraded»</b> de Wizards, que es lo que pide la mayoría de mesas de fuera. Son dos varas de medir distintas: un mazo puede pasarse del presupuesto del pod y seguir siendo un Bracket 3 perfectamente legal.</p>
+<ul>
+<li>Hasta <b>${BRACKET3.game_changers_max}</b> cartas de la lista de game changers.</li>
+<li>Nada de destrucción masiva de tierras.</li>
+<li>Turnos extra en poca cantidad (máximo ${BRACKET3.extra_turns_max}) y nunca encadenables ni en bucle.</li>
+<li>Ningún combo infinito intencionado de 2 cartas de fase temprana — se consideran tempranos los que suman ${BRACKET3.early_combo_mana} de maná o menos entre las dos piezas, es decir, montables en las primeras seis vueltas.</li>
+<li>Y el mazo tiene que ser legal: 100 cartas, singleton, dentro de la identidad de color del comandante y sin cartas de la banlist oficial.</li></ul>
 <h3>Precios, combos y sugerencias</h3>
-<p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban automáticamente en cada análisis contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5 (mejoras de nivel: menos de €10). Las URLs de Archidekt se cargan automáticamente a través de un proxy público (corsproxy.io) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
+<p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban automáticamente en cada análisis contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5 (mejoras de nivel: menos de €10). Las URLs de Archidekt se cargan a través de proxies públicos (r.jina.ai, allorigins, codetabs — se prueban en orden hasta que uno responde) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
   : `
 <button id="howClose" class="modal-close" aria-label="Close">✕</button>
 <h2 id="howTitle">How this guide works</h2>
@@ -63,8 +72,16 @@ function renderHow() {
 <li>With tutors: zero game changers.</li>
 <li>With any infinite combo: zero tutors.</li>
 <li>High fast mana (9+) and high free spells (5+) together: +2 extra points.</li></ul>
+<h3>Bracket 3 (Wizards' official system)</h3>
+<p>Besides the pod points, every deck is checked against Wizards' <b>Bracket 3 "Upgraded"</b>, which is what most tables outside the pod ask for. They are two different yardsticks: a deck can blow the pod budget and still be a perfectly legal Bracket 3 deck.</p>
+<ul>
+<li>Up to <b>${BRACKET3.game_changers_max}</b> cards from the Game Changers list.</li>
+<li>No mass land denial.</li>
+<li>Extra turns in low quantities (at most ${BRACKET3.extra_turns_max}) and never chained or looped.</li>
+<li>No intentional early-game two-card infinite combo — early means the two halves cost ${BRACKET3.early_combo_mana} mana or less together, i.e. assemblable within the first six turns.</li>
+<li>And the deck must be legal: 100 cards, singleton, inside the commander's colour identity, nothing on the official banlist.</li></ul>
 <h3>Prices, combos and suggestions</h3>
-<p>Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked automatically on every analysis against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5 (tier upgrades: under €10). Archidekt URLs load automatically through a public proxy (corsproxy.io) because Archidekt blocks direct browser reads; if you prefer your deck not to transit a third party, paste the list as text. Combos are checked against a database hosted on this very site — no third parties.</p>`;
+<p>Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked automatically on every analysis against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5 (tier upgrades: under €10). Archidekt URLs load through public proxies (r.jina.ai, allorigins, codetabs — tried in order until one answers) because Archidekt blocks direct browser reads; if you prefer your deck not to transit a third party, paste the list as text. Combos are checked against a database hosted on this very site — no third parties.</p>`;
   $('howBody').innerHTML = html;
   $('howClose').onclick = closeHow;
 }

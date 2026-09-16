@@ -42,14 +42,3 @@ function stripLine(line) {
   return { name, quantity: qty };
 }
 function addEntry(map, e) { map.set(e.name, (map.get(e.name) || 0) + e.quantity); }
-
-// ---- commander guess (precon convention: first legendary creature listed) ----
-export function guessCommander(entries, db) {
-  for (const e of entries) {
-    const c = db[e.name];
-    if (!c) continue;
-    const front = (c.type_line || "").split(" // ")[0];
-    if (front.includes("Legendary") && (front.includes("Creature") || /can be your commander/i.test(c.oracle_text || ""))) return e.name;
-  }
-  return null;
-}

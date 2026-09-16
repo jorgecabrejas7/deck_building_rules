@@ -15,10 +15,8 @@ export async function analyze() {
   try {
     let parsed;
     if (det.kind === 'archidekt') {
-      try {
-        try { parsed = await PodEngine.fetchArchidekt(det.id, false); }
-        catch (e) { parsed = await PodEngine.fetchArchidekt(det.id, true); }
-      } catch (e) { state.error = 'archErr'; state.busy = false; renderInput(); return; }
+      try { parsed = await PodEngine.fetchArchidekt(det.id); }
+      catch (e) { console.error(e); state.error = 'archErr'; state.busy = false; renderInput(); return; }
     } else {
       parsed = PodEngine.parseDecklist(text);
     }
@@ -81,10 +79,19 @@ export function recompute(notFound) {
   const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
     cls: PodEngine.classifyCard(cardCache[e.name]) }));
   const detected = PodEngine.detectArchetype(cardsInfo);
-  const commander = (parsed.commanders && parsed.commanders[0]) || PodEngine.guessCommander(resolved, cardCache);
-  const commanders = parsed.commanders && parsed.commanders.length ? parsed.commanders : (commander ? [commander] : []);
+  // A user pick overrules detection; it is re-validated against this list, so a
+  // stale one (edited deck, restored session) falls back to auto-detection.
+  const picked = PodEngine.normalizeCommanders(state.cmdPick, resolved, cardCache);
+  const commanders = picked.length ? picked : PodEngine.pickCommanders(parsed, cardCache);
+  const commander = commanders[0] || null;
+  const candidates = PodEngine.commanderCandidates(resolved, cardCache);
   const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache,
     notFound !== undefined ? notFound : (state.result ? state.result.notFound : []));
+  const bracket3 = PodEngine.evaluateBracket3({
+    stats, flagged, db: cardCache, validation,
+    combos: _cd ? _cd.list : null,
+    loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
+  });
   // what-if cut deltas for every card that drives a points dial or violation
   const drivingNames = new Set();
   for (const list of Object.values(evalRes.driving)) for (const [n] of list) drivingNames.add(n);
@@ -95,10 +102,19 @@ export function recompute(notFound) {
     whatIf[n] = { dPts: evalRes.points - comboPts - wi.points, tier: wi.tier,
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
-  state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, whatIf,
+  state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, candidates,
+    bracket3, whatIf,
     notFound: notFound !== undefined ? notFound : (state.result ? state.result.notFound : []), validation };
   state.hand = null;
   state.tipsCache = null;
+}
+
+// The command zone drives colour identity, synergy advice and the archetype
+// read, so changing it re-derives the whole report. null = back to detection.
+export function setCommanders(names) {
+  state.cmdPick = names && names.length ? names : null;
+  recompute();
+  renderAll();
 }
 
 let fetchCancelled = false;

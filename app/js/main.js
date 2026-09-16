@@ -15,6 +15,8 @@ import { renderPower } from './ui/power.js';
 import { renderValidation } from './ui/validation.js';
 import { renderComp } from './ui/comp.js';
 import { renderVerdict } from './ui/verdict.js';
+import { renderCommander } from './ui/commander.js';
+import { renderBracket } from './ui/bracket.js';
 import { renderBrowser } from './ui/browser.js';
 import { renderTips } from './ui/tips.js';
 import { renderRamp } from './ui/ramp.js';
@@ -67,7 +69,7 @@ export function renderAll() {
   renderBanner();
   if (has) {
     renderSummary(); renderValidation();
-    if (state.tab === 'informe') { renderVerdict(); renderPower(); renderTips(); }
+    if (state.tab === 'informe') { renderCommander(); renderVerdict(); renderPower(); renderBracket(); renderTips(); }
     if (state.tab === 'detalles') { renderComp(); renderCurve(); renderRamp(); renderHand(); renderBrowser(); }
   }
   if (state.tab === 'pod') renderPod();
@@ -126,6 +128,7 @@ const __boot = () => {
   if (sess) {
     if (typeof sess.deckText === 'string') $('deckText').value = sess.deckText;
     if (typeof sess.arch === 'string') state.arch = sess.arch;
+    if (Array.isArray(sess.cmdPick)) state.cmdPick = sess.cmdPick;
     if (Array.isArray(sess.tableTexts))
       state.tableTexts = [0, 1, 2, 3].map(i => typeof sess.tableTexts[i] === 'string' ? sess.tableTexts[i] : '');
   }

@@ -4,6 +4,8 @@
  *   (a) the selftest cases pass (same expectations as tier_rules.py --selftest)
  *   (b) all 36 precon decks get the same stats/points/tier as the Python pipeline
  *       (expected values generated on the fly via python3).
+ *   (c) commander auto-detection recovers the real commander of all 36 precons,
+ *       and every precon's Bracket 3 verdict is explainable.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
  * Users of the HTML app never need this.
@@ -44,7 +46,7 @@ for report in sorted((root/'out'/'precon_decks').glob('*.report.json')):
     for deck in data.get('decks', []):
         stats, flagged = compute_deck_stats(deck['cards'], cache)
         res = evaluate_deck(stats, flagged, rules, card_names={c['name'] for c in deck['cards']})
-        out.append({'deck': deck['deck_title'], 'stats': {k: v for k, v in stats.items() if isinstance(v, (int, float)) or v is None},
+        out.append({'deck': deck['deck_title'], 'commanders': deck.get('commanders', []), 'stats': {k: v for k, v in stats.items() if isinstance(v, (int, float)) or v is None},
                     'tier': res['tier'], 'points': res['points'], 'breakdown': res['point_breakdown'],
                     'violations': len(res['violations']), 'cards': deck['cards']})
 print(json.dumps(out))
@@ -75,4 +77,40 @@ for (const exp of expected) {
   if (diffs.length) { fails++; console.log(`MISMATCH ${exp.deck}\n  ${diffs.join("\n  ")}`); }
 }
 console.log(`Precon parity: ${expected.length - fails}/${expected.length} decks match Python (stats+points+tier+violations)`);
-process.exit(fails ? 1 : 0);
+
+// (c) commander detection + Bracket 3, on the same 36 precons.
+// Ground truth: each precon report lists the box's legendary options. Modern
+// precons ship two ALTERNATIVE face commanders, so a correct guess is any
+// subset of that list — and for a real partner pair, both halves.
+const combos = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "combos.json"), "utf8"));
+let cmdFails = 0, b3Fits = 0;
+const b3Reasons = {};
+for (const exp of expected) {
+  const entries = exp.cards.map(c => ({ name: c.name, quantity: c.quantity }));
+  // precons carry no Commander header, so this exercises pure detection
+  const cmds = PodEngine.pickCommanders({ entries, commanders: [] }, db);
+  const truth = exp.commanders || [];
+  if (!cmds.length || !cmds.every(c => truth.includes(c))) {
+    cmdFails++;
+    console.log(`COMMANDER ${exp.deck}: got ${cmds.join(" + ") || "(none)"}, box lists ${truth.join(" / ")}`);
+  }
+  const { stats, flagged } = PodEngine.computeDeckStats(entries, db);
+  const matched = PodEngine.matchCombos(entries.map(e => e.name), combos);
+  const cardsInfo = entries.filter(e => db[e.name]).map(e => ({ card: db[e.name], qty: e.quantity, name: e.name }));
+  const validation = PodEngine.validateDeck(cardsInfo, cmds, db, []);
+  const b3 = PodEngine.evaluateBracket3({ stats, flagged, db, validation, combos: matched,
+    loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
+  if (b3.fits) b3Fits++;
+  else for (const id of b3.failed) (b3Reasons[id] ||= []).push(exp.deck);
+}
+console.log(`Commander detection: ${expected.length - cmdFails}/${expected.length} precons resolved to a listed commander`);
+console.log(`Bracket 3: ${b3Fits}/${expected.length} precons fit; misses ${JSON.stringify(
+  Object.fromEntries(Object.entries(b3Reasons).map(([k, v]) => [k, v.length])))}`);
+// Precons are Bracket 2 decks, so a Bracket-3 miss on anything other than the
+// (genuine, unintended) early combos some of them ship means the check drifted.
+const unexpected = Object.keys(b3Reasons).filter(k => k !== "early_combos");
+if (unexpected.length) {
+  console.log(`UNEXPECTED Bracket 3 failures on precons: ${unexpected.join(", ")}`);
+  fails++;
+}
+process.exit(fails || cmdFails ? 1 : 0);

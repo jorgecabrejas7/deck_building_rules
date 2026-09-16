@@ -25,11 +25,14 @@ export function renderTableMode() {
   const res = state.tableResults;
   if (res) {
     html += '<div class="table-scroll"><table class="tm-table">' +
-      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
+      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.brTile + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
       res.map((d, i) => {
         return '<tr><td>' + esc(d.name) + '</td>' +
           '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + t[d.tier] + '</span></td>' +
-          '<td class="mono">' + d.pts + '</td><td class="mono">€' + Math.round(d.price) + '</td><td>' + esc(d.arch) + '</td>' +
+          '<td class="mono">' + d.pts + '</td>' +
+          '<td><span class="tier-pill ' + (d.bracket3.fits ? 'tone-ok' : 'tone-bad') + '">' +
+            (d.bracket3.fits ? '✓ ' + t.brYes : '✕ ' + t.brNo) + '</span></td>' +
+          '<td class="mono">€' + Math.round(d.price) + '</td><td>' + esc(d.arch) + '</td>' +
           '<td><button data-tmload="' + i + '" class="btn-ghost-sm">' + t.tmLoad + '</button></td></tr>';
       }).join('') + '</table></div>';
     if (res.length >= 2) html += cmpDials(res) + cmpComp(res) + cmpCards(res);
@@ -150,19 +153,27 @@ export async function runTableMode() {
       await PodEngine.fetchCards(names, cardCache, () => {});
       const resolved = parsed.entries.filter(e => cardCache[e.name]);
       const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
+      let comboList = null;
       if (comboDb) {
-        const list = PodEngine.matchCombos(parsed.entries.map(e => e.name), comboDb);
-        stats.combos = list.length;
-        stats.combo_sizes = list.filter(c => c.infinite).map(c => c.n);
+        comboList = PodEngine.matchCombos(parsed.entries.map(e => e.name), comboDb);
+        stats.combos = comboList.length;
+        stats.combo_sizes = comboList.filter(c => c.infinite).map(c => c.n);
       }
       const ev = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
       const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name, cls: PodEngine.classifyCard(cardCache[e.name]) }));
       const det = PodEngine.detectArchetype(cardsInfo);
-      const cmd = (parsed.commanders && parsed.commanders[0]) || PodEngine.guessCommander(resolved, cardCache);
+      const commanders = PodEngine.pickCommanders(parsed, cardCache);
+      const cmd = commanders[0] || null;
+      const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, []);
+      const bracket3 = PodEngine.evaluateBracket3({
+        stats, flagged, db: cardCache, validation,
+        combos: comboDb ? comboList : null,
+        loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
+      });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
         tier: ev.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,
-        arch: a.name[state.lang], archKey: det.key, commander: cmd,
+        arch: a.name[state.lang], archKey: det.key, commander: cmd, bracket3,
         stats, ev, cardsInfo });
     }
     persistCache();

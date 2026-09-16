@@ -3,6 +3,7 @@ import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { PIP } from './constants.js';
 import { $, esc, tierTone, archName } from './helpers.js';
+import { bracketTile } from './bracket.js';
 
 export function renderSummary() {
   const t = T(), r = state.result, ev = r.evalRes;
@@ -26,6 +27,7 @@ export function renderSummary() {
       // over budget the tile takes the tier tone instead of staying neutral
       stat(t.pts, ev.points + ' <span class="stat-cap">· ' + t.capWord + ' ' + budgetN + '</span>',
         ev.points > budgetN ? 'toned ' + tierTone(ev.tier) : '') +
+      bracketTile() +
       stat(t.price, '€' + Math.round(r.stats.total_price_eur)) +
       stat(t.cardsN, r.stats.total_cards) +
       '<div class="panel stat-tile"><div class="tile-label">' + t.archetype + '</div><div class="stat-arch">' + esc(archName()) + '</div></div></div>';

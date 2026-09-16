@@ -382,3 +382,27 @@
 .cmp-cards-cell{max-width:320px}
 .cmp-cards-cell .card-chip{margin:2px 4px 2px 0}
 .chip-shared{border-color:var(--accent)}
+
+/* commander picker (report tab) */
+.cmd-seats{display:flex;gap:14px;flex-wrap:wrap}
+.cmd-seat{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:7px 14px 7px 7px}
+.cmd-seat-art{width:56px;height:41px;flex:none;border-radius:7px;background:var(--track) center/cover no-repeat}
+.cmd-chips{display:flex;gap:8px;flex-wrap:wrap}
+.cmd-chip{display:flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:99px;padding:4px 13px 4px 5px;font-size:var(--fs-caption);font-weight:600;cursor:pointer}
+.cmd-chip:hover:not(:disabled){border-color:var(--accent)}
+.cmd-chip.on{background:var(--okBg);border-color:var(--okBd);color:var(--okFg)}
+.cmd-chip:disabled{opacity:.4;cursor:not-allowed}
+.cmd-chip-auto{padding-left:13px;border-style:dashed;color:var(--muted)}
+.cmd-chip-tag{font-weight:500;color:var(--muted)}
+
+/* bracket 3 panel */
+.br-verdict{background:var(--toneBg);border:1px solid var(--toneBd);color:var(--toneFg);border-radius:99px;padding:4px 14px;font-size:var(--fs-caption);font-weight:700;white-space:nowrap}
+.br-rows{display:flex;flex-direction:column;gap:9px}
+.br-row{display:flex;gap:10px;align-items:flex-start;font-size:var(--fs-body);line-height:1.5}
+.br-ic{flex:none;width:18px;font-weight:700}
+.br-text{display:flex;flex-direction:column;gap:2px}
+.br-ok .br-ic{color:var(--okFg)}
+.br-fail .br-ic{color:var(--badFg)}
+.br-fail .br-rule{font-weight:600}
+.br-why{font-size:var(--fs-caption);color:var(--badFg)}
+.br-combo{display:block;padding-top:2px}

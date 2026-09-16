@@ -21,7 +21,7 @@ export function saveSession(){
   const ta = document.getElementById('deckText');
   try { localStorage.setItem(SESSION_KEY, JSON.stringify({
     deckText: ta ? ta.value : '', arch: state.arch, tab: state.tab,
-    tableTexts: state.tableTexts,
+    tableTexts: state.tableTexts, cmdPick: state.cmdPick,
   })); } catch (e) {}
 }
 // Pre-consolidation tab keys map onto the merged report/detail panes.
@@ -39,7 +39,8 @@ export const state = {
   lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
   arch: 'auto', grp: 'type', cf: 'all', curveBin: null, hl: null, openArch: null, tab: 'load',
   deck: null,        // {entries, commanders, deckName}
-  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, whatIf}
+  cmdPick: null,     // user-chosen commander name(s); null = auto-detect
+  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, commanders, candidates, bracket3, whatIf}
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype

@@ -15,7 +15,7 @@
 // HTTP cache. Any byte change to this file triggers an immediate update
 // (skipWaiting + clients.claim), since browsers refetch the registered SW
 // script bypassing the HTTP cache.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'pdc-' + VERSION;
 
 self.addEventListener('install', () => self.skipWaiting());
