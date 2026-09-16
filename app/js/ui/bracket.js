@@ -47,11 +47,13 @@ export function renderBracket() {
             : '<span class="br-why">' + why(c, t, lang) + '</span>') + '</div></div>';
   }).join('');
 
+  // No title here: the part header above the panel already names this section,
+  // so the panel leads straight with the verdict and the five criteria.
   $('bracket').innerHTML = '<div class="panel panel-pad">' +
-    '<div class="row-between"><h2 class="secT secT-lg">' + t.brT + '</h2>' +
-    '<span class="br-verdict ' + (b.fits ? 'tone-ok' : 'tone-bad') + '">' +
-    (b.fits ? '✓ ' + esc(t.brFits) : '✕ ' + esc(t.brFitsNo)) + '</span></div>' +
-    '<div class="note-sm">' + esc(t.brHint) + '</div>' +
+    '<div class="row-between"><span class="br-verdict ' +
+    (!b.fits ? 'tone-bad' : b.pending ? 'tone-warn' : 'tone-ok') + '">' +
+    (!b.fits ? '✕ ' + esc(t.brFitsNo) : '✓ ' + esc(t.brFits)) + '</span>' +
+    (b.pending ? '<span class="note-sm">' + esc(t.brPending) + '</span>' : '') + '</div>' +
     '<div class="br-rows">' + rows + '</div></div>';
 }
 

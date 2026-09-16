@@ -69,7 +69,11 @@ export function renderAll() {
   renderBanner();
   if (has) {
     renderSummary(); renderValidation();
-    if (state.tab === 'informe') { renderCommander(); renderVerdict(); renderPower(); renderBracket(); renderTips(); }
+    if (state.tab === 'informe') {
+      // the two part headings are static per language; their ids match their keys
+      for (const k of ['partPodT', 'partPodX', 'partBrT', 'partBrX']) $(k).textContent = t[k];
+      renderCommander(); renderVerdict(); renderPower(); renderBracket(); renderTips();
+    }
     if (state.tab === 'detalles') { renderComp(); renderCurve(); renderRamp(); renderHand(); renderBrowser(); }
   }
   if (state.tab === 'pod') renderPod();

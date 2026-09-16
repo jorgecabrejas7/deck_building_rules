@@ -87,9 +87,18 @@ export function renderVerdict() {
       '</div>';
   }
   $('verdict').innerHTML = html;
-  // peak-end: a passing report also ENDS on the win, after the advice section
+  // peak-end: the report closes on what the deck is cleared for. It now sits
+  // below BOTH parts, so it carries the pod verdict and the bracket verdict.
   const end = $('informeEnd');
-  if (end) end.innerHTML = passing ? '<div class="informe-end">' + esc(t.endLegal) + '</div>' : '';
+  if (end) {
+    const b = r.bracket3;
+    const marks = [];
+    if (passing) marks.push(esc(t.endLegal));
+    if (!b.pending) marks.push(esc(b.fits ? t.endBracketOk : t.endBracketNo));
+    end.innerHTML = marks.length
+      ? '<div class="informe-end' + (b.fits || b.pending ? '' : ' mixed') + '">' + marks.join(' · ') + '</div>'
+      : '';
+  }
   // the advice now lives further down this same report: scroll, don't switch tabs
   const b = $('verdictTips');
   // instant jump: a smooth scroll gets cancelled by lazy-image layout shifts above the target

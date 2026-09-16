@@ -1,3 +1,5 @@
+import { OUT_OF_DECK_RE } from "./decks.js";
+
 // ---- Archidekt deck loading ----
 // Archidekt's API whitelists its own origins, so Access-Control-Allow-Origin is
 // never ours and the browser can only read it through a CORS proxy.
@@ -37,12 +39,18 @@ async function fetchDeckJson(url) {
 
 export async function fetchArchidekt(id) {
   const data = await fetchDeckJson("https://archidekt.com/api/decks/" + id + "/");
-  const excluded = new Set((data.categories || []).filter(c => c.includedInDeck === false).map(c => c.name));
+  // Two ways a card sits outside the 100: the owner unticked its category, or
+  // it lives in a maybeboard/sideboard. Archidekt ships Sideboard with
+  // includedInDeck:true, so the name check is what actually keeps those cards
+  // out of the analysis.
+  const excluded = new Set((data.categories || [])
+    .filter(c => c.includedInDeck === false || OUT_OF_DECK_RE.test(c.name))
+    .map(c => c.name));
   const entries = [];
   const commanders = [];
   for (const c of data.cards || []) {
     const cats = c.categories || [];
-    if (cats.some(k => excluded.has(k))) continue;
+    if (cats.some(k => excluded.has(k) || OUT_OF_DECK_RE.test(k))) continue;
     const name = (c.card && c.card.oracleCard && c.card.oracleCard.name) || (c.card && c.card.name);
     if (!name) continue;
     entries.push({ name, quantity: c.quantity || 1 });

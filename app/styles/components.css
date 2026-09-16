@@ -406,3 +406,12 @@
 .br-fail .br-rule{font-weight:600}
 .br-why{font-size:var(--fs-caption);color:var(--badFg)}
 .br-combo{display:block;padding-top:2px}
+
+/* report parts: the pod's point budget and Wizards' bracket are two separate
+   yardsticks, so the Informe states which one you are reading */
+.report-part{display:flex;flex-direction:column;gap:16px}
+.part-head{display:flex;align-items:flex-start;gap:12px;padding-top:4px;border-top:1px solid var(--border)}
+.part-n{flex:none;width:26px;height:26px;margin-top:5px;border-radius:99px;border:1px solid var(--accent);color:var(--accent);display:grid;place-items:center;font-size:var(--fs-caption);font-weight:700}
+.part-title{font-size:var(--fs-lead);font-weight:700;line-height:1.3}
+.part-sub{font-size:var(--fs-caption);color:var(--muted);line-height:1.5;max-width:70ch}
+.informe-end.mixed{color:var(--muted)}

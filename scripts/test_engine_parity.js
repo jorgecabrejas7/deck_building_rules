@@ -6,6 +6,8 @@
  *       (expected values generated on the fly via python3).
  *   (c) commander auto-detection recovers the real commander of all 36 precons,
  *       and every precon's Bracket 3 verdict is explainable.
+ *   (d) game changers pay on their own dial only.
+ *   (e) maybeboard / sideboard cards never reach the analysis.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
  * Users of the HTML app never need this.
@@ -160,5 +162,25 @@ const gcBad = gcCases.filter(([, ok]) => !ok);
 for (const [label] of gcBad) console.log(`GAME CHANGER PRICING FAIL: ${label}`);
 console.log(`Game-changer pricing: ${gcCases.length - gcBad.length}/${gcCases.length} correct`);
 if (gcBad.length) fails++;
+
+// (e) cards parked outside the 100 never reach the analysis. Archidekt ships
+// its Sideboard category with includedInDeck:true, so these lists really do
+// arrive attached to otherwise ordinary decks.
+const OUT_CASES = [
+  ["Moxfield SIDEBOARD: header", "1 Sol Ring\n\nSIDEBOARD:\n1 Mana Crypt", ["Sol Ring"], ["Mana Crypt"]],
+  ["Archidekt [Maybeboard] tag", "1x Sol Ring (c21) 263 [Artifact]\n1x Mana Crypt (2xm) 270 [Maybeboard]", ["Sol Ring"], ["Mana Crypt"]],
+  ["comment section marker", "1 Sol Ring\n// Maybeboard\n1 Mana Crypt", ["Sol Ring"], ["Mana Crypt"]],
+  ["skip section ends at the next header", "Maybeboard\n1 Mana Crypt\nDeck\n1 Sol Ring", ["Sol Ring"], ["Mana Crypt"]],
+  ["an ordinary comment is not a section", "// budget build\n1 Sol Ring", ["Sol Ring"], []],
+];
+let outBad = 0;
+for (const [label, text, want, unwanted] of OUT_CASES) {
+  const names = new Set(PodEngine.parseDecklist(text).entries.map(e => e.name));
+  if (!want.every(n => names.has(n)) || unwanted.some(n => names.has(n))) {
+    outBad++; console.log(`OUT-OF-DECK FAIL: ${label} -> ${[...names].join(", ") || "(empty)"}`);
+  }
+}
+console.log(`Out-of-deck exclusion: ${OUT_CASES.length - outBad}/${OUT_CASES.length} correct`);
+if (outBad) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

@@ -42,6 +42,8 @@ function renderHow() {
 <li>Con tutores: cero game changers.</li>
 <li>Con cualquier combo infinito: cero tutores.</li>
 <li>Maná rápido alto (9+) y hechizos gratis altos (5+) a la vez: +2 puntos extra.</li></ul>
+<h3>Qué se analiza</h3>
+<p>Solo el mazo de verdad: las cartas de un <b>maybeboard</b> o un <b>sideboard</b> no se analizan, porque no se juegan. Se detectan por cabecera («SIDEBOARD:», «Maybeboard»), por comentario («// Maybeboard») y por la etiqueta de categoría de Archidekt («[Maybeboard]»).</p>
 <h3>Bracket 3 (el sistema oficial de Wizards)</h3>
 <p>Aparte de los puntos del pod, cada mazo se comprueba contra el <b>Bracket 3 «Upgraded»</b> de Wizards, que es lo que pide la mayoría de mesas de fuera. Son dos varas de medir distintas: un mazo puede pasarse del presupuesto del pod y seguir siendo un Bracket 3 perfectamente legal.</p>
 <ul>
@@ -72,6 +74,8 @@ function renderHow() {
 <li>With tutors: zero game changers.</li>
 <li>With any infinite combo: zero tutors.</li>
 <li>High fast mana (9+) and high free spells (5+) together: +2 extra points.</li></ul>
+<h3>What gets analyzed</h3>
+<p>Only the real deck: cards in a <b>maybeboard</b> or <b>sideboard</b> are not analyzed, because they are not played. They are detected by header ("SIDEBOARD:", "Maybeboard"), by comment marker ("// Maybeboard") and by Archidekt's per-line category tag ("[Maybeboard]").</p>
 <h3>Bracket 3 (Wizards' official system)</h3>
 <p>Besides the pod points, every deck is checked against Wizards' <b>Bracket 3 "Upgraded"</b>, which is what most tables outside the pod ask for. They are two different yardsticks: a deck can blow the pod budget and still be a perfectly legal Bracket 3 deck.</p>
 <ul>

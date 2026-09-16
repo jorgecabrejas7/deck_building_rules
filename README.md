@@ -39,6 +39,17 @@ interactive mana curve, deck browser with card art, sample opening hand, a
 4-deck table compare mode, a pod deck registry (see below), a how-it-works
 rules explainer, and a bilingual (ES/EN) archetype guide.
 
+The Informe reads as two parts: part one is the pod's own point budget
+(verdict, the power dials, then the advice), part two is Wizards' Bracket 3.
+They are separate yardsticks and the report says so, because a deck can fail
+one and pass the other.
+
+Maybeboards and sideboards are never analyzed — they are not the deck. That
+covers a "SIDEBOARD:"/"Maybeboard" header, a "// Maybeboard" comment marker,
+and Archidekt's "[Maybeboard]" per-line category tag; on the API side, note
+that Archidekt ships its Sideboard category with includedInDeck:true, so the
+loader excludes those categories by name as well as by that flag.
+
 Bracket 3: alongside the pod's point budget, every deck is also checked
 against Wizards' official Bracket 3 "Upgraded" — up to 3 Game Changers, no mass
 land denial, extra turns in low quantities and never chained or looped, no
