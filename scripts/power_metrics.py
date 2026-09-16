@@ -147,8 +147,12 @@ def compute_deck_stats(cards, cache):
             total_price += price * qty
             max_card_price = max(max_card_price, price)
             priced_qty += qty
+            # A game changer is already priced on its own dial; charging it
+            # again on a price band would make an expensive game changer cost
+            # more points than a cheap one for the very same effect. The >30 EUR
+            # band is the hard cap rather than a dial, so it keeps every card.
             band = price_band(price)
-            if band:
+            if band and (band == "price_30_plus" or not info.get("game_changer")):
                 price_bands[band].append((name, qty))
         else:
             unpriced.append(name)

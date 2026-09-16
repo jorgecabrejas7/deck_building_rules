@@ -169,7 +169,7 @@
   "conditionals": [
     {
       "id": "gc_locks_price",
-      "description": "A game changer must be the deck's only luxury: no elevated price bands alongside it.",
+      "description": "A game changer must be the deck's only luxury: no elevated price bands alongside it. Bands exclude game changers themselves, so this caps the REST of the deck.",
       "if": {
         "dial": "game_changers",
         "op": ">=",
@@ -250,5 +250,6 @@
     "avg_price_per_card"
   ],
   "overflow_per_unit": 1,
-  "overflow_note": "Beyond a dial's last priced step, every extra unit costs +1 more point — points never stop counting. No per-dial forbidden zones; only the tier budgets decide, except dials marked forbidden and the hard bans."
+  "overflow_note": "Beyond a dial's last priced step, every extra unit costs +1 more point — points never stop counting. No per-dial forbidden zones; only the tier budgets decide, except dials marked forbidden and the hard bans.",
+  "price_dials_note": "Price-band dials count NON-game-changer cards only: a game changer already pays on its own dial, and charging it again on a band would make an expensive game changer cost more points than a cheap one for the same effect. The max_card_price_eur hard cap is not a dial and still applies to every card, game changers included. The gc_locks_price conditional therefore reads as 'no OTHER luxury alongside your game changer'."
 }

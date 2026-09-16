@@ -7,8 +7,8 @@ export const CATS = {land:{es:'Tierras',en:'Lands'},ramp:{es:'Rampeo',en:'Ramp'}
 // Dial display: order, names and help texts describing the REAL pod rules (v1.1).
 export const DIAL_META = [
 {k:'game_changers',name:{es:'Cambia-partidas',en:'Game changers'},help:{
- es:'Cartas de la lista oficial de game changers de Wizards: generan una ventaja desproporcionada por sí solas. El primero cuesta 2 puntos y cada uno más suma +1 punto extra — el contador nunca se para. Además, si llevas alguno no puedes subir de 3 cartas de €10–20 ni llevar ninguna de €20–30: es tu único lujo.',
- en:'Cards on Wizards’ official game-changer list: they generate outsized advantage on their own. The first costs 2 points and each extra adds +1 more — the counter never stops. And with any of them you can’t exceed 3 cards at €10–20 or run any at €20–30: it must be your only luxury.'}},
+ es:'Cartas de la lista oficial de game changers de Wizards: generan una ventaja desproporcionada por sí solas. El primero cuesta 2 puntos y cada uno más suma +1 punto extra — el contador nunca se para. Un game changer paga SOLO en este dial: no vuelve a contar en las bandas de precio, así que uno caro y uno barato pesan lo mismo. Además, si llevas alguno, el RESTO del mazo no puede subir de 3 cartas de €10–20 ni llevar ninguna de €20–30: es tu único lujo.',
+ en:'Cards on Wizards’ official game-changer list: they generate outsized advantage on their own. The first costs 2 points and each extra adds +1 more — the counter never stops. A game changer pays on THIS dial only: it never counts again on a price band, so a cheap one and an expensive one weigh the same. And with any of them the REST of the deck can’t exceed 3 cards at €10–20 or run any at €20–30: it must be your only luxury.'}},
 {k:'extra_turns',name:{es:'Turnos extra',en:'Extra turns'},help:{
  es:'Los turnos extra dejan a la mesa mirando. El primero (de un solo uso) cuesta 3 puntos y cada uno más suma +1; todos exigen justificación en mesa. Las cartas que permiten repetirlos (lista vetada) siguen prohibidas.',
  en:'Extra turns leave the table watching. The first (one-shot) costs 3 points and each extra adds +1; all of them need table justification. Cards that make them repeatable (banned list) stay forbidden.'}},
@@ -37,14 +37,14 @@ export const DIAL_META = [
  es:'Combos infinitos completos según Commander Spellbook (la base de combos que usa EDHREC); cada combo cuenta por separado, sin agrupar por cartas compartidas. Los 2 primeros son gratis (los precons llevan hasta 2 combos «de juguete»); cada uno más cuesta según lo compacto que sea: de 2 cartas +3, de 3 cartas +2, de 4 o más +1. Con cualquier combo, no se permiten tutores. Se comprueban automáticamente al analizar, con la base de datos alojada en esta misma web.',
  en:'Complete infinite combos per Commander Spellbook (the combo database EDHREC uses); every combo counts separately, no grouping by shared cards. The first 2 are free (precons ship up to 2 “jank” combos); each extra is priced by compactness: 2-card +3, 3-card +2, 4+ +1. With any combo, no tutors allowed. Checked automatically on every analysis, against the database hosted on this same site.'}},
 {k:'price_1_5',name:{es:'Cartas €1–5',en:'Cards €1–5'},help:{
- es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24 cuestan 1–2 puntos, y cada una más suma +1.',
- en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 cost 1–2 points, and each extra adds +1.'}},
+ es:'Volumen de cartas de €1–5: mide cuánto se ha optimizado el mazo por encima de un precon. Zona libre amplia (hasta 18, como el precon que más lleva); de 19 a 24 cuestan 1–2 puntos, y cada una más suma +1. Los game changers no cuentan aquí: ya pagan en su propio dial.',
+ en:'Volume of €1–5 cards: measures how far the deck is optimized past a precon. Wide free zone (up to 18, matching the biggest precon); 19–24 cost 1–2 points, and each extra adds +1. Game changers don’t count here: they already pay on their own dial.'}},
 {k:'price_10_20',name:{es:'Cartas €10–20',en:'Cards €10–20'},help:{
- es:'Las cartas de €10–20 suelen ser los staples que suben el techo del mazo. Hasta 3 gratis (los precons llegan a 3); de la cuarta a la sexta cuestan 1–3 puntos, y cada una más suma +1.',
- en:'€10–20 cards are usually the staples that raise the deck’s ceiling. Up to 3 free (precons reach 3); the fourth through sixth cost 1–3 points, and each extra adds +1.'}},
+ es:'Las cartas de €10–20 suelen ser los staples que suben el techo del mazo. Hasta 3 gratis (los precons llegan a 3); de la cuarta a la sexta cuestan 1–3 puntos, y cada una más suma +1. Los game changers no cuentan aquí: ya pagan en su propio dial.',
+ en:'€10–20 cards are usually the staples that raise the deck’s ceiling. Up to 3 free (precons reach 3); the fourth through sixth cost 1–3 points, and each extra adds +1. Game changers don’t count here: they already pay on their own dial.'}},
 {k:'price_20_30',name:{es:'Cartas €20–30',en:'Cards €20–30'},help:{
- es:'El escalón antes del límite duro de €30. Ningún precon tiene cartas aquí: la primera cuesta 3 puntos, la segunda 5 en total, y cada una más suma +1. Por encima de €30 hace falta aprobación explícita de la mesa, eso no cambia.',
- en:'The step before the hard €30 cap. No precon has cards here: the first costs 3 points, the second 5 total, and each extra adds +1. Above €30 still needs explicit table approval — that never changes.'}}
+ es:'El escalón antes del límite duro de €30. Ningún precon tiene cartas aquí: la primera cuesta 3 puntos, la segunda 5 en total, y cada una más suma +1. Los game changers no cuentan aquí: ya pagan en su propio dial. Por encima de €30 hace falta aprobación explícita de la mesa — eso sí aplica a todas las cartas, game changers incluidos.',
+ en:'The step before the hard €30 cap. No precon has cards here: the first costs 3 points, the second 5 total, and each extra adds +1. Game changers don’t count here: they already pay on their own dial. Above €30 still needs explicit table approval — and that one does apply to every card, game changers included.'}}
 ];
 
 // Localized names for point-breakdown entries that aren't dials

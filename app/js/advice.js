@@ -167,7 +167,8 @@ export function cardDials(card) {
   for (const d of ADD_DIALS) if (KEYWORD_PATTERNS[d].test(oracle)) dials.push(d);
   const isLand = (card.type_line || '').includes('Land');
   if (!isLand && card.cmc !== undefined && card.cmc !== null && card.cmc <= 2 && FAST_MANA_RE.test(oracle)) dials.push('fast_mana');
-  if (card.price !== null && card.price !== undefined)
+  // game changers pay on their own dial only (see engine/stats.js)
+  if (!card.game_changer && card.price !== null && card.price !== undefined)
     for (const [d, test] of PRICE_DIALS) if (test(card.price)) { dials.push(d); break; }
   return dials;
 }

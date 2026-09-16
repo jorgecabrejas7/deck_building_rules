@@ -46,7 +46,15 @@ export function computeDeckStats(entries, db) {
       totalPrice += price * qty;
       maxCardPrice = Math.max(maxCardPrice, price);
       pricedQty += qty;
-      for (const [label, test] of PRICE_BANDS) if (test(price)) { priceBands[label].push([name, qty]); break; }
+      // A game changer is already priced on its own dial, so charging it again
+      // on a price band would make an expensive game changer cost more points
+      // than a cheap one for the very same effect. The >€30 band is the hard
+      // cap rather than a dial, and that one applies to every card in the deck.
+      for (const [label, test] of PRICE_BANDS) {
+        if (!test(price)) continue;
+        if (!info.game_changer || label === "price_30_plus") priceBands[label].push([name, qty]);
+        break;
+      }
     } else unpriced.push(name);
 
     const typeLine = info.type_line || "";

@@ -135,4 +135,30 @@ for (const c of earlyCombos) {
     fails++;
   }
 }
+// (d) game changers pay on their own dial only. Same card, two price tags:
+// the points must not move, or an expensive game changer would outweigh a cheap
+// one for the very same effect. The >30 EUR hard cap still applies to both.
+const gcDb = {
+  cheap: { name: "cheap", price: 0.6, cmc: 2, type_line: "Creature", oracle_text: "", game_changer: true },
+  pricey: { name: "pricey", price: 25, cmc: 2, type_line: "Creature", oracle_text: "", game_changer: true },
+  huge: { name: "huge", price: 35, cmc: 2, type_line: "Creature", oracle_text: "", game_changer: true },
+  plain: { name: "plain", price: 25, cmc: 2, type_line: "Creature", oracle_text: "", game_changer: false },
+};
+const gcRun = (name) => {
+  const entries = [{ name, quantity: 1 }];
+  const { stats, flagged } = PodEngine.computeDeckStats(entries, gcDb);
+  const res = PodEngine.evaluateDeck(stats, flagged, RULES, [name]);
+  return { points: res.points, bands: stats.price_20_30, capped: res.violations.some(v => v.id === "price_cap") };
+};
+const gcCases = [
+  ["cheap and pricey game changers cost the same", gcRun("cheap").points === gcRun("pricey").points],
+  ["a game changer never enters a price band", gcRun("pricey").bands === 0],
+  ["a non-game-changer at the same price still pays", gcRun("plain").points > gcRun("pricey").points],
+  ["the 30 EUR hard cap still catches a game changer", gcRun("huge").capped],
+];
+const gcBad = gcCases.filter(([, ok]) => !ok);
+for (const [label] of gcBad) console.log(`GAME CHANGER PRICING FAIL: ${label}`);
+console.log(`Game-changer pricing: ${gcCases.length - gcBad.length}/${gcCases.length} correct`);
+if (gcBad.length) fails++;
+
 process.exit(fails || cmdFails ? 1 : 0);

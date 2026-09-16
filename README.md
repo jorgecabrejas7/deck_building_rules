@@ -70,6 +70,12 @@ or compare it against the currently loaded one in table mode.
   python3 scripts/pod_decks.py add --url https://archidekt.com/decks/12345 --owner Jorge
   python3 scripts/pod_decks.py add --file deck.txt --name "Mi mazo" --owner Ana
 
+Price dials count non-game-changer cards only: a game changer already pays on
+its own dial, so charging it again on a price band would make an expensive game
+changer cost more points than a cheap one for the same effect. The €30 hard cap
+is not a dial and still applies to every card. Precon calibration is unchanged
+(32 T1 / 4 T2 / 0 above).
+
 Rules v2 semantics: points never stop counting (past a dial's last priced step
 each extra unit adds +1); only the tier budgets decide (T1<=2, T2<=7) plus hard
 bans and conditionals. Combos: every infinite combo counts separately, first 2

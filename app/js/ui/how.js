@@ -38,7 +38,7 @@ function renderHow() {
 <li>Destrucción masiva de tierras.</li></ul>
 <h3>Condicionales (un lujo excluye otros)</h3>
 <ul>
-<li>Con un game changer: máximo 3 cartas de €10–20 y ninguna de €20–30.</li>
+<li>Con un game changer: en el RESTO del mazo, máximo 3 cartas de €10–20 y ninguna de €20–30. (Un game changer paga solo en su dial: no cuenta además como carta cara, así que uno barato y uno caro pesan igual. El tope duro de €30 sí se aplica a todas las cartas.)</li>
 <li>Con tutores: cero game changers.</li>
 <li>Con cualquier combo infinito: cero tutores.</li>
 <li>Maná rápido alto (9+) y hechizos gratis altos (5+) a la vez: +2 puntos extra.</li></ul>
@@ -68,7 +68,7 @@ function renderHow() {
 <li>Mass land destruction.</li></ul>
 <h3>Conditionals (one luxury excludes others)</h3>
 <ul>
-<li>With a game changer: at most 3 cards at €10–20 and none at €20–30.</li>
+<li>With a game changer: in the REST of the deck, at most 3 cards at €10–20 and none at €20–30. (A game changer pays on its own dial only — it is not also counted as an expensive card, so a cheap one and a costly one weigh the same. The hard €30 cap does still apply to every card.)</li>
 <li>With tutors: zero game changers.</li>
 <li>With any infinite combo: zero tutors.</li>
 <li>High fast mana (9+) and high free spells (5+) together: +2 extra points.</li></ul>
