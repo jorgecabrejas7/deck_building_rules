@@ -40,7 +40,7 @@ export const state = {
   arch: 'auto', grp: 'type', cf: 'all', curveBin: null, hl: null, openArch: null, tab: 'load',
   deck: null,        // {entries, commanders, deckName}
   cmdPick: null,     // user-chosen commander name(s); null = auto-detect
-  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, commanders, candidates, bracket3, whatIf}
+  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, commanders, options, bracket3, whatIf}
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype

@@ -47,21 +47,31 @@ export function canPair(a, b) {
   return PAIRS.some(([x, y]) => (ka.includes(x) && kb.includes(y)) || (ka.includes(y) && kb.includes(x)));
 }
 
-// Every card in the list that could sit in the command zone. `solo` cards can
-// lead alone; the rest (Backgrounds) only ever join one that can.
-export function commanderCandidates(entries, db) {
+// EVERY card in the deck, each with its command-zone eligibility, so the picker
+// can show the whole list rather than a shortlist the user has to take on
+// trust. kind: "solo" leads alone, "second" (a Background) only joins one that
+// can, "banned" is on the Commander ban list, "ineligible" is everything else.
+export function commanderOptions(entries, db) {
   const seen = new Set();
   const out = [];
   for (const e of entries) {
     if (seen.has(e.name)) continue;
     const card = db[e.name];
     if (!card) continue;
-    const solo = isLegalCommander(card);
-    if (!solo && !isBackground(card)) continue;
     seen.add(e.name);
-    out.push({ name: e.name, card, solo });
+    const kind = card.legal_commander === "banned" ? "banned"
+      : isLegalCommander(card) ? "solo"
+      : isBackground(card) ? "second"
+      : "ineligible";
+    out.push({ name: e.name, card, kind, solo: kind === "solo" });
   }
   return out;
+}
+
+// The subset that may actually sit in the command zone — what the detection
+// and the pick validation reason over.
+export function commanderCandidates(entries, db) {
+  return commanderOptions(entries, db).filter(c => c.kind === "solo" || c.kind === "second");
 }
 
 const identityOf = (card) => new Set(card.color_identity || []);

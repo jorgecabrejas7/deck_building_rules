@@ -67,9 +67,13 @@ the EDHREC synergy page and half the advice, so a declared Commander section
 colours pick the legend — a commander must cover the colour identity of all 99,
 and among the legends that do, the tightest fit wins with list order breaking
 ties. Partner / Friends forever / Doctor's companion / Background pairs are
-detected as pairs. Whatever it guesses, the report's COMMANDER panel lists every
-card in the list that could legally sit in the command zone and one click
-re-derives the whole report around it (the pick is saved with the session).
+detected as pairs. Whatever it guesses, the report's COMMANDER panel offers the WHOLE deck:
+every card is listed with a search box, the ones that may legally sit in the
+command zone come first and are clickable, and the rest stay visible, faded,
+carrying the reason they cannot lead (banned in Commander, not a legendary
+creature, Background-second-only). One click re-derives the whole report
+around the new commander, and the pick is saved with the session. Showing a
+shortlist would ask the user to trust a filter they cannot inspect.
 Rules live in app/js/engine/commander.js; verified against all 36 precons
 (36/36 correct, including the one real partner pair).
 

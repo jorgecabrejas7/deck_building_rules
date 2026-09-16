@@ -8,6 +8,7 @@
  *       and every precon's Bracket 3 verdict is explainable.
  *   (d) game changers pay on their own dial only.
  *   (e) maybeboard / sideboard cards never reach the analysis.
+ *   (f) the commander picker is offered the WHOLE deck, not a shortlist.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
  * Users of the HTML app never need this.
@@ -182,5 +183,22 @@ for (const [label, text, want, unwanted] of OUT_CASES) {
 }
 console.log(`Out-of-deck exclusion: ${OUT_CASES.length - outBad}/${OUT_CASES.length} correct`);
 if (outBad) fails++;
+
+// (f) the picker spans the whole deck: every resolvable card is listed with its
+// eligibility, so "why isn't my commander in the list?" cannot happen silently.
+let optBad = 0;
+for (const exp of expected) {
+  const entries = exp.cards.map(c => ({ name: c.name, quantity: c.quantity })).filter(e => db[e.name]);
+  const opts = PodEngine.commanderOptions(entries, db);
+  const distinct = new Set(entries.map(e => e.name)).size;
+  const eligible = opts.filter(o => o.kind === "solo" || o.kind === "second");
+  const sameAsCandidates = eligible.length === PodEngine.commanderCandidates(entries, db).length;
+  if (opts.length !== distinct || !eligible.length || !sameAsCandidates) {
+    optBad++;
+    console.log(`PICKER FAIL ${exp.deck}: listed ${opts.length}/${distinct}, eligible ${eligible.length}`);
+  }
+}
+console.log(`Commander picker: ${expected.length - optBad}/${expected.length} precons list every card with an eligibility`);
+if (optBad) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

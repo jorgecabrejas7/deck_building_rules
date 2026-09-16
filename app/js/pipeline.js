@@ -87,7 +87,7 @@ export function recompute(notFound) {
   const picked = PodEngine.normalizeCommanders(pick, resolved, cardCache);
   const commanders = picked.length ? picked : PodEngine.pickCommanders(parsed, cardCache);
   const commander = commanders[0] || null;
-  const candidates = PodEngine.commanderCandidates(resolved, cardCache);
+  const options = PodEngine.commanderOptions(resolved, cardCache);
   const missing = notFound !== undefined ? notFound : (state.result ? state.result.notFound : []);
   const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, missing);
   const bracket3 = PodEngine.evaluateBracket3({
@@ -106,7 +106,7 @@ export function recompute(notFound) {
     whatIf[n] = { dPts: evalRes.points - comboPts - wi.points, tier: wi.tier,
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
-  state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, candidates,
+  state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, options,
     bracket3, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;

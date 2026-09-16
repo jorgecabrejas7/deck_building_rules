@@ -6,7 +6,7 @@ export { detectInput, parseDecklist, deckFingerprint } from "./decks.js";
 export { fetchCards, fetchCheapest, suggestCards, searchScryfall } from "./scryfall.js";
 export { fetchArchidekt } from "./archidekt.js";
 export { isLegalCommander, isBackground, canPair, pairKinds, commanderCandidates,
-  normalizeCommanders, pickCommanders } from "./commander.js";
+  commanderOptions, normalizeCommanders, pickCommanders } from "./commander.js";
 export { evaluateBracket3, BRACKET3 } from "./bracket.js";
 export { manaProduced, isLandRamp } from "./ramp.js";
 export { matchCombos } from "./combos.js";

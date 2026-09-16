@@ -387,11 +387,18 @@
 .cmd-seats{display:flex;gap:14px;flex-wrap:wrap}
 .cmd-seat{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:7px 14px 7px 7px}
 .cmd-seat-art{width:56px;height:41px;flex:none;border-radius:7px;background:var(--track) center/cover no-repeat}
-.cmd-chips{display:flex;gap:8px;flex-wrap:wrap}
+/* the whole deck is listed, so the list scrolls instead of burying the report */
+.cmd-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cmd-search{flex:1;min-width:180px;border:1px solid var(--border);border-radius:99px;background:var(--panel2);color:var(--text);padding:7px 14px;font-size:var(--fs-caption)}
+.cmd-search:focus-visible{border-color:var(--accent)}
+.cmd-chips{display:flex;gap:8px;flex-wrap:wrap;max-height:268px;overflow-y:auto;padding:2px}
+.cmd-chip-name{white-space:nowrap}
+.cmd-chip-out{opacity:.5}
+.cmd-chip-out:hover{opacity:.75}
 .cmd-chip{display:flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:99px;padding:4px 13px 4px 5px;font-size:var(--fs-caption);font-weight:600;cursor:pointer}
 .cmd-chip:hover:not(:disabled){border-color:var(--accent)}
 .cmd-chip.on{background:var(--okBg);border-color:var(--okBd);color:var(--okFg)}
-.cmd-chip:disabled{opacity:.4;cursor:not-allowed}
+.cmd-chip:disabled{cursor:not-allowed}
 .cmd-chip-auto{padding-left:13px;border-style:dashed;color:var(--muted)}
 .cmd-chip-tag{font-weight:500;color:var(--muted)}
 
