@@ -7,7 +7,7 @@ import { renderPod } from './pod.js';
 
 // The evidence behind the verdict: what the deck does, measured against the 36
 // precons, the pod's decks and public cEDH lists (data/deck_study.json). Its
-// power decides the pod tier (engine/verdict.js); the rest here is information.
+// this is its own reading and never decides the pod (engine/powerLevel.js).
 const BANDS = [[5, 'casual'], [6.5, 'upgraded'], [7.6, 'mid'], [9, 'high'], [Infinity, 'cedh']];
 export const powerBand = (score) => BANDS.find(([top]) => score < top)[1];
 
@@ -54,6 +54,14 @@ function pillars(power, t) {
       '<span><i class="pl-key a"></i>' + esc(t.pfRef_precon) + '</span>' +
       '<span><i class="pl-key b"></i>' + esc(t.pfRef_pod) + '</span>' +
       '<span><i class="pl-key c"></i>' + esc(t.pfRef_cedh) + '</span></div>' : '');
+}
+
+// When a card or combo sets the bracket, say which: the score alone would not explain it.
+function floorNote(r, t) {
+  const f = r.level.floor;
+  if (!f) return '';
+  return '<p class="note-sm"><b>' + esc(fill(t['vWhyFloor_' + f.reason], { c: (f.reason === 'mld' ? f.mld : f.combos).join(', ') })) + '</b> ' +
+    esc(fill(t.vPowerOnly, { v: r.level.score })) + '</p>';
 }
 
 function fingerprint(power, t) {
@@ -198,12 +206,12 @@ export function renderProfile() {
   const waiting = !profile.wins.checked;
   root.innerHTML = '<div class="panel panel-pad-lg">' +
     '<div class="combo-stats">' +
-      tile(t.pfPractical, waiting ? '…' : esc(r.verdict.bracket) + ' <span class="stat-cap">' + power.score + ' / 10</span>', waiting ? t.brPending : t['band_' + powerBand(power.score)]) +
+      tile(t.pfPractical, waiting ? '…' : esc(r.level.bracket) + ' <span class="stat-cap">' + power.score + ' / 10</span>', waiting ? t.brPending : t['band_' + powerBand(power.score)]) +
       tile(t.pfSalt, salt ? salt.total : '…', saltRank(salt, t)) +
       tile(t.pfSyn, synergy.status === 'done' ? synergy.coverage + '%' : synergy.status === 'loading' ? '…' : '—', t.pfSynSub) +
       tile(t.pfMana, profile.manabase.score, t.pfManaSub) +
     '</div>' +
-    fingerprint(power, t) + tempoLead(r, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) + tempo(r, t) +
+    floorNote(r, t) + fingerprint(power, t) + tempoLead(r, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) + tempo(r, t) +
     '<div class="pf-grid">' + manaBlock(profile.manabase, t) + saltBlock(salt, t) + synergyBlock(synergy, t) + shapeBlock(profile, t) + '</div>' +
     comparison(r, t) +
     '<p class="note-sm">' + esc(t.pfNote) + '</p></div>';

@@ -1,8 +1,8 @@
 // ---- power: an estimate on a 1-10 scale, ours and not anyone else's ----
 // Built on four values, by Jorge's call: ways to win, interaction, saltiness and
-// synergy. Speed and resilience are reported but do not score. The pod's verdict reads
-// this number (engine/verdict.js), and his read of his own decks is locked in the
-// parity test: change it through rules that hold for every deck.
+// synergy. Speed and resilience are reported but do not score. This is a reading of its
+// own and never decides the pod (engine/powerLevel.js). His read of his own decks is
+// locked in the parity test: change it through rules that hold for every deck.
 
 // [low, high] per scored metric: nothing at low, full marks at high.
 export const METRIC_RANGE = {

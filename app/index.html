@@ -106,12 +106,16 @@ window.addEventListener('error', function (e) {
     </div>
   </div>
 
-  <!-- Informe: the verdict and what to do about it first, then the evidence. Power
-       decides the pod tier; the brackets are a separate yardstick judged on their own,
-       and points are kept below as information. -->
+  <!-- Informe: three separate readings. The point budget decides who is in the pod and
+       comes first, with what to do about it. Wizards' brackets and the power level are
+       judged on their own and never change the pod verdict. -->
   <div id="tab-informe" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-informe">
     <div id="verdict"></div>
     <div id="commanderPanel"></div>
+    <section id="sec-points" class="report-part" aria-labelledby="partPodT">
+      <div class="part-head"><div><h2 id="partPodT" class="part-title"></h2><p id="partPodX" class="part-sub"></p></div></div>
+      <div id="power" class="panel power-panel"></div>
+    </section>
     <section id="sec-plan" class="report-part" aria-labelledby="partPlanT">
       <div class="part-head"><h2 id="partPlanT" class="part-title"></h2></div>
       <div id="tips" class="stack-16">
@@ -120,19 +124,15 @@ window.addEventListener('error', function (e) {
         <details class="panel adv-fold"><summary id="tipsCompT"></summary><div id="tipsComp" class="panel-pad-lg" aria-live="polite"></div></details>
       </div>
     </section>
-    <section id="sec-profile" class="report-part" aria-labelledby="partPfT">
-      <div class="part-head"><div><h2 id="partPfT" class="part-title"></h2><p id="partPfX" class="part-sub"></p></div></div>
-      <div id="profile"></div>
-    </section>
     <section id="sec-bracket" class="report-part" aria-labelledby="partBrT">
       <div class="part-head"><div><h2 id="partBrT" class="part-title"></h2><p id="partBrX" class="part-sub"></p></div></div>
       <div id="bracket"></div>
       <div id="combos"></div>
     </section>
-    <details id="sec-points" class="report-part points-part">
-      <summary class="part-head"><div><h2 id="partPodT" class="part-title"></h2><p id="partPodX" class="part-sub"></p></div></summary>
-      <div id="power" class="panel power-panel"></div>
-    </details>
+    <section id="sec-profile" class="report-part" aria-labelledby="partPfT">
+      <div class="part-head"><div><h2 id="partPfT" class="part-title"></h2><p id="partPfX" class="part-sub"></p></div></div>
+      <div id="profile"></div>
+    </section>
     <div id="informeEnd"></div>
   </div>
 

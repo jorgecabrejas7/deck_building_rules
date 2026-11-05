@@ -1,11 +1,38 @@
 {
   "$comment": "Pod power-level rules: two-tier shared-point-budget system. Anchored to the 36 precon decks (2024-2026) in out/precon_decks. Consumed by scripts/tier_rules.py. Dials are computed by scripts/power_metrics.py compute_deck_stats().",
   "version": 2,
-  "power_tiers": {
-    "note": "These decide the pod verdict: power score limits, plus hard_bans.banned_cards. Set with Jorge against his read of the pod's decks (see the parity test). Everything below, points included, is reported but no longer decides.",
-    "tier1_max": 4,
-    "tier2_max": 5.5,
-    "brackets": [[4, "2"], [5.5, "2*"], [7, "3"], [8, "3*"], [9, "4"], [9.5, "4*"], [10, "5"]]
+  "power_brackets": {
+    "note": "The power level's scale, set with Jorge against his read of his decks. Apart from the pod: the point budget below alone decides tiers.",
+    "brackets": [
+      [
+        4,
+        "2"
+      ],
+      [
+        5.5,
+        "2*"
+      ],
+      [
+        7,
+        "3"
+      ],
+      [
+        8,
+        "3*"
+      ],
+      [
+        9,
+        "4"
+      ],
+      [
+        9.5,
+        "4*"
+      ],
+      [
+        10,
+        "5"
+      ]
+    ]
   },
   "tiers": {
     "tier1": {

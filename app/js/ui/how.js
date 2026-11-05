@@ -7,7 +7,6 @@ import { $, esc } from './helpers.js';
 function renderHow() {
   const lang = state.lang;
   const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
-  const pow = RULES.power_tiers;
   const P = lang === 'es';
   const dialRows = DIAL_META.map(m => {
     const spec = RULES.dials[m.k];
@@ -26,11 +25,9 @@ function renderHow() {
   const html = P ? `
 <button id="howClose" class="modal-close" aria-label="Cerrar">✕</button>
 <h2 id="howTitle">¿Cómo funciona esta guía?</h2>
-<p class="lead">El nivel del pod lo decide el <b>poder</b> del mazo. La referencia es sencilla: <b>Tier 1 = un precon de caja</b>.</p>
+<p class="lead">El nivel del pod lo decide un <b>presupuesto de puntos</b>. La referencia es sencilla: <b>Tier 1 = un precon de caja</b>.</p>
 <h3>Quién entra en el pod</h3>
-<p><b>Tier 1: poder hasta ${pow.tier1_max}. Tier 2: hasta ${pow.tier2_max}. Más: fuera del pod.</b> Las cartas prohibidas dejan fuera a un mazo tenga el poder que tenga. El poder es una escala propia de 1 a 10, calibrada con 36 precons y 8 listas cEDH públicas.</p>
-<h3>Los puntos, solo como información</h3>
-<p>Los puntos ya no deciden: miden cuánto se aleja un mazo de un precon en cada «dial», y el precio pesa mucho en ellos. Referencias: ${t1} y ${t2} puntos.</p>
+<p><b>Tier 1: hasta ${t1} puntos. Tier 2: hasta ${t2}. Más, o romper una regla dura: fuera del pod.</b> Cada dial cuenta cuánto se aleja el mazo de un precon.</p>
 <h3>Los diales</h3>
 <div class="table-scroll"><table><thead><tr><th>Dial</th><th>Cantidad → puntos</th></tr></thead><tbody>${dialRows}</tbody></table></div>
 <h3>Prohibiciones</h3>
@@ -58,10 +55,10 @@ function renderHow() {
 <p>Los tutores ya no tienen límite propio desde octubre de 2025: los más eficientes están en la lista de game changers. Una lista no demuestra la intención, así que la lectura va del Bracket 2 al 4: el 1 depende del tema y el 5 del metajuego competitivo.</p>
 <h3>El bracket de cada combo</h3>
 <p>Cada combo lleva la etiqueta de <b>Commander Spellbook</b>, de Exhibition (B1+) a Ruthless (B4+). Spellbook decide el bracket de cada combo, con su propia lógica: si una leyenda del combo es o no tu comandante, se recalcula igual que hace su estimador. Es su clasificación, no una regla de Wizards. Los combos que exigen una carta como comandante solo cuentan si esa carta está en la zona de mando.</p>
-<h3>Bracket práctico</h3>
-<p>El nivel del pod sale de una estimación propia de cómo juega el mazo, en la escala de brackets: los precons de caja son 2, y sube a 2*, 3, 3*, 4, 4* y 5. Tier 1 es Bracket 2, Tier 2 es 2* y Tier 3 (fuera del pod) es 3 o más. Las cartas prohibidas del pod dejan fuera a cualquier mazo. La destrucción masiva de tierras o un combo de 2 cartas jugable en curva (6 de maná o menos por turno, ya que los permanentes pueden bajar en turnos distintos) lo ponen en Bracket 4, aunque su poder sea bajo. Es distinto de la lista oficial de Wizards, que se comprueba aparte. Un mazo con 10 o más cartas de 3 € o más y una lista que la gente juega se considera mejorado y sube un poco: el precio solo sirve como prueba de que no es un mazo de caja.</p>
+<h3>Nivel de poder</h3>
+<p>Una lectura aparte de las otras dos, que no influye en si un mazo entra en el pod. Es una estimación propia de cómo juega, en la escala de brackets: los precons de caja son 2, y sube a 2*, 3, 3*, 4, 4* y 5. Sale de cuatro valores: formas de ganar, interacción, sinergia y salt. La destrucción masiva de tierras o un combo de 2 cartas jugable en curva (6 de maná o menos por turno, ya que los permanentes pueden bajar en turnos distintos) lo ponen en Bracket 4, aunque su poder sea bajo.</p>
 <h3>Perfil del mazo</h3>
-<p>El perfil explica el poder, y el poder decide el nivel del pod. Salt, sinergia y base de maná solo informan.</p>
+<p>Explica de dónde sale el poder. Nada de esto decide el nivel del pod.</p>
 <ul>
 <li><b>Poder (1-10):</b> escala propia, no la de otra web. Sale de cuatro valores: formas de ganar, interacción, salt y sinergia (la profundidad del tema principal del mazo). Se calibró con 36 precons, 8 listas cEDH públicas y la opinión de Jorge sobre sus mazos.</li>
 <li><b>Salt:</b> la suma de las valoraciones de la comunidad de EDHREC para cada carta.</li>
@@ -73,11 +70,9 @@ function renderHow() {
   : `
 <button id="howClose" class="modal-close" aria-label="Close">✕</button>
 <h2 id="howTitle">How this guide works</h2>
-<p class="lead">A deck's <b>power</b> decides its pod level. The reference is simple: <b>Tier 1 = a boxed precon</b>.</p>
+<p class="lead">A <b>point budget</b> decides a deck's pod level. The reference is simple: <b>Tier 1 = a boxed precon</b>.</p>
 <h3>Who is in the pod</h3>
-<p><b>Tier 1: power up to ${pow.tier1_max}. Tier 2: up to ${pow.tier2_max}. Higher: out of the pod.</b> Banned cards keep a deck out at any power. Power is our own 1-10 scale, calibrated on 36 precons and 8 public cEDH lists.</p>
-<h3>Points, as information only</h3>
-<p>Points no longer decide: they measure how far a deck strays from a precon on each "dial", and price weighs heavily in them. Reference marks: ${t1} and ${t2} points.</p>
+<p><b>Tier 1: up to ${t1} points. Tier 2: up to ${t2}. More, or breaking a hard rule: out of the pod.</b> Each dial counts how far the deck strays from a precon.</p>
 <h3>The dials</h3>
 <div class="table-scroll"><table>${dialRows}</table></div>
 <h3>Hard bans (no points involved: just don't)</h3>
@@ -105,10 +100,10 @@ function renderHow() {
 <p>Tutors have had no limit of their own since October 2025: the most efficient ones are on the Game Changers list. A list cannot prove intent, so the read runs from Bracket 2 to 4: Bracket 1 depends on theme and Bracket 5 on the competitive metagame.</p>
 <h3>Each combo's bracket</h3>
 <p>Every combo carries <b>Commander Spellbook</b>'s tag, from Exhibition (B1+) to Ruthless (B4+). Spellbook decides each combo's bracket with its own logic: whether a legend in the combo is your commander is recalculated the way its estimator does. It is Spellbook's classification, not a Wizards rule. Combos that need a card as commander only count when that card is in the command zone.</p>
-<h3>Practical bracket</h3>
-<p>The pod level comes from our own estimate of how the deck plays, on the bracket scale: boxed precons are 2, rising through 2*, 3, 3*, 4, 4* and 5. Tier 1 is Bracket 2, Tier 2 is 2*, and Tier 3 (out of the pod) is 3 or higher. The pod's banned cards keep any deck out. Mass land denial, or a two-card combo playable on curve (6 mana or less per turn, since permanents can land on separate turns), puts a deck in Bracket 4 even if its power is low. This is separate from Wizards' official checklist, which is checked on its own. A deck with 10 or more cards worth €3 or more, on a list people actually play, counts as upgraded and rises slightly: price only serves as evidence it isn't a boxed deck.</p>
+<h3>Power level</h3>
+<p>A separate reading from the other two, with no bearing on whether a deck is in the pod. It is our own estimate of how the deck plays, on the bracket scale: boxed precons are 2, rising through 2*, 3, 3*, 4, 4* and 5. It comes from four values: ways to win, interaction, synergy and salt. Mass land denial, or a two-card combo playable on curve (6 mana or less per turn, since permanents can land on separate turns), puts a deck in Bracket 4 even if its power is low.</p>
 <h3>Deck profile</h3>
-<p>The profile explains power, and power decides the pod level. Salt, synergy and the manabase are information only.</p>
+<p>It explains where the power comes from. None of it decides the pod level.</p>
 <ul>
 <li><b>Power (1-10):</b> our own scale, not another site's. It comes from four values: ways to win, interaction, salt and synergy (how deep the deck's main theme runs). Calibrated on 36 precons, 8 public cEDH lists and Jorge's read of his own decks.</li>
 <li><b>Salt:</b> EDHREC's community rating for each card, added up.</li>

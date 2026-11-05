@@ -3,11 +3,11 @@ import { state, cardCache } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { BLOCK_MSG, CATS, dialName } from './constants.js';
-import { $, esc, archKey, bannedCards, catLabel, fill } from './helpers.js';
+import { $, esc, archKey, catLabel, fill } from './helpers.js';
 import { bindSugPopovers } from './popover.js';
 import { compositionHtml } from './verdict.js';
 import { compSlots, tagCount } from './comp.js';
-import { powerUpOptions, roomCuts, fetchUpgradeCards, deckColorIdentity, synergyAdvice, UPGRADE_QUERIES } from '../advice.js';
+import { orderedCuts, powerUpOptions, roomCuts, fetchUpgradeCards, deckColorIdentity, synergyAdvice, UPGRADE_QUERIES } from '../advice.js';
 
 // Compact "why this card" line: rank · price · speed. One glance, no prose.
 function whyAdd(c) {
@@ -49,7 +49,7 @@ function sugChip(c) {
 }
 
 function tipsKey() {
-  return state.result.verdict.tier + '|' + state.result.verdict.score + '|' + state.result.stats.total_price_eur + '|' + state.result.stats.total_cards + '|' + archKey() + '|' + state.lang + '|' + state.fetchSt + '|' + (state.combosData ? state.combosData.status : '');
+  return state.result.evalRes.tier + '|' + state.result.evalRes.points + '|' + state.result.stats.total_price_eur + '|' + state.result.stats.total_cards + '|' + archKey() + '|' + state.lang + '|' + state.fetchSt + '|' + (state.combosData ? state.combosData.status : '');
 }
 
 function retryRow() {
@@ -66,25 +66,25 @@ function slotState() {
     many: slots.filter(sl => sl.v > sl.max) };
 }
 
-// The way back into the pod, with power after each cut. Banned cards go first: they
-// keep a deck out at any power. Honest when the listed cuts don't get there.
+// The way back to the budget: rule breaks first, then the cuts that free most points, with
+// a running total. Combo points are not freed card by card, so they are stated apart.
 function cutPlanHtml(r, t) {
-  const plan = r.cutPlan, banned = bannedCards(r);
-  const steps = plan ? plan.steps.filter(st => !st.banned && st.card !== 'undefined') : [];
-  const stepTail = (st) => st.reason ? esc(t['planFloor_' + st.reason]) : '<span class="mono">→ ' + st.power + '</span>';
-  const row = (card, tail) => {
-    const c = cardCache[card] || Object.values(cardCache).find(x => x && String(x.name).split(' // ')[0] === card) || { name: card };
-    return '<li class="plan-step">' + sugChip({ name: card, price: c.price, img_art: c.img_art, img_normal: c.img_normal }) +
-      '<span class="plan-after">' + tail + '</span></li>';
-  };
-  return '<ol class="plan-list">' +
-    banned.map(n => row(n, esc(t.planBanned))).join('') +
-    steps.map(st => row(st.card, stepTail(st))).join('') + '</ol>' +
-    (plan ? '<p class="note-sm">' + esc(plan.reaches ? fill(t.planReaches, { v: plan.final, m: r.verdict.limits.tier2_max }) : fill(t.planShort, { v: plan.final, m: r.verdict.limits.tier2_max })) + '</p>' : '');
+  const ev = r.evalRes, cuts = orderedCuts(r).slice(0, 10), target = ev.tier === 'above' ? RULES.tiers.tier2.max_points : RULES.tiers.tier1.max_points;
+  let running = ev.points;
+  const rows = cuts.map(c => {
+    running -= Math.max(c.dPts, 0);
+    const card = cardCache[c.name] || { name: c.name };
+    return '<li class="plan-step">' + sugChip({ name: c.name, price: card.price, img_art: card.img_art, img_normal: card.img_normal }) +
+      '<span class="plan-after mono">' + (c.dPts > 0 ? '−' + c.dPts + ' → ' + running : esc(t.planFixes)) + '</span></li>';
+  }).join('');
+  const combo = ev.breakdown.combos || 0;
+  return (rows ? '<ol class="plan-list">' + rows + '</ol>' : '') +
+    '<p class="note-sm">' + esc(fill(running <= target ? t.planReaches : t.planShort, { v: running, m: target })) +
+    (combo ? ' ' + esc(fill(t.planCombos, { v: combo })) : '') + '</p>';
 }
 
 export function renderTips() {
-  const t = T(), r = state.result, v = r.verdict;
+  const t = T(), r = state.result, ev = r.evalRes;
   // #tipsMain/#tipsUp/#tipsComp are static shells (index.html); the async ones
   // are aria-live, so swapping their innerHTML announces loading → results.
   if (state.tipsCache && state.tipsCache.key === tipsKey()) {
@@ -94,11 +94,11 @@ export function renderTips() {
     bindTips();
     return;
   }
-  // Out of the pod: only the route back. In the pod: nothing to cut, so the synergy
-  // swaps below are the whole plan and this stays one line.
-  $('tipsMain').innerHTML = v.tier === 'above' && !v.pending
-    ? '<h3 class="secT secT-lg">' + esc(fill(t.planOutT, { v: v.score })) + '</h3>' + cutPlanHtml(r, t)
-    : '<p class="plan-note">' + esc(v.pending ? t.vPending : t['planIn_' + v.tier]) + '</p>';
+  // Over budget: the route back leads. Tier 2: optional, folded. Tier 1: nothing to cut.
+  $('tipsMain').innerHTML = ev.tier === 'above'
+    ? '<h3 class="secT secT-lg">' + esc(fill(t.planOutT, { v: ev.points })) + '</h3>' + cutPlanHtml(r, t)
+    : '<p class="plan-note">' + esc(t['planIn_' + ev.tier]) + '</p>' + (ev.tier === 'tier2'
+      ? '<details class="adv-disclosure"><summary>' + esc(t.downToggle) + '</summary><div class="adv-disc-body">' + cutPlanHtml(r, t) + '</div></details>' : '');
   $('tipsUp').innerHTML = '<h3 class="secT secT-lg">' + t.synT + '</h3><div class="note-muted">' + t.tipsLoading + '</div>';
   renderCompBrief();
   bindTips();
@@ -187,7 +187,7 @@ async function fillSynergy(key) {
         '<div class="adv-disc-body sug-grid">' + tiles.slice(3).join('') + '</div></details>' : '');
   }
   // tier-up advice is opt-in: collapsed, fetched only on demand, and pointless out of the pod
-  if (r.verdict.tier !== 'above') body += '<details class="adv-disclosure" data-up-lazy><summary>' + t.tierUpToggle + '</summary>' +
+  if (r.evalRes.tier !== 'above') body += '<details class="adv-disclosure" data-up-lazy><summary>' + t.tierUpToggle + '</summary>' +
     '<div class="adv-disc-body" data-up-body><div class="note-muted">' + t.tipsLoading + '</div></div></details>';
   el.innerHTML = '<h3 class="secT secT-lg">' + t.synT + '</h3>' + body;
   bindTips();

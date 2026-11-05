@@ -48,9 +48,8 @@ export function renderSectionNav() {
   nav.hidden = !(state.result && state.tab === 'informe');
   if (nav.hidden) return;
   nav.setAttribute('aria-label', t.navAria);
-  nav.innerHTML = [['verdict', t.navVerdict], ['sec-plan', t.partPlanT], ['sec-profile', t.navProfile], ['sec-bracket', t.navBracket], ['sec-points', t.navPoints]]
+  nav.innerHTML = [['verdict', t.navVerdict], ['sec-points', t.navPoints], ['sec-plan', t.partPlanT], ['sec-bracket', t.navBracket], ['sec-profile', t.navProfile]]
     .map(([id, label]) => '<a href="#' + id + '">' + esc(label) + '</a>').join('');
-  nav.querySelector('[href="#sec-points"]').onclick = () => { $('sec-points').open = true; };
 }
 
 export function renderBanner() {

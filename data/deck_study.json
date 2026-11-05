@@ -4,8 +4,8 @@
  "labelled": 0,
  "groups": {
   "precon": 36,
-  "podIn": 16,
-  "podOut": 5,
+  "podIn": 8,
+  "podOut": 13,
   "cedh": 8
  },
  "medians": {
@@ -126,24 +126,24 @@
    "key": "power",
    "medians": {
     "precon": 3.05,
-    "podIn": 4.1,
-    "podOut": 6.5,
+    "podIn": 3.4,
+    "podOut": 4.1,
     "cedh": 9.5
    },
    "precon_vs_pod": 0.79,
-   "podIn_vs_podOut": 0.85,
+   "podIn_vs_podOut": 0.88,
    "pod_vs_cedh": 0.96
   },
   {
    "key": "pillar_salt",
    "medians": {
     "precon": 11.5,
-    "podIn": 16,
-    "podOut": 25,
+    "podIn": 14,
+    "podOut": 22,
     "cedh": 100
    },
    "precon_vs_pod": 0.79,
-   "podIn_vs_podOut": 0.85,
+   "podIn_vs_podOut": 0.75,
    "pod_vs_cedh": 0.99
   },
   {
@@ -155,91 +155,91 @@
     "cedh": 0
    },
    "precon_vs_pod": 0.53,
-   "podIn_vs_podOut": 0.59,
+   "podIn_vs_podOut": 0.41,
    "pod_vs_cedh": 0.43
   },
   {
    "key": "pillar_interaction",
    "medians": {
     "precon": 26,
-    "podIn": 33,
-    "podOut": 55,
+    "podIn": 40,
+    "podOut": 33,
     "cedh": 91.5
    },
    "precon_vs_pod": 0.68,
-   "podIn_vs_podOut": 0.84,
+   "podIn_vs_podOut": 0.42,
    "pod_vs_cedh": 0.98
   },
   {
    "key": "pillar_wins",
    "medians": {
     "precon": 4,
-    "podIn": 6.5,
-    "podOut": 71,
+    "podIn": 0,
+    "podOut": 9,
     "cedh": 81
    },
    "precon_vs_pod": 0.55,
-   "podIn_vs_podOut": 0.69,
+   "podIn_vs_podOut": 0.66,
    "pod_vs_cedh": 0.85
   },
   {
    "key": "salt_total",
    "medians": {
     "precon": 22.45,
-    "podIn": 25.55,
-    "podOut": 31.3,
+    "podIn": 24.1,
+    "podOut": 29,
     "cedh": 86.3
    },
    "precon_vs_pod": 0.79,
-   "podIn_vs_podOut": 0.85,
+   "podIn_vs_podOut": 0.73,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "salt_average",
    "medians": {
     "precon": 0.29,
-    "podIn": 0.33,
-    "podOut": 0.4,
+    "podIn": 0.32,
+    "podOut": 0.34,
     "cedh": 0.9
    },
    "precon_vs_pod": 0.82,
-   "podIn_vs_podOut": 0.84,
+   "podIn_vs_podOut": 0.71,
    "pod_vs_cedh": 1
   },
   {
    "key": "synergy_coverage",
    "medians": {
     "precon": 100,
-    "podIn": 79,
-    "podOut": 74,
+    "podIn": 93,
+    "podOut": 71,
     "cedh": 89
    },
    "precon_vs_pod": 0.12,
-   "podIn_vs_podOut": 0.43,
+   "podIn_vs_podOut": 0.21,
    "pod_vs_cedh": 0.66
   },
   {
    "key": "synergy_average",
    "medians": {
     "precon": 40.5,
-    "podIn": 23,
-    "podOut": 21,
+    "podIn": 37.5,
+    "podOut": 18,
     "cedh": 33
    },
    "precon_vs_pod": 0.16,
-   "podIn_vs_podOut": 0.36,
+   "podIn_vs_podOut": 0.25,
    "pod_vs_cedh": 0.6
   },
   {
    "key": "manabase_score",
    "medians": {
     "precon": 74.5,
-    "podIn": 81,
-    "podOut": 91,
+    "podIn": 86.5,
+    "podOut": 82,
     "cedh": 100
    },
    "precon_vs_pod": 0.75,
-   "podIn_vs_podOut": 0.87,
+   "podIn_vs_podOut": 0.47,
    "pod_vs_cedh": 0.96
   },
   {
@@ -258,24 +258,24 @@
    "key": "manabase_quality",
    "medians": {
     "precon": 83,
-    "podIn": 82,
-    "podOut": 94,
+    "podIn": 83,
+    "podOut": 82,
     "cedh": 100
    },
    "precon_vs_pod": 0.55,
-   "podIn_vs_podOut": 0.84,
+   "podIn_vs_podOut": 0.54,
    "pod_vs_cedh": 0.95
   },
   {
    "key": "fetches",
    "medians": {
     "precon": 2,
-    "podIn": 2,
-    "podOut": 0,
+    "podIn": 1.5,
+    "podOut": 1,
     "cedh": 7
    },
    "precon_vs_pod": 0.33,
-   "podIn_vs_podOut": 0.36,
+   "podIn_vs_podOut": 0.49,
    "pod_vs_cedh": 0.99
   },
   {
@@ -283,47 +283,47 @@
    "medians": {
     "precon": 38,
     "podIn": 36.5,
-    "podOut": 34,
+    "podOut": 36,
     "cedh": 27.5
    },
    "precon_vs_pod": 0.21,
-   "podIn_vs_podOut": 0.3,
+   "podIn_vs_podOut": 0.43,
    "pod_vs_cedh": 0.01
   },
   {
    "key": "avg_mv",
    "medians": {
     "precon": 3.5,
-    "podIn": 3.08,
-    "podOut": 2.61,
+    "podIn": 2.78,
+    "podOut": 3.03,
     "cedh": 1.97
    },
    "precon_vs_pod": 0.26,
-   "podIn_vs_podOut": 0.21,
+   "podIn_vs_podOut": 0.58,
    "pod_vs_cedh": 0.06
   },
   {
    "key": "cheap_plays",
    "medians": {
     "precon": 20.5,
-    "podIn": 23.5,
-    "podOut": 36,
+    "podIn": 28.5,
+    "podOut": 24,
     "cedh": 50.5
    },
    "precon_vs_pod": 0.72,
-   "podIn_vs_podOut": 0.83,
+   "podIn_vs_podOut": 0.42,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "ramp",
    "medians": {
     "precon": 13,
-    "podIn": 14,
-    "podOut": 13,
+    "podIn": 13.5,
+    "podOut": 14,
     "cedh": 23.5
    },
    "precon_vs_pod": 0.56,
-   "podIn_vs_podOut": 0.5,
+   "podIn_vs_podOut": 0.54,
    "pod_vs_cedh": 0.85
   },
   {
@@ -335,43 +335,43 @@
     "cedh": 13.5
    },
    "precon_vs_pod": 0.57,
-   "podIn_vs_podOut": 0.8,
+   "podIn_vs_podOut": 0.73,
    "pod_vs_cedh": 0.96
   },
   {
    "key": "draw",
    "medians": {
     "precon": 15,
-    "podIn": 13,
-    "podOut": 11,
+    "podIn": 12.5,
+    "podOut": 13,
     "cedh": 10
    },
    "precon_vs_pod": 0.35,
-   "podIn_vs_podOut": 0.39,
+   "podIn_vs_podOut": 0.63,
    "pod_vs_cedh": 0.27
   },
   {
    "key": "tutors",
    "medians": {
     "precon": 0,
-    "podIn": 1,
+    "podIn": 0,
     "podOut": 1,
     "cedh": 14.5
    },
    "precon_vs_pod": 0.67,
-   "podIn_vs_podOut": 0.53,
+   "podIn_vs_podOut": 0.68,
    "pod_vs_cedh": 1
   },
   {
    "key": "recursion",
    "medians": {
     "precon": 4.5,
-    "podIn": 3.5,
-    "podOut": 4,
+    "podIn": 3,
+    "podOut": 5,
     "cedh": 3.5
    },
    "precon_vs_pod": 0.45,
-   "podIn_vs_podOut": 0.51,
+   "podIn_vs_podOut": 0.63,
    "pod_vs_cedh": 0.47
   },
   {
@@ -379,23 +379,23 @@
    "medians": {
     "precon": 0,
     "podIn": 1,
-    "podOut": 3,
+    "podOut": 2,
     "cedh": 10
    },
    "precon_vs_pod": 0.66,
-   "podIn_vs_podOut": 0.78,
+   "podIn_vs_podOut": 0.53,
    "pod_vs_cedh": 0.9
   },
   {
    "key": "removal",
    "medians": {
     "precon": 9.5,
-    "podIn": 8,
-    "podOut": 9,
+    "podIn": 10.5,
+    "podOut": 8,
     "cedh": 9
    },
    "precon_vs_pod": 0.42,
-   "podIn_vs_podOut": 0.43,
+   "podIn_vs_podOut": 0.24,
    "pod_vs_cedh": 0.54
   },
   {
@@ -407,19 +407,19 @@
     "cedh": 1
    },
    "precon_vs_pod": 0.39,
-   "podIn_vs_podOut": 0.59,
+   "podIn_vs_podOut": 0.57,
    "pod_vs_cedh": 0.2
   },
   {
    "key": "cheap_answers",
    "medians": {
     "precon": 4,
-    "podIn": 4,
-    "podOut": 7,
+    "podIn": 5,
+    "podOut": 4,
     "cedh": 11
    },
    "precon_vs_pod": 0.64,
-   "podIn_vs_podOut": 0.84,
+   "podIn_vs_podOut": 0.38,
    "pod_vs_cedh": 0.94
   },
   {
@@ -431,7 +431,7 @@
     "cedh": 12
    },
    "precon_vs_pod": 0.52,
-   "podIn_vs_podOut": 0.62,
+   "podIn_vs_podOut": 0.47,
    "pod_vs_cedh": 0.87
   },
   {
@@ -439,11 +439,11 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 4,
+    "podOut": 0,
     "cedh": 5.5
    },
    "precon_vs_pod": 0.49,
-   "podIn_vs_podOut": 0.76,
+   "podIn_vs_podOut": 0.59,
    "pod_vs_cedh": 0.82
   },
   {
@@ -451,11 +451,11 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 4,
+    "podOut": 0,
     "cedh": 5
    },
    "precon_vs_pod": 0.52,
-   "podIn_vs_podOut": 0.78,
+   "podIn_vs_podOut": 0.6,
    "pod_vs_cedh": 0.85
   },
   {
@@ -474,24 +474,24 @@
    "key": "commander_turn",
    "medians": {
     "precon": 4,
-    "podIn": 4.5,
-    "podOut": 4,
+    "podIn": 4,
+    "podOut": 5,
     "cedh": 3
    },
    "precon_vs_pod": 0.62,
-   "podIn_vs_podOut": 0.51,
+   "podIn_vs_podOut": 0.72,
    "pod_vs_cedh": 0.21
   },
   {
    "key": "mana_turn_4",
    "medians": {
     "precon": 4.6,
-    "podIn": 4.5,
-    "podOut": 4.4,
+    "podIn": 4.3,
+    "podOut": 4.5,
     "cedh": 4.3
    },
    "precon_vs_pod": 0.35,
-   "podIn_vs_podOut": 0.52,
+   "podIn_vs_podOut": 0.74,
    "pod_vs_cedh": 0.36
   },
   {
@@ -503,7 +503,7 @@
     "cedh": 2
    },
    "precon_vs_pod": 0.5,
-   "podIn_vs_podOut": 0.67,
+   "podIn_vs_podOut": 0.51,
    "pod_vs_cedh": 0.86
   },
   {
@@ -511,7 +511,7 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 1,
+    "podOut": 0,
     "cedh": 19
    },
    "precon_vs_pod": 0.6,
@@ -522,24 +522,24 @@
    "key": "price",
    "medians": {
     "precon": 68.23,
-    "podIn": 165.8,
-    "podOut": 196.88,
+    "podIn": 92.28,
+    "podOut": 206.79,
     "cedh": 1907.81
    },
    "precon_vs_pod": 0.88,
-   "podIn_vs_podOut": 0.64,
+   "podIn_vs_podOut": 0.97,
    "pod_vs_cedh": 1
   },
   {
    "key": "points",
    "medians": {
     "precon": 0,
-    "podIn": 5,
-    "podOut": 29,
+    "podIn": 1.5,
+    "podOut": 10,
     "cedh": 71
    },
    "precon_vs_pod": 0.85,
-   "podIn_vs_podOut": 0.83,
+   "podIn_vs_podOut": 0.94,
    "pod_vs_cedh": 0.99
   }
  ],
@@ -553,12 +553,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
+   "tier": "tier2",
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 6,
    "breakdown": {
     "free_spells": 1,
@@ -748,7 +746,7 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier1",
    "practicalBracket": "4",
    "powerBracket": "2",
    "floor": {
@@ -758,12 +756,10 @@
      "Combat Celebrant + Helm of the Host"
     ]
    },
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 51.51,
    "gc": 0,
@@ -955,12 +951,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
+   "tier": "tier2",
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 4,
    "breakdown": {
     "extra_turns": 3,
@@ -1156,8 +1150,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -1347,8 +1339,6 @@
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 4,
    "breakdown": {
     "combos": 4
@@ -1548,8 +1538,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -1742,8 +1730,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 1,
    "breakdown": {
     "combos": 1
@@ -1937,8 +1923,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2136,8 +2120,6 @@
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 5,
    "breakdown": {
     "stax_effects": 1,
@@ -2326,8 +2308,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2512,8 +2492,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2722,8 +2700,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2912,7 +2888,7 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier1",
    "practicalBracket": "4",
    "powerBracket": "2*",
    "floor": {
@@ -2922,12 +2898,10 @@
      "Dakmor Salvage + The Gitrog Monster"
     ]
    },
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 52.86,
    "gc": 0,
@@ -3123,8 +3097,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -3317,8 +3289,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -3511,8 +3481,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -3701,12 +3669,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 5,
    "breakdown": {
     "game_changers": 2,
@@ -3716,7 +3682,7 @@
     "price_cap",
     "gc_locks_price"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 155.47,
    "gc": 1,
@@ -3910,8 +3876,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 1,
    "breakdown": {
     "stax_effects": 1
@@ -4102,7 +4066,7 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier1",
    "practicalBracket": "4",
    "powerBracket": "2*",
    "floor": {
@@ -4112,12 +4076,10 @@
      "Gilraen, Dúnedain Protector + Village Bell-Ringer"
     ]
    },
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 45.97,
    "gc": 0,
@@ -4314,8 +4276,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -4508,8 +4468,6 @@
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 3,
    "breakdown": {
     "extra_turns": 3
@@ -4692,12 +4650,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "tier1",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 2,
    "breakdown": {
     "game_changers": 2
@@ -4892,8 +4848,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -5086,8 +5040,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -5272,8 +5224,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 2,
    "breakdown": {
     "tutors": 2
@@ -5476,8 +5426,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -5670,8 +5618,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 1,
    "breakdown": {
     "stax_effects": 1
@@ -5858,8 +5804,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 2,
    "breakdown": {
     "free_spells": 2
@@ -6046,8 +5990,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -6232,8 +6174,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -6418,8 +6358,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -6604,8 +6542,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 2,
    "breakdown": {
     "game_changers": 2
@@ -6800,8 +6736,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 2,
    "breakdown": {
     "free_spells": 2
@@ -6992,12 +6926,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "tier1",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -7190,8 +7122,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -7384,8 +7314,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 1,
    "breakdown": {
     "price_1_5": 1
@@ -7578,12 +7506,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 5,
    "breakdown": {
     "game_changers": 2,
@@ -7593,7 +7519,7 @@
     "price_cap",
     "gc_locks_price"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 155.47,
    "gc": 1,
@@ -7785,12 +7711,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 10,
    "breakdown": {
     "fast_mana": 2,
@@ -7801,7 +7725,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 222.41,
    "gc": 0,
@@ -7988,12 +7912,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 19,
    "breakdown": {
     "tutors": 5,
@@ -8003,7 +7925,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 362.23,
    "gc": 0,
@@ -8192,12 +8114,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 11,
    "breakdown": {
     "counterspells": 1,
@@ -8206,7 +8126,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 196.02,
    "gc": 0,
@@ -8406,15 +8326,6 @@
      "Helm of the Host + Port Razer"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Dockside Extortionist",
-    "Jeska's Will",
-    "Jeweled Lotus",
-    "Mana Crypt",
-    "Mox Opal",
-    "Timestream Navigator"
-   ],
    "points": 31,
    "breakdown": {
     "game_changers": 8,
@@ -8630,12 +8541,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 20,
    "breakdown": {
     "tutors": 2,
@@ -8646,7 +8555,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 326.01,
    "gc": 0,
@@ -8843,8 +8752,6 @@
     ],
     "combos": []
    },
-   "pointsTier": "above",
-   "banned": [],
    "points": 36,
    "breakdown": {
     "game_changers": 2,
@@ -9048,8 +8955,6 @@
    "practicalBracket": "3",
    "powerBracket": "3",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 10,
    "breakdown": {
     "game_changers": 2,
@@ -9250,12 +9155,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 5,
    "breakdown": {
     "game_changers": 2,
@@ -9264,7 +9167,7 @@
    "violations": [
     "gc_locks_price"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 176.13,
    "gc": 1,
@@ -9443,12 +9346,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 9,
    "breakdown": {
     "free_spells": 1,
@@ -9459,7 +9360,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 309.7,
    "gc": 0,
@@ -9662,12 +9563,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 8,
    "breakdown": {
     "game_changers": 2,
@@ -9677,7 +9576,7 @@
     "price_cap",
     "gc_locks_price"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 182.23,
    "gc": 1,
@@ -9868,8 +9767,6 @@
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 5,
    "breakdown": {
     "stax_effects": 1,
@@ -10089,8 +9986,6 @@
      "Dramatic Reversal + Isochron Scepter"
     ]
    },
-   "pointsTier": "above",
-   "banned": [],
    "points": 29,
    "breakdown": {
     "counterspells": 4,
@@ -10284,8 +10179,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 1,
    "breakdown": {
     "price_1_5": 1
@@ -10474,8 +10367,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -10670,8 +10561,6 @@
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 6,
    "breakdown": {
     "combos": 6
@@ -10853,12 +10742,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "above",
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [],
    "points": 2,
    "breakdown": {
     "price_1_5": 2
@@ -10866,7 +10753,7 @@
    "violations": [
     "price_cap"
    ],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 206.79,
    "gc": 0,
@@ -11073,8 +10960,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 2,
    "breakdown": {
     "free_spells": 2
@@ -11264,8 +11149,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -11460,8 +11343,6 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "pointsTier": "tier1",
-   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -11668,7 +11549,7 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
    "practicalBracket": "4",
    "powerBracket": "2",
    "floor": {
@@ -11678,14 +11559,12 @@
     ],
     "combos": []
    },
-   "pointsTier": "tier2",
-   "banned": [],
    "points": 4,
    "breakdown": {
     "price_1_5": 4
    },
    "violations": [],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 114.41,
    "gc": 0,
@@ -11890,13 +11769,6 @@
      "Tainted Pact + Thassa's Oracle"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Chrome Mox",
-    "Gaea's Cradle",
-    "Grim Monolith",
-    "Mox Amber"
-   ],
    "points": 68,
    "breakdown": {
     "game_changers": 20,
@@ -12130,13 +12002,6 @@
      "Tainted Pact + Thassa's Oracle"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Chrome Mox",
-    "Lotus Petal",
-    "Mox Diamond",
-    "Mox Opal"
-   ],
    "points": 58,
    "breakdown": {
     "game_changers": 20,
@@ -12370,15 +12235,6 @@
      "Tainted Pact + Thassa's Oracle"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Ancient Tomb",
-    "Chrome Mox",
-    "Lion's Eye Diamond",
-    "Lotus Petal",
-    "Mana Vault",
-    "Mox Diamond"
-   ],
    "points": 80,
    "breakdown": {
     "game_changers": 21,
@@ -12623,17 +12479,6 @@
      "Tainted Pact + Thassa's Oracle"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Ancient Tomb",
-    "Chrome Mox",
-    "Lion's Eye Diamond",
-    "Lotus Petal",
-    "Mana Vault",
-    "Mox Amber",
-    "Mox Diamond",
-    "Mox Opal"
-   ],
    "points": 81,
    "breakdown": {
     "game_changers": 21,
@@ -12876,19 +12721,6 @@
      "Basalt Monolith + Kinnan, Bonder Prodigy"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Ancient Tomb",
-    "Chrome Mox",
-    "Gaea's Cradle",
-    "Grim Monolith",
-    "Lotus Petal",
-    "Mana Crypt",
-    "Mana Vault",
-    "Mox Amber",
-    "Mox Diamond",
-    "Mox Opal"
-   ],
    "points": 89,
    "breakdown": {
     "game_changers": 16,
@@ -13098,20 +12930,6 @@
    "practicalBracket": "2*",
    "powerBracket": "2*",
    "floor": null,
-   "pointsTier": "above",
-   "banned": [
-    "Ancient Tomb",
-    "Chrome Mox",
-    "Dockside Extortionist",
-    "Jeska's Will",
-    "Jeweled Lotus",
-    "Lion's Eye Diamond",
-    "Lotus Petal",
-    "Mana Crypt",
-    "Mana Vault",
-    "Mox Diamond",
-    "Mox Opal"
-   ],
    "points": 36,
    "breakdown": {
     "game_changers": 10,
@@ -13313,18 +13131,6 @@
      "Combat Celebrant + Rionya, Fire Dancer"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Ancient Tomb",
-    "Chrome Mox",
-    "City of Traitors",
-    "Dockside Extortionist",
-    "Jeweled Lotus",
-    "Lotus Petal",
-    "Mana Crypt",
-    "Mana Vault",
-    "Mox Diamond"
-   ],
    "points": 31,
    "breakdown": {
     "game_changers": 7,
@@ -13538,18 +13344,6 @@
      "Food Chain + Squee, the Immortal"
     ]
    },
-   "pointsTier": "above",
-   "banned": [
-    "Ancient Tomb",
-    "Chrome Mox",
-    "Gaea's Cradle",
-    "Lion's Eye Diamond",
-    "Lotus Petal",
-    "Mana Vault",
-    "Mox Amber",
-    "Mox Diamond",
-    "Mox Opal"
-   ],
    "points": 74,
    "breakdown": {
     "game_changers": 21,

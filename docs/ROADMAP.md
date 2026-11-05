@@ -2,7 +2,7 @@
 
 Every feature worth considering for the checker, from commandersalt.com (CS), deckcheck.co (DC) and our own ideas. Update the status in the same commit that changes it.
 
-**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. Since November 2026 the pod verdict comes from the practical bracket (`power_tiers` in `rules/pod_rules.json`), plus the banned list: precons anchor Bracket 2, then 2*, 3, 3*, 4, 4*, 5. Tier 1 is 2, Tier 2 is 2*, Tier 3 is out. Mass land denial or a two-card combo playable on curve sets Bracket 4 regardless of power, so bracket and power can differ. Power is built on ways to win, interaction, salt and synergy. Points and price are informative. Jorge's read of his own decks is locked in the parity test: if a scoring change breaks one, ask him. Learn from those sites' published methods, and use none of their data, scores or look: DeckCheck's API terms ban scraping and competing databases.
+**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Mass land denial or a two-card combo playable on curve sets power-level Bracket 4 regardless of the score. Jorge's read of his decks is locked in the parity test: if a scoring change breaks one, ask him.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
 
@@ -99,7 +99,7 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 
 ## Every milestone must pass
 - `node scripts/test_engine_parity.js`
-- `python3 scripts/tier_rules.py --calibrate` (points only, 32 / 4 / 0)
+- `python3 scripts/tier_rules.py --calibrate` (the pod rules: 32 / 4 / 0)
 - `node scripts/deck_study.js` after any engine change: every cEDH list above every precon
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing
 

@@ -21,12 +21,11 @@ const displayName = (n) => NAME_FIX.reduce((name, [bad, good]) => name.replace(b
 function rowFor(d, s, t) {
   const num = (v) => '<td class="mono num">' + v + '</td>';
   const tier = !s ? '—' : '<span class="tier-pill ' + tierTone(s.tier) + '">' + esc(t['short_' + s.tier]) + '</span>' +
-    (s.banned && s.banned.length ? '<span class="pod-why">' + esc(t.podBanned) + '</span>' : '') +
-    (s.floor ? '<span class="pod-why">' + esc(t['podFloor_' + s.floor.reason]) + '</span>' : '');
+    (s.violations.includes('banned') ? '<span class="pod-why">' + esc(t.podBanned) + '</span>' : '');
   return '<tr><th scope="row"><span class="pod-name">' + esc(displayName(d.name)) + '</span>' +
     (d.url ? ' <a class="pod-link" href="' + esc(d.url) + '" target="_blank" rel="noopener noreferrer">Archidekt ↗</a>' : '') + '</th>' +
     '<td>' + tier + '</td>' +
-    num(s ? esc(s.practicalBracket) + ' · ' + s.power.score.toFixed(1) : '—') + num(s ? s.points : '—') + num(s ? s.bracket.checklist : '—') +
+    num(s ? s.points : '—') + num(s ? esc(s.practicalBracket) + ' · ' + s.power.score.toFixed(1) + (s.floor ? '<span class="pod-why">' + esc(t['podFloor_' + s.floor.reason]) + '</span>' : '') : '—') + num(s ? s.bracket.checklist : '—') +
     num(s ? s.salt.total.toFixed(1) : '—') + num(s && s.synergy ? s.synergy.coverage + '%' : '—') + num(s ? '€' + Math.round(s.price) : '—') +
     '<td class="pod-actions"><button data-pod-load="' + d.id + '" class="btn-accent-sm">' + t.podLoad + '</button>' +
     (state.deck ? '<button data-pod-cmp="' + d.id + '" class="btn-ghost-sm">' + t.podCompare + '</button>' : '') + '</td></tr>';
@@ -50,7 +49,7 @@ function table(decks, t) {
       return '<td class="mono num">' + (typeof v !== 'number' ? '' : k === 'price' ? '€' + Math.round(v) : k === 'synergy_coverage' ? Math.round(v) + '%' : k === 'points' ? v : v.toFixed(1)) + '</td>';
     }).join('') + '<td></td></tr>';
   return '<div class="tbl-scroll pod-scroll"><table class="br-table pod-table"><thead><tr><th scope="col">' + esc(t.tmDeck) + '</th><th scope="col">' + esc(t.tierWord) + '</th>' +
-    head('power', t.pfPractical) + head('points', t.pts) + head('bracket', t.brTileN) + head('salt', t.pfSalt) + head('synergy', t.pfSyn) + head('price', t.price) +
+    head('points', t.pts) + head('power', t.pfPractical) + head('bracket', t.brTileN) + head('salt', t.pfSalt) + head('synergy', t.pfSyn) + head('price', t.price) +
     '<td></td></tr></thead><tbody>' + rows.map(({ d, s }) => rowFor(d, s, t)).join('') +
     (study ? ref(t.pfRef_precon, study.medians.precon) + ref(t.pfRef_cedh, study.medians.cedh) : '') +
     '</tbody></table></div>' + (study ? '<p class="note-sm">' + esc(t.podStudyNote) + '</p>' : '');

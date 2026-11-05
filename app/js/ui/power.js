@@ -93,8 +93,7 @@ export function renderPower() {
   if (!activeD.length) html += '<div class="note-ok power-clear-note">✓ ' + t.powerAllQuiet + '</div>';
 
   // violations + flags
-  // the budget line would read as a verdict, and points no longer give one
-  const viols = ev.violations.filter(v => v.id !== 'budget').map(v => {
+  const viols = ev.violations.map(v => {
     if (v.id === 'conditional') return (MSG.conditional[v.condId] ? MSG.conditional[v.condId][lang](v) : v.condId);
     return MSG[v.id] ? MSG[v.id][lang](v) : JSON.stringify(v);
   });

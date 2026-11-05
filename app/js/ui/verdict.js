@@ -1,18 +1,33 @@
 import { state } from '../state.js';
 import { T } from '../i18n.js';
-import { ARCH, CATS } from './constants.js';
-import { $, esc, archKey, bannedCards, fill, tierTone } from './helpers.js';
+import { RULES } from '../rules.js';
+import { ARCH, CATS, EXTRA_PTS, MSG, dialName } from './constants.js';
+import { $, esc, archKey, fill, tierTone } from './helpers.js';
 import { compSlots, tagCount } from './comp.js';
 
-// The answer to "is this deck in the pod?", first thing in the report: the tier, why,
-// and what to do about it. Power decides, with the banned list on top; the bracket
-// sits below as the separate yardstick it is.
+// The answer to "is this deck in the pod?", first thing in the report: the point budget
+// decides, as it always has. The power level and Wizards' checklist sit below as the
+// separate readings they are.
 function reason(r, t) {
-  const v = r.verdict, banned = bannedCards(r);
-  if (v.pending) return t.vPending;
-  const power = fill(t['vWhy_' + v.byPower], { v: v.score, a: v.limits.tier1_max, b: v.limits.tier2_max });
-  const floor = !v.floor ? '' : fill(t['vWhyFloor_' + v.floor.reason], { c: (v.floor.reason === 'mld' ? v.floor.mld : v.floor.combos).join(', ') }) + ' ';
-  return (banned.length ? fill(t.vWhyBanned, { c: banned.join(', ') }) + ' ' : '') + floor + (v.floor ? fill(t.vPowerOnly, { v: v.score }) : power);
+  const ev = r.evalRes, a = RULES.tiers.tier1.max_points, b = RULES.tiers.tier2.max_points;
+  const hard = ev.violations.filter(v => v.id !== 'budget');
+  const main = fill(t['vWhy_' + (ev.points > b ? 'over' : ev.points > a ? 'tier2' : 'tier1')], { v: ev.points, a, b });
+  return hard.length ? main + ' ' + fill(t.vWhyRules, { v: hard.length }) : main;
+}
+
+function violationLines(r, lang) {
+  return r.evalRes.violations.filter(v => v.id !== 'budget').map(v =>
+    v.id === 'conditional' ? (MSG.conditional[v.condId] ? MSG.conditional[v.condId][lang](v) : v.condId) : MSG[v.id][lang](v));
+}
+
+function spendLine(r, t, lang) {
+  const spends = Object.entries(r.evalRes.breakdown).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  return spends.length ? fill(t.vSpends, { c: spends.map(([k, v]) => (EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang)) + ' +' + v).join(', ') }) : '';
+}
+
+function powerLine(r, t) {
+  const l = r.level;
+  return l.pending ? t.brPending : fill(t.vPowerLine, { b: l.bracket, v: l.score });
 }
 
 function bracketLine(r, t) {
@@ -23,20 +38,21 @@ function bracketLine(r, t) {
 }
 
 export function renderVerdict() {
-  const t = T(), r = state.result, v = r.verdict;
-  const keys = v.tier !== 'tier1' && !v.pending ? r.power.keyCards.slice(0, 3).map(c => c.name) : [];
-  $('verdict').innerHTML = '<div class="verdict-hero ' + (v.pending ? 'tone-pending' : tierTone(v.tier)) + '">' +
-    '<div class="vh-top"><h2 class="vh-tier">' + esc(t[v.tier]) + '</h2>' +
-    '<span class="vh-power mono">' + (v.pending ? '…' : esc(t.vBracketWord) + ' ' + esc(v.bracket) + ' <small>' + v.score + ' / 10 ' + esc(t.vPowerWord) + '</small>') + '</span></div>' +
+  const t = T(), r = state.result, lang = state.lang, ev = r.evalRes;
+  const lines = violationLines(r, lang), spend = spendLine(r, t, lang);
+  $('verdict').innerHTML = '<div class="verdict-hero ' + tierTone(ev.tier) + '">' +
+    '<div class="vh-top"><h2 class="vh-tier">' + esc(t[ev.tier]) + '</h2>' +
+    '<span class="vh-power mono">' + ev.points + ' <small>/ ' + RULES.tiers.tier2.max_points + ' ' + esc(t.pts) + '</small></span></div>' +
     '<p class="vh-why">' + esc(reason(r, t)) + '</p>' +
-    (keys.length ? '<p class="vh-sub">' + esc(fill(t.vKeyCards, { c: keys.join(', ') })) + '</p>' : '') +
-    '<div class="vh-foot"><a class="vh-action" href="#sec-plan">' + esc(v.tier === 'above' ? t.vActionOut : t.vActionIn) + ' ↓</a>' +
+    lines.map(l => '<p class="vh-sub">✕ ' + esc(l) + '</p>').join('') +
+    (spend ? '<p class="vh-sub">' + esc(spend) + '</p>' : '') +
+    '<div class="vh-foot"><a class="vh-action" href="#sec-plan">' + esc(ev.tier === 'above' ? t.vActionOut : t.vActionIn) + ' ↓</a>' +
+    '<a class="vh-bracket" href="#sec-profile">' + esc(powerLine(r, t)) + '</a>' +
     '<a class="vh-bracket" href="#sec-bracket">' + esc(bracketLine(r, t)) + '</a></div></div>';
-  // the report closes on the same two answers it opened with
-  const end = $('informeEnd');
-  const podMark = v.pending ? '' : (v.tier === 'above' ? '✕ ' + t.endOut : '✓ ' + t.endIn);
+  // the report closes on the same answers it opened with
+  const podMark = ev.tier === 'above' ? '✕ ' + t.endOut : '✓ ' + t.endIn;
   const brMark = r.bracket.pending ? '' : (r.bracket.fits ? t.endBracketOk : t.endBracketNo);
-  end.innerHTML = '<div class="informe-end' + (v.tier === 'above' ? ' mixed' : '') + '">' +
+  $('informeEnd').innerHTML = '<div class="informe-end' + (ev.tier === 'above' ? ' mixed' : '') + '">' +
     [podMark, brMark].filter(Boolean).map(esc).join(' · ') + '</div>';
 }
 

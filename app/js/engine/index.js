@@ -17,4 +17,4 @@ export { saltScore } from "./salt.js";
 export { synergyScore } from "./synergyScore.js";
 export { computePower, METRIC_RANGE } from "./power.js";
 export { simulateGoldfish, drawOdds } from "./goldfish.js";
-export { podVerdict, powerCutPlan } from "./verdict.js";
+export { powerLevel } from "./powerLevel.js";
