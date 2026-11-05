@@ -221,6 +221,8 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
     web: [...new Set(list.filter(c => c.infinite).flatMap(c => c.cards))],
     engine: engineCards,
     answersTotal: answers.map(x => front(x.card.name)),
+    finishers: names(x => read(x).printedWin || read(x).massPump),
+    avgMv: [], cheap: names(x => x.cls.type !== "L" && (x.card.cmc || 0) <= 2),
   };
   const goldfish = simulateGoldfish({ cardsInfo, commanders, read, games, combos: priced.map(c => ({
     pieces: [...c.cards, ...(c.filled || [])], deploy: c.deploy })) });

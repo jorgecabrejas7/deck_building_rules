@@ -10,11 +10,11 @@
  },
  "medians": {
   "precon": {
-   "power": 3.15,
-   "pillar_consistency": 0,
-   "pillar_efficiency": 25,
+   "power": 3.05,
+   "pillar_salt": 11.5,
+   "pillar_synergy": 0,
    "pillar_interaction": 26,
-   "pillar_wins": 0,
+   "pillar_wins": 4,
    "salt_total": 22.45,
    "salt_average": 0.29,
    "synergy_coverage": 100,
@@ -47,11 +47,11 @@
    "points": 0
   },
   "pod": {
-   "power": 4,
-   "pillar_consistency": 0,
-   "pillar_efficiency": 35,
+   "power": 4.1,
+   "pillar_salt": 18,
+   "pillar_synergy": 0,
    "pillar_interaction": 34.5,
-   "pillar_wins": 0,
+   "pillar_wins": 9,
    "salt_total": 26.85,
    "salt_average": 0.34,
    "synergy_coverage": 75.5,
@@ -84,11 +84,11 @@
    "points": 7
   },
   "cedh": {
-   "power": 9.7,
-   "pillar_consistency": 89.5,
-   "pillar_efficiency": 93.5,
+   "power": 9.35,
+   "pillar_salt": 100,
+   "pillar_synergy": 0,
    "pillar_interaction": 91.5,
-   "pillar_wins": 81,
+   "pillar_wins": 78,
    "salt_total": 86.3,
    "salt_average": 0.9,
    "synergy_coverage": 89,
@@ -125,38 +125,38 @@
   {
    "key": "power",
    "medians": {
-    "precon": 3.15,
-    "podIn": 4,
-    "podOut": 6.05,
-    "cedh": 9.7
+    "precon": 3.05,
+    "podIn": 4.1,
+    "podOut": 6.55,
+    "cedh": 9.35
    },
    "precon_vs_pod": 0.83,
    "podIn_vs_podOut": 1,
+   "pod_vs_cedh": 0.95
+  },
+  {
+   "key": "pillar_salt",
+   "medians": {
+    "precon": 11.5,
+    "podIn": 16,
+    "podOut": 27.5,
+    "cedh": 100
+   },
+   "precon_vs_pod": 0.78,
+   "podIn_vs_podOut": 0.89,
    "pod_vs_cedh": 0.99
   },
   {
-   "key": "pillar_consistency",
+   "key": "pillar_synergy",
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 0,
-    "cedh": 89.5
+    "podOut": 5,
+    "cedh": 0
    },
    "precon_vs_pod": 0.54,
-   "podIn_vs_podOut": 0.6,
-   "pod_vs_cedh": 1
-  },
-  {
-   "key": "pillar_efficiency",
-   "medians": {
-    "precon": 25,
-    "podIn": 32,
-    "podOut": 51.5,
-    "cedh": 93.5
-   },
-   "precon_vs_pod": 0.72,
-   "podIn_vs_podOut": 0.95,
-   "pod_vs_cedh": 0.99
+   "podIn_vs_podOut": 0.64,
+   "pod_vs_cedh": 0.42
   },
   {
    "key": "pillar_interaction",
@@ -173,14 +173,14 @@
   {
    "key": "pillar_wins",
    "medians": {
-    "precon": 0,
-    "podIn": 0,
-    "podOut": 66,
-    "cedh": 81
+    "precon": 4,
+    "podIn": 6.5,
+    "podOut": 76.5,
+    "cedh": 78
    },
-   "precon_vs_pod": 0.57,
-   "podIn_vs_podOut": 1,
-   "pod_vs_cedh": 0.93
+   "precon_vs_pod": 0.58,
+   "podIn_vs_podOut": 0.8,
+   "pod_vs_cedh": 0.82
   },
   {
    "key": "salt_total",
@@ -726,13 +726,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.8,
-    "raw": 23,
+    "score": 3.4,
+    "raw": 16.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 38,
+     "wins": 23,
      "interaction": 24,
-     "wins": 21
+     "salt": 11,
+     "synergy": 0
     }
    }
   },
@@ -922,13 +922,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.7,
-    "raw": 21.5,
+    "score": 3.4,
+    "raw": 16.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 32,
+     "wins": 23,
      "interaction": 23,
-     "wins": 22
+     "salt": 10,
+     "synergy": 0
     }
    }
   },
@@ -1116,13 +1116,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.2,
-    "raw": 16.6,
+    "score": 2.9,
+    "raw": 12.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 35,
+     "wins": 9,
      "interaction": 26,
-     "wins": 0
+     "salt": 16,
+     "synergy": 0
     }
    }
   },
@@ -1304,13 +1304,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3,
-    "raw": 14.8,
+    "score": 3.2,
+    "raw": 14.7,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 17,
+     "wins": 23,
      "interaction": 14,
-     "wins": 21
+     "salt": 13,
+     "synergy": 0
     }
    }
   },
@@ -1502,13 +1502,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.7,
-    "raw": 21.7,
+    "score": 4,
+    "raw": 22.1,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 22,
+     "wins": 38,
      "interaction": 22,
-     "wins": 32
+     "salt": 9,
+     "synergy": 0
     }
    }
   },
@@ -1693,13 +1693,13 @@
     "offPlan": 2
    },
    "power": {
-    "score": 2.1,
-    "raw": 6.3,
+    "score": 2.5,
+    "raw": 8.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 13,
+     "wins": 13,
      "interaction": 10,
-     "wins": 0
+     "salt": 8,
+     "synergy": 0
     }
    }
   },
@@ -1885,13 +1885,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 3.1,
-    "raw": 15.8,
+    "score": 3.3,
+    "raw": 15.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 20,
+     "wins": 19,
      "interaction": 23,
-     "wins": 13
+     "salt": 14,
+     "synergy": 0
     }
    }
   },
@@ -2081,13 +2081,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.3,
-    "raw": 17.9,
+    "score": 3.7,
+    "raw": 19,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 8,
+     "wins": 23,
      "interaction": 32,
-     "wins": 21
+     "salt": 12,
+     "synergy": 0
     }
    }
   },
@@ -2268,13 +2268,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4,
-    "raw": 17.9,
+    "score": 4.3,
+    "raw": 20.1,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 27,
+     "wins": 0,
      "interaction": 37,
-     "wins": 0
+     "salt": 19,
+     "synergy": 40
     }
    }
   },
@@ -2451,13 +2451,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.6,
-    "raw": 10.9,
+    "score": 2,
+    "raw": 4.2,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 28,
+     "wins": 0,
      "interaction": 13,
-     "wins": 0
+     "salt": 6,
+     "synergy": 0
     }
    }
   },
@@ -2658,13 +2658,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.7,
-    "raw": 12.2,
+    "score": 2.5,
+    "raw": 8.8,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 20,
+     "wins": 4,
      "interaction": 24,
-     "wins": 0
+     "salt": 8,
+     "synergy": 0
     }
    }
   },
@@ -2850,12 +2850,12 @@
    },
    "power": {
     "score": 3.2,
-    "raw": 17.1,
+    "raw": 15.1,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 12,
+     "wins": 5,
      "interaction": 43,
-     "wins": 4
+     "salt": 6,
+     "synergy": 7
     }
    }
   },
@@ -2868,8 +2868,8 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
-   "practicalBracket": "2*",
+   "tier": "tier1",
+   "practicalBracket": "2",
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -3045,13 +3045,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 4.1,
-    "raw": 25.9,
+    "score": 3.8,
+    "raw": 20.4,
     "pillars": {
-     "consistency": 21,
-     "efficiency": 25,
+     "wins": 25,
      "interaction": 28,
-     "wins": 27
+     "salt": 17,
+     "synergy": 4
     }
    }
   },
@@ -3236,13 +3236,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.1,
-    "raw": 6.3,
+    "score": 2,
+    "raw": 4.6,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 12,
+     "wins": 0,
      "interaction": 11,
-     "wins": 0
+     "salt": 12,
+     "synergy": 0
     }
    }
   },
@@ -3427,13 +3427,13 @@
     "offPlan": 2
    },
    "power": {
-    "score": 2.6,
-    "raw": 10.7,
+    "score": 2.1,
+    "raw": 5.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 26,
+     "wins": 0,
      "interaction": 14,
-     "wins": 0
+     "salt": 16,
+     "synergy": 0
     }
    }
   },
@@ -3618,13 +3618,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.5,
-    "raw": 9.5,
+    "score": 2.1,
+    "raw": 5.2,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 26,
+     "wins": 0,
      "interaction": 10,
-     "wins": 0
+     "salt": 18,
+     "synergy": 0
     }
    }
   },
@@ -3820,13 +3820,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.8,
-    "raw": 23.3,
+    "score": 3.9,
+    "raw": 21.1,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 25,
+     "wins": 23,
      "interaction": 36,
-     "wins": 21
+     "salt": 19,
+     "synergy": 0
     }
    }
   },
@@ -4013,13 +4013,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.7,
-    "raw": 22.4,
+    "score": 3.8,
+    "raw": 20.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 25,
+     "wins": 0,
      "interaction": 51,
-     "wins": 3
+     "salt": 18,
+     "synergy": 25
     }
    }
   },
@@ -4210,12 +4210,12 @@
    },
    "power": {
     "score": 3.6,
-    "raw": 21.5,
+    "raw": 18.6,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 21,
+     "wins": 23,
      "interaction": 32,
-     "wins": 22
+     "salt": 9,
+     "synergy": 0
     }
    }
   },
@@ -4401,13 +4401,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 3,
-    "raw": 15.3,
+    "score": 2.5,
+    "raw": 8.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 30,
+     "wins": 0,
      "interaction": 26,
-     "wins": 0
+     "salt": 12,
+     "synergy": 3
     }
    }
   },
@@ -4586,13 +4586,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4,
-    "raw": 15,
+    "score": 4.1,
+    "raw": 8.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 36,
+     "wins": 4,
      "interaction": 20,
-     "wins": 0
+     "salt": 12,
+     "synergy": 0
     }
    }
   },
@@ -4779,13 +4779,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4,
-    "raw": 18.1,
+    "score": 4.1,
+    "raw": 15.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 22,
+     "wins": 0,
      "interaction": 42,
-     "wins": 0
+     "salt": 15,
+     "synergy": 13
     }
    }
   },
@@ -4970,13 +4970,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3,
-    "raw": 15.2,
+    "score": 2.4,
+    "raw": 8.6,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 27,
+     "wins": 4,
      "interaction": 28,
-     "wins": 0
+     "salt": 0,
+     "synergy": 0
     }
    }
   },
@@ -5153,13 +5153,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.7,
-    "raw": 12,
+    "score": 2.1,
+    "raw": 5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 24,
+     "wins": 0,
      "interaction": 20,
-     "wins": 0
+     "salt": 0,
+     "synergy": 0
     }
    }
   },
@@ -5354,13 +5354,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.1,
-    "raw": 16.1,
+    "score": 2.4,
+    "raw": 8,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 26,
+     "wins": 0,
      "interaction": 32,
-     "wins": 0
+     "salt": 0,
+     "synergy": 0
     }
    }
   },
@@ -5545,13 +5545,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 2.5,
-    "raw": 10.4,
+    "score": 2.3,
+    "raw": 7.3,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 15,
+     "wins": 4,
      "interaction": 22,
-     "wins": 0
+     "salt": 1,
+     "synergy": 0
     }
    }
   },
@@ -5730,13 +5730,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3,
-    "raw": 14.9,
+    "score": 2.6,
+    "raw": 10.1,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 21,
+     "wins": 0,
      "interaction": 32,
-     "wins": 0
+     "salt": 14,
+     "synergy": 0
     }
    }
   },
@@ -5915,13 +5915,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 17.4,
+    "score": 2.9,
+    "raw": 12.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 18,
+     "wins": 0,
      "interaction": 43,
-     "wins": 0
+     "salt": 11,
+     "synergy": 0
     }
    }
   },
@@ -6098,13 +6098,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.1,
-    "raw": 16.3,
+    "score": 3.7,
+    "raw": 19.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 28,
+     "wins": 17,
      "interaction": 31,
-     "wins": 0
+     "salt": 8,
+     "synergy": 18
     }
    }
   },
@@ -6281,13 +6281,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 16.7,
+    "score": 3.5,
+    "raw": 17.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 33,
+     "wins": 21,
      "interaction": 28,
-     "wins": 0
+     "salt": 6,
+     "synergy": 6
     }
    }
   },
@@ -6464,13 +6464,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.6,
-    "raw": 21.3,
+    "score": 2.6,
+    "raw": 9.8,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 43,
+     "wins": 0,
      "interaction": 35,
-     "wins": 0
+     "salt": 7,
+     "synergy": 0
     }
    }
   },
@@ -6657,13 +6657,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.6,
-    "raw": 11.3,
+    "score": 2.5,
+    "raw": 8.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 27,
+     "wins": 9,
      "interaction": 15,
-     "wins": 0
+     "salt": 10,
+     "synergy": 0
     }
    }
   },
@@ -6676,8 +6676,8 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
-   "practicalBracket": "2*",
+   "tier": "tier1",
+   "practicalBracket": "2",
    "pointsTier": "tier1",
    "banned": [],
    "points": 2,
@@ -6850,13 +6850,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.2,
-    "raw": 26.8,
+    "score": 3.6,
+    "raw": 18.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 34,
+     "wins": 5,
      "interaction": 57,
-     "wins": 4
+     "salt": 15,
+     "synergy": 0
     }
    }
   },
@@ -7041,13 +7041,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4,
-    "raw": 8.6,
+    "score": 4.1,
+    "raw": 5.8,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 15,
+     "wins": 0,
      "interaction": 16,
-     "wins": 0
+     "salt": 12,
+     "synergy": 0
     }
    }
   },
@@ -7232,13 +7232,13 @@
     "offPlan": 5
    },
    "power": {
-    "score": 2.4,
-    "raw": 8.6,
+    "score": 2.5,
+    "raw": 9.2,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 21,
+     "wins": 13,
      "interaction": 11,
-     "wins": 0
+     "salt": 8,
+     "synergy": 0
     }
    }
   },
@@ -7425,13 +7425,13 @@
     "offPlan": 3
    },
    "power": {
-    "score": 3,
-    "raw": 14.8,
+    "score": 2.7,
+    "raw": 10.7,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 23,
+     "wins": 0,
      "interaction": 30,
-     "wins": 0
+     "salt": 12,
+     "synergy": 7
     }
    }
   },
@@ -7629,13 +7629,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.8,
-    "raw": 23.3,
+    "score": 3.9,
+    "raw": 21.1,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 25,
+     "wins": 23,
      "interaction": 36,
-     "wins": 21
+     "salt": 19,
+     "synergy": 0
     }
    }
   },
@@ -7830,12 +7830,12 @@
    },
    "power": {
     "score": 4.1,
-    "raw": 21.1,
+    "raw": 8.8,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 53,
+     "wins": 0,
      "interaction": 26,
-     "wins": 0
+     "salt": 15,
+     "synergy": 0
     }
    }
   },
@@ -8030,13 +8030,13 @@
     "offPlan": 5
    },
    "power": {
-    "score": 4,
-    "raw": 20,
+    "score": 4.1,
+    "raw": 10.7,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 37,
+     "wins": 0,
      "interaction": 36,
-     "wins": 0
+     "salt": 11,
+     "synergy": 0
     }
    }
   },
@@ -8230,13 +8230,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4.3,
-    "raw": 22.8,
+    "score": 4.1,
+    "raw": 16.8,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 36,
+     "wins": 0,
      "interaction": 44,
-     "wins": 2
+     "salt": 28,
+     "synergy": 8
     }
    }
   },
@@ -8455,13 +8455,13 @@
     "offPlan": 12
    },
    "power": {
-    "score": 6.4,
-    "raw": 49.1,
+    "score": 6.6,
+    "raw": 47.3,
     "pillars": {
-     "consistency": 29,
-     "efficiency": 47,
+     "wins": 73,
      "interaction": 41,
-     "wins": 69
+     "salt": 52,
+     "synergy": 0
     }
    }
   },
@@ -8655,13 +8655,13 @@
     "offPlan": 31
    },
    "power": {
-    "score": 4,
-    "raw": 11.3,
+    "score": 4.4,
+    "raw": 21.3,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 15,
+     "wins": 26,
      "interaction": 25,
-     "wins": 0
+     "salt": 31,
+     "synergy": 0
     }
    }
   },
@@ -8857,13 +8857,13 @@
     "offPlan": 17
    },
    "power": {
-    "score": 5.7,
-    "raw": 42.2,
+    "score": 6.5,
+    "raw": 45.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 56,
+     "wins": 80,
      "interaction": 31,
-     "wins": 63
+     "salt": 25,
+     "synergy": 10
     }
    }
   },
@@ -9061,12 +9061,12 @@
    },
    "power": {
     "score": 5.6,
-    "raw": 41.4,
+    "raw": 37.5,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 43,
+     "wins": 0,
      "interaction": 56,
-     "wins": 46
+     "salt": 30,
+     "synergy": 95
     }
    }
   },
@@ -9250,13 +9250,13 @@
     "offPlan": 5
    },
    "power": {
-    "score": 4,
-    "raw": 11.9,
+    "score": 4.1,
+    "raw": 17.1,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 32,
+     "wins": 30,
      "interaction": 13,
-     "wins": 0
+     "salt": 12,
+     "synergy": 0
     }
    }
   },
@@ -9466,13 +9466,13 @@
     "offPlan": 49
    },
    "power": {
-    "score": 4,
-    "raw": 12.2,
+    "score": 4.1,
+    "raw": 13.6,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 14,
+     "wins": 9,
      "interaction": 29,
-     "wins": 0
+     "salt": 18,
+     "synergy": 0
     }
    }
   },
@@ -9665,13 +9665,13 @@
     "offPlan": 27
    },
    "power": {
-    "score": 4,
-    "raw": 10.1,
+    "score": 4.1,
+    "raw": 6.7,
     "pillars": {
-     "consistency": 7,
-     "efficiency": 24,
+     "wins": 4,
      "interaction": 10,
-     "wins": 0
+     "salt": 17,
+     "synergy": 0
     }
    }
   },
@@ -9879,13 +9879,13 @@
     "offPlan": 8
    },
    "power": {
-    "score": 2,
-    "raw": 5.3,
+    "score": 2.9,
+    "raw": 12.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 15,
+     "wins": 21,
      "interaction": 5,
-     "wins": 0
+     "salt": 18,
+     "synergy": 0
     }
    }
   },
@@ -10070,13 +10070,13 @@
     "offPlan": 14
    },
    "power": {
-    "score": 7.7,
-    "raw": 63,
+    "score": 7.6,
+    "raw": 56.8,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 78,
+     "wins": 92,
      "interaction": 66,
-     "wins": 79
+     "salt": 23,
+     "synergy": 0
     }
    }
   },
@@ -10257,13 +10257,13 @@
     "offPlan": 3
    },
    "power": {
-    "score": 3.9,
-    "raw": 23.7,
+    "score": 3.2,
+    "raw": 14.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 36,
+     "wins": 0,
      "interaction": 46,
-     "wins": 3
+     "salt": 5,
+     "synergy": 13
     }
    }
   },
@@ -10450,13 +10450,13 @@
     "offPlan": 20
    },
    "power": {
-    "score": 3.8,
-    "raw": 22.7,
+    "score": 3.1,
+    "raw": 14.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 32,
+     "wins": 0,
      "interaction": 47,
-     "wins": 2
+     "salt": 0,
+     "synergy": 13
     }
    }
   },
@@ -10634,13 +10634,13 @@
     "offPlan": 21
    },
    "power": {
-    "score": 4.6,
-    "raw": 25.9,
+    "score": 4.3,
+    "raw": 20.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 47,
+     "wins": 33,
      "interaction": 21,
-     "wins": 26
+     "salt": 13,
+     "synergy": 0
     }
    }
   },
@@ -10847,13 +10847,13 @@
     "offPlan": 21
    },
    "power": {
-    "score": 4,
-    "raw": 16.2,
+    "score": 4.1,
+    "raw": 15.2,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 25,
+     "wins": 9,
      "interaction": 33,
-     "wins": 0
+     "salt": 22,
+     "synergy": 0
     }
    }
   },
@@ -11034,13 +11034,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 17.4,
+    "score": 2.9,
+    "raw": 12.4,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 18,
+     "wins": 0,
      "interaction": 43,
-     "wins": 0
+     "salt": 11,
+     "synergy": 0
     }
    }
   },
@@ -11228,13 +11228,13 @@
     "offPlan": 2
    },
    "power": {
-    "score": 3.3,
-    "raw": 18.4,
+    "score": 3.4,
+    "raw": 16.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 34,
+     "wins": 0,
      "interaction": 33,
-     "wins": 0
+     "salt": 15,
+     "synergy": 32
     }
    }
   },
@@ -11437,13 +11437,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.6,
-    "raw": 21.1,
+    "score": 3.4,
+    "raw": 16.9,
     "pillars": {
-     "consistency": 0,
-     "efficiency": 40,
+     "wins": 9,
      "interaction": 37,
-     "wins": 0
+     "salt": 27,
+     "synergy": 0
     }
    }
   },
@@ -11668,12 +11668,12 @@
    },
    "power": {
     "score": 9.7,
-    "raw": 91.7,
+    "raw": 76,
     "pillars": {
-     "consistency": 79,
-     "efficiency": 89,
+     "wins": 90,
      "interaction": 100,
-     "wins": 92
+     "salt": 100,
+     "synergy": 0
     }
    }
   },
@@ -11689,7 +11689,7 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "5",
+   "practicalBracket": "4*",
    "pointsTier": "above",
    "banned": [
     "Chrome Mox",
@@ -11896,13 +11896,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 9.6,
-    "raw": 87.9,
+    "score": 9.3,
+    "raw": 68.5,
     "pillars": {
-     "consistency": 100,
-     "efficiency": 84,
+     "wins": 75,
      "interaction": 94,
-     "wins": 79
+     "salt": 100,
+     "synergy": 0
     }
    }
   },
@@ -11917,7 +11917,7 @@
    "cards": 99,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "5",
+   "practicalBracket": "4*",
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12139,13 +12139,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 9.7,
-    "raw": 90.1,
+    "score": 9.2,
+    "raw": 67.7,
     "pillars": {
-     "consistency": 100,
-     "efficiency": 100,
+     "wins": 78,
      "interaction": 86,
-     "wins": 81
+     "salt": 100,
+     "synergy": 0
     }
    }
   },
@@ -12160,7 +12160,7 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "5",
+   "practicalBracket": "4*",
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12383,13 +12383,13 @@
     "offPlan": 20
    },
    "power": {
-    "score": 9.7,
-    "raw": 92.2,
+    "score": 9.4,
+    "raw": 69.5,
     "pillars": {
-     "consistency": 100,
-     "efficiency": 100,
+     "wins": 78,
      "interaction": 93,
-     "wins": 81
+     "salt": 100,
+     "synergy": 0
     }
    }
   },
@@ -12602,13 +12602,13 @@
     "offPlan": 3
    },
    "power": {
-    "score": 9.7,
-    "raw": 91.3,
+    "score": 9.8,
+    "raw": 79.5,
     "pillars": {
-     "consistency": 71,
-     "efficiency": 85,
+     "wins": 100,
      "interaction": 98,
-     "wins": 100
+     "salt": 100,
+     "synergy": 0
     }
    }
   },
@@ -12623,7 +12623,7 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "3",
+   "practicalBracket": "2*",
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12806,13 +12806,13 @@
     "offPlan": 15
    },
    "power": {
-    "score": 7,
-    "raw": 55.3,
+    "score": 5.3,
+    "raw": 30,
     "pillars": {
-     "consistency": 43,
-     "efficiency": 98,
+     "wins": 0,
      "interaction": 66,
-     "wins": 15
+     "salt": 50,
+     "synergy": 30
     }
    }
   },
@@ -12827,7 +12827,7 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "3",
+   "practicalBracket": "2*",
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -13021,13 +13021,13 @@
     "offPlan": 12
    },
    "power": {
-    "score": 6.7,
-    "raw": 51.6,
+    "score": 5.5,
+    "raw": 34.3,
     "pillars": {
-     "consistency": 71,
-     "efficiency": 63,
+     "wins": 28,
      "interaction": 49,
-     "wins": 35
+     "salt": 72,
+     "synergy": 0
     }
    }
   },
@@ -13258,13 +13258,13 @@
     "offPlan": 2
    },
    "power": {
-    "score": 9.8,
-    "raw": 93.5,
+    "score": 9.6,
+    "raw": 72.7,
     "pillars": {
-     "consistency": 100,
-     "efficiency": 98,
+     "wins": 88,
      "interaction": 90,
-     "wins": 90
+     "salt": 100,
+     "synergy": 0
     }
    }
   }

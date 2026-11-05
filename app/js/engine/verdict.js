@@ -5,11 +5,12 @@
 import { computeDeckStats } from "./stats.js";
 import { computeProfile } from "./profile.js";
 import { computePower } from "./power.js";
+import { saltScore } from "./salt.js";
 
 const tierFor = (score, limits) => score <= limits.tier1_max ? "tier1" : score <= limits.tier2_max ? "tier2" : "above";
 
-// checked: false while the combo check is pending. Power cannot yet see the deck's
-// combos, so the tier is provisional: it can only rise once they land.
+// checked: false until the combos and salt ratings have loaded. Power cannot see them
+// yet, so the tier is provisional: it can only rise once they land.
 export function podVerdict({ power, evalRes, rules, checked }) {
   const limits = rules.power_tiers;
   const bracket = limits.brackets.find(([top]) => power.score <= top)[1];
@@ -24,7 +25,7 @@ export function podVerdict({ power, evalRes, rules, checked }) {
 const CUT_SEARCH_GAMES = 100;
 const MAX_CUTS = 8;
 
-export function powerCutPlan({ entries, db, combos, commanders, cardTags, classify, rules, banned = [] }) {
+export function powerCutPlan({ entries, db, combos, commanders, cardTags, saltDb, classify, rules, banned = [] }) {
   const zone = new Set((commanders || []).map(n => String(n).split(" // ")[0]));
   const front = (n) => String(n).split(" // ")[0];
   const limit = rules.power_tiers.tier2_max;
@@ -34,7 +35,7 @@ export function powerCutPlan({ entries, db, combos, commanders, cardTags, classi
     const cardsInfo = list.map(e => ({ card: db[e.name], qty: e.quantity, name: e.name, cls: classify(db[e.name]) }));
     const live = combos.filter(c => [...c.cards, ...(c.filled || [])].every(n => names.has(n)));
     const profile = computeProfile({ cardsInfo, stats, combos: live, commanders, cardTags, games: CUT_SEARCH_GAMES });
-    return computePower(profile, stats);
+    return computePower(profile, stats, saltScore(list.map(e => e.name), saltDb));
   };
   let rest = entries.filter(e => !banned.some(b => front(b) === front(e.name)));
   const steps = banned.map(card => ({ card: front(card), banned: true }));

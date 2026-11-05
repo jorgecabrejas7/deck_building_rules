@@ -116,12 +116,12 @@ export function recompute(notFound) {
     unresolved: missing.length,
   });
   const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders, cardTags: state.cardTags });
-  const power = PodEngine.computePower(profile, stats);
-  const verdict = PodEngine.podVerdict({ power, evalRes, rules: RULES, checked: !!combos });
-  // Only a deck outside Tier 1 needs a route, and only once its combos are known.
-  const cutPlan = combos && verdict.tier === 'above' ? PodEngine.powerCutPlan({ entries: resolved, db: cardCache,
-    combos: bracket.combos, commanders, cardTags: state.cardTags, classify: PodEngine.classifyCard, rules: RULES, banned: verdict.banned }) : null;
   const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
+  const power = PodEngine.computePower(profile, stats, salt);
+  const verdict = PodEngine.podVerdict({ power, evalRes, rules: RULES, checked: !!combos && !!salt });
+  // Only a deck outside Tier 1 needs a route, and only once its combos are known.
+  const cutPlan = combos && salt && verdict.tier === 'above' ? PodEngine.powerCutPlan({ entries: resolved, db: cardCache,
+    combos: bracket.combos, commanders, cardTags: state.cardTags, saltDb: state.saltDb, classify: PodEngine.classifyCard, rules: RULES, banned: verdict.banned }) : null;
   const synergy = synergyFor(cardsInfo, commanders);
   // what-if cut deltas for every card that drives a points dial or violation
   const drivingNames = new Set();

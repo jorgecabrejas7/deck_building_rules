@@ -127,7 +127,7 @@ async function study(d) {
   const profile = E.computeProfile({ cardsInfo, stats, combos: bracket.combos, commanders, cardTags });
   const salt = E.saltScore(names, saltDb);
   const synergy = E.synergyScore({ cardsInfo, commanders, table: await synergyTable(commanders) });
-  const power = E.computePower(profile, stats);
+  const power = E.computePower(profile, stats, salt);
   const podTier = E.podVerdict({ power, evalRes: ev, rules: RULES, checked: true });
   const verdict = podTier.tier === "above" ? "out" : "in";
   return { id: d.id, name: d.name, group: d.group, url: d.url, podId: d.podId, commanders,
@@ -161,8 +161,8 @@ function auc(a, b) {
 }
 const MEASURES = {
   power: d => d.power.score,
-  pillar_consistency: d => d.power.pillars.consistency,
-  pillar_efficiency: d => d.power.pillars.efficiency,
+  pillar_salt: d => d.power.pillars.salt,
+  pillar_synergy: d => d.power.pillars.synergy,
   pillar_interaction: d => d.power.pillars.interaction,
   pillar_wins: d => d.power.pillars.wins,
   salt_total: d => d.salt.total,

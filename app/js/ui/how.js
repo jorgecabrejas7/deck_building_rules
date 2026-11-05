@@ -63,9 +63,9 @@ function renderHow() {
 <h3>Perfil del mazo</h3>
 <p>El perfil explica el poder, y el poder decide el nivel del pod. Salt, sinergia y base de maná solo informan.</p>
 <ul>
-<li><b>Poder (1-10):</b> escala propia, no la de otra web. Sale de cuatro pilares (consistencia, eficiencia, interacción y formas de ganar), cada uno medido entre un precon flojo y una lista cEDH mediana. Se calibró con 36 precons y 8 listas cEDH públicas.</li>
+<li><b>Poder (1-10):</b> escala propia, no la de otra web. Sale de cuatro valores: formas de ganar, interacción, salt y sinergia (la profundidad del tema principal del mazo). Se calibró con 36 precons, 8 listas cEDH públicas y la opinión de Jorge sobre sus mazos.</li>
 <li><b>Salt:</b> la suma de las valoraciones de la comunidad de EDHREC para cada carta.</li>
-<li><b>Sinergia:</b> cuántas cartas sin tierras tienen sinergia positiva en la página de EDHREC de tu comandante. Mide si sigues lo que juega la gente con él, así que un brew original puntúa bajo sin estar mal construido.</li>
+<li><b>Sinergia con EDHREC:</b> cuántas cartas sin tierras tienen sinergia positiva en la página de tu comandante. Es informativa y no cuenta para el poder: premia seguir lo habitual, y un precon saca el máximo.</li>
 <li><b>Qué hace cada carta:</b> sale de las etiquetas de Scryfall, que la gente asigna carta a carta. Las cartas aún sin etiquetar se leen por su texto.</li>
 <li><b>Base de maná:</b> fuentes de cada color frente a sus manás en coste, tierras que siempre entran giradas y curva.</li></ul>
 <h3>Precios, combos y sugerencias</h3>
@@ -110,9 +110,9 @@ function renderHow() {
 <h3>Deck profile</h3>
 <p>The profile explains power, and power decides the pod level. Salt, synergy and the manabase are information only.</p>
 <ul>
-<li><b>Power (1-10):</b> our own scale, not another site's. It comes from four pillars (consistency, efficiency, interaction and ways to win), each measured between a weak precon and a median cEDH list. Calibrated on 36 precons and 8 public cEDH lists.</li>
+<li><b>Power (1-10):</b> our own scale, not another site's. It comes from four values: ways to win, interaction, salt and synergy (how deep the deck's main theme runs). Calibrated on 36 precons, 8 public cEDH lists and Jorge's read of his own decks.</li>
 <li><b>Salt:</b> EDHREC's community rating for each card, added up.</li>
-<li><b>Synergy:</b> how many nonland cards have positive synergy on your commander's EDHREC page. It measures how closely you follow what people play with them, so an original brew scores low without being badly built.</li>
+<li><b>EDHREC synergy:</b> how many nonland cards have positive synergy on your commander's page. It is informative and does not count toward power: it rewards following the norm, and a precon scores the maximum.</li>
 <li><b>What each card does:</b> this comes from Scryfall's tags, assigned by people card by card. Cards not tagged yet are read from their text.</li>
 <li><b>Manabase:</b> sources of each colour against its pips, lands that always enter tapped, and the curve.</li></ul>
 <h3>Prices, combos and suggestions</h3>

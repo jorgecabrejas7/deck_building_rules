@@ -2,7 +2,7 @@
 
 Every feature worth considering for the checker, from commandersalt.com (CS), deckcheck.co (DC) and our own ideas. Update the status in the same commit that changes it.
 
-**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. Since November 2026 the pod verdict comes from the practical bracket (`power_tiers` in `rules/pod_rules.json`), plus the banned list: precons anchor Bracket 2, then 2*, 3, 3*, 4, 4*, 5. Tier 1 is 2, Tier 2 is 2*, Tier 3 is out. Points and price are informative. Jorge's read of his own decks is locked in the parity test: if a scoring change breaks one, ask him. Learn from those sites' published methods, and use none of their data, scores or look: DeckCheck's API terms ban scraping and competing databases.
+**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. Since November 2026 the pod verdict comes from the practical bracket (`power_tiers` in `rules/pod_rules.json`), plus the banned list: precons anchor Bracket 2, then 2*, 3, 3*, 4, 4*, 5. Tier 1 is 2, Tier 2 is 2*, Tier 3 is out. Power is built on ways to win, interaction, salt and synergy. Points and price are informative. Jorge's read of his own decks is locked in the parity test: if a scoring change breaks one, ask him. Learn from those sites' published methods, and use none of their data, scores or look: DeckCheck's API terms ban scraping and competing databases.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
 

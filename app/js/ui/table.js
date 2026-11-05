@@ -178,14 +178,15 @@ export async function runTableMode() {
         unresolved: notFound.length,
       });
       const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders, cardTags });
-      const power = PodEngine.computePower(profile, stats);
-      const verdict = PodEngine.podVerdict({ power, evalRes: ev, rules: RULES, checked: !!comboList });
+      const salt = saltDb ? PodEngine.saltScore(resolved.map(e => e.name), saltDb) : null;
+      const power = PodEngine.computePower(profile, stats, salt);
+      const verdict = PodEngine.podVerdict({ power, evalRes: ev, rules: RULES, checked: !!comboList && !!salt });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
         tier: verdict.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,
         arch: a.name[state.lang], archKey: det.key, commander: cmd, bracket,
         power: comboList ? verdict.bracket + ' · ' + power.score : null,
-        salt: saltDb ? PodEngine.saltScore(resolved.map(e => e.name), saltDb).total : null,
+        salt: salt ? salt.total : null,
         stats, ev, cardsInfo });
     }
     persistCache();

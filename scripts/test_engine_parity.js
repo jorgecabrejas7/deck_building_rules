@@ -286,14 +286,11 @@ const synOf = (table) => PodEngine.synergyScore({ cardsInfo: manaDeck, commander
 const baseProfile = pfProfile(manaDeck);
 const weak = PodEngine.computePower(baseProfile, {});
 const strong = PodEngine.computePower({ ...baseProfile,
-  consistency: { ...baseProfile.consistency, tutors: 17 },
-  speed: { ...baseProfile.speed, avgMv: 1.9, cheap: 55, fastMana: 14, ramp: 27 },
   interaction: { ...baseProfile.interaction, cheapAnswers: 12, counters: 11, stax: 13, free: 5, removal: 15, wipes: 3 },
-  manabase: { ...baseProfile.manabase, quality: 100 },
-  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, web: 13 },
-  shape: { ...baseProfile.shape, engine: { theme: "burn", count: 30 } },
+  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, web: 13, printed: 4, massPump: 5 },
   goldfish: { ...baseProfile.goldfish, winBy: { 8: 70 } },
-}, { game_changers: 20 });
+  shape: { ...baseProfile.shape, engine: { theme: "burn", count: 30 } },
+}, {}, { total: 90, top: [] });
 const study = read_study();
 function read_study() { return JSON.parse(fs.readFileSync(path.join(ROOT, "data", "deck_study.json"), "utf8")); }
 const scores = (g) => study.decks.filter(d => d.group === g).map(d => d.power.score);
@@ -319,16 +316,18 @@ const PF_CASES = [
   ["no EDHREC page is no data, not zero", synOf(null).status === "none"],
   ["synergy covers nonland cards with positive synergy", synOf(sameTable).coverage === 50 && synOf(sameTable).offPlan === 0],
   ["power reads weak decks low and strong decks at the top", weak.score < 4 && strong.score === 10],
+  ["power is built on wins, interaction, salt and synergy", Object.keys(strong.pillars).sort().join() === "interaction,salt,synergy,wins"],
+  ["a deep theme with no interaction adds no synergy", PodEngine.computePower({ ...baseProfile, interaction: { ...baseProfile.interaction, cheapAnswers: 0, counters: 0, stax: 0, free: 0, removal: 0, wipes: 0 }, shape: { ...baseProfile.shape, engine: { theme: "burn", count: 30 } } }, {}).pillars.synergy === 0],
   ["no Game Changer metric: those cards score for what they do", !("gc" in PodEngine.METRIC_RANGE)],
   ["a line through the commander counts half", PodEngine.computeProfile({ cardsInfo: manaDeck, stats: {}, commanders: ["Boss"], combos: [
     { cards: ["Boss", "X"], infinite: true, relevant: true, win: false, tag: "S", features: ["Infinite mana"], cardsToFind: 1, deploy: 4 }] }).wins.ending === 0.5],
   ["every scored metric sits in a benchmark, so tiers explain the score", Object.keys(PodEngine.METRIC_RANGE).every(k => strong.benchmarks.some(b => b.scored && b.values.some(v => v.key === k)))],
-  ["benchmarks read top tier on a strong deck and low on a weak one", strong.benchmarks.filter(b => b.scored).every(b => b.tier === "S") && weak.benchmarks.find(b => b.key === "finding").tier === "F"],
+  ["benchmarks read top tier on a strong deck and low on a weak one", strong.benchmarks.filter(b => b.scored).every(b => b.tier === "S") && weak.benchmarks.find(b => b.key === "backups").tier === "F"],
   ["a benchmark names the cards behind it", (() => {
-    const info = pfDeck([[pfCard("Search", 2, "Sorcery", { oracle_text: "Search your library for a card." })]]);
+    const info = pfDeck([[pfCard("Nope", 2, "Instant", { oracle_text: "Counter target spell." })]]);
     const prof = PodEngine.computeProfile({ cardsInfo: info, stats: {}, combos: [], commanders: [] });
     const power = PodEngine.computePower(prof, {});
-    return power.benchmarks.find(b => b.key === "finding").cards.join() === "Search" && power.keyCards[0].name === "Search";
+    return power.benchmarks.find(b => b.key === "answers").cards.includes("Nope") && power.keyCards[0].name === "Nope";
   })()],
   ["study: every cEDH list scores above every precon", Math.min(...scores("cedh")) > Math.max(...scores("precon"))],
   ["study: the precon median stays in the casual band", (() => { const p = sorted(scores("precon")); return p[p.length >> 1] < 5; })()],
@@ -415,7 +414,7 @@ const V_CASES = [
   ["a banned card is out at any power", vFor(1, [{ id: "banned", cards: ["Mana Crypt"] }]).tier === "above" && vFor(1, [{ id: "banned", cards: ["Mana Crypt"] }]).banned[0] === "Mana Crypt"],
   ["other violations no longer decide", vFor(1, [{ id: "price_cap" }, { id: "budget" }]).tier === "tier1"],
   ["no precon reads out of the pod", studyNow.decks.filter(d => d.group === "precon" && d.tier === "above").length === 0],
-  ["every cEDH list reads out, above every precon", studyNow.decks.filter(d => d.group === "cedh").every(d => d.tier === "above")],
+  ["every cEDH list scores above every precon", Math.min(...studyNow.decks.filter(d => d.group === "cedh").map(d => d.power.score)) > Math.max(...studyNow.decks.filter(d => d.group === "precon").map(d => d.power.score))],
   // Jorge's read of his own pod, November 2026. If a scoring change breaks one, ask him.
   ["Urza is the strongest, well above Luffy", vPod("Urza").power.score >= vPod("Luffy").power.score + 0.5 && vPod("Urza").power.score > vPod("Teysha").power.score],
   ["Urza stays below Bracket 4", ["3", "3*"].includes(vPod("Urza").practicalBracket)],

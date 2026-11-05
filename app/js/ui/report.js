@@ -5,7 +5,7 @@ import { MSG, EXTRA_PTS, dialName } from './constants.js';
 import { archName } from './helpers.js';
 import { renderHeader } from './header.js';
 
-const PILLARS = ['consistency', 'efficiency', 'interaction', 'wins'];
+const PILLARS = ['wins', 'interaction', 'salt', 'synergy'];
 
 export function copyReport() {
   if (!state.result) return;

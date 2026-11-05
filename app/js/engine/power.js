@@ -1,46 +1,43 @@
 // ---- power: an estimate on a 1-10 scale, ours and not anyone else's ----
-// Four pillars read off the deck profile. Each metric is placed between where a
-// weak precon sits (0) and where the median cEDH list sits (1), so "60" on a pillar
-// reads as "60% of the way from a weak precon to cEDH".
-// Informative only: it never decides a pod tier or a bracket.
+// Built on four values, by Jorge's call: ways to win, interaction, saltiness and
+// synergy. Speed and resilience are reported but do not score. The pod's verdict reads
+// this number (engine/verdict.js), and his read of his own decks is locked in the
+// parity test: change it through rules that hold for every deck.
 
-// [low, high] per metric, set from `node scripts/deck_study.js --metrics`:
-// low = where weak precons sit, high = the median cEDH list. avgMv runs
-// the other way. Measures that do not separate precons from cEDH in the study (total
-// and cheap draw, removal count, recursion, colour coverage) stay in the profile but out of the score.
+// [low, high] per scored metric: nothing at low, full marks at high.
 export const METRIC_RANGE = {
-  tutors: [2, 16],
-  avgMv: [3.7, 2], cheap: [13, 50], fastMana: [3, 13], ramp: [9, 24], quality: [76, 100],
+  ending: [0, 4], web: [0, 12], lines: [0, 2], winBy8: [0, 60], finishers: [1, 8],
   cheapAnswers: [2, 8], counters: [0, 10], stax: [0, 8], free: [0, 4], answersTotal: [8, 22],
-  ending: [0, 4], lines: [0, 2], winBy8: [0, 60], web: [0, 12], engine: [8, 28],
+  salt: [15, 80], engine: [8, 28],
 };
-// Game Changers are not a metric: each already scores for what it does, as a tutor or
-// fast mana, and counting the list too paid for the same card twice.
-const PILLAR_WEIGHT = { consistency: 0.15, efficiency: 0.25, interaction: 0.3, wins: 0.3 };
-const PILLARS = {
-  consistency: ["tutors"],
-  efficiency: ["avgMv", "cheap", "fastMana", "ramp", "quality"],
-  interaction: ["cheapAnswers", "counters", "stax", "free", "answersTotal"],
-  wins: ["ending", "lines", "winBy8", "web"],
+// Shown for context only. avgMv runs the other way.
+const INFO_RANGE = {
+  tutors: [2, 16], avgMv: [3.7, 2], cheap: [13, 50], fastMana: [3, 13], ramp: [9, 24], quality: [76, 100],
+  draw: [6, 20], protection: [1, 8], recursion: [1, 6],
 };
-// A deck wins through combos or through an engine, so that pillar takes the better of
-// the two: averaging would punish a specialist. An engine alone is slower and easier
-// to answer than a combo, hence its ceiling. Deep themes are normal in precons, so one
-// only counts once the deck around it is above precon level on efficiency and interaction.
-const ENGINE_CEILING = 0.5;
-const ENGINE_SUPPORT = [35, 50];
+const PILLAR_WEIGHT = { wins: 0.4, interaction: 0.25, salt: 0.15, synergy: 0.2 };
+// How many game-ending lines and loops a deck holds matters most. Reliability counts
+// least, because the simulation sees 3 and 4-card lines assemble rarely even when a deck
+// is built around them. Teysha's web of 20 combos is exactly that case.
+const COMBO_WEIGHT = { ending: 0.4, web: 0.3, lines: 0.2, winBy8: 0.1 };
+// A deck also wins through printed win conditions and overruns, more slowly and more
+// easily answered than a combo, hence the ceiling.
+const FINISHER_CEILING = 0.3;
+// Synergy is how deep the main theme runs. Deep themes are normal in precons, so one only
+// counts once the deck can also protect its plan with real interaction.
+const THEME_SUPPORT = [25, 50];
 
-// The score broken into questions a player asks. Every scored metric belongs to one
-// benchmark, so these explain the number without changing it. Resilience is read the
-// same way but left out of the score: in the study it did not separate precons from cEDH.
+// The score broken into questions a player asks. Every scored metric belongs to one, so
+// these explain the number without changing it.
 const BENCHMARKS = [
-  ["manaSpeed", "efficiency", ["fastMana", "ramp"]], ["curve", "efficiency", ["avgMv", "cheap"]], ["lands", "efficiency", ["quality"]],
-  ["finding", "consistency", ["tutors"]],
+  ["backups", "wins", ["ending", "web", "lines"]], ["winSpeed", "wins", ["winBy8"]], ["finishers", "wins", ["finishers"]],
   ["answers", "interaction", ["cheapAnswers", "counters", "answersTotal"]], ["denial", "interaction", ["stax"]], ["freeSpells", "interaction", ["free"]],
-  ["winSpeed", "wins", ["winBy8"]], ["backups", "wins", ["ending", "lines", "web"]], ["engine", "wins", ["engine"]],
+  ["saltiness", "salt", ["salt"]], ["engine", "synergy", ["engine"]],
 ];
-const RESILIENCE_RANGE = { draw: [6, 20], protection: [1, 8], recursion: [1, 6] };
-const RESILIENCE = [["cardFlow", ["draw"]], ["shielding", ["protection"]], ["recovery", ["recursion"]]];
+const INFO_BENCHMARKS = [
+  ["manaSpeed", ["fastMana", "ramp"]], ["curve", ["avgMv", "cheap"]], ["lands", ["quality"]], ["finding", ["tutors"]],
+  ["cardFlow", ["draw"]], ["shielding", ["protection"]], ["recovery", ["recursion"]],
+];
 const TIERS = [[0.9, "S"], [0.65, "A"], [0.35, "B"], [0.1, "C"], [-Infinity, "F"]];
 const tierOf = (x) => TIERS.find(([min]) => x >= min)[1];
 
@@ -49,13 +46,12 @@ const tierOf = (x) => TIERS.find(([min]) => x >= min)[1];
 // that a deck is past stock level, and it needs a playable list behind it: a pile of
 // pricey cards nobody plays (median EDHREC rank past 5000) doesn't count.
 // A deck already past the casual band has its strength in the score: no lift needed.
-const UPGRADED = { pricey: 10, medianRank: 5000, bonus: 0.5, floor: 4, onlyBelow: 5.5 };
+const UPGRADED = { pricey: 10, medianRank: 5000, bonus: 0.5, floor: 4.1, onlyBelow: 5.5 };
 const isUpgraded = ({ upgrade }) => !!upgrade && upgrade.pricey >= UPGRADED.pricey &&
   upgrade.medianRank !== null && upgrade.medianRank <= UPGRADED.medianRank;
 
-// raw pillar average -> score. Flat through the casual middle, steep toward cEDH,
-// the same shape commandersalt describes, with knots set from the study.
-const CURVE = [[0, 1.5], [20, 3.5], [40, 5.5], [60, 7.5], [85, 9.5], [100, 10]];
+// raw score -> 1-10. Set from the study: stock precons low, cEDH lists at the top.
+const CURVE = [[0, 1.5], [10, 2.6], [20, 3.8], [30, 4.8], [40, 5.9], [55, 7.4], [70, 9.5], [85, 10], [100, 10]];
 
 function toScale(raw) {
   for (let i = 1; i < CURVE.length; i++) {
@@ -65,73 +61,74 @@ function toScale(raw) {
   return CURVE[CURVE.length - 1][1];
 }
 
-function metricsOf(profile, stats) {
-  const { speed, consistency, interaction, wins, manabase } = profile;
-  return {
-    tutors: consistency.tutors,
-    avgMv: speed.avgMv, cheap: speed.cheap, fastMana: speed.fastMana, ramp: speed.ramp, quality: manabase.quality,
-    cheapAnswers: interaction.cheapAnswers, counters: interaction.counters, answersTotal: interaction.removal + interaction.wipes + interaction.counters,
-    stax: interaction.stax, free: interaction.free,
-    ending: wins.ending, lines: wins.lines, winBy8: profile.goldfish.winBy ? profile.goldfish.winBy[8] : null, web: wins.web, engine: profile.shape.engine.count,
-  };
-}
-
-// 0..1 between the metric's two anchors. No reading counts as the low end.
-function place(key, value) {
-  const [lo, hi] = METRIC_RANGE[key];
+// 0..1 between a metric's two anchors. No reading counts as the low end.
+function place(range, value) {
   if (value === null || value === undefined) return 0;
-  return Math.max(0, Math.min(1, (value - lo) / (hi - lo)));
+  return Math.max(0, Math.min(1, (value - range[0]) / (range[1] - range[0])));
 }
+const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 
-export function computePower(profile, stats) {
-  const metrics = metricsOf(profile, stats);
-  const pillars = {}, placed = {};
-  for (const [pillar, keys] of Object.entries(PILLARS)) {
-    for (const k of keys) placed[k] = place(k, metrics[k]);
-    pillars[pillar] = Math.round(keys.reduce((s, k) => s + placed[k], 0) / keys.length * 100);
-  }
-  placed.engine = place("engine", metrics.engine);
-  const support = (pillars.efficiency + pillars.interaction) / 2;
-  const supported = Math.max(0, Math.min(1, (support - ENGINE_SUPPORT[0]) / (ENGINE_SUPPORT[1] - ENGINE_SUPPORT[0])));
-  pillars.wins = Math.round(Math.max(pillars.wins, placed.engine * supported * ENGINE_CEILING * 100));
-  const raw = Object.entries(PILLAR_WEIGHT).reduce((sum, [k, w]) => sum + pillars[k] * w, 0);
-  const metricValue = { ...metrics, draw: profile.consistency.draw, protection: profile.interaction.protection, recursion: profile.consistency.recursion };
-  const bench = (key, pillar, keys, scored, at) => {
-    const share = keys.reduce((sum, k) => sum + at(k), 0) / keys.length;
-    return { key, pillar, scored, tier: tierOf(share), values: keys.map(k => ({ key: k, value: metricValue[k] })),
-      cards: [...new Set(keys.flatMap(k => profile.ledger[k] || []))] };
+// salt: saltScore() for this deck, or null until the ratings have loaded.
+export function computePower(profile, stats, salt = null) {
+  const { speed, consistency, interaction, wins, manabase, goldfish, shape, ledger } = profile;
+  const metrics = {
+    ending: wins.ending, web: wins.web, lines: wins.lines, winBy8: goldfish.winBy ? goldfish.winBy[8] : null,
+    finishers: wins.printed + wins.massPump,
+    cheapAnswers: interaction.cheapAnswers, counters: interaction.counters, stax: interaction.stax, free: interaction.free,
+    answersTotal: interaction.removal + interaction.wipes + interaction.counters,
+    salt: salt ? salt.total : null, engine: shape.engine.count,
   };
+  const info = {
+    tutors: consistency.tutors, avgMv: speed.avgMv, cheap: speed.cheap, fastMana: speed.fastMana, ramp: speed.ramp,
+    quality: manabase.quality, draw: consistency.draw, protection: interaction.protection, recursion: consistency.recursion,
+  };
+  const placed = Object.fromEntries(Object.keys(METRIC_RANGE).map(k => [k, place(METRIC_RANGE[k], metrics[k])]));
+  const placedInfo = Object.fromEntries(Object.keys(INFO_RANGE).map(k => [k, place(INFO_RANGE[k], info[k])]));
+
+  const combos = Object.entries(COMBO_WEIGHT).reduce((sum, [k, w]) => sum + placed[k] * w, 0);
+  const inter = mean(["cheapAnswers", "counters", "stax", "free", "answersTotal"].map(k => placed[k]));
+  const supported = place(THEME_SUPPORT, inter * 100);
+  const pillars = {
+    wins: Math.round(Math.max(combos, placed.finishers * FINISHER_CEILING) * 100),
+    interaction: Math.round(inter * 100),
+    salt: Math.round(placed.salt * 100),
+    synergy: Math.round(placed.engine * supported * 100),
+  };
+  const raw = Object.entries(PILLAR_WEIGHT).reduce((sum, [k, w]) => sum + pillars[k] * w, 0);
+
+  const cardsOf = (keys) => [...new Set(keys.flatMap(k => (k === "salt" ? (salt ? salt.top.map(c => c.name) : []) : ledger[k] || [])))];
   const benchmarks = [
-    ...BENCHMARKS.map(([key, pillar, keys]) => bench(key, pillar, keys, true, k => placed[k])),
-    ...RESILIENCE.map(([key, keys]) => bench(key, "resilience", keys, false, (k) => {
-      const [lo, hi] = RESILIENCE_RANGE[k];
-      return Math.max(0, Math.min(1, (metricValue[k] - lo) / (hi - lo)));
-    })),
+    ...BENCHMARKS.map(([key, pillar, keys]) => ({ key, pillar, scored: true, tier: tierOf(mean(keys.map(k => placed[k]))),
+      values: keys.map(k => ({ key: k, value: metrics[k] })), cards: cardsOf(keys) })),
+    ...INFO_BENCHMARKS.map(([key, keys]) => ({ key, pillar: "tempo", scored: false, tier: tierOf(mean(keys.map(k => placedInfo[k]))),
+      values: keys.map(k => ({ key: k, value: info[k] })), cards: cardsOf(keys) })),
   ];
-  // the cards doing the most scored jobs at once
+  // the cards doing the most scored jobs at once; salt alone says nothing about function
   const jobs = new Map();
-  for (const b of benchmarks) if (b.scored) for (const n of b.cards) jobs.set(n, (jobs.get(n) || 0) + 1);
+  for (const b of benchmarks) if (b.scored && b.key !== "saltiness") for (const n of b.cards) jobs.set(n, (jobs.get(n) || 0) + 1);
   const keyCards = [...jobs].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8).map(([name, count]) => ({ name, count }));
+
   const base = toScale(raw);
-  const score = isUpgraded(profile) && base < UPGRADED.onlyBelow ? Math.min(Math.max(base + UPGRADED.bonus, UPGRADED.floor), UPGRADED.onlyBelow) : base;
-  return { score: Math.min(10, Math.round(score * 10) / 10), upgraded: isUpgraded(profile), raw: Math.round(raw * 10) / 10, pillars, metrics, benchmarks, keyCards,
-    fingerprint: fingerprint(profile, metrics, placed) };
+  const score = isUpgraded(profile) && base < UPGRADED.onlyBelow
+    ? Math.min(Math.max(base + UPGRADED.bonus, UPGRADED.floor), UPGRADED.onlyBelow) : base;
+  return { score: Math.round(score * 10) / 10, upgraded: isUpgraded(profile), raw: Math.round(raw * 10) / 10, pillars,
+    metrics, benchmarks, keyCards, fingerprint: fingerprint(profile, metrics, placed, placedInfo, info) };
 }
 
 // A few plain facts about the deck's shape, each only when it clearly stands out.
-function fingerprint(profile, metrics, placed) {
+function fingerprint(profile, metrics, placed, placedInfo, info) {
   const marks = [];
   const top = profile.shape.archetypes[0];
   if (top && top.share >= 25) marks.push({ key: "arch", arch: top.key });
   if (profile.shape.typal.type && profile.shape.typal.share >= 30) marks.push({ key: "typal", type: profile.shape.typal.type });
-  if (placed.fastMana >= 0.5) marks.push({ key: "fastMana" });
-  if (placed.tutors >= 0.35) marks.push({ key: "tutored" });
+  if (placedInfo.fastMana >= 0.5) marks.push({ key: "fastMana" });
+  if (placedInfo.tutors >= 0.35) marks.push({ key: "tutored" });
   if (placed.counters >= 0.35) marks.push({ key: "counters" });
   if (placed.stax >= 0.35) marks.push({ key: "stax" });
   if (profile.wins.twoCard > 0) marks.push({ key: "twoCardWin" });
   else if (metrics.ending > 0) marks.push({ key: "comboWin" });
-  if (placed.engine >= 0.5) marks.push({ key: "engine", theme: profile.shape.engine.theme });
-  if (metrics.avgMv !== null && metrics.avgMv <= 2.6) marks.push({ key: "lowCurve" });
-  if (metrics.avgMv !== null && metrics.avgMv >= 3.8) marks.push({ key: "topHeavy" });
+  if (placed.engine >= 0.5) marks.push({ key: "engine" });
+  if (info.avgMv !== null && info.avgMv <= 2.6) marks.push({ key: "lowCurve" });
+  if (info.avgMv !== null && info.avgMv >= 3.8) marks.push({ key: "topHeavy" });
   return marks;
 }
