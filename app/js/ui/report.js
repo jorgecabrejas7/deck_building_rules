@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { RULES } from '../rules.js';
+import { COMBO_TAGS } from '../engine/index.js';
 import { T } from '../i18n.js';
 import { MSG, EXTRA_PTS, dialName } from './constants.js';
 import { archName } from './helpers.js';
@@ -14,9 +15,11 @@ export function copyReport() {
     t.price + ': €' + Math.round(state.result.stats.total_price_eur),
     t.cardsN + ': ' + state.result.stats.total_cards,
     t.archetype + ': ' + archName()];
-  const b = state.result.bracket3;
+  const b = state.result.bracket;
   lines.push(t.brTile + ': ' + (!b.fits ? t.brNo : b.pending ? t.brPending : t.brYes));
+  if (!b.pending) lines.push(t.brReadWotc + ': ' + b.checklist + ' · ' + t.brReadSb + ': ' + COMBO_TAGS[b.estimate].name + ' (' + COMBO_TAGS[b.estimate].bracket + ')');
   for (const c of b.checks) if (!c.ok) lines.push('  ✕ ' + t['br_' + c.id]);
+  for (const c of b.combos) lines.push('  ' + [...c.cards, ...c.filled].join(' + ') + ' [B' + COMBO_TAGS[c.tag].bracket + ' ' + COMBO_TAGS[c.tag].name + ']');
   for (const v of ev.violations) lines.push('✕ ' + (v.id === 'conditional' ? MSG.conditional[v.condId][lang](v) : MSG[v.id][lang](v)));
   for (const f of ev.flags) lines.push('⚠ ' + (MSG['flag_' + f.dial] ? MSG['flag_' + f.dial][lang](f) : f.id));
   for (const [k, p] of Object.entries(ev.breakdown)) lines.push('· ' + (EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang)) + ': +' + p + ' pts');

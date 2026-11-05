@@ -44,14 +44,17 @@ function renderHow() {
 <li>Maná rápido alto (9+) y hechizos gratis altos (5+) a la vez: +2 puntos extra.</li></ul>
 <h3>Qué se analiza</h3>
 <p>Solo el mazo de verdad: las cartas de un <b>maybeboard</b> o un <b>sideboard</b> no se analizan, porque no se juegan. Se detectan por cabecera («SIDEBOARD:», «Maybeboard»), por comentario («// Maybeboard») y por la etiqueta de categoría de Archidekt («[Maybeboard]»).</p>
-<h3>Bracket 3 (el sistema oficial de Wizards)</h3>
-<p>Aparte de los puntos del pod, cada mazo se comprueba contra el <b>Bracket 3 «Upgraded»</b> de Wizards, que es lo que pide la mayoría de mesas de fuera. Son dos varas de medir distintas: un mazo puede pasarse del presupuesto del pod y seguir siendo un Bracket 3 perfectamente legal.</p>
+<h3>Brackets (el sistema oficial de Wizards)</h3>
+<p>Aparte de los puntos del pod, cada mazo se mide con los <b>brackets</b> de Wizards. Son dos varas distintas: un mazo puede pasarse del presupuesto del pod y seguir siendo un Bracket 3 legal. Se dan dos lecturas: la lista de Wizards, que decide si cumple Bracket 3, y la estimación de Commander Spellbook, que avisa pero no suspende.</p>
 <ul>
 <li>Hasta <b>${BRACKET3.game_changers_max}</b> cartas de la lista de game changers.</li>
-<li>Nada de destrucción masiva de tierras.</li>
-<li>Turnos extra en poca cantidad (máximo ${BRACKET3.extra_turns_max}) y nunca encadenables ni en bucle.</li>
-<li>Ningún combo infinito intencionado de 2 cartas de fase temprana — se consideran tempranos los que suman ${BRACKET3.early_combo_mana} de maná o menos entre las dos piezas, es decir, montables en las primeras seis vueltas.</li>
+<li>Nada de destrucción masiva de tierras, ni por carta ni por combo. Cuenta también el bloqueo de maná de cartas como Winter Orb o Blood Moon, según la clasificación de Spellbook.</li>
+<li>Turnos extra en poca cantidad (máximo ${BRACKET3.extra_turns_max}) y nunca encadenables ni en bucle, tampoco mediante un combo de turnos infinitos.</li>
+<li>Ningún combo que <b>Commander Spellbook</b> sitúe en Bracket 4 o más (etiqueta Ruthless). Los de Bracket 3–4 (Spicy) caben, con aviso. El maná se muestra como información, no decide.</li>
 <li>Y el mazo tiene que ser legal: 100 cartas, singleton, dentro de la identidad de color del comandante y sin cartas de la banlist oficial.</li></ul>
+<p>Los tutores ya no tienen límite propio desde octubre de 2025: los más eficientes están en la lista de game changers. Una lista no demuestra la intención, así que la lectura va del Bracket 2 al 4: el 1 depende del tema y el 5 del metajuego competitivo.</p>
+<h3>El bracket de cada combo</h3>
+<p>Cada combo lleva la etiqueta de <b>Commander Spellbook</b>, de Exhibition (B1+) a Ruthless (B4+). Spellbook decide el bracket de cada combo, con su propia lógica: si una leyenda del combo es o no tu comandante, se recalcula igual que hace su estimador. Es su clasificación, no una regla de Wizards. Los combos que exigen una carta como comandante solo cuentan si esa carta está en la zona de mando.</p>
 <h3>Precios, combos y sugerencias</h3>
 <p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban automáticamente en cada análisis contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5 (mejoras de nivel: menos de €10). Las URLs de Archidekt se cargan a través de proxies públicos (r.jina.ai, allorigins, codetabs — se prueban en orden hasta que uno responde) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
   : `
@@ -76,14 +79,17 @@ function renderHow() {
 <li>High fast mana (9+) and high free spells (5+) together: +2 extra points.</li></ul>
 <h3>What gets analyzed</h3>
 <p>Only the real deck: cards in a <b>maybeboard</b> or <b>sideboard</b> are not analyzed, because they are not played. They are detected by header ("SIDEBOARD:", "Maybeboard"), by comment marker ("// Maybeboard") and by Archidekt's per-line category tag ("[Maybeboard]").</p>
-<h3>Bracket 3 (Wizards' official system)</h3>
-<p>Besides the pod points, every deck is checked against Wizards' <b>Bracket 3 "Upgraded"</b>, which is what most tables outside the pod ask for. They are two different yardsticks: a deck can blow the pod budget and still be a perfectly legal Bracket 3 deck.</p>
+<h3>Brackets (Wizards' official system)</h3>
+<p>Besides the pod points, every deck is measured against Wizards' <b>brackets</b>. They are two separate yardsticks: a deck can go over the pod budget and still be a legal Bracket 3 deck. You get two reads: Wizards' checklist, which decides whether the deck meets Bracket 3, and Commander Spellbook's estimate, which warns but does not fail.</p>
 <ul>
 <li>Up to <b>${BRACKET3.game_changers_max}</b> cards from the Game Changers list.</li>
-<li>No mass land denial.</li>
-<li>Extra turns in low quantities (at most ${BRACKET3.extra_turns_max}) and never chained or looped.</li>
-<li>No intentional early-game two-card infinite combo — early means the two halves cost ${BRACKET3.early_combo_mana} mana or less together, i.e. assemblable within the first six turns.</li>
-<li>And the deck must be legal: 100 cards, singleton, inside the commander's colour identity, nothing on the official banlist.</li></ul>
+<li>No mass land denial, by card or by combo. Mana locks such as Winter Orb or Blood Moon count too, per Spellbook's classification.</li>
+<li>Extra turns in low quantities (max ${BRACKET3.extra_turns_max}), never chainable or looped, including through an infinite-turns combo.</li>
+<li>No combo that <b>Commander Spellbook</b> places at Bracket 4 or higher (the Ruthless tag). Those at Bracket 3–4 (Spicy) fit, with a warning. Mana is shown for information and decides nothing.</li>
+<li>And the deck has to be legal: 100 cards, singleton, inside the commander's colour identity and nothing on the official ban list.</li></ul>
+<p>Tutors have had no limit of their own since October 2025: the most efficient ones are on the Game Changers list. A list cannot prove intent, so the read runs from Bracket 2 to 4: Bracket 1 depends on theme and Bracket 5 on the competitive metagame.</p>
+<h3>Each combo's bracket</h3>
+<p>Every combo carries <b>Commander Spellbook</b>'s tag, from Exhibition (B1+) to Ruthless (B4+). Spellbook decides each combo's bracket with its own logic: whether a legend in the combo is your commander is recalculated the way its estimator does. It is Spellbook's classification, not a Wizards rule. Combos that need a card as commander only count when that card is in the command zone.</p>
 <h3>Prices, combos and suggestions</h3>
 <p>Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked automatically on every analysis against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5 (tier upgrades: under €10). Archidekt URLs load through public proxies (r.jina.ai, allorigins, codetabs — tried in order until one answers) because Archidekt blocks direct browser reads; if you prefer your deck not to transit a third party, paste the list as text. Combos are checked against a database hosted on this very site — no third parties.</p>`;
   $('howBody').innerHTML = html;

@@ -91,7 +91,7 @@ export function renderVerdict() {
   // below BOTH parts, so it carries the pod verdict and the bracket verdict.
   const end = $('informeEnd');
   if (end) {
-    const b = r.bracket3;
+    const b = r.bracket;
     const marks = [];
     if (passing) marks.push(esc(t.endLegal));
     if (!b.pending) marks.push(esc(b.fits ? t.endBracketOk : t.endBracketNo));

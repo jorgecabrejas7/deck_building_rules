@@ -9,6 +9,7 @@
  *   (d) game changers pay on their own dial only.
  *   (e) maybeboard / sideboard cards never reach the analysis.
  *   (f) the commander picker is offered the WHOLE deck, not a shortlist.
+ *   (g) the bracket rules, on synthetic cards and on the real combo database.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
  * Users of the HTML app never need this.
@@ -87,7 +88,8 @@ console.log(`Precon parity: ${expected.length - fails}/${expected.length} decks 
 // subset of that list — and for a real partner pair, both halves.
 const combos = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "combos.json"), "utf8"));
 let cmdFails = 0, b3Fits = 0;
-const earlyCombos = [];
+const b3Levels = {};
+const tooStrong = [];
 const b3Reasons = {};
 for (const exp of expected) {
   const entries = exp.cards.map(c => ({ name: c.name, quantity: c.quantity }));
@@ -99,44 +101,27 @@ for (const exp of expected) {
     console.log(`COMMANDER ${exp.deck}: got ${cmds.join(" + ") || "(none)"}, box lists ${truth.join(" / ")}`);
   }
   const { stats, flagged } = PodEngine.computeDeckStats(entries, db);
-  const matched = PodEngine.matchCombos(entries.map(e => e.name), combos);
+  const matched = PodEngine.activeCombos(PodEngine.matchCombos(entries.map(e => e.name), combos), cmds);
   const cardsInfo = entries.filter(e => db[e.name]).map(e => ({ card: db[e.name], qty: e.quantity, name: e.name }));
   const validation = PodEngine.validateDeck(cardsInfo, cmds, db, []);
-  const b3 = PodEngine.evaluateBracket3({ stats, flagged, db, validation, combos: matched,
-    loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
+  const b3 = PodEngine.evaluateBrackets({ stats, flagged, db, validation, combos: matched, comboDb: combos, commanders: cmds,
+    deckNames: entries.map(e => e.name), loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
   if (b3.fits) b3Fits++;
   else for (const id of b3.failed) (b3Reasons[id] ||= []).push(exp.deck);
-  for (const c of b3.checks.find(x => x.id === "early_combos").combos)
-    earlyCombos.push({ deck: exp.deck, ...c });
+  (b3Levels[b3.checklist] ||= []).push(exp.deck);
+  for (const c of b3.checks.find(x => x.id === "combos").combos)
+    tooStrong.push({ deck: exp.deck, ...c });
 }
 console.log(`Commander detection: ${expected.length - cmdFails}/${expected.length} precons resolved to a listed commander`);
-console.log(`Bracket 3: ${b3Fits}/${expected.length} precons fit; misses ${JSON.stringify(
-  Object.fromEntries(Object.entries(b3Reasons).map(([k, v]) => [k, v.length])))}`);
-for (const c of earlyCombos) console.log(`  early combo: ${c.deck}: ${c.cards.join(" + ")} (${c.mana} mana)`);
+console.log(`Bracket 3: ${b3Fits}/${expected.length} precons fit; misses ${JSON.stringify(b3Reasons)}`);
+console.log(`Checklist read: ${JSON.stringify(Object.fromEntries(Object.entries(b3Levels).map(([k, v]) => [k, v.length])))}`);
+for (const c of tooStrong) console.log(`  Bracket 4+ combo: ${c.deck}: ${c.cards.join(" + ")} (${c.features[0]})`);
 // Precons are Bracket 2 decks, so a Bracket-3 miss on anything other than the
-// (genuine, unintended) early combos some of them ship means the check drifted.
-const unexpected = Object.keys(b3Reasons).filter(k => k !== "early_combos");
+// combos Spellbook itself rates 4+ (some precons do ship one) means the check drifted.
+const unexpected = Object.keys(b3Reasons).filter(k => k !== "combos");
 if (unexpected.length) {
   console.log(`UNEXPECTED Bracket 3 failures on precons: ${unexpected.join(", ")}`);
   fails++;
-}
-// early_combos is whitelisted above, so it needs its own guard: every flagged
-// combo must have been PRICED, not defaulted. A piece the lookup misses used
-// to score 0 mana and drag the combo under the threshold (split and modal
-// cards are keyed by their full "A // B" name, the combo DB by the front face).
-for (const c of earlyCombos) {
-  const priced = c.cards.every(n => {
-    const card = db[n] || Object.values(db).find(x => x && String(x.name).split(" // ")[0] === n);
-    return card && typeof card.cmc === "number";
-  });
-  const sum = c.cards.reduce((s, n) => {
-    const card = db[n] || Object.values(db).find(x => x && String(x.name).split(" // ")[0] === n);
-    return s + (card && typeof card.cmc === "number" ? card.cmc : NaN);
-  }, 0);
-  if (!priced || sum !== c.mana) {
-    console.log(`UNPRICED early combo in ${c.deck}: ${c.cards.join(" + ")} reported ${c.mana}, real ${sum}`);
-    fails++;
-  }
 }
 // (d) game changers pay on their own dial only. Same card, two price tags:
 // the points must not move, or an expensive game changer would outweigh a cheap
@@ -200,5 +185,81 @@ for (const exp of expected) {
 }
 console.log(`Commander picker: ${expected.length - optBad}/${expected.length} precons list every card with an eligibility`);
 if (optBad) fails++;
+
+// (g) the bracket rules themselves. Synthetic cards keep the mana arithmetic
+// obvious; the real database guards the shape of what the build produces.
+const brCard = (name, cmc, extra = {}) => ({ name, cmc, type_line: "Artifact", oracle_text: "", ...extra });
+const brDb = Object.fromEntries([
+  brCard("Two", 2), brCard("Three", 3), brCard("Five", 5), brCard("Six", 6), brCard("Plain", 1),
+  brCard("Orb", 2), brCard("Leader", 2, { type_line: "Legendary Creature — Human" }),
+  brCard("Pal", 1), brCard("Bud", 1),
+  brCard("Time A", 3, { oracle_text: "Take an extra turn after this one." }),
+  brCard("Time B", 3, { oracle_text: "Take an extra turn after this one." }),
+  brCard("Time C", 3, { oracle_text: "Take an extra turn after this one." }),
+  brCard("GC1", 2, { game_changer: true }), brCard("GC2", 2, { game_changer: true }),
+  brCard("GC3", 2, { game_changer: true }), brCard("GC4", 2, { game_changer: true }),
+].map(c => [c.name, c]));
+const brDbFile = { templates: {}, mass_land_denial: ["Orb"], extra_turn: [], combos: [
+  { c: ["Three", "Two"], r: "Infinite damage", t: "R", f: "ir" },
+  { c: ["Five", "Six"], r: "Infinite damage", t: "R", f: "ir" },
+  { c: ["Two", "Plain"], r: "Infinite mana", t: "R", m: 5, f: "ir" },
+  { c: ["Plain", "Three"], r: "Infinite ETB", t: "E", f: "i" },
+  { c: ["Plain", "Six"], r: "Infinite mana", t: "S", f: "ir" },
+  { c: ["Plain", "Five"], r: "Win the game", t: "R", f: "rw" },
+  { c: ["Two", "Five", "Six"], r: "Infinite turns", t: "R", f: "irt" },
+  { c: ["GC1", "Six"], r: "Mass Land Denial", t: "R", f: "rd" },
+  { c: ["Leader", "Three"], r: "Infinite damage", t: "R", f: "ir", mc: ["Leader"] },
+  { c: ["Bud", "Leader", "Pal"], r: "Infinite damage", t: "S", f: "ir" },
+] };
+const brEval = (names, commanders = []) => {
+  const entries = names.map(name => ({ name, quantity: 1 }));
+  const { stats, flagged } = PodEngine.computeDeckStats(entries, brDb);
+  const list = PodEngine.activeCombos(PodEngine.matchCombos(names, brDbFile), commanders);
+  return PodEngine.evaluateBrackets({ stats, flagged, deckNames: names, db: brDb, combos: list,
+    comboDb: brDbFile, commanders, validation: [], loopCards: [] });
+};
+const check = (b, id) => b.checks.find(c => c.id === id);
+const cutDown = (names, commanders = []) => {
+  const b = brEval(names, commanders);
+  const out = new Set(b.cuts.cards.map(c => c.card));
+  for (const c of b.cuts.choices) for (const n of c.from.slice(0, c.count)) out.add(n);
+  return brEval(names.filter(n => !out.has(n)), commanders);
+};
+const realMatch = (names, commanders = []) => PodEngine.activeCombos(PodEngine.matchCombos(names, combos), commanders);
+const consult = realMatch(["Thassa's Oracle", "Demonic Consultation"]);
+const BR_CASES = [
+  ["a combo Spellbook tags 4+ fails", brEval(["Two", "Three"]).failed.includes("combos")],
+  ["...however much mana it costs", brEval(["Five", "Six"]).failed.includes("combos")],
+  ["a Bracket 3-4 combo fits, with a warning", brEval(["Plain", "Six"]).fits && check(brEval(["Plain", "Six"]), "combos").borderline.length === 1],
+  ["a Bracket 1 combo is no concern, however cheap", brEval(["Plain", "Three"]).fits && brEval(["Plain", "Three"]).checklist === 2],
+  ["a combo's tag sets its checklist level", brEval(["Plain", "Six"]).checklist === 3 && brEval(["Two", "Three"]).checklist === 4],
+  ["what a combo costs is still reported", brEval(["Two", "Plain"]).combos[0].deploy === 8],
+  ["an infinite-turns combo breaks the extra-turn rule", brEval(["Two", "Five", "Six"]).failed.includes("extra_turns")],
+  ["a land-denial combo breaks the land rule", brEval(["GC1", "Six"]).failed.includes("mass_land_denial")],
+  ["a card flagged by Spellbook breaks the land rule", brEval(["Orb"]).failed.includes("mass_land_denial")],
+  ["a combo needing a commander does not exist from the 99", brEval(["Leader", "Three"]).fits],
+  ["...and does from the command zone", !brEval(["Leader", "Three"], ["Leader"]).fits],
+  ["commander + two cards takes Spellbook's two-card read", !brEval(["Bud", "Leader", "Pal"], ["Leader"]).fits && brEval(["Bud", "Leader", "Pal"], ["Leader"]).combos[0].tag === "R"],
+  ["the same three cards from the 99 do not", brEval(["Bud", "Leader", "Pal"]).fits && brEval(["Bud", "Leader", "Pal"]).combos[0].tag === "E"],
+  ["two extra turns pass, three fail", brEval(["Time A", "Time B"]).fits && !brEval(["Time A", "Time B", "Time C"]).fits],
+  ["four game changers read Bracket 4", brEval(["GC1", "GC2", "GC3", "GC4"]).checklist === 4 && !brEval(["GC1", "GC2", "GC3", "GC4"]).fits],
+  ["one game changer reads Bracket 3", brEval(["GC1"]).checklist === 3 && brEval(["GC1"]).fits],
+  ["nothing notable reads Bracket 2", brEval(["Plain"]).checklist === 2],
+  ["Spellbook's read takes the strongest tag", brEval(["Five", "Six"]).estimate === "R" && brEval(["Plain"]).estimate === "E"],
+  ["waiting on combos is pending, not a pass", PodEngine.evaluateBrackets({ stats: { game_changers: 0 }, flagged: {}, deckNames: [], db: {}, combos: null, comboDb: null, validation: [] }).pending],
+  ["the cut list always lands inside Bracket 3", [
+    ["Two", "Three"], ["Two", "Three", "Plain", "Five"], ["GC1", "GC2", "GC3", "GC4", "Six"],
+    ["Time A", "Time B", "Time C", "Orb"], ["Two", "Five", "Six", "Three", "GC1"],
+  ].every(names => cutDown(names).fits)],
+  ["the commander is the last card it cuts", brEval(["Leader", "Three"], ["Leader"]).cuts.cards.map(c => c.card).join() === "Three"],
+  ["real DB: every combo has a known tag", combos.combos.every(c => PodEngine.COMBO_TAGS[c.t])],
+  ["real DB: Oracle + Consultation is there, as a Ruthless win", consult.length === 1 && consult[0].win && consult[0].tag === "R" && !consult[0].infinite],
+  ["real DB: flags Winter Orb as land denial and Time Warp as a turn", combos.mass_land_denial.includes("Winter Orb") && combos.extra_turn.includes("Time Warp")],
+  ["real DB: a throttled build cannot slip through", combos.combos.length > 100000 && Object.keys(combos.templates).length > 100 && !!combos.updated],
+];
+const brBad = BR_CASES.filter(([, ok]) => !ok);
+for (const [label] of brBad) console.log(`BRACKET FAIL: ${label}`);
+console.log(`Bracket rules: ${BR_CASES.length - brBad.length}/${BR_CASES.length} correct`);
+if (brBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

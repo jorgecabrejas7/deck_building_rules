@@ -64,7 +64,7 @@
   .modal-body{padding:18px 16px}
 
   /* ≥44px touch targets on real controls */
-  .tab-btn,.btn-primary,.btn-ghost,.btn-accent,.btn-accent-sm,.btn-outline,
+  .combo-filter,.tab-btn,.btn-primary,.btn-ghost,.btn-accent,.btn-accent-sm,.btn-outline,
   .btn-outline-accent,.btn-tone-outline,.btn-ghost-sm,.chip-dashed,.cf-btn,
   .comp-clear,.pill-clear,.btn-build,.seg-toggle button,.seg-toggle-sm button,
   .modal-close,.price-pill,.banner-x,.valid-jump{min-height:44px}

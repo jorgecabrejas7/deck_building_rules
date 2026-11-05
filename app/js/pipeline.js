@@ -52,17 +52,17 @@ export async function getComboDb() {
 }
 export async function checkCombos() {
   if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
-  state.combosData = { status: 'checking', list: [], count: 0 };
+  state.combosData = { status: 'checking', list: [] };
   renderAll();
   try {
     const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), await getComboDb());
-    state.combosData = { status: 'done', list, count: list.length, dbVersion: comboDb.version };
+    state.combosData = { status: 'done', list, cardLists: comboDb, updated: comboDb.updated };
     recompute();
-    const inf = list.filter(c => c.infinite).length;
+    const inf = state.result.bracket.combos.filter(c => c.infinite).length;
     announce(inf ? T().srCombos + ' ' + inf : T().comboNone);
   } catch (e) {
     console.error(e);
-    state.combosData = { status: 'error', list: [], count: 0 };
+    state.combosData = { status: 'error', list: [] };
     announce(T().comboErr);
   }
   renderAll();
@@ -72,13 +72,6 @@ export function recompute(notFound) {
   const parsed = state.deck;
   const resolved = parsed.entries.filter(e => cardCache[e.name]);
   const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
-  const _cd = state.combosData && state.combosData.status === 'done' ? state.combosData : null;
-  stats.combos = _cd ? _cd.count : 0;
-  stats.combo_sizes = _cd ? _cd.list.filter(c => c.infinite).map(c => c.n) : [];
-  const evalRes = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
-  const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
-    cls: PodEngine.classifyCard(cardCache[e.name]) }));
-  const detected = PodEngine.detectArchetype(cardsInfo);
   // A user pick overrules detection, but only for the deck it was made on:
   // the same legend can sit in someone else's 99, so matching by name alone
   // would silently re-derive THEIR deck around YOUR commander.
@@ -87,12 +80,22 @@ export function recompute(notFound) {
   const picked = PodEngine.normalizeCommanders(pick, resolved, cardCache);
   const commanders = picked.length ? picked : PodEngine.pickCommanders(parsed, cardCache);
   const commander = commanders[0] || null;
+  const _cd = state.combosData && state.combosData.status === 'done' ? state.combosData : null;
+  const combos = _cd ? PodEngine.activeCombos(_cd.list, commanders) : null;
+  const infinite = (combos || []).filter(c => c.infinite);
+  stats.combos = infinite.length;
+  stats.combo_sizes = infinite.map(c => c.n);
+  const evalRes = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
+  const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
+    cls: PodEngine.classifyCard(cardCache[e.name]) }));
+  const detected = PodEngine.detectArchetype(cardsInfo);
   const options = PodEngine.commanderOptions(resolved, cardCache);
   const missing = notFound !== undefined ? notFound : (state.result ? state.result.notFound : []);
   const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, missing);
-  const bracket3 = PodEngine.evaluateBracket3({
-    stats, flagged, db: cardCache, validation,
-    combos: _cd ? _cd.list : null,
+  const bracket = PodEngine.evaluateBrackets({
+    stats, flagged, db: cardCache, validation, commanders,
+    deckNames: resolved.map(e => e.name),
+    combos, comboDb: _cd ? _cd.cardLists : null,
     loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
     unresolved: missing.length,
   });
@@ -107,7 +110,7 @@ export function recompute(notFound) {
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
   state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, options,
-    bracket3, whatIf, notFound: missing, validation };
+    bracket, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;
 }

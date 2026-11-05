@@ -1,7 +1,8 @@
 import { state, cardCache } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
-import { DIAL_META, MSG, comboFeatureText } from './constants.js';
+import { DIAL_META, MSG } from './constants.js';
+import { comboInline } from './combos.js';
 import { $, esc } from './helpers.js';
 import { checkCombos } from '../pipeline.js';
 import { bindSugPopovers } from './popover.js';
@@ -136,11 +137,8 @@ function comboBlock() {
         '<button id="comboBtn" class="btn-accent-sm">' + t.comboRetry + '</button></div>') + '</div>';
   }
   if (cd.status === 'checking') return '<div class="note-muted">' + t.comboChecking + '</div>';
-  const inf = cd.list.filter(c => c.infinite);
-  if (!inf.length) return '<div class="note-ok">✓ ' + t.comboNone +
-    (cd.list.length ? ' (' + cd.list.length + ' ' + t.comboOthers + ')' : '') + '</div>';
-  return '<div class="stack-6">' + inf.map(c =>
-    '<div class="combo-line"><b>' + c.cards.map(esc).join(' + ') + '</b>' +
-    (c.templates && c.templates.length ? ' <span class="txt-muted">+ ' + c.templates.map(esc).join(' + ') + '</span>' : '') +
-    ' <span class="txt-muted">→ ' + esc(comboFeatureText(c.features[0] || '', state.lang)) + '</span></div>').join('') + '</div>';
+  const inf = state.result.bracket.combos.filter(c => c.infinite);
+  if (!inf.length) return '<div class="note-ok">✓ ' + t.comboNone + '</div>';
+  return '<div class="stack-6">' + inf.slice(0, 12).map(c => '<div class="combo-line">' + comboInline(c) + '</div>').join('') +
+    (inf.length > 12 ? '<div class="note-sm">' + t.comboSeeAll.replace('%v', inf.length) + '</div>' : '') + '</div>';
 }
