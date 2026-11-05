@@ -75,6 +75,8 @@
 @media (max-width: 999px) {
   .verdict-cols{grid-template-columns:1fr;gap:10px}
   .pl-row{grid-template-columns:96px 1fr 30px}
+  .bm summary{min-height:44px}
+  .pf-keycards{columns:1}
   .pod-row{gap:8px}
   .pod-actions{margin-left:0;width:100%}
 }

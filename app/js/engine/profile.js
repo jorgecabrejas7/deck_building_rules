@@ -187,5 +187,18 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
     throughCommander: list.filter(c => c.cards.some(n => zone.has(n))).length,
   };
 
-  return { manabase: manabase(cardsInfo, avgMv, read), speed, consistency, interaction, wins, shape };
+  const names = (fn) => cardsInfo.filter(fn).map(x => front(x.card.name));
+  const cheapest = priced.length ? priced.reduce((a, b) => (b.deploy < a.deploy ? b : a)) : null;
+  const ledger = {
+    tutors: names(x => read(x).tutor), gc: names(x => x.card.game_changer),
+    fastMana: names(x => x.cls.type !== "L" && (x.card.cmc || 0) <= 2 && FAST_MANA_RE.test(oracleOf(x.card))),
+    ramp: names(x => read(x).ramp),
+    cheapAnswers: answers.filter(x => (x.card.cmc || 0) <= 2).map(x => front(x.card.name)),
+    counters: names(x => read(x).counter), stax: names(x => read(x).stax),
+    free: names(x => KEYWORD_PATTERNS.free_spells.test(oracleOf(x.card))),
+    draw: names(x => read(x).draw), protection: names(x => read(x).protection), recursion: names(x => read(x).recursion),
+    ending: [...new Set(ending.flatMap(c => c.cards))], twoCard: [...new Set(ending.filter(c => c.cardsToFind <= 2).flatMap(c => c.cards))],
+    fastest: cheapest ? cheapest.cards : [],
+  };
+  return { manabase: manabase(cardsInfo, avgMv, read), speed, consistency, interaction, wins, shape, ledger };
 }

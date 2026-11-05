@@ -14,11 +14,11 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Cut list to reach Bracket 3, rule-zero notes | CS | ✅ |
 | 1-10 power with pillars and drivers | CS | 🟡 fitted on few decks |
 | Card reader accurate on real decks | CS | ✅ Scryfall tags, 89% precision and 94% recall on 196 labelled cards |
-| 12-style benchmark breakdown: tier, question, reason, cards behind it | DC | ⬜ M2 |
-| Card ledger: which cards drive each score | CS, DC | ⬜ M2 |
-| Per-card score and weight in the deck list | CS | ⬜ M2 |
-| Score drivers with named boosts and penalties | CS | 🟡 M2 |
-| Deck fingerprint: plain-language description of the deck | CS | ⬜ M2 |
+| Benchmark breakdown: tier, question and the cards behind it | DC | ✅ 14 benchmarks |
+| Card ledger: which cards drive each score | CS, DC | ✅ |
+| Per-card score and weight in the deck list | CS | 🟡 top cards by jobs done |
+| Score drivers with named boosts and penalties | CS | ✅ replaced by benchmarks |
+| Deck fingerprint: plain-language description of the deck | CS | ✅ |
 | Goldfish turns: when the engine is ready, first must-answer threat | DC | ⬜ M3 |
 | Combo assembly odds by turn, with tutors counted | new | ⬜ M3 |
 | Draw odds calculator | DC | ⬜ M3 |
@@ -91,7 +91,7 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 
 ## Milestones
 - **M1, card reader:** done.
-- **M2, benchmarks and card ledger:** about 12 benchmarks under the four pillars, each with a tier, the question it answers, a generated sentence and its cards. Per-card contribution in the deck browser, and a deck fingerprint.
+- **M2, benchmarks and card ledger:** done.
 - **M3, goldfish engine:** seeded simulation of mana by turn, commander turn, first threat turn and combo assembly odds. Draw odds calculator.
 - **M4, profile depth:** manabase detail, salt breakdown, combo profile, win-condition and archetype reasons, report card grades.
 - **M5, improvement and sharing:** one-card-away combos, rule-based trim and tuning, precon browser with newer precons, import formats, share links, rule-zero image, buy links, tokens.

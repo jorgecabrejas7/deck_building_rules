@@ -134,7 +134,7 @@ async function study(d) {
     tier: ev.tier, points: ev.points, breakdown: ev.breakdown, violations: ev.violations.map(v => v.id === "conditional" ? v.condId : v.id),
     verdict, label: labels[d.podId] || null, price: stats.total_price_eur, gc: stats.game_changers,
     bracket: { fits: bracket.fits, checklist: bracket.checklist, estimate: bracket.estimate, failed: bracket.failed },
-    profile, salt: { total: salt.total, average: salt.average, top: salt.top.slice(0, 3) },
+    profile: { ...profile, ledger: undefined }, salt: { total: salt.total, average: salt.average, top: salt.top.slice(0, 3) },
     synergy: synergy.status === "done" ? { coverage: synergy.coverage, average: synergy.average, offPlan: synergy.offPlan } : null,
     power: { score: power.score, raw: power.raw, pillars: power.pillars }, metrics: power.metrics };
 }

@@ -315,7 +315,14 @@ const PF_CASES = [
   ["no EDHREC page is no data, not zero", synOf(null).status === "none"],
   ["synergy covers nonland cards with positive synergy", synOf(sameTable).coverage === 50 && synOf(sameTable).offPlan === 0],
   ["power reads weak decks low and strong decks at the top", weak.score < 4 && strong.score === 10],
-  ["power explains itself", strong.up.length > 0 && weak.down.length > 0],
+  ["every scored metric sits in a benchmark, so tiers explain the score", Object.keys(PodEngine.METRIC_RANGE).every(k => strong.benchmarks.some(b => b.scored && b.values.some(v => v.key === k)))],
+  ["benchmarks read top tier on a strong deck and low on a weak one", strong.benchmarks.filter(b => b.scored).every(b => b.tier === "S") && weak.benchmarks.find(b => b.key === "finding").tier === "F"],
+  ["a benchmark names the cards behind it", (() => {
+    const info = pfDeck([[pfCard("Search", 2, "Sorcery", { oracle_text: "Search your library for a card." })]]);
+    const prof = PodEngine.computeProfile({ cardsInfo: info, stats: {}, combos: [], commanders: [] });
+    const power = PodEngine.computePower(prof, {});
+    return power.benchmarks.find(b => b.key === "finding").cards.join() === "Search" && power.keyCards[0].name === "Search";
+  })()],
   ["study: every cEDH list scores above every precon", Math.min(...scores("cedh")) > Math.max(...scores("precon"))],
   ["study: the precon median stays in the casual band", (() => { const p = sorted(scores("precon")); return p[p.length >> 1] < 5; })()],
   ["study: the pillars stay within 0-100", study.decks.every(d => Object.values(d.power.pillars).every(v => v >= 0 && v <= 100))],

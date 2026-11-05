@@ -15,4 +15,4 @@ export { runSelfTest } from "./selftest.js";
 export { computeProfile, pipCounts, readCard, indexCardTags } from "./profile.js";
 export { saltScore } from "./salt.js";
 export { synergyScore } from "./synergyScore.js";
-export { computePower } from "./power.js";
+export { computePower, METRIC_RANGE } from "./power.js";

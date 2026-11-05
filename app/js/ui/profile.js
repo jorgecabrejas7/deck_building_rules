@@ -56,13 +56,33 @@ function pillars(power, t) {
       '<span><i class="pl-key c"></i>' + esc(t.pfRef_cedh) + '</span></div>' : '');
 }
 
-function drivers(power, t) {
-  const item = (d) => '<li>' + esc(t['pm_' + d.key]) + ' <b class="mono">' + show(d.value) + '</b></li>';
-  if (!power.up.length && !power.down.length) return '';
-  return '<div class="pf-cols">' +
-    (power.up.length ? '<div><h3 class="mini-title">' + esc(t.pfUp) + '</h3><ul class="pf-list">' + power.up.map(item).join('') + '</ul></div>' : '') +
-    (power.down.length ? '<div><h3 class="mini-title">' + esc(t.pfDown) + '</h3><ul class="pf-list">' + power.down.map(item).join('') + '</ul></div>' : '') +
-    '</div>';
+function fingerprint(power, t) {
+  const label = (m) => m.key === 'arch' ? esc((ARCH.find(x => x.k === m.arch) || { name: { [state.lang]: m.arch } }).name[state.lang])
+    : m.key === 'typal' ? esc(t.fp_typal.replace('%n', m.type)) : esc(t['fp_' + m.key]);
+  return power.fingerprint.length ? '<div class="combo-flags pf-print">' +
+    power.fingerprint.map(m => '<span class="combo-flag soft">' + label(m) + '</span>').join('') + '</div>' : '';
+}
+
+// Each benchmark opens to the question it answers and the cards behind its tier.
+function benchmarks(power, t) {
+  const groups = [...PILLAR_KEYS, 'resilience'];
+  const row = (b) => '<details class="bm"><summary><span class="bm-tier mono t-' + b.tier + '">' + b.tier + '</span>' +
+    '<span class="bm-name">' + esc(t['bm_' + b.key]) + '</span>' +
+    '<span class="note-sm mono">' + b.values.map(v => show(v.value)).join(' · ') + '</span></summary>' +
+    '<p class="note-sm">' + esc(t['bmq_' + b.key]) + '</p>' +
+    '<p class="note-sm">' + b.values.map(v => esc(t['pm_' + v.key]) + ': <b class="mono">' + show(v.value) + '</b>').join(' · ') + '</p>' +
+    (b.cards.length ? '<p class="bm-cards">' + b.cards.map(esc).join(', ') + '</p>' : '') + '</details>';
+  return '<div class="bm-groups">' + groups.map(g =>
+    '<div class="bm-group"><h3 class="mini-title">' + esc(t['pf_' + g]) + '</h3>' +
+    power.benchmarks.filter(b => b.pillar === g).map(row).join('') +
+    (g === 'resilience' ? '<p class="note-sm">' + esc(t.pfNotScored) + '</p>' : '') + '</div>').join('') + '</div>';
+}
+
+function keyCards(power, t) {
+  if (!power.keyCards.length) return '';
+  return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfKeyCards) + '</h3>' +
+    '<ul class="pf-list pf-keycards">' + power.keyCards.map(c => '<li>' + esc(c.name) +
+      (c.count > 1 ? ' <b class="mono">×' + c.count + '</b>' : '') + '</li>').join('') + '</ul></div>';
 }
 
 // The deck beside each reference group: also the plain-text view of the whole section.
@@ -135,7 +155,7 @@ export function renderProfile() {
       tile(t.pfSyn, synergy.status === 'done' ? synergy.coverage + '%' : synergy.status === 'loading' ? '…' : '—', t.pfSynSub) +
       tile(t.pfMana, profile.manabase.score, t.pfManaSub) +
     '</div>' +
-    pillars(power, t) + drivers(power, t) +
+    fingerprint(power, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) +
     '<div class="pf-grid">' + manaBlock(profile.manabase, t) + saltBlock(salt, t) + synergyBlock(synergy, t) + shapeBlock(profile, t) + '</div>' +
     '<details class="br-legend" open><summary>' + esc(t.pfCompareT) + '</summary>' + comparison(r, t) + '</details>' +
     '<p class="note-sm">' + esc(t.pfNote) + '</p></div>';
