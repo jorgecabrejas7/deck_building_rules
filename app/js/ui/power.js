@@ -2,7 +2,7 @@ import { state, cardCache } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { DIAL_META, EXTRA_PTS, MSG, dialName } from './constants.js';
-import { $, esc } from './helpers.js';
+import { $, esc, eur } from './helpers.js';
 import { checkCombos } from '../pipeline.js';
 import { bindSugPopovers } from './popover.js';
 
@@ -63,7 +63,7 @@ export function renderPower() {
     '<div class="gauge-fill" style="--w:' + pct.toFixed(1) + '%"></div>' +
     '<div class="gauge-tick" style="--x:' + (t1N / gMax * 100).toFixed(1) + '%"></div>' +
     '<div class="gauge-tick" style="--x:' + (budgetN / gMax * 100).toFixed(1) + '%"></div></div>' +
-    '<div class="mono gauge-scale"><span>0</span><span>' + t1N + '</span><span>' + budgetN + '</span><span>' + gMax + '</span></div>' +
+    '<div class="mono gauge-scale">' + [0, t1N, budgetN, gMax].map(v => '<span style="--x:' + (v / gMax * 100).toFixed(1) + '%">' + v + '</span>').join('') + '</div>' +
     (spends.length ? '<ul class="spend-list">' + spends.map(([k, v]) => '<li>' + esc(EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang)) + ' <b class="mono">+' + v + '</b></li>').join('') + '</ul>' : '') +
     '</div>';
 
@@ -79,7 +79,7 @@ export function renderPower() {
       const c = cardCache[n] || {};
       return '<span class="card-chip">' +
         '<span class="chip-art"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
-        esc(n) + ' <span class="mono chip-price">' + (c.price != null ? '€' + c.price : '—') + '</span></span>';
+        esc(n) + ' <span class="mono chip-price">' + (c.price != null ? eur(c.price) : '—') + '</span></span>';
     }).join('') + '</div>' : '') + (isCombo ? comboBlock() : '');
     html += '<div class="dial">' +
       '<div class="dial-row">' +
@@ -87,8 +87,7 @@ export function renderPower() {
       '<span class="mono dial-val">' + shownValue + '</span>' +
       meterHtml(spec, value, false) +
       '<span class="mono dial-pts ' + ptsTone + '">' + ptsLabel + '</span></div>' +
-      (detail ? '<div class="dial-detail"><div class="dial-detail-bar"></div>' +
-        '<div class="dial-detail-body">' + detail + '</div></div>' : '') + '</div>';
+      (detail ? '<div class="dial-detail-body">' + detail + '</div>' : '') + '</div>';
   }
   if (!activeD.length) html += '<div class="note-ok power-clear-note">✓ ' + t.powerAllQuiet + '</div>';
 

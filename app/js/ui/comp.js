@@ -42,7 +42,7 @@ export function renderComp() {
         .map(x => esc(x.name.split(' // ')[0])).join(', ') + '</p>' : '');
   }
   html += '</div><div class="comp-hint"><span>' + t.compHint + '</span>' +
-    (state.hl ? '<button id="clearHl" class="comp-clear">✕ ' + t.clear + ': ' + CATS[state.hl][lang] + '</button>' : '') + '</div>';
+    (state.hl ? '<button id="clearHl" class="comp-clear">' + t.clear + ': ' + CATS[state.hl][lang] + '</button>' : '') + '</div>';
   $('comp').innerHTML = html;
   for (const row of $('comp').querySelectorAll('[data-hl]'))
     row.onclick = () => {

@@ -1,58 +1,59 @@
-/* Page shell: header, main column, sticky summary, tab panes, modal, popovers. */
+/* Page shell: header, main column, tabs, sticky strip, tab panes, modal, popovers. */
 .page{min-height:100vh;display:flex;flex-direction:column}
 
-/* header / branding */
-.hero{position:relative;overflow:hidden;background:var(--panel);border-bottom:1px solid var(--border)}
-.hero-glow1{position:absolute;right:-40px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,oklch(0.55 0.09 260 / .22),transparent 65%)}
-.hero-glow2{position:absolute;right:150px;top:-100px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,oklch(0.5 0.1 300 / .16),transparent 65%)}
-.hero-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:14px 20px}
-.brand{display:flex;align-items:center;gap:14px}
-.brand-logo{width:44px;height:44px;border-radius:11px;background:conic-gradient(oklch(0.85 0.06 95),oklch(0.65 0.11 240),oklch(0.45 0.05 300),oklch(0.6 0.16 30),oklch(0.6 0.13 150),oklch(0.85 0.06 95));display:grid;place-items:center;flex:none}
-.brand-logo-inner{width:35px;height:35px;border-radius:8px;background:var(--panel);display:grid;place-items:center;font-weight:700;font-size:var(--fs-display)}
-.brand-text{display:flex;flex-direction:column;line-height:1.1}
-.brand-title{font-size:var(--fs-display);font-weight:700;letter-spacing:-0.01em}
-.brand-tag{font-size:var(--fs-micro);color:var(--muted);letter-spacing:0.14em}
-.header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* header: a wordmark and four quiet controls, nothing else */
+.hero-inner{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);max-width:var(--page);margin:0 auto;padding:var(--sp-4) var(--gutter)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+/* the one colour flourish in the chrome: the five colours of Magic, drawn as a ring */
+.brand-mark{width:22px;height:22px;flex:none;border-radius:50%;background:conic-gradient(oklch(0.85 0.06 95),oklch(0.65 0.11 240),oklch(0.45 0.05 300),oklch(0.6 0.16 30),oklch(0.6 0.13 150),oklch(0.85 0.06 95));-webkit-mask:radial-gradient(circle,transparent 6.5px,#000 7px);mask:radial-gradient(circle,transparent 6.5px,#000 7px)}
+.brand-text{display:flex;align-items:baseline;gap:var(--sp-3);min-width:0}
+.brand-title{font-size:var(--fs-ui);font-weight:600;letter-spacing:var(--track-snug);white-space:nowrap}
+.brand-tag{font-size:var(--fs-caption);color:var(--muted);white-space:nowrap}
+.header-actions{display:flex;gap:var(--sp-1);align-items:center}
 
-/* main column */
-.main{position:relative;width:100%;max-width:1180px;margin:0 auto;padding:16px 20px 12px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box}
-.sticky-sentinel{position:absolute;top:0;left:0;width:1px;height:1px}
-.sticky-wrap{position:sticky;top:0;z-index:60;background:var(--bg);padding:8px 0 0;display:flex;flex-direction:column;gap:10px}
-.summary-row{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
-.tabbar{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0}
+/* main column: children keep to the page width; the sticky strip alone runs edge to edge */
+.main{position:relative;width:100%;padding:var(--sp-2) 0 var(--sp-7);display:flex;flex-direction:column;gap:var(--sp-5);box-sizing:border-box}
+.main>*{box-sizing:border-box;width:min(var(--page),100% - 2*var(--gutter));margin-inline:auto}
+.main:focus{outline:none}
+.sticky-sentinel{position:absolute;top:0;left:0;width:1px;height:1px;margin:0}
+
+/* tabs: one segmented control */
+.tab-row{display:flex;justify-content:center;padding-block:var(--sp-2);z-index:61}
+.tabbar{display:inline-flex;gap:2px;padding:3px;border-radius:var(--r-pill);background:var(--fill);max-width:100%}
 #banner:empty{display:none}
 
-.section-nav{display:flex;gap:16px;overflow-x:auto;scrollbar-width:none;padding:2px 0 8px;font-size:var(--fs-caption);font-weight:600}
-.section-nav[hidden]{display:none}
-.section-nav a{flex:none;color:var(--muted);text-decoration:none;padding:3px 0}
-.section-nav a:hover{color:var(--text)}
-.skip-link{position:absolute;left:-999px;top:8px;z-index:300;background:var(--panel);color:var(--text);padding:8px 14px;border-radius:7px}
-.skip-link:focus{left:8px}
-.main:focus{outline:none}
-.sticky-wrap.stuck .stat-secondary{display:none}
-/* collapsed sticky chrome once the page is scrolled (class toggled in main.js) */
-.sticky-wrap.stuck{box-shadow:0 10px 18px -14px rgba(0,0,0,.4)}
-.sticky-wrap.stuck .summary-row{flex-wrap:nowrap;overflow-x:auto;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.sticky-wrap.stuck .summary-row::-webkit-scrollbar{display:none}
-.sticky-wrap.stuck .tier-box{min-width:0;flex:none;flex-direction:row;align-items:baseline;gap:8px;padding:6px 12px}
-.sticky-wrap.stuck .tier-box-value{font-size:var(--fs-body);white-space:nowrap}
-.sticky-wrap.stuck .cmd-tile{min-width:0;flex:none;padding:6px 12px}
-.sticky-wrap.stuck .cmd-tile img,.sticky-wrap.stuck .ci-pips{display:none}
-.sticky-wrap.stuck .cmd-tile>div{display:flex;align-items:baseline;gap:7px}
-.sticky-wrap.stuck .cmd-name{font-size:var(--fs-caption);white-space:nowrap}
-.sticky-wrap.stuck .stat-grid{display:flex;flex:none;min-width:0;gap:8px}
-.sticky-wrap.stuck .stat-tile{flex:none;display:flex;align-items:baseline;gap:7px;padding:6px 12px}
-.sticky-wrap.stuck .stat-value{font-size:var(--fs-body);white-space:nowrap}
-.sticky-wrap.stuck .stat-arch{font-size:var(--fs-caption);padding-top:0;white-space:nowrap}
-/* right-edge fade while more tiles remain off-screen (class toggled in summary.js) */
+/* sticky strip: section links on the left, the deck's readings on the right */
+.main>.sticky-wrap{position:sticky;top:0;z-index:60;width:100%;margin-block:calc(var(--sp-5) * -.5);padding:var(--sp-2) max(var(--gutter),calc((100% - var(--page)) / 2));min-height:52px;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-5);border-bottom:1px solid transparent;transition:border-color var(--dur) var(--ease);
+  background:color-mix(in oklab,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.6) blur(20px);backdrop-filter:saturate(1.6) blur(20px)}
+.sticky-wrap.stuck{border-bottom-color:var(--border)}
+body:not([data-tab=informe]):not([data-tab=detalles]) .sticky-wrap{display:none}
+.summary-row{order:1;display:flex;gap:var(--sp-5);align-items:center;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:opacity var(--dur) var(--ease)}
+.summary-row::-webkit-scrollbar{display:none}
+/* in the report the verdict says all this first, so the strip waits until it scrolls away */
+body[data-tab=informe] .sticky-wrap:not(.stuck) .summary-row{opacity:0;visibility:hidden}
+.sticky-wrap.stuck .stat-secondary,body[data-tab=informe] .cmd-tile{display:none}
+/* right-edge fade while more stats remain off-screen (class toggled in summary.js) */
 .summary-row.fade-end{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
-.tab-pane{display:none;flex-direction:column;gap:20px}
+
+.section-nav{flex:none;display:flex;gap:var(--sp-5);overflow-x:auto;scrollbar-width:none;font-size:var(--fs-caption);font-weight:500}
+.section-nav a{flex:none;color:var(--muted);text-decoration:none;padding:var(--sp-1) 0;transition:color var(--dur) var(--ease)}
+.section-nav a:hover{color:var(--text);opacity:1}
+.skip-link{position:absolute;left:-999px;top:8px;z-index:300;background:var(--panel);color:var(--text);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-sm)}
+.skip-link:focus{left:8px}
+.tab-pane{display:none;flex-direction:column;gap:var(--sp-5)}
 
 /* footer, modal, popover singletons */
-.footer{text-align:center;font-size:var(--fs-caption);color:var(--muted);padding:10px 20px 28px}
-.modal-backdrop{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);overflow:auto;padding:30px 16px;box-sizing:border-box}
-.modal-body{max-width:780px;margin:0 auto;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:26px 30px;position:relative}
-.text-pop{display:none;position:fixed;max-width:320px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 15px;font-size:var(--fs-body);line-height:1.6;box-shadow:0 12px 34px rgba(0,0,0,.35);z-index:100;pointer-events:none}
-.card-pop{display:none;position:fixed;width:264px;height:368px;border-radius:13px;border:1px solid var(--border);box-shadow:0 18px 50px rgba(0,0,0,.45);z-index:99;pointer-events:none;background:radial-gradient(ellipse at center,var(--panel2) 40%,var(--panel))}
+.footer{box-sizing:border-box;width:min(var(--page),100% - 2*var(--gutter));margin:0 auto;text-align:center;font-size:var(--fs-micro);color:var(--muted);padding:var(--sp-5) 0 var(--sp-7)}
+.modal-backdrop{display:none;position:fixed;inset:0;z-index:200;background:oklch(0.15 0.005 260 / .5);overflow:auto;padding:var(--sp-7) var(--sp-4);box-sizing:border-box}
+.modal-body{max-width:720px;margin:0 auto;background:var(--panel);border-radius:var(--r-xl);padding:var(--sp-7);position:relative;box-shadow:var(--shadow-2)}
+.text-pop{display:none;position:fixed;max-width:320px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);font-size:var(--fs-caption);line-height:1.55;box-shadow:var(--shadow-2);z-index:100;pointer-events:none}
+.card-pop{display:none;position:fixed;width:264px;height:368px;border-radius:13px;box-shadow:var(--shadow-2);z-index:99;pointer-events:none;background:var(--panel2)}
 .card-pop-img{position:absolute;inset:0;border-radius:inherit;background:center/cover no-repeat;opacity:0;transition:opacity .18s ease-out}
 .card-pop-img.in{opacity:1}
+
+/* wide screens keep the tabs in reach above the strip */
+@media (min-width:1000px){
+  .main>.tab-row{position:sticky;top:0;width:100%;height:56px;padding-block:0;align-items:center;background:color-mix(in oklab,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.6) blur(20px);backdrop-filter:saturate(1.6) blur(20px)}
+  .main>.sticky-wrap{top:56px}
+}

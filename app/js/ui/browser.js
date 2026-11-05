@@ -1,7 +1,7 @@
 import { state, cardCache } from '../state.js';
 import { T } from '../i18n.js';
 import { TYPES, TYPE_ORDER, CATS } from './constants.js';
-import { $, esc, badgeFor, helpIcon } from './helpers.js';
+import { $, esc, eur, badgeFor, helpIcon } from './helpers.js';
 import { bindCardTilePopover } from './popover.js';
 import { inCat } from './comp.js';
 
@@ -22,7 +22,7 @@ export function renderBrowser() {
     const label = byT ? TYPES[g][lang] : (CATS[g] ? CATS[g][lang] : g);
     return '<div class="group">' +
       '<h3 class="group-head">' +
-      esc(label.toUpperCase()) + ' · ' + cnt[g] + (!byT ? helpIcon(g) : '') + '</h3>' +
+      esc(label) + ' · ' + cnt[g] + (!byT ? helpIcon(g) : '') + '</h3>' +
       '<div class="card-grid">' +
       gmap[g].sort((a, b) => (a.card.cmc || 0) - (b.card.cmc || 0) || a.name.localeCompare(b.name)).map(x => {
         const badge = badgeFor(x.name);
@@ -37,7 +37,7 @@ export function renderBrowser() {
           wi + '</div>' +
           '<div class="tile-body">' +
           '<div class="tile-name">' + esc(x.name.split(' // ')[0]) + '</div>' +
-          '<div class="mono tile-sub">' + esc(mana) + ' · ' + (x.card.price != null ? '€' + x.card.price : '—') + (x.qty > 1 ? ' · x' + x.qty : '') + '</div></div></div>';
+          '<div class="mono tile-sub">' + esc(mana) + ' · ' + (x.card.price != null ? eur(x.card.price) : '—') + (x.qty > 1 ? ' · x' + x.qty : '') + '</div></div></div>';
       }).join('') + '</div></div>';
   }).join('');
   for (const tile of $('groups').querySelectorAll('.cardTile')) {

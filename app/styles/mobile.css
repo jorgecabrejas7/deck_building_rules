@@ -1,104 +1,103 @@
-/* Mobile overrides. Desktop ≥1000px is untouched: every rule lives behind a
-   media query. Target: no horizontal scroll at 360px, 44px touch targets. */
+/* Phone and tablet. Target: no horizontal page scroll at 360px, 44px touch targets. */
 
 @media (max-width: 999px) {
-  .hero-inner{padding:12px 14px}
-  .main{padding:12px 12px 10px;gap:12px}
   img{max-width:100%}
-  .tile-name,.cmd-name,.sug-name,.combo-line,.ramp-text{overflow-wrap:anywhere}
+  .tile-name,.cmd-name,.sug-name,.ramp-text{overflow-wrap:anywhere}
+  .hero-inner{padding-block:var(--sp-2)}
+  .brand-tag{display:none}
+  .brand-mark{display:none}
+  .brand-title{font-size:15px}
+  .main{gap:var(--sp-4)}
+  .tab-pane{gap:var(--sp-4)}
 
-  /* compact sticky summary: one horizontally scrollable strip.
-     NIVEL + PUNTOS stay first; commander art is what gets pushed off-screen. */
-  .sticky-wrap{padding:6px 0 0}
-  .summary-row{flex-wrap:nowrap;overflow-x:auto;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .summary-row::-webkit-scrollbar{display:none}
-  .summary-row .cmd-tile{order:1}
-  .tier-box{min-width:132px;padding:8px 14px;flex:none}
-  .tier-box-value{font-size:var(--fs-ui)}
-  .cmd-tile{min-width:0;flex:none;padding:4px 10px 4px 4px}
-  .cmd-tile img{width:42px;height:31px}
-  .cmd-name{font-size:var(--fs-caption);white-space:nowrap}
-  .stat-grid{display:flex;flex:none;gap:8px;min-width:0}
-  .stat-tile{flex:none;padding:6px 10px}
-  .stat-value{font-size:var(--fs-ui)}
-  .stat-arch{font-size:var(--fs-caption);white-space:nowrap}
-  .banner-box{padding:10px 14px;font-size:var(--fs-caption)}
+  /* the control fills the width, so all five tabs show without scrolling */
+  .tabbar{display:flex;width:100%;box-sizing:border-box}
+  .tab-btn{flex:1 1 auto;padding-inline:var(--sp-1)}
 
-  /* scrollable tab bar */
-  .tabbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .tabbar::-webkit-scrollbar{display:none}
-  .tab-btn{flex:0 0 auto;padding:12px 10px}
-  .section-nav a{min-height:36px;display:flex;align-items:center}
+  /* the strip floats under the section links, so appearing never moves the page */
+  .main>.sticky-wrap{min-height:44px;padding-block:0}
+  .section-nav{flex:1;gap:var(--sp-4)}
+  .section-nav a{min-height:44px;display:flex;align-items:center}
+  body[data-tab=informe] .summary-row{position:absolute;top:100%;left:0;right:0;padding:var(--sp-2) var(--gutter);border-bottom:1px solid var(--border);
+    background:color-mix(in oklab,var(--bg) 92%,transparent);-webkit-backdrop-filter:saturate(1.6) blur(20px);backdrop-filter:saturate(1.6) blur(20px)}
+  body[data-tab=detalles] .summary-row{padding-block:var(--sp-2)}
+  .summary-row{gap:var(--sp-4)}
+  .stat-tile,.tier-box{flex:none}
 
-  /* panels tighten */
-  .input-panel,.power-panel,.comp-panel,.browser-panel,.panel-pad,.panel-pad-lg,.tm-panel{padding:14px}
-  .curve-card{padding:14px}
+  /* panels tighten, never crowd */
+  .input-panel,.power-panel,.comp-panel,.browser-panel,.panel-pad,.panel-pad-lg,.tm-panel,.curve-card{padding:var(--sp-5) 20px}
+  .arch-head{padding-inline:20px}
+  .arch-body{padding-inline:20px}
+  .guide-list .arch-head{min-height:44px}
+  .adv-fold>summary{padding-inline:20px}
 
-  /* dial rows: label/value/points on top, full-width meter below */
-  .dial-row{grid-template-columns:1fr auto auto;gap:8px 10px}
+  /* the verdict stacks: sentence, then the number */
+  .verdict-hero{padding:var(--sp-6) var(--sp-5);border-radius:var(--r-lg)}
+  .vh-top{grid-template-columns:1fr;gap:var(--sp-4)}
+  .vh-power{justify-self:start}
+  .vh-action{width:100%;box-sizing:border-box;justify-content:center}
+
+  /* dial rows: label, value and points on top, full-width meter below */
+  .dial-row{grid-template-columns:1fr auto auto;gap:var(--sp-2) var(--sp-3)}
   .dial-row .dial-name{grid-column:1;grid-row:1}
   .dial-row .dial-val{grid-column:2;grid-row:1}
   .dial-row .dial-pts{grid-column:3;grid-row:1}
   .dial-row .dial-meter{grid-column:1/-1;grid-row:2}
-  .dial-detail{gap:10px}
-  .qrow{grid-template-columns:minmax(0,1fr) 52px auto;gap:8px}
+  .qrow{grid-template-columns:minmax(0,1fr) 52px auto;gap:var(--sp-2)}
 
-  /* composition rows: pill on top right, band below */
-  .comp-row{grid-template-columns:1fr auto;gap:8px 10px;min-height:44px}
+  /* composition rows: pill top right, band below */
+  .comp-row{grid-template-columns:1fr auto;gap:var(--sp-2) var(--sp-3);min-height:44px}
   .comp-row>span:first-child{grid-column:1;grid-row:1}
   .comp-row .comp-pill{grid-column:2;grid-row:1}
   .comp-row .comp-track{grid-column:1/-1;grid-row:2}
 
-  /* denser card grids */
-  .card-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
-  .hand-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:var(--sp-3)}
+  .hand-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:var(--sp-2)}
   .tile-name{font-size:var(--fs-micro)}
 
-  /* readable curve */
   .curve-wrap{grid-template-columns:1fr}
-  .curve-bins{gap:4px;height:186px}
+  .curve-bins{gap:var(--sp-1);height:186px}
   .bin-count{font-size:var(--fs-micro)}
 
-  /* modal */
-  .modal-backdrop{padding:16px 8px}
-  .modal-body{padding:18px 16px}
+  .pod-card{padding:var(--sp-3) var(--sp-4)}
+  .pod-table tbody th{min-width:120px}
+  .modal-backdrop{padding:var(--sp-3) var(--sp-2)}
+  .modal-body{padding:var(--sp-6) 20px;border-radius:var(--r-lg)}
 
   /* ≥44px touch targets on real controls */
-  .bm summary,.br-legend summary,.adv-disclosure summary,.adv-fold>summary,.cmd-chip,.cmd-search,.combo-link,.pod-sort,.combo-filter,.tab-btn,.btn-primary,.btn-ghost,.btn-accent,.btn-accent-sm,.btn-outline,
-  .btn-outline-accent,.btn-tone-outline,.btn-ghost-sm,.chip-dashed,.cf-btn,
+  .adv-disclosure summary,.adv-fold>summary,.cmd-chip,.cmd-search,.combo-link,.pod-sort,.tab-btn,.btn-primary,.btn-accent,.btn-accent-sm,.btn-outline,
+  .btn-outline-accent,.btn-ghost-sm,.chip-dashed,.cf-btn,.link-btn,
   .comp-clear,.pill-clear,.btn-build,.seg-toggle button,.seg-toggle-sm button,
-  .modal-close,.price-pill,.banner-x,.valid-jump{min-height:44px}
+  .modal-close,.price-pill,.valid-jump,.vh-action,.vh-bracket,.arch-field{min-height:44px}
+  .vh-bracket{display:flex;align-items:center}
   .icon-btn{width:44px;height:44px}
   .catHelp{width:22px;height:22px;font-size:var(--fs-caption);position:relative}
   .catHelp::after{content:"";position:absolute;inset:-11px}
   .modal-close{width:44px}
   /* under 16px, iOS zooms the page on focus */
   .deck-input,.arch-select,.cmd-search,.tm-ta{font-size:16px}
-  .brand-tag{display:none}
   .combo-link{display:inline-flex;align-items:center}
-  .verdict-hero{padding:16px}
+
 }
 
 @media (max-width: 999px) {
-  .verdict-cols{grid-template-columns:1fr;gap:10px}
-  .pl-row{grid-template-columns:96px 1fr 30px}
-  .bm summary{min-height:44px}
-  .pf-keycards{columns:1}
+  .verdict-cols{grid-template-columns:1fr;gap:var(--sp-4)}
+
 }
 
 @media (max-width: 480px) {
-  .brand-title{font-size:var(--fs-lead)}
-  /* header: exactly two rows — brand, then ONE icon-only actions row */
-  .hero-inner{row-gap:8px}
-  .header-actions{gap:6px;flex-wrap:nowrap;width:100%;justify-content:flex-end}
+  /* header: one row, icon-only controls; aria-labels carry the words */
+  .header-actions{gap:0}
   .header-actions .btn-txt{display:none}
-  .btn-outline,.btn-outline-accent{padding:7px 9px;font-size:var(--fs-caption)}
-  .header-actions .btn-outline,.header-actions .btn-outline-accent{min-width:44px;padding:0;font-size:var(--fs-ui)}
-  .card-grid{grid-template-columns:repeat(3,1fr);gap:6px}
-  .hand-grid{grid-template-columns:repeat(3,1fr)}
-  .vh-tier,.vh-power{font-size:var(--fs-display)}
-  .bm-groups{grid-template-columns:1fr}
+  .header-actions .btn-outline,.header-actions .btn-outline-accent{width:44px;min-width:44px;padding:0;justify-content:center}
+  .seg-toggle button{padding-inline:var(--sp-2)}
+  .card-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-3) var(--sp-2)}
+  .hand-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+
   .tm-grid{grid-template-columns:1fr}
+  .load-actions{flex-direction:column;align-items:stretch}
+  .load-actions .btn-primary{width:100%}
+  .arch-field{flex:none}
 }
 
 /* Hover-driven affordances only where hover exists */

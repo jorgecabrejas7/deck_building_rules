@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pod Deck Checker — La guía del Yoryi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/layout.css">
 <link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/power.css">
 <link rel="stylesheet" href="styles/mobile.css">
 </head>
 <body>
@@ -43,67 +45,65 @@ window.addEventListener('error', function (e) {
 </script>
 <a class="skip-link" href="#mainContent"></a>
 <div class="page">
-<div class="hero">
-  <div class="hero-glow1"></div>
-  <div class="hero-glow2"></div>
+<header class="hero">
   <div class="hero-inner">
     <div class="brand">
-      <div class="brand-logo"><div class="brand-logo-inner mono">Y</div></div>
+      <span class="brand-mark" aria-hidden="true"></span>
       <div class="brand-text">
         <h1 class="brand-title">La guía del Yoryi</h1>
-        <span id="appTag" class="brand-tag mono">POD DECK CHECKER</span>
+        <span id="appTag" class="brand-tag"></span>
       </div>
     </div>
     <div class="header-actions">
-      <button id="copyBtn" class="btn-outline">⧉</button>
-      <button id="howBtn" class="btn-outline-accent">?</button>
+      <button id="copyBtn" class="btn-outline"></button>
+      <button id="howBtn" class="btn-outline-accent"></button>
       <div class="seg-toggle">
         <button id="esBtn">ES</button>
         <button id="enBtn">EN</button>
       </div>
-      <button id="themeBtn" class="icon-btn" title="Tema">◐</button>
+      <button id="themeBtn" class="icon-btn"></button>
     </div>
   </div>
-</div>
+</header>
 <main id="mainContent" class="main" tabindex="-1">
   <div id="stickySentinel" class="sticky-sentinel"></div>
+  <div class="tab-row"><div id="tabbar" class="tabbar" role="tablist"></div></div>
   <div id="stickyWrap" class="sticky-wrap">
     <div id="summary" class="summary-row"></div>
-    <div id="tabbar" class="tabbar" role="tablist"></div>
     <nav id="sectionNav" class="section-nav" hidden></nav>
   </div>
 
   <div id="banner" aria-live="polite"></div>
 
   <div id="tab-load" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-load">
-    <div class="panel input-panel">
-      <h2 id="inputTitle" class="secT secT-lg">ANALIZAR MAZO</h2>
-      <textarea id="deckText" rows="10" class="mono deck-input"></textarea>
-      <div id="inputNotice" class="input-notice"></div>
-      <div class="controls-row">
-        <button id="analyzeBtn" class="btn-primary"></button>
-        <button id="tableModeBtn" class="btn-ghost"></button>
-        <button id="validJump" type="button" class="valid-jump" style="display:none"></button>
+    <div class="load">
+      <div class="load-head">
+        <h2 id="inputTitle" class="load-title"></h2>
+        <p id="loadSub" class="load-sub"></p>
+      </div>
+      <div class="input-panel">
+        <textarea id="deckText" rows="10" class="deck-input"></textarea>
+        <div id="inputNotice" class="input-notice" hidden></div>
+        <div class="load-actions">
+          <button id="analyzeBtn" class="btn-primary"></button>
+          <label class="arch-field">
+            <span id="archLabel"></span>
+            <select id="archSel" class="arch-select"></select>
+          </label>
+        </div>
+        <button id="validJump" type="button" class="valid-jump" hidden></button>
       </div>
       <div class="chips-row">
         <span id="tryLabel" class="lbl-muted"></span>
-        <span id="samples" style="display:contents"></span>
+        <span id="samples" class="chip-row"></span>
       </div>
-      <label class="arch-field">
-        <span id="archLabel"></span>
-        <select id="archSel" class="arch-select"></select>
-      </label>
-    </div>
-    <div id="validation" style="display:none"></div>
-    <div id="tableMode" style="display:none"></div>
-    <div id="empty" class="empty-state">
-      <div class="empty-pips">
-        <div></div><div></div><div></div><div></div><div></div>
+      <div class="controls-row">
+        <button id="tableModeBtn" type="button" class="link-btn"></button>
+        <button id="emptyPod" type="button" class="link-btn"></button>
       </div>
-      <div id="emptyT" class="empty-title"></div>
-      <div id="emptyX" class="empty-text"></div>
-      <button id="emptyPod" type="button" class="btn-ghost-sm"></button>
     </div>
+    <div id="validation" hidden></div>
+    <div id="tableMode" hidden></div>
   </div>
 
   <!-- Informe: three separate readings. The point budget decides who is in the pod and
@@ -119,7 +119,7 @@ window.addEventListener('error', function (e) {
     <section id="sec-plan" class="report-part" aria-labelledby="partPlanT">
       <div class="part-head"><h2 id="partPlanT" class="part-title"></h2></div>
       <div id="tips" class="stack-16">
-        <div id="tipsMain" class="panel panel-pad-lg"></div>
+        <div id="tipsMain"></div>
         <div id="tipsUp" class="panel panel-pad-lg" aria-live="polite"></div>
         <details class="panel adv-fold"><summary id="tipsCompT"></summary><div id="tipsComp" class="panel-pad-lg" aria-live="polite"></div></details>
       </div>
@@ -162,14 +162,12 @@ window.addEventListener('error', function (e) {
   </div>
 
   <div id="tab-guide" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-guide">
-    <div class="panel clip">
-      <h2 id="guideT" class="secT secT-lg guide-title"></h2>
-      <div id="guideBody"></div>
-    </div>
+    <div class="part-head"><h2 id="guideT" class="part-title"></h2></div>
+    <div id="guideBody" class="panel clip guide-list"></div>
   </div>
 </main>
 <div id="srStatus" class="vh" aria-live="polite"></div>
-<div id="footer" class="footer mono"></div>
+<div id="footer" class="footer"></div>
 <div id="howModal" class="modal-backdrop">
   <div id="howBody" class="modal-body" role="dialog" aria-modal="true" aria-labelledby="howTitle"></div>
 </div>

@@ -4,6 +4,7 @@ import { T } from '../i18n.js';
 import { ARCH, CATS, CAT_HELP, BADGE_OF } from './constants.js';
 
 export const $ = (id) => document.getElementById(id);
+export const eur = (v) => '€' + v.toFixed(2);
 export const fill = (s, vals) => Object.entries(vals).reduce((out, [k, v]) => out.replace('%' + k, v), s);
 // Banned cards named by the pod rules, read off the point evaluation that finds them.
 export const bannedCards = (r) => r.evalRes.violations.filter(v => v.id === 'banned')

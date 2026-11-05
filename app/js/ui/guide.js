@@ -11,11 +11,11 @@ export function renderGuide() {
     const open = state.openArch === a.k;
     return '<div class="arch-item">' +
       '<div data-arch="' + a.k + '" role="button" tabindex="0" aria-expanded="' + open + '" class="arch-head">' +
-      '<span>' + esc(a.name[lang]) + '</span><span aria-hidden="true">' + (open ? '−' : '＋') + '</span></div>' +
+      '<span>' + esc(a.name[lang]) + '</span><span class="arch-chev" aria-hidden="true"></span></div>' +
       (open ? '<div class="arch-body">' +
         '<div class="arch-desc">' + a.desc[lang] + '</div>' +
         '<div class="arch-how">' + a.how[lang] + '</div>' +
-        '<div class="mono arch-slots">' +
+        '<div class="arch-slots">' +
         '<span>' + t.slots + '</span>' +
         a.slots[lang].map(s => '<span class="slot-chip">' + esc(s) + '</span>').join('') +
         '<button data-build="' + a.k + '" class="btn-build">' + t.build + '</button></div></div>' : '') + '</div>';

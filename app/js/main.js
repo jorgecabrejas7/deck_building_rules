@@ -63,10 +63,10 @@ export function renderAll() {
   const focus = focusKey(document.activeElement) || lastFocus;
   applyTheme(); renderHeader(); renderInput(); renderGuide(); renderTabbar(); renderTableMode();
   const t = T();
-  $('emptyT').textContent = t.emptyT; $('emptyX').textContent = t.emptyX;
+  $('loadSub').textContent = t.emptyX;
   $('footer').textContent = t.footer;
   const has = !!state.result;
-  $('empty').style.display = has || state.tableOpen ? 'none' : '';
+  document.body.dataset.tab = state.tab;
   // the summary belongs to the deck's own tabs: Pod and Guide are about other things
   $('summary').style.display = has && (state.tab === 'informe' || state.tab === 'detalles') ? '' : 'none';
   renderSectionNav();

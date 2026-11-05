@@ -11,6 +11,7 @@ import { compSlots, tagCount } from './comp.js';
 function reason(r, t) {
   const ev = r.evalRes, a = RULES.tiers.tier1.max_points, b = RULES.tiers.tier2.max_points;
   const hard = ev.violations.filter(v => v.id !== 'budget');
+  if (hard.length && ev.points <= b) return fill(t.vWhyFitsButRules, { v: ev.points, b, a: hard.length });
   const main = fill(t['vWhy_' + (ev.points > b ? 'over' : ev.points > a ? 'tier2' : 'tier1')], { v: ev.points, a, b });
   return hard.length ? main + ' ' + fill(t.vWhyRules, { v: hard.length }) : main;
 }
@@ -40,14 +41,14 @@ function bracketLine(r, t) {
 export function renderVerdict() {
   const t = T(), r = state.result, lang = state.lang, ev = r.evalRes;
   const lines = violationLines(r, lang), spend = spendLine(r, t, lang);
+  const subs = lines.map(l => '<p class="vh-sub">✕ ' + esc(l) + '</p>').join('') + (spend ? '<p class="vh-sub">' + esc(spend) + '</p>' : '');
   $('verdict').innerHTML = '<div class="verdict-hero ' + tierTone(ev.tier) + '">' +
     '<div class="vh-top"><h2 class="vh-tier">' + esc(t[ev.tier]) + '</h2>' +
-    '<span class="vh-power mono">' + ev.points + ' <small>/ ' + RULES.tiers.tier2.max_points + ' ' + esc(t.pts) + '</small></span></div>' +
+    '<span class="vh-power mono">' + ev.points + ' <small>/ ' + RULES.tiers.tier2.max_points + ' ' + esc(t.pts.toLowerCase()) + '</small></span></div>' +
     '<p class="vh-why">' + esc(reason(r, t)) + '</p>' +
-    lines.map(l => '<p class="vh-sub">✕ ' + esc(l) + '</p>').join('') +
-    (spend ? '<p class="vh-sub">' + esc(spend) + '</p>' : '') +
-    '<div class="vh-foot"><a class="vh-action" href="#sec-plan">' + esc(ev.tier === 'above' ? t.vActionOut : t.vActionIn) + ' ↓</a>' +
-    '<a class="vh-bracket" href="#sec-profile">' + esc(powerLine(r, t)) + '</a>' +
+    (subs ? '<div class="vh-subs">' + subs + '</div>' : '') +
+    '<a class="vh-action" href="#sec-plan">' + esc(ev.tier === 'above' ? t.vActionOut : t.vActionIn) + ' ↓</a>' +
+    '<div class="vh-also"><a class="vh-bracket" href="#sec-profile">' + esc(powerLine(r, t)) + '</a>' +
     '<a class="vh-bracket" href="#sec-bracket">' + esc(bracketLine(r, t)) + '</a></div></div>';
   // the report closes on the same answers it opened with
   const podMark = ev.tier === 'above' ? '✕ ' + t.endOut : '✓ ' + t.endIn;

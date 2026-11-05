@@ -1,39 +1,62 @@
 /* Design tokens + base element rules. Light theme is the default; dark is a
    single body.dark block — js/ui/header.js resolves the system preference and
    always sets/removes the class (plus a pre-paint inline script in index.html). */
-body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);color-scheme:light;
-/* type scale — every font-size in the app maps to one of these roles:
-   micro 11 (fine-print labels/meta) · caption 12 (sub-panel titles, small UI)
-   body 13 (default prose/UI) · ui 14 (primary section titles, buttons, nav)
-   lead 16 (lead banners, key numbers) · title 18 (stat/tier values)
-   display 22 (brand, modal display) — 2× micro, so the scale spans a real octave */
---fs-micro:11px;--fs-caption:12px;--fs-body:14px;--fs-ui:15px;--fs-lead:17px;--fs-title:18px;--fs-display:24px;--fs-hero:32px;
---bg:#f2f0ec;--panel:#ffffff;--panel2:#faf9f7;--border:#e4e0d9;--border2:#efece6;--text:#23211e;--muted:#68635b;--faint:#b3aca0;--accent:oklch(0.52 0.13 260);--accentBtn:oklch(0.52 0.13 260);--accentFg:#ffffff;
---track:#efece6;--marker:#23211e;
+body{margin:0;font-family:var(--font-sans);font-size:var(--fs-body);line-height:1.5;background:var(--bg);color:var(--text);color-scheme:light;
+-webkit-font-smoothing:antialiased;font-feature-settings:'ss01' 0;
+--font-sans:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+--font-mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+/* type scale, in three clear jumps:
+   small   micro 12 (meta) · caption 13 (labels, chips) · body 15 (default) · ui 16 (controls, reading)
+   heading lead 19 (lead sentence) · title 22 (panel title) · display 32 (stat, modal)
+   page    section 40 (section title) · hero 56 (the verdict) · mega 96 (the verdict's number) */
+--fs-micro:12px;--fs-caption:13px;--fs-body:15px;--fs-ui:16px;--fs-lead:19px;--fs-title:22px;--fs-display:32px;--fs-section:40px;--fs-hero:56px;--fs-mega:96px;
+--track-tight:-0.025em;--track-snug:-0.015em;
+/* spacing: tight inside a group, generous between groups */
+--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--sp-8:64px;--sp-9:112px;
+--gutter:32px;--page:1040px;--measure:62ch;--sticky-offset:132px;
+--r-sm:8px;--r-md:12px;--r-lg:20px;--r-xl:28px;--r-pill:999px;
+--ease:cubic-bezier(.2,.8,.2,1);--dur:.2s;
+--shadow-1:0 1px 2px oklch(0.2 0.01 260 / .05),0 8px 24px -12px oklch(0.2 0.01 260 / .08);
+--shadow-2:0 2px 6px oklch(0.2 0.01 260 / .08),0 24px 56px -16px oklch(0.2 0.01 260 / .24);
+--fill:oklch(0.2 0.005 260 / .055);--fill-hover:oklch(0.2 0.005 260 / .1);
+--bg:oklch(0.975 0.002 260);--panel:#ffffff;--panel2:oklch(0.975 0.002 260);--border:oklch(0.915 0.003 260);--border2:oklch(0.945 0.002 260);--text:oklch(0.21 0.006 260);--muted:oklch(0.47 0.008 260);--faint:oklch(0.68 0.006 260);--accent:oklch(0.5 0.17 256);--accentBtn:oklch(0.5 0.17 256);--accentFg:#ffffff;
+--track:oklch(0.93 0.003 260);--marker:oklch(0.21 0.006 260);
 --pipW:oklch(0.93 0.05 95);--pipU:oklch(0.7 0.11 240);--pipB:oklch(0.35 0.03 300);--pipR:oklch(0.6 0.17 30);--pipG:oklch(0.62 0.13 150);
---zoneA:oklch(0.85 0.09 145);--zoneB:oklch(0.88 0.1 85);--zoneC:oklch(0.85 0.1 25);
---good:oklch(0.48 0.1 145);--warn:oklch(0.52 0.11 85);--bad:oklch(0.52 0.15 25);
---okBg:oklch(0.92 0.06 145);--okBd:oklch(0.8 0.1 145);--okFg:oklch(0.38 0.1 145);
---warnBg:oklch(0.95 0.05 85);--warnBd:oklch(0.85 0.08 85);--warnFg:oklch(0.42 0.09 85);
---badBg:oklch(0.96 0.03 25);--badBd:oklch(0.85 0.07 25);--badFg:oklch(0.45 0.13 25);
---tipBg:oklch(0.95 0.04 260);--tipBd:oklch(0.85 0.06 260);--tipFg:oklch(0.35 0.06 260);
---compBg:#f3f6f2;--compBd:#dde5dc;--compMut:#5f6d5a;--borderCtl:#8f8a80}
+--zoneA:oklch(0.86 0.07 150);--zoneB:oklch(0.89 0.08 85);--zoneC:oklch(0.85 0.08 25);
+--good:oklch(0.46 0.1 150);--warn:oklch(0.5 0.1 85);--bad:oklch(0.51 0.16 25);
+--okBg:oklch(0.955 0.035 150);--okBd:oklch(0.88 0.06 150);--okFg:oklch(0.36 0.09 150);
+--warnBg:oklch(0.96 0.04 85);--warnBd:oklch(0.88 0.07 85);--warnFg:oklch(0.4 0.08 85);
+--badBg:oklch(0.955 0.025 25);--badBd:oklch(0.88 0.05 25);--badFg:oklch(0.44 0.14 25);
+--tipBg:oklch(0.96 0.02 256);--tipBd:oklch(0.9 0.03 256);--tipFg:oklch(0.36 0.08 256);
+--compBg:#ffffff;--compBd:oklch(0.915 0.003 260);--compMut:oklch(0.47 0.008 260);--borderCtl:oklch(0.62 0.006 260)}
 body.dark{color-scheme:dark;
---bg:#141619;--panel:#1f2126;--panel2:#191b1f;--border:#2b2e34;--border2:#24272c;--text:#e8e6e1;--muted:#979eaa;--faint:#565b64;--accent:oklch(0.68 0.14 260);--accentBtn:oklch(0.56 0.14 260);--accentFg:#ffffff;
---track:#2b2e34;--marker:#e8e6e1;
+--shadow-1:0 1px 2px oklch(0 0 0 / .3);
+--shadow-2:0 2px 6px oklch(0 0 0 / .4),0 24px 56px -16px oklch(0 0 0 / .7);
+--fill:oklch(0.98 0.003 260 / .08);--fill-hover:oklch(0.98 0.003 260 / .14);
+--bg:oklch(0.16 0.004 260);--panel:oklch(0.21 0.005 260);--panel2:oklch(0.185 0.004 260);--border:oklch(0.29 0.005 260);--border2:oklch(0.26 0.005 260);--text:oklch(0.96 0.002 260);--muted:oklch(0.74 0.008 260);--faint:oklch(0.5 0.006 260);--accent:oklch(0.76 0.12 250);--accentBtn:oklch(0.54 0.17 256);--accentFg:#ffffff;
+--track:oklch(0.29 0.005 260);--marker:oklch(0.96 0.002 260);
 --pipW:oklch(0.93 0.05 95);--pipU:oklch(0.7 0.11 240);--pipB:oklch(0.52 0.04 300);--pipR:oklch(0.6 0.17 30);--pipG:oklch(0.62 0.13 150);
---zoneA:oklch(0.45 0.09 145);--zoneB:oklch(0.5 0.1 85);--zoneC:oklch(0.48 0.12 25);
---good:oklch(0.75 0.1 145);--warn:oklch(0.78 0.1 85);--bad:oklch(0.72 0.13 25);
---okBg:oklch(0.3 0.08 145);--okBd:oklch(0.45 0.1 145);--okFg:oklch(0.82 0.1 145);
---warnBg:oklch(0.28 0.06 85);--warnBd:oklch(0.42 0.09 85);--warnFg:oklch(0.85 0.1 85);
---badBg:oklch(0.25 0.07 25);--badBd:oklch(0.4 0.11 25);--badFg:oklch(0.85 0.08 25);
---tipBg:oklch(0.24 0.05 260);--tipBd:oklch(0.38 0.07 260);--tipFg:oklch(0.85 0.05 260);
---compBg:#1a211c;--compBd:#28332b;--compMut:#8fa38b;--borderCtl:#6d727b}
-html{scroll-padding-top:130px}
+--zoneA:oklch(0.45 0.08 150);--zoneB:oklch(0.5 0.09 85);--zoneC:oklch(0.48 0.11 25);
+--good:oklch(0.78 0.11 150);--warn:oklch(0.8 0.1 85);--bad:oklch(0.74 0.13 25);
+--okBg:oklch(0.27 0.05 150);--okBd:oklch(0.38 0.07 150);--okFg:oklch(0.88 0.08 150);
+--warnBg:oklch(0.27 0.045 85);--warnBd:oklch(0.4 0.07 85);--warnFg:oklch(0.88 0.09 85);
+--badBg:oklch(0.26 0.05 25);--badBd:oklch(0.4 0.09 25);--badFg:oklch(0.88 0.06 25);
+--tipBg:oklch(0.25 0.04 256);--tipBd:oklch(0.37 0.06 256);--tipFg:oklch(0.88 0.05 256);
+--compBg:oklch(0.21 0.005 260);--compBd:oklch(0.29 0.005 260);--compMut:oklch(0.74 0.008 260);--borderCtl:oklch(0.55 0.006 260)}
+@media (max-width:999px){body{--gutter:20px;--fs-section:32px;--fs-display:28px;--fs-hero:40px;--fs-mega:72px;--fs-title:20px;--fs-lead:18px;--sp-9:72px;--sticky-offset:100px}}
+html{scroll-padding-top:var(--sticky-offset);scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 ::placeholder{color:var(--muted);opacity:1}
-a{color:var(--accent)}a:hover{opacity:.8}
-h1,h2,h3{margin:0}
+a{color:var(--accent);text-underline-offset:.2em;text-decoration-thickness:1px}a:hover{opacity:.8}
+h1,h2,h3,h4{margin:0}
+p{margin:0}
+[hidden]{display:none!important}
 button,select,textarea,input{font:inherit;color:inherit}
-textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::selection{background:color-mix(in oklab,var(--accent) 26%,transparent)}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}

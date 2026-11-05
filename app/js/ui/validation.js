@@ -9,17 +9,17 @@ export function renderValidation() {
   // fold on the Load tab and is easy to miss before analyzing
   const jump = $('validJump');
   if (!r.validation.length) {
-    el.innerHTML = ''; el.style.display = 'none';
-    if (jump) jump.style.display = 'none';
+    el.innerHTML = ''; el.hidden = true;
+    if (jump) jump.hidden = true;
     return;
   }
   if (jump) {
     const n = r.validation.length;
-    jump.style.display = '';
+    jump.hidden = false;
     jump.textContent = '⚠ ' + n + ' ' + (n === 1 ? t.validJump1 : t.validJumpN) + ' ↓';
     jump.onclick = () => el.scrollIntoView();
   }
-  el.style.display = '';
+  el.hidden = false;
   el.innerHTML = '<div class="valid-box">' +
     '<h2 class="mini-title">' + t.validT + '</h2>' +
     r.validation.slice(0, 12).map(v => '<div class="valid-line">· ' + esc(MSG['valid_' + v.id][lang](v)) + '</div>').join('') +

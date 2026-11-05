@@ -3,7 +3,7 @@ import { state, cardCache, persistCache, saveSession } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { ARCH, DIAL_META, CATS } from './constants.js';
-import { $, esc, tierTone } from './helpers.js';
+import { $, esc, eur, tierTone } from './helpers.js';
 import { analyze, getCardTags, getComboDb, getSaltDb } from '../pipeline.js';
 import { renderInput } from './input.js';
 import { slotsFor } from './comp.js';
@@ -13,13 +13,13 @@ export function renderTableMode() {
   const t = T();
   $('tableModeBtn').textContent = t.tmBtn;
   const el = $('tableMode');
-  if (!state.tableOpen) { el.style.display = 'none'; return; }
-  el.style.display = '';
+  el.hidden = !state.tableOpen;
+  if (!state.tableOpen) return;
   let html = '<div class="panel tm-panel">' +
     '<h2 class="secT secT-lg">' + t.tmT + '</h2>' +
     '<div class="lbl-muted">' + t.tmHint + '</div>' +
     '<div class="tm-grid">' +
-    [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="mono tm-ta" placeholder="' + t.tmDeck + ' ' + (i + 1) + '" aria-label="' + t.tmDeck + ' ' + (i + 1) + '">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
+    [0, 1, 2, 3].map(i => '<textarea data-tm="' + i + '" rows="8" class="tm-ta" placeholder="' + t.tmDeck + ' ' + (i + 1) + '" aria-label="' + t.tmDeck + ' ' + (i + 1) + '">' + esc(state.tableTexts[i]) + '</textarea>').join('') + '</div>' +
     '<div><button id="tmRunBtn" ' + (state.tableBusy ? 'disabled' : '') + ' class="btn-accent">' +
     (state.tableBusy ? t.tmRunning + '…' : t.tmRun) + '</button></div>';
   const res = state.tableResults;
@@ -115,7 +115,7 @@ function cmpCards(res) {
     if (diff && shared) return '';
     return '<span class="sugTile card-chip' + (shared ? ' chip-shared' : '') + '" data-img="' + esc(c.img_normal || '') + '">' + (shared ? '<span title="=">≡</span> ' : '') +
       '<span class="chip-art"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
-      esc(x.name.split(' // ')[0]) + (c.price != null ? ' <span class="mono chip-price">€' + c.price + '</span>' : '') + '</span>';
+      esc(x.name.split(' // ')[0]) + (c.price != null ? ' <span class="mono chip-price">' + eur(c.price) + '</span>' : '') + '</span>';
   };
   let rows = '';
   for (const cat of Object.keys(CATS)) {

@@ -4,12 +4,16 @@ import { ARCH } from './constants.js';
 import { drawOdds } from '../engine/index.js';
 import { $, esc, fill } from './helpers.js';
 import { renderPod } from './pod.js';
+import { answer, cardList, fold, paint, tableWrap } from './reading.js';
 
-// The evidence behind the verdict: what the deck does, measured against the 36
-// precons, the pod's decks and public cEDH lists (data/deck_study.json). Its
-// this is its own reading and never decides the pod (engine/powerLevel.js).
+// The power level: how strong the deck is, measured against the 36 precons, the pod's
+// decks and public cEDH lists (data/deck_study.json). It is its own reading and never
+// decides the pod (engine/powerLevel.js). One story: the answer, the four values it is
+// built from, and what is behind each value on demand.
 const BANDS = [[5, 'casual'], [6.5, 'upgraded'], [7.6, 'mid'], [9, 'high'], [Infinity, 'cedh']];
-export const powerBand = (score) => BANDS.find(([top]) => score < top)[1];
+const powerBand = (score) => BANDS.find(([top]) => score < top)[1];
+const GROUPS = ['precon', 'pod', 'cedh'];
+const LEVEL = { F: 1, C: 2, B: 3, A: 4, S: 5 };
 
 let studyRequested = false;
 export function loadStudy() {
@@ -29,73 +33,171 @@ const med = (group, key) => {
   const v = state.study && state.study.medians[group] && state.study.medians[group][key];
   return typeof v === 'number' ? v : null;
 };
-const show = (v) => (v === null || v === undefined ? '—' : String(v));
+const isNone = (v) => v === null || v === undefined;
+const show = (v) => (isNone(v) ? '—' : String(v));
+const facts = (list) => '<ul class="rd-facts">' + list.map(([v, label]) => '<li><b>' + v + '</b> ' + esc(label) + '</li>').join('') + '</ul>';
+const archName = (key) => (ARCH.find(x => x.k === key) || { name: { [state.lang]: key } }).name[state.lang];
 
-function tile(label, value, sub) {
-  return '<div class="panel stat-tile"><div class="tile-label">' + esc(label) + '</div>' +
-    '<div class="mono stat-value">' + value + '</div>' +
-    (sub ? '<div class="note-sm combo-tile-sub">' + esc(sub) + '</div>' : '') + '</div>';
-}
-
-// One thin bar per pillar with the three reference medians as labelled ticks. Every
-// value is also printed in the comparison table below, so nothing relies on the bar.
-function pillars(power, t) {
-  const tick = (group, cls, key) => {
-    const v = med(group, 'pillar_' + key);
-    return v === null ? '' : '<span class="pl-tick ' + cls + '" style="--x:' + Math.min(v, 100) + '%" title="' +
-      esc(t['pfRef_' + group] + ': ' + v) + '"></span>';
+// Why the score sits where it does: which values pull away from the pod's median.
+function why(r, t) {
+  const { pillars, upgraded } = r.power;
+  const names = (keys) => new Intl.ListFormat(state.lang).format(keys.map(k => t['pf_' + k].toLocaleLowerCase(state.lang)));
+  const lead = () => {
+    if (!state.study) return '';
+    const gap = (k) => pillars[k] - med('pod', 'pillar_' + k);
+    const up = Object.keys(pillars).filter(k => gap(k) > 5), down = Object.keys(pillars).filter(k => gap(k) < -5);
+    return up.length && down.length ? fill(t.pfWhyBoth, { a: names(up), b: names(down) })
+      : up.length ? fill(t.pfWhyUp, { a: names(up) })
+      : down.length ? fill(t.pfWhyDown, { b: names(down) }) : t.pfWhyEven;
   };
-  return '<div class="pl-rows">' + Object.keys(power.pillars).map(k =>
-    '<div class="pl-row"><span class="pl-name">' + esc(t['pf_' + k] || k) + '</span>' +
-    '<div class="pl-track" aria-hidden="true"><div class="pl-fill" style="--w:' + power.pillars[k] + '%"></div>' +
-    tick('precon', 'a', k) + tick('pod', 'b', k) + tick('cedh', 'c', k) + '</div>' +
-    '<span class="mono pl-val">' + power.pillars[k] + '</span></div>').join('') + '</div>' +
-    (state.study ? '<div class="pl-legend note-sm">' +
-      '<span><i class="pl-key a"></i>' + esc(t.pfRef_precon) + '</span>' +
-      '<span><i class="pl-key b"></i>' + esc(t.pfRef_pod) + '</span>' +
-      '<span><i class="pl-key c"></i>' + esc(t.pfRef_cedh) + '</span></div>' : '');
+  return [lead(), upgraded ? t.pfWhyLift : ''].filter(Boolean).join(' ');
 }
 
-// When a card or combo sets the bracket, say which: the score alone would not explain it.
+// A card or combo sets the bracket here, so the score and the bracket disagree on purpose.
 function floorNote(r, t) {
   const f = r.level.floor;
-  if (!f) return '';
-  return '<p class="note-sm"><b>' + esc(fill(t['vWhyFloor_' + f.reason], { c: (f.reason === 'mld' ? f.mld : f.combos).join(', ') })) + '</b> ' +
-    esc(fill(t.vPowerOnly, { v: r.level.score })) + '</p>';
+  if (!f || r.level.bracket === r.level.powerBracket) return '';
+  return '<div class="rd-floor"><p class="rd-floor-t">' + esc(fill(t['vWhyFloor_' + f.reason], { c: (f.reason === 'mld' ? f.mld : f.combos).join(', ') })) + '</p>' +
+    '<p>' + esc(fill(t.pfFloorX, { b: r.level.powerBracket })) + '</p></div>';
 }
 
-function fingerprint(power, t) {
-  const label = (m) => m.key === 'arch' ? esc((ARCH.find(x => x.k === m.arch) || { name: { [state.lang]: m.arch } }).name[state.lang])
-    : m.key === 'typal' ? esc(t.fp_typal.replace('%n', m.type)) : esc(t['fp_' + m.key]);
-  return power.fingerprint.length ? '<div class="combo-flags pf-print">' +
-    power.fingerprint.map(m => '<span class="combo-flag soft">' + label(m) + '</span>').join('') + '</div>' : '';
+function head(r, t) {
+  const { level, power } = r;
+  const sub = level.pending ? esc(t.vPending)
+    : esc(fill(t.pfScore, { v: power.score })) + ' · ' + esc(t['band_' + powerBand(power.score)]);
+  return answer({ label: t.pfPracticalLabel, value: level.pending ? '…' : level.bracket, sub,
+    body: floorNote(r, t) +
+      (level.pending ? '' : '<p class="rd-why">' + esc(why(r, t)) + '</p>') +
+      '<p class="rd-apart">' + esc(t.pfApart) + '</p>' });
 }
 
-// Each benchmark opens to the question it answers and the cards behind its tier.
-function benchmarks(power, t) {
-  const groups = [...new Set(power.benchmarks.map(b => b.pillar))];
-  // no reading isn't a failing grade: a deck with no combo line has nothing to rate
-  const grade = (b) => (b.values.every(v => v.value === null || v.value === undefined) ? '—' : b.tier);
-  const row = (b) => '<details class="bm"><summary><span class="bm-tier mono t-' + grade(b) + '">' + grade(b) + '</span>' +
-    '<span class="bm-name">' + esc(t['bm_' + b.key] || b.key) + '</span>' +
-    '<span class="bm-vals note-sm">' + b.values.map(v => esc(t['pm_' + v.key] || v.key) + ' <b class="mono">' + show(v.value) + '</b>').join(' · ') + '</span></summary>' +
-    '<p class="note-sm">' + esc(t['bmq_' + b.key] || '') + '</p>' +
-    (b.cards.length ? '<p class="bm-cards">' + b.cards.map(esc).join(', ') + '</p>' : '') + '</details>';
-  return '<div class="bm-groups">' + groups.map(g =>
-    '<div class="bm-group"><h3 class="mini-title">' + esc(t['pf_' + g] || g) + '</h3>' +
-    power.benchmarks.filter(b => b.pillar === g).map(row).join('') +
-    (power.benchmarks.some(b => b.pillar === g && !b.scored) ? '<p class="note-sm">' + esc(t.pfNotScored) + '</p>' : '') + '</div>').join('') + '</div>' +
-    '<p class="note-sm">' + esc(t.bmLegend) + '</p>';
+// Where this value sits among the medians, in words. Synergy's medians are all 0, hence the c > b guards.
+function standing(v, k, t) {
+  const [a, b, c] = GROUPS.map(g => med(g, 'pillar_' + k));
+  if (b === null) return '';
+  const key = Math.abs(v - b) <= 2 ? 'pod'
+    : c > b && v >= c ? 'cedh'
+    : v > b ? (c > b && v - b > (c - b) / 2 ? 'near' : 'above')
+    : Math.abs(v - a) <= 2 ? 'precon'
+    : v > a ? 'between' : 'below';
+  return t['pfStand_' + key];
 }
 
-function keyCards(power, t) {
-  if (!power.keyCards.length) return '';
-  return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfKeyCards) + '</h3>' +
-    '<ul class="pf-list pf-keycards">' + power.keyCards.map(c => '<li>' + esc(c.name) +
-      (c.count > 1 ? ' <b class="mono">×' + c.count + '</b>' : '') + '</li>').join('') + '</ul></div>';
+const bar = (label, v, own) => '<li class="rd-bar' + (own ? ' own' : '') + '" style="--v:' + Math.min(v, 100) + '">' +
+  '<span class="rd-bar-l">' + esc(label) + '</span><span class="rd-bar-track" aria-hidden="true"><i></i></span>' +
+  '<span class="rd-bar-n' + (own ? ' vh' : '') + '">' + Math.round(v) + '</span></li>';
+
+// A player's reading of a measure: a word on a five-step scale, never a school grade.
+// No reading isn't a failing one: a deck with no combo line has nothing to rate.
+function level(b, t) {
+  const none = b.values.every(v => isNone(v.value));
+  const n = none ? 0 : LEVEL[b.tier];
+  return '<span class="rd-level"><span class="rd-pips" aria-hidden="true">' +
+    [1, 2, 3, 4, 5].map(i => '<i' + (i <= n ? ' class="on"' : '') + '></i>').join('') + '</span>' +
+    esc(none ? t.lvlNone : t['lvl_' + b.tier]) + '</span>';
 }
 
-// The deck beside each reference group: also the plain-text view of the whole section.
+function benchmark(b, t, cards) {
+  return '<section class="rd-bm"><div class="rd-bm-head"><h5>' + esc(t['bm_' + b.key] || b.key) + '</h5>' + level(b, t) + '</div>' +
+    '<p class="rd-q">' + esc(t['bmq_' + b.key] || '') + '</p>' +
+    facts(b.values.map(v => [isNone(v.value) ? esc(t.lvlNone) : esc(v.value), t['pm_' + v.key] || v.key])) + cards + '</section>';
+}
+
+// Per value: what only makes sense beside its measures.
+function winsExtra(r, t) {
+  const w = r.profile.wins;
+  return w.checked && w.ending ? '<p class="rd-text">' + esc(fill(t.pfWinsX, { e: w.ending, l: w.lines, t: w.twoCard, p: w.printed, f: show(w.fastest) })) + '</p>' : '';
+}
+
+function saltExtra(r, t) {
+  const { salt } = r;
+  if (!salt) return '';
+  const pod = state.study ? state.study.decks.filter(d => d.group === 'pod').map(d => d.salt.total) : [];
+  const rank = pod.length ? fill(t.pfSaltRank, { v: Math.round(pod.filter(x => x < salt.total).length / pod.length * 100) }) + '. ' : '';
+  return '<p class="rd-text">' + esc(rank + fill(t.pfSaltX, { a: salt.average })) + '</p>';
+}
+
+function synergyExtra(r, t) {
+  const s = r.synergy;
+  if (s.status === 'loading') return '<p class="rd-text">' + esc(t.brChecking) + '</p>';
+  if (s.status !== 'done') return '<p class="rd-text">' + esc(t.pfSynNone) + '</p>';
+  return '<section class="rd-bm"><div class="rd-bm-head"><h5>' + esc(t.pfSynT) + '</h5><span class="rd-level">' + s.coverage + '%</span></div>' +
+    '<p class="rd-q">' + esc(fill(t.pfSynX, { o: s.offPlan })) + '</p>' +
+    cardList(s.carrying.map(c => c.name), { note: (n) => '+' + Math.round(s.carrying.find(c => c.name === n).s * 100) + '%' }) +
+    '<a class="rd-link" href="https://edhrec.com/commanders/' + esc(s.slug) + '" target="_blank" rel="noopener noreferrer">EDHREC</a></section>';
+}
+
+function behind(k, r, t) {
+  const salted = new Map((r.salt ? r.salt.top : []).map(c => [c.name, String(c.salt)]));
+  const marks = r.power.benchmarks.filter(b => b.pillar === k).map(b =>
+    benchmark(b, t, cardList(b.cards, b.key === 'saltiness' ? { note: (n) => salted.get(n) || '' } : undefined))).join('');
+  const extra = { wins: winsExtra, salt: saltExtra, synergy: synergyExtra }[k];
+  return (extra ? extra(r, t) : '') + marks;
+}
+
+function value(k, r, t) {
+  const v = r.power.pillars[k];
+  // no combo check or salt ratings yet: the 0 behind this value isn't a reading
+  const none = (k === 'wins' && !r.profile.wins.checked) || (k === 'salt' && !r.salt);
+  const refs = GROUPS.map(g => [t['pfRef_' + g], med(g, 'pillar_' + k)]).filter(([, m]) => m !== null);
+  return '<article class="rd-value"><div class="rd-value-read"><h4>' + esc(t['pf_' + k]) + '</h4>' +
+    '<p class="rd-value-n">' + (none ? '—' : v) + '</p>' +
+    '<p class="rd-value-stand">' + esc(none ? t.lvlNone : standing(v, k, t)) + '</p></div>' +
+    '<ul class="rd-bars">' + bar(t.pfThisDeck, none ? 0 : v, true) + refs.map(([l, m]) => bar(l, m, false)).join('') + '</ul>' +
+    fold('value:' + k, t.pfBehind, '', behind(k, r, t)) + '</article>';
+}
+
+// Mana by turn: one series over time, every column labelled, so it is its own text equivalent.
+function manaChart(g, t) {
+  const turns = [1, 2, 3, 4, 5, 6, 8, 10];
+  const top = Math.max(...turns.map(n => g.mana[n - 1]), 1);
+  return '<h5 class="rd-sub-t">' + esc(t.gfManaT) + '</h5><ol class="rd-cols">' + turns.map(n =>
+    '<li style="--h:' + Math.round(g.mana[n - 1] / top * 100) + '"><b>' + g.mana[n - 1] + '</b><span class="rd-col" aria-hidden="true"></span>' +
+    '<span class="rd-col-l"><span class="vh">' + esc(t.gfTurn) + ' </span>T' + n + '</span></li>').join('') + '</ol>';
+}
+
+// Unscored context, all in one calm place: tempo with nobody interfering, the odds of
+// seeing each role, and the measures that describe the deck without counting for power.
+function context(r, t) {
+  const g = r.profile.goldfish, L = r.profile.ledger;
+  const deck = r.stats.total_cards - r.commanders.length;
+  const lead = [g.commanderTurn !== null ? fill(t.gfCommander, { v: g.commanderTurn }) : '',
+    g.winBy ? (g.winTurn !== null ? fill(t.gfWin, { v: g.winTurn }) : t.gfNoWin) + ' ' + fill(t.gfWinBy, { a: g.winBy[6], b: g.winBy[8], c: g.winBy[10] }) : ''].filter(Boolean).join(' ');
+  const roles = [['pr_ramp', L.ramp], ['pr_draw', L.draw], ['pr_tutors', L.tutors], ['pr_cheap_answers', L.cheapAnswers]];
+  const odds = tableWrap('<thead><tr><th></th>' + [2, 4, 6, 8].map(n => '<th scope="col">T' + n + '</th>').join('') + '</tr></thead><tbody>' +
+    // seven in hand plus one a turn after the first
+    roles.map(([label, cards]) => '<tr><th scope="row">' + esc(t[label]) + ' <span class="rd-dim">' + cards.length + '</span></th>' +
+      [2, 4, 6, 8].map(turn => '<td>' + Math.round(drawOdds(deck, cards.length, 6 + turn) * 100) + '%</td>').join('') + '</tr>').join('') + '</tbody>');
+  const marks = r.power.benchmarks.filter(b => !b.scored).map(b => benchmark(b, t, cardList(b.cards, { cap: 0 }))).join('');
+  return '<p class="rd-text rd-strong">' + esc(t.pfNotScored) + '</p>' +
+    (lead ? '<p class="rd-text">' + esc(lead) + '</p>' : '') + manaChart(g, t) +
+    '<p class="rd-q">' + esc(fill(t.gfX, { n: g.games })) + '</p>' +
+    '<h5 class="rd-sub-t">' + esc(t.gfOddsT) + '</h5>' + odds + marks;
+}
+
+function manabase(m, t) {
+  const rows = m.colors.map(c => '<tr><th scope="row"><span class="rd-pip" data-c="' + esc(c.color) + '" aria-hidden="true"></span>' + esc(c.color) + '</th>' +
+    '<td>' + Math.round(c.share * 100) + '%</td><td>' + c.sources + ' / ' + c.target +
+    (c.color === m.weakest && c.cover < 1 ? ' <span class="rd-short">' + esc(t.pfShort) + '</span>' : '') + '</td>' +
+    '<td class="rd-cover" aria-hidden="true" style="--v:' + Math.round(Math.min(c.cover, 1) * 100) + '"><span class="rd-bar-track"><i></i></span></td></tr>').join('');
+  return '<p class="rd-text">' + esc(fill(t.pfManaX, { f: m.fixing, q: m.quality, c: m.curve })) + '</p>' +
+    '<p class="rd-text">' + esc(fill(t.pfManaLands, { l: m.lands, b: m.basics, t: m.tapped, e: m.fetches })) + '</p>' +
+    (rows ? tableWrap('<thead><tr><th></th><th scope="col">' + esc(t.pfPips) + '</th><th scope="col">' + esc(t.pfSources) + '</th><th></th></tr></thead><tbody>' + rows + '</tbody>') : '');
+}
+
+function shape(r, t) {
+  const { power, profile: p } = r;
+  const mark = (m) => m.key === 'arch' ? archName(m.arch) : m.key === 'typal' ? fill(t.fp_typal, { n: m.type }) : t['fp_' + m.key];
+  const typal = p.shape.typal.type && p.shape.typal.share >= 25 ? fill(t.pfTypal, { n: p.shape.typal.type, s: p.shape.typal.share }) : '';
+  return (power.fingerprint.length ? '<p class="rd-text rd-strong">' + power.fingerprint.map(m => esc(mark(m))).join(' · ') + '</p>' : '') +
+    (p.shape.archetypes.length ? facts(p.shape.archetypes.map(a => [a.share + '%', archName(a.key)])) : '') +
+    (typal ? '<p class="rd-text">' + esc(typal) + '</p>' : '') +
+    (power.keyCards.length ? '<h5 class="rd-sub-t">' + esc(t.pfKeyCards) + '</h5>' +
+      cardList(power.keyCards.map(c => c.name), { note: (n) => { const c = power.keyCards.find(x => x.name === n); return c.count > 1 ? '×' + c.count : ''; } }) : '');
+}
+
+// The deck beside each reference group, what sets it apart first: distance from the
+// pod in units of the precon-to-cEDH span.
 function comparison(r, t) {
   const p = r.profile;
   const rows = [
@@ -106,113 +208,30 @@ function comparison(r, t) {
     ['stax', p.interaction.stax], ['ending_combos', p.wins.checked ? p.wins.ending : null],
     ['price', r.stats.total_price_eur],
   ];
-  // what sets this deck apart comes first: distance from the pod, in units of the precon-to-cEDH span
   const off = ([k, v]) => {
     const pod = med('pod', k), span = Math.abs((med('cedh', k) ?? 0) - (med('precon', k) ?? 0)) || 1;
     return v === null || pod === null ? -1 : Math.abs(v - pod) / span;
   };
-  const sorted = rows.slice().sort((a, b) => off(b) - off(a));
   const round = (k, v) => (v === null ? null : k === 'price' ? '€' + Math.round(v) : v);
-  const mark = (k, v) => {
-    const lo = Math.min(med('precon', k) ?? v, med('pod', k) ?? v), hi = Math.max(med('precon', k) ?? v, med('pod', k) ?? v);
-    return v === null ? '' : v > hi ? ' ↑' : v < lo ? ' ↓' : '';
-  };
-  const table = (list) => '<div class="tbl-scroll"><table class="br-table pf-table"><thead><tr><th></th>' +
-    '<th scope="col">' + esc(t.pfThisDeck) + '</th><th scope="col">' + esc(t.pfRef_precon) + '</th>' +
-    '<th scope="col">' + esc(t.pfRef_pod) + '</th><th scope="col">' + esc(t.pfRef_cedh) + '</th></tr></thead><tbody>' +
-    list.map(([k, v]) => '<tr><th scope="row">' + esc(t['pr_' + k]) + '</th><td class="mono"><b>' + show(round(k, v)) + esc(mark(k, v)) + '</b></td>' +
-      ['precon', 'pod', 'cedh'].map(g => '<td class="mono">' + show(round(k, med(g, k))) + '</td>').join('') + '</tr>').join('') +
-    '</tbody></table></div>';
-  return '<h3 class="mini-title">' + esc(t.pfCompareT) + '</h3>' + table(sorted.slice(0, 5)) +
-    '<details class="br-legend"><summary>' + esc(fill(t.pfCompareMore, { v: sorted.length })) + '</summary>' + table(sorted) + '</details>';
-}
-
-// Tempo if nobody interferes, plus how likely each role is to show up by each turn.
-function tempo(r, t) {
-  const g = r.profile.goldfish, L = r.profile.ledger;
-  const turns = [1, 2, 3, 4, 5, 6, 8, 10];
-  const deck = r.stats.total_cards - r.commanders.length;
-  const roles = [['pr_ramp', L.ramp], ['pr_draw', L.draw], ['pr_tutors', L.tutors], ['pr_cheap_answers', L.cheapAnswers]];
-  // seven in hand plus one a turn after the first
-  const odds = [2, 4, 6, 8].map(turn => '<th scope="col">T' + turn + '</th>').join('');
-  return '<details class="br-legend"><summary>' + esc(t.gfT) + '</summary>' +
-    '<p class="note-sm">' + esc(t.gfX.replace('%n', g.games)) + '</p>' +
-    '<div class="tbl-scroll"><table class="br-table"><thead><tr><th></th>' + turns.map(n => '<th scope="col">T' + n + '</th>').join('') +
-    '</tr></thead><tbody><tr><th scope="row">' + esc(t.gfMana) + '</th>' + turns.map(n => '<td class="mono">' + g.mana[n - 1] + '</td>').join('') + '</tr></tbody></table></div>' +
-    '<h3 class="mini-title">' + esc(t.gfOddsT) + '</h3>' +
-    '<div class="tbl-scroll"><table class="br-table"><thead><tr><th></th>' + odds + '</tr></thead><tbody>' +
-    roles.map(([label, cards]) => '<tr><th scope="row">' + esc(t[label]) + ' <span class="note-sm mono">' + cards.length + '</span></th>' +
-      [2, 4, 6, 8].map(turn => '<td class="mono">' + Math.round(drawOdds(deck, cards.length, 6 + turn) * 100) + '%</td>').join('') + '</tr>').join('') +
-    '</tbody></table></div></details>';
-}
-
-function tempoLead(r, t) {
-  const g = r.profile.goldfish;
-  const parts = [g.commanderTurn !== null ? t.gfCommander.replace('%v', g.commanderTurn) : '',
-    g.winBy ? (g.winTurn !== null ? t.gfWin.replace('%v', g.winTurn) : t.gfNoWin) + ' ' +
-      t.gfWinBy.replace('%a', g.winBy[6]).replace('%b', g.winBy[8]).replace('%c', g.winBy[10]) : ''];
-  return parts.some(Boolean) ? '<p class="pf-lead">' + esc(parts.filter(Boolean).join(' ')) + '</p>' : '';
-}
-
-// Salt means little as a bare number, so say where it sits among the pod's decks.
-function saltRank(salt, t) {
-  const pod = state.study ? state.study.decks.filter(d => d.group === 'pod').map(d => d.salt.total) : [];
-  return salt && pod.length ? fill(t.pfSaltRank, { v: Math.round(pod.filter(x => x < salt.total).length / pod.length * 100) }) : '';
-}
-
-function manaBlock(m, t) {
-  return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfManaT) + ' · <span class="mono">' + m.score + '/100</span></h3>' +
-    '<p class="note-sm">' + esc(t.pfManaX.replace('%f', m.fixing).replace('%q', m.quality).replace('%c', m.curve)) + '</p>' +
-    '<p class="note-sm">' + esc(t.pfManaLands.replace('%l', m.lands).replace('%b', m.basics).replace('%t', m.tapped).replace('%e', m.fetches)) + '</p>' +
-    (m.colors.length ? '<div class="tbl-scroll"><table class="br-table"><thead><tr><th></th><th scope="col">' + esc(t.pfPips) + '</th><th scope="col">' + esc(t.pfSources) + '</th></tr></thead><tbody>' +
-      m.colors.map(c => '<tr><th scope="row">' + c.color + (c.color === m.weakest && c.cover < 1 ? ' ⚠' : '') + '</th>' +
-        '<td class="mono">' + Math.round(c.share * 100) + '%</td><td class="mono">' + c.sources + ' / ' + c.target + '</td></tr>').join('') +
-      '</tbody></table></div>' : '') + '</div>';
-}
-
-function saltBlock(salt, t) {
-  if (!salt) return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfSaltT) + '</h3><p class="note-muted">' + esc(t.brChecking) + '</p></div>';
-  return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfSaltT) + ' · <span class="mono">' + salt.total + '</span></h3>' +
-    '<p class="note-sm">' + esc(t.pfSaltX.replace('%a', salt.average)) + '</p>' +
-    (salt.top.length ? '<ul class="pf-list">' + salt.top.slice(0, 5).map(c => '<li>' + esc(c.name) + ' <b class="mono">' + c.salt + '</b></li>').join('') + '</ul>' : '') + '</div>';
-}
-
-function synergyBlock(s, t) {
-  const head = '<h3 class="mini-title">' + esc(t.pfSynT) + (s.status === 'done' ? ' · <span class="mono">' + s.coverage + '%</span>' : '') + '</h3>';
-  if (s.status === 'loading') return '<div class="pf-block">' + head + '<p class="note-muted">' + esc(t.brChecking) + '</p></div>';
-  if (s.status !== 'done') return '<div class="pf-block">' + head + '<p class="note-muted">' + esc(t.pfSynNone) + '</p></div>';
-  return '<div class="pf-block">' + head +
-    '<p class="note-sm">' + esc(t.pfSynX.replace('%o', s.offPlan)) + '</p>' +
-    '<ul class="pf-list">' + s.carrying.map(c => '<li>' + esc(c.name) + ' <b class="mono">+' + Math.round(c.s * 100) + '%</b></li>').join('') + '</ul>' +
-    '<a class="combo-link" href="https://edhrec.com/commanders/' + esc(s.slug) + '" target="_blank" rel="noopener noreferrer">EDHREC ↗</a></div>';
-}
-
-function shapeBlock(p, t) {
-  const arch = p.shape.archetypes.map(a => esc((ARCH.find(x => x.k === a.key) || { name: { [state.lang]: a.key } }).name[state.lang]) + ' <b class="mono">' + a.share + '%</b>').join(' · ');
-  const w = p.wins;
-  const winLine = w.checked ? t.pfWinsX.replace('%e', w.ending).replace('%l', w.lines).replace('%t', w.twoCard)
-    .replace('%p', w.printed).replace('%f', show(w.fastest)) : t.brChecking;
-  return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfShapeT) + '</h3>' +
-    (arch ? '<p class="note-sm">' + arch + '</p>' : '') +
-    (p.shape.typal.type && p.shape.typal.share >= 25
-      ? '<p class="note-sm">' + esc(t.pfTypal.replace('%n', p.shape.typal.type).replace('%s', p.shape.typal.share)) + '</p>' : '') +
-    '<p class="note-sm">' + esc(winLine) + '</p></div>';
+  return tableWrap('<thead><tr><th></th><th scope="col">' + esc(t.pfThisDeck) + '</th>' +
+    GROUPS.map(g => '<th scope="col">' + esc(t['pfRef_' + g]) + '</th>').join('') + '</tr></thead><tbody>' +
+    rows.slice().sort((a, b) => off(b) - off(a)).map(([k, v]) => '<tr><th scope="row">' + esc(t['pr_' + k]) + '</th><td class="rd-own">' + show(round(k, v)) + '</td>' +
+      GROUPS.map(g => '<td>' + show(round(k, med(g, k))) + '</td>').join('') + '</tr>').join('') + '</tbody>');
 }
 
 export function renderProfile() {
   loadStudy();
-  const t = T(), r = state.result, root = $('profile');
-  const { power, profile, salt, synergy } = r;
-  const waiting = !profile.wins.checked;
-  root.innerHTML = '<div class="panel panel-pad-lg">' +
-    '<div class="combo-stats">' +
-      tile(t.pfPractical, waiting ? '…' : esc(r.level.bracket) + ' <span class="stat-cap">' + power.score + ' / 10</span>', waiting ? t.brPending : t['band_' + powerBand(power.score)]) +
-      tile(t.pfSalt, salt ? salt.total : '…', saltRank(salt, t)) +
-      tile(t.pfSyn, synergy.status === 'done' ? synergy.coverage + '%' : synergy.status === 'loading' ? '…' : '—', t.pfSynSub) +
-      tile(t.pfMana, profile.manabase.score, t.pfManaSub) +
+  const t = T(), r = state.result;
+  const { power, profile } = r;
+  const g = profile.goldfish, top = profile.shape.archetypes[0];
+  paint($('profile'), '<div class="panel rd">' + head(r, t) +
+    '<div class="rd-values"><div class="rd-intro"><h3>' + esc(t.pfValuesT) + '</h3><p>' + esc(t.pfValuesX) + '</p></div>' +
+      Object.keys(power.pillars).map(k => value(k, r, t)).join('') + '</div>' +
+    '<div class="rd-folds">' +
+      fold('context', t.pf_tempo, g.commanderTurn !== null ? fill(t.gfAside, { v: g.commanderTurn }) : '', context(r, t)) +
+      fold('mana', t.pfManaT, fill(t.pfManaAside, { v: profile.manabase.score }), manabase(profile.manabase, t)) +
+      fold('shape', t.pfShapeT, top ? archName(top.key) : '', shape(r, t)) +
+      fold('compare', t.pfCompareT, '', comparison(r, t)) +
     '</div>' +
-    floorNote(r, t) + fingerprint(power, t) + tempoLead(r, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) + tempo(r, t) +
-    '<div class="pf-grid">' + manaBlock(profile.manabase, t) + saltBlock(salt, t) + synergyBlock(synergy, t) + shapeBlock(profile, t) + '</div>' +
-    comparison(r, t) +
-    '<p class="note-sm">' + esc(t.pfNote) + '</p></div>';
+    '<p class="rd-foot">' + esc(t.pfNote) + '</p></div>');
 }

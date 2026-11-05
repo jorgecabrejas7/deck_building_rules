@@ -73,7 +73,7 @@ export function renderCommander() {
   // Correcting detection is rare, so the picker stays folded unless detection found
   // nobody. Its chips only render when open: 90 tab stops must not precede the report.
   const open = state.cmdOpen || !picked.length;
-  el.innerHTML = '<div class="panel cmd-panel">' +
+  el.innerHTML = '<div class="cmd-panel">' +
     '<div class="cmd-line">' +
     (picked.length ? '<div class="cmd-seats">' + picked.map(seat).join('') + '</div>' : '<div class="note-warn">' + esc(t.cmdNone) + '</div>') +
     '<span class="comp-sub">' + esc(manual ? t.cmdManualTag : t.cmdAutoTag) + '</span>' +

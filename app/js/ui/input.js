@@ -25,7 +25,7 @@ export function renderInput() {
   for (const b of $('samples').querySelectorAll('[data-sample]'))
     b.onclick = () => { $('deckText').value = SAMPLES[b.dataset.sample]; state.error = null; renderInput(); };
   const notice = $('inputNotice');
-  if (state.error) { notice.style.display = ''; notice.textContent = t[state.error] || state.error; }
-  else if (PodEngine.detectInput($('deckText').value).kind === 'moxfield') { notice.style.display = ''; notice.textContent = t.mox; }
-  else notice.style.display = 'none';
+  if (state.error) { notice.hidden = false; notice.textContent = t[state.error] || state.error; }
+  else if (PodEngine.detectInput($('deckText').value).kind === 'moxfield') { notice.hidden = false; notice.textContent = t.mox; }
+  else notice.hidden = true;
 }

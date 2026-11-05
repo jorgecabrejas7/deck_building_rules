@@ -35,7 +35,7 @@ function bigSugTile(c, cut, x = {}) {
     '<div class="sug-body"><div class="sug-name">' + esc(c.name) +
     (price ? ' <span class="mono chip-price">' + price + '</span>' : '') + '</div>' +
     '<div class="sug-why">' + esc(x.why || whyAdd(c)) + '</div>' +
-    (cut ? '<div class="sug-cut">✂ ' + esc(t.tipsSwap) + ': <b>' + esc(cut.name) + '</b>' +
+    (cut ? '<div class="sug-cut">' + esc(t.tipsSwap) + ': <b>' + esc(cut.name) + '</b>' +
       (x.cutWhy ? ' <span class="why">(' + esc(x.cutWhy) + ')</span>'
         : cut.card && cut.card.edhrec_rank ? ' <span class="mono">#' + fmtRank(cut.card.edhrec_rank) + '</span>' : '') + '</div>' : '') +
     '</div></div>';
@@ -72,7 +72,7 @@ function cutPlanHtml(r, t) {
   const ev = r.evalRes, cuts = orderedCuts(r).slice(0, 10), target = ev.tier === 'above' ? RULES.tiers.tier2.max_points : RULES.tiers.tier1.max_points;
   let running = ev.points;
   const rows = cuts.map(c => {
-    running -= Math.max(c.dPts, 0);
+    running = Math.max(running - Math.max(c.dPts, 0), 0);
     const card = cardCache[c.name] || { name: c.name };
     return '<li class="plan-step">' + sugChip({ name: c.name, price: card.price, img_art: card.img_art, img_normal: card.img_normal }) +
       '<span class="plan-after mono">' + (c.dPts > 0 ? '−' + c.dPts + ' → ' + running : esc(t.planFixes)) + '</span></li>';
@@ -269,8 +269,8 @@ async function fillUpgrades(details, key) {
     const blocked = options.filter(o => o.blocked);
     if (blocked.length) {
       body += '<div class="adv-blocked">' + blocked.map(o =>
-        '<div class="adv-up-row muted"><span class="adv-lock">🔒</span><span>' + esc(dialName(o.dial, lang)) + ' — ' +
-        esc(BLOCK_MSG[o.blocked] ? BLOCK_MSG[o.blocked][lang] : o.blocked) + '</span></div>').join('') + '</div>';
+        '<div class="adv-up-row muted">' + esc(dialName(o.dial, lang)) + ' — ' +
+        esc(BLOCK_MSG[o.blocked] ? BLOCK_MSG[o.blocked][lang] : o.blocked) + '</div>').join('') + '</div>';
     }
   }
   if (failed) body += retryRow();

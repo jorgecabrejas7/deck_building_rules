@@ -27,7 +27,7 @@ function rowFor(d, s, t) {
     '<td>' + tier + '</td>' +
     num(s ? s.points : '—') + num(s ? esc(s.practicalBracket) + ' · ' + s.power.score.toFixed(1) + (s.floor ? '<span class="pod-why">' + esc(t['podFloor_' + s.floor.reason]) + '</span>' : '') : '—') + num(s ? s.bracket.checklist : '—') +
     num(s ? s.salt.total.toFixed(1) : '—') + num(s && s.synergy ? s.synergy.coverage + '%' : '—') + num(s ? '€' + Math.round(s.price) : '—') +
-    '<td class="pod-actions"><button data-pod-load="' + d.id + '" class="btn-accent-sm">' + t.podLoad + '</button>' +
+    '<td class="pod-actions"><button data-pod-load="' + d.id + '" class="btn-ghost-sm">' + t.podLoad + '</button>' +
     (state.deck ? '<button data-pod-cmp="' + d.id + '" class="btn-ghost-sm">' + t.podCompare + '</button>' : '') + '</td></tr>';
 }
 
@@ -48,7 +48,7 @@ function table(decks, t) {
       const v = k && m[k];
       return '<td class="mono num">' + (typeof v !== 'number' ? '' : k === 'price' ? '€' + Math.round(v) : k === 'synergy_coverage' ? Math.round(v) + '%' : k === 'points' ? v : v.toFixed(1)) + '</td>';
     }).join('') + '<td></td></tr>';
-  return '<div class="tbl-scroll pod-scroll"><table class="br-table pod-table"><thead><tr><th scope="col">' + esc(t.tmDeck) + '</th><th scope="col">' + esc(t.tierWord) + '</th>' +
+  return '<div class="tbl-scroll pod-scroll"><table class="pod-table"><thead><tr><th scope="col">' + esc(t.tmDeck) + '</th><th scope="col">' + esc(t.tierWord) + '</th>' +
     head('points', t.pts) + head('power', t.pfPractical) + head('bracket', t.brTileN) + head('salt', t.pfSalt) + head('synergy', t.pfSyn) + head('price', t.price) +
     '<td></td></tr></thead><tbody>' + rows.map(({ d, s }) => rowFor(d, s, t)).join('') +
     (study ? ref(t.pfRef_precon, study.medians.precon) + ref(t.pfRef_cedh, study.medians.cedh) : '') +
@@ -76,8 +76,8 @@ export function renderPod() {
     : pd.status === 'error' ? '<div class="note-bad">' + t.podErr + '</div>'
     : !pd.decks.length ? '<div class="note-muted">' + esc(t.podEmpty) + '</div>'
     : table(pd.decks, t);
-  el.innerHTML = '<div class="panel panel-pad-lg"><h2 class="secT secT-lg">' + t.podT + '</h2>' +
-    '<p class="lbl-muted">' + esc(t.podHint) + '</p>' + body + '</div>';
+  el.innerHTML = '<div class="stack-16"><div class="part-head"><div><h2 class="part-title">' + t.podT + '</h2>' +
+    '<p class="part-sub">' + esc(t.podHint) + '</p></div></div><div class="panel pod-card">' + body + '</div></div>';
   for (const b of el.querySelectorAll('[data-podsort]')) b.onclick = () => {
     const k = b.dataset.podsort;
     state.podSort = { key: k, dir: state.podSort.key === k ? -state.podSort.dir : -1 };

@@ -2,9 +2,9 @@ import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { COMBO_TAGS } from '../engine/index.js';
 import { comboFeatureText } from './constants.js';
-import { $, esc } from './helpers.js';
-import { bindCardTilePopover } from './popover.js';
+import { $, esc, fill } from './helpers.js';
 import { checkCombos } from '../pipeline.js';
+import { ICON, answer, cardName, fold, paint } from './reading.js';
 
 // Every combo says which bracket it belongs to. The tag is Commander Spellbook's
 // own classification, so what the page calls "Bracket 4+" is what its editors do.
@@ -15,11 +15,9 @@ const PAGE = 5;
 export function tagChip(tag, t) {
   const m = COMBO_TAGS[tag];
   const label = tag === 'B' ? t.brIllegal : 'B' + m.bracket;
-  return '<span class="combo-tag ' + TAG_TONE[tag] + '" title="' + esc(t['tag_' + tag]) + '">' +
-    '<b class="mono">' + esc(label) + '</b> ' + esc(m.name) + '</span>';
+  return '<span class="rd-tag ' + TAG_TONE[tag] + '" title="' + esc(t['tag_' + tag]) + '"><b>' + esc(label) + '</b> ' + esc(m.name) + '</span>';
 }
 
-const pieceNames = (c) => [...c.cards, ...(c.filled || [])];
 const spellbookUrl = (c) => 'https://commanderspellbook.com/search/?q=' +
   encodeURIComponent(c.cards.map(n => 'card:"' + n + '"').join(' '));
 
@@ -28,12 +26,15 @@ const manaText = (c, t) => c.deploy === null || c.deploy === undefined ? ''
     ? t.comboManaPlus.replace('%v', c.deploy - c.extraMana).replace('%x', c.extraMana).replace('%t', c.deploy)
     : t.comboMana.replace('%v', c.deploy);
 
-// One line inside a checklist row: the pieces, its bracket, what it costs and does.
-export function comboInline(c, cls = '') {
+// A combo in one breath: its pieces and bracket, then what it does and costs.
+export function comboLine(c) {
   const t = T();
-  return '<span class="br-combo' + (cls ? ' ' + cls : '') + '"><b>' + pieceNames(c).map(esc).join(' + ') + '</b> ' +
-    tagChip(c.tag, t) + (manaText(c, t) ? ' <span class="mono">' + esc(manaText(c, t)) + '</span>' : '') +
-    ' → ' + esc(comboFeatureText(c.features[0] || '', state.lang)) + '</span>';
+  const named = c.templates ? c.templates.filter(n => !n.includes('{')) : [];
+  const result = comboFeatureText(c.features[0] || '', state.lang) + (named.length ? ' (' + named.join(', ') + ')' : '');
+  return '<div class="rd-line-main"><div class="rd-pieces">' +
+    [...c.cards, ...(c.filled || [])].map(n => cardName(n, 'rd-piece')).join('<span class="rd-plus" aria-hidden="true">+</span>') +
+    '</div>' + tagChip(c.tag, t) + '</div>' +
+    '<p class="rd-result">' + esc([result, manaText(c, t)].filter(Boolean).join(' · ')) + '</p>';
 }
 
 const breaksB3 = (c) => c.tag === 'R' || c.landDenial || c.infiniteTurns;
@@ -47,106 +48,86 @@ const FILTERS = [
   ['lock', isLock],
 ];
 
-function comboRow(c, t, imgOf) {
-  const badges = [
-    breaksB3(c) ? '<span class="combo-flag bad">' + esc(t.cfBreaks) + '</span>' : '',
-    c.win ? '<span class="combo-flag">' + esc(t.cfWin) + '</span>' : '',
-    c.cardsToFind <= 2 ? '<span class="combo-flag">' + esc(c.n > 2 ? t.cfTwoCmd : t.cfTwo) + '</span>' : '',
-    c.infinite ? '<span class="combo-flag">' + esc(t.cfInf) + '</span>' : '',
-    isLock(c) ? '<span class="combo-flag">' + esc(t.cfLock) + '</span>' : '',
-    c.prereq ? '<span class="combo-flag soft">' + esc(t.cfBoard) + '</span>' : '',
-    c.mustCommand.length ? '<span class="combo-flag soft">' + esc(t.cfCommander) + '</span>' : '',
-  ].join('');
-  const pieces = pieceNames(c).map(n =>
-    '<span class="combo-card" data-name="' + esc(n) + '"' + (imgOf(n) ? ' data-img="' + esc(imgOf(n)) + '"' : '') + '>' + esc(n) + '</span>')
-    .join('<span class="combo-plus" aria-hidden="true">+</span>');
-  return '<li class="combo-item' + (breaksB3(c) ? ' breaks' : '') + '">' +
-    '<div class="combo-main"><div class="combo-pieces">' + pieces + '</div>' + tagChip(c.tag, t) + '</div>' +
-    '<div class="combo-result">→ ' + esc(comboFeatureText(c.features[0] || '', state.lang)) +
-      (c.templates && c.templates.some(n => !n.includes('{')) ? ' <span class="txt-muted">(' + c.templates.filter(n => !n.includes('{')).map(esc).join(', ') + ')</span>' : '') + '</div>' +
-    '<div class="combo-foot"><div class="combo-flags">' + badges + '</div>' +
-      '<span class="mono combo-mana">' + esc(manaText(c, t)) + '</span>' +
-      '<a class="combo-link" href="' + spellbookUrl(c) + '" target="_blank" rel="noopener noreferrer">' + esc(t.comboSteps) + ' ↗</a></div></li>';
+function comboRow(c, t) {
+  const traits = [
+    c.win && t.cfWin,
+    c.cardsToFind <= 2 && (c.n > 2 ? t.cfTwoCmd : t.cfTwo),
+    c.infinite && t.cfInf,
+    isLock(c) && t.cfLock,
+    c.prereq && t.cfBoard,
+    c.mustCommand.length && t.cfCommander,
+  ].filter(Boolean);
+  return '<li>' + comboLine(c) + '<div class="rd-line-foot">' +
+    (breaksB3(c) ? '<span class="rd-tag tone-bad">' + esc(t.cfBreaks) + '</span>' : '') +
+    '<span class="rd-traits">' + esc(traits.join(' · ')) + '</span>' +
+    '<a class="rd-link" href="' + spellbookUrl(c) + '" target="_blank" rel="noopener noreferrer">' + esc(t.comboSteps) + ICON.open + '</a></div></li>';
 }
 
-function stats(list, t) {
-  const count = (fn) => list.filter(fn).length;
+// The two facts worth a sentence: the cheapest line, and the card most lines lean on.
+function why(list, t) {
   const uses = new Map();
   for (const c of list) for (const n of c.cards) uses.set(n, (uses.get(n) || 0) + 1);
   const anchor = [...uses].sort((a, b) => b[1] - a[1])[0];
   const fastest = list.filter(c => typeof c.deploy === 'number' && (c.infinite || c.win)).sort((a, b) => a.deploy - b.deploy)[0];
-  const tile = (lbl, val, sub) => '<div class="panel stat-tile"><div class="tile-label">' + esc(lbl) + '</div>' +
-    '<div class="mono stat-value">' + val + '</div>' + (sub ? '<div class="note-sm combo-tile-sub">' + esc(sub) + '</div>' : '') + '</div>';
-  return '<div class="combo-stats">' +
-    tile(t.csTotal, list.length, t.csInf.replace('%v', count(c => c.infinite))) +
-    tile(t.csTwo, count(c => c.cardsToFind <= 2), t.csWin.replace('%v', count(c => c.win))) +
-    tile(t.csFastest, fastest ? fastest.deploy : '—', fastest ? fastest.cards.join(' + ') : t.csNoFast) +
-    tile(t.csAnchor, anchor ? anchor[1] : '—', anchor ? anchor[0] : '') +
-    '</div>';
+  return [fastest ? fill(t.comboWhyFast, { v: fastest.deploy, c: fastest.cards.join(' + ') }) : '',
+    anchor && anchor[1] > 1 ? fill(t.comboWhyAnchor, { c: anchor[0], v: anchor[1] }) : ''].filter(Boolean).join(' ');
 }
 
 function tagLegend(t) {
-  return '<details class="br-legend"><summary>' + esc(t.tagLegendT) + '</summary>' +
-    '<ul class="tag-legend">' + Object.keys(COMBO_TAGS).map(k =>
-      '<li>' + tagChip(k, t) + ' <span class="note-sm">' + esc(t['tag_' + k]) + '</span></li>').join('') + '</ul>' +
-    '<p class="note-sm">' + esc(t.tagSource) + '</p></details>';
+  return fold('tags', t.tagLegendT, '', '<ul class="rd-tag-legend">' + Object.keys(COMBO_TAGS).map(k =>
+    '<li>' + tagChip(k, t) + '<span class="rd-q">' + esc(t['tag_' + k]) + '</span></li>').join('') + '</ul>' +
+    '<p class="rd-q">' + esc(t.tagSource) + '</p>');
 }
 
 export function renderCombos() {
   const t = T(), cd = state.combosData, root = $('combos');
   const isFile = location.protocol === 'file:';
-  const head = '<div class="row-between"><h3 class="secT secT-lg">' + esc(t.combosT) + '</h3>' +
-    (cd && cd.updated ? '<span class="note-sm">' + esc(t.comboDbDate) + ' ' + esc(cd.updated.slice(0, 10)) + '</span>' : '') + '</div>';
+  const shell = (value, sub, body, lead = '') => '<div class="panel rd">' + answer({ label: t.combosT, value, sub, body: lead }) + body + '</div>';
   if (!cd || cd.status === 'error') {
-    root.innerHTML = '<div class="panel panel-pad-lg">' + head +
-      (isFile ? '<div class="note-warn">' + t.fileProto + '</div>' : '') +
-      (cd ? '<div class="note-bad">' + t.comboErr + '</div>' : '') +
-      (isFile ? '' : '<div class="combo-row"><button id="comboRetry" class="btn-accent-sm">' + t.comboRetry + '</button></div>') + '</div>';
+    paint(root, shell('—', isFile ? '' : esc(cd ? t.comboErr : t.comboChecking),
+      (isFile ? '<p class="rd-text">' + esc(t.fileProto) + '</p>' : '') +
+      (isFile ? '' : '<button type="button" id="comboRetry" class="rd-btn">' + esc(t.comboRetry) + '</button>')));
     const b = $('comboRetry'); if (b) b.onclick = checkCombos;
     return;
   }
-  if (cd.status === 'checking') {
-    root.innerHTML = '<div class="panel panel-pad-lg">' + head + '<div class="note-muted">' + t.comboChecking + '</div></div>';
-    return;
-  }
+  if (cd.status === 'checking') return paint(root, shell('…', esc(t.comboChecking), ''));
+  const dbDate = cd.updated ? '<p class="rd-foot">' + esc(t.comboDbDate) + ' ' + esc(cd.updated.slice(0, 10)) + '</p>' : '';
   const all = state.result.bracket.combos;
-  if (!all.length) {
-    root.innerHTML = '<div class="panel panel-pad-lg">' + head + '<div class="note-ok">✓ ' + t.comboNoneAny + '</div>' + tagLegend(t) + '</div>';
-    return;
-  }
+  if (!all.length) return paint(root, shell('0', esc(t.comboNoneAny), '<div class="rd-folds">' + tagLegend(t) + '</div>' + dbDate));
 
-  // the tag chips double as the deck's distribution and as filters
-  const tagBtn = (k, n) => '<button type="button" class="combo-filter' + (state.comboFilter === 'tag:' + k ? ' on' : '') +
-    '" data-combof="tag:' + k + '" aria-pressed="' + (state.comboFilter === 'tag:' + k) + '">' +
-    '<span class="mono">' + esc(k === 'B' ? t.brIllegal : 'B' + COMBO_TAGS[k].bracket) + '</span> ' + esc(COMBO_TAGS[k].name) + ' <b class="mono">' + n + '</b></button>';
+  const pressed = (k) => state.comboFilter === k;
+  const btn = (k, label, n) => '<button type="button" class="rd-filter" data-combof="' + k + '" aria-pressed="' + pressed(k) + '">' + label + ' <b>' + n + '</b></button>';
+  // the tag filters double as the deck's distribution by bracket
   const tagBar = Object.keys(COMBO_TAGS).map(k => [k, all.filter(c => c.tag === k).length]).filter(([, n]) => n)
-    .map(([k, n]) => tagBtn(k, n)).join('');
+    .map(([k, n]) => btn('tag:' + k, esc(k === 'B' ? t.brIllegal : 'B' + COMBO_TAGS[k].bracket) + ' ' + esc(COMBO_TAGS[k].name), n)).join('');
   const catBar = FILTERS.map(([k, fn]) => [k, all.filter(fn).length]).filter(([k, n]) => k === 'all' || n)
-    .map(([k, n]) => '<button type="button" class="combo-filter' + (state.comboFilter === k ? ' on' : '') +
-      '" data-combof="' + k + '" aria-pressed="' + (state.comboFilter === k) + '">' + esc(t['cf_' + k]) + ' <b class="mono">' + n + '</b></button>').join('');
+    .map(([k, n]) => btn(k, esc(t['cf_' + k]), n)).join('');
 
   const f = state.comboFilter;
   const shown = f.startsWith('tag:') ? all.filter(c => c.tag === f.slice(4))
     : all.filter((FILTERS.find(([k]) => k === f) || FILTERS[0])[1]);
   const visible = state.comboAll ? shown : shown.slice(0, PAGE);
-  const front = new Map(state.result.cardsInfo.map(({ card }) => [String(card.name).split(' // ')[0], card]));
-  const imgOf = (n) => (front.get(n) || {}).img_normal || '';
+  const count = (fn) => all.filter(fn).length;
 
-  root.innerHTML = '<div class="panel panel-pad-lg">' + head + stats(all, t) +
-    '<div class="combo-filters" role="group" aria-label="' + esc(t.comboFilterAria) + '">' + catBar + '</div>' +
-    '<div class="combo-filters" role="group" aria-label="' + esc(t.comboFilterTagAria) + '">' + tagBar + '</div>' +
-    '<ul class="combo-list">' + (visible.map(c => comboRow(c, t, imgOf)).join('') ||
-      '<li class="note-muted">' + esc(t.comboNoMatch) + '</li>') + '</ul>' +
+  paint(root, shell(String(all.length),
+    esc(fill(t.comboSub, { i: count(c => c.infinite), w: count(c => c.win), d: count(c => c.cardsToFind <= 2) })),
+    '<div class="rd-filter-bars"><div class="rd-filter-bar" role="group" aria-label="' + esc(t.comboFilterAria) + '">' + catBar + '</div>' +
+    '<div class="rd-filter-bar" role="group" aria-label="' + esc(t.comboFilterTagAria) + '">' + tagBar + '</div></div>' +
+    '<ul class="rd-lines rd-combo-list" id="comboList" tabindex="-1">' + (visible.map(c => comboRow(c, t)).join('') ||
+      '<li class="rd-q">' + esc(t.comboNoMatch) + '</li>') + '</ul>' +
     (shown.length > PAGE && !state.comboAll
-      ? '<button type="button" id="comboMore" class="btn-ghost">' + esc(t.comboMore.replace('%v', shown.length)) + '</button>' : '') +
-    tagLegend(t) + '</div>';
+      ? '<button type="button" id="comboMore" class="rd-btn">' + esc(t.comboMore.replace('%v', shown.length)) + '</button>' : '') +
+    '<div class="rd-folds">' + tagLegend(t) + '</div>' + dbDate,
+    why(all, t) ? '<p class="rd-why">' + esc(why(all, t)) + '</p>' : ''));
 
   for (const b of root.querySelectorAll('[data-combof]')) b.onclick = () => {
-    state.comboFilter = state.comboFilter === b.dataset.combof ? 'all' : b.dataset.combof;
+    const k = b.dataset.combof;
+    state.comboFilter = state.comboFilter === k ? 'all' : k;
     state.comboAll = false;
     renderCombos();
+    // the re-render removes the pressed button: keep keyboard focus where it was
+    root.querySelector('[data-combof="' + k + '"]').focus();
   };
-  const more = $('comboMore');
-  if (more) more.onclick = () => { state.comboAll = true; renderCombos(); };
-  for (const el of root.querySelectorAll('.combo-card[data-img]')) bindCardTilePopover(el, () => el.dataset.img);
+  const moreBtn = $('comboMore');
+  if (moreBtn) moreBtn.onclick = () => { state.comboAll = true; renderCombos(); $('comboList').focus({ preventScroll: true }); };
 }
