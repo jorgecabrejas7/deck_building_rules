@@ -41,7 +41,8 @@ async function fetchPage(slug) {
       cards.push({ n: cv.name, s: cv.synergy, nd: cv.num_decks || 0, pd: cv.potential_decks || 0 });
     }
   }
-  return cards;
+  // EDHREC answers 200 with an empty body for a pair it has no page for
+  return cards.length ? cards : null;
 }
 
 // Synergy table for the deck's commander(s): {slug, cards:[{n,s,nd,pd}]} or

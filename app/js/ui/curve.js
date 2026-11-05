@@ -1,3 +1,4 @@
+import { pipCounts } from '../engine/index.js';
 import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { SEGC, PIP } from './constants.js';
@@ -58,11 +59,7 @@ export function renderCurve() {
     ['cre', 'draw', 'rem', 'ramp', 'oth'].map(k => '<span class="legend-item"><span class="legend-swatch" style="--c:' + SEGC[k] + '"></span>' + t[k] + helpIcon(k) + '</span>').join('') +
     '<span class="mono avg">' + t.avg + ' ' + avgCmc + ' · ' + nlQty + ' ' + t.nonlands + '</span></div></div>';
   // pips
-  const pipCnt = { W: 0, U: 0, B: 0, R: 0, G: 0 };
-  for (const x of r.cardsInfo) {
-    const mana = x.card.mana_cost || '';
-    for (const ch of mana.replace(/[{}/]/g, '')) if (pipCnt[ch] !== undefined) pipCnt[ch] += x.qty;
-  }
+  const pipCnt = pipCounts(r.cardsInfo);
   const pipTot = Object.values(pipCnt).reduce((a, b) => a + b, 0) || 1;
   html += '<div class="curve-card">' +
     '<h2 class="secT">' + t.pips + '</h2><div class="pip-rows">' +

@@ -26,13 +26,23 @@ function cardFromScryfall(c) {
   };
 }
 
+// Scryfall answers 429 once a burst outruns its limit; waiting a little is all it
+// asks, so one throttled call must not fail a whole analysis.
+async function scryfallFetch(url, opts) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, opts);
+    if (res.status !== 429 || attempt === 4) return res;
+    await sleep((Number(res.headers.get("Retry-After")) || 2 ** attempt) * 1000);
+  }
+}
+
 export async function fetchCards(names, cache, onProgress) {
   const need = names.filter(n => !cache[n]);
   const notFound = [];
   for (let i = 0; i < need.length; i += 75) {
     const batch = need.slice(i, i + 75);
     if (onProgress) onProgress({ done: i, total: need.length });
-    const res = await fetch("https://api.scryfall.com/cards/collection", {
+    const res = await scryfallFetch("https://api.scryfall.com/cards/collection", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identifiers: batch.map(name => ({ name })) }),
     });
@@ -47,12 +57,13 @@ export async function fetchCards(names, cache, onProgress) {
       }
     }
     for (const nf of data.not_found || []) notFound.push(nf.name);
-    await sleep(120);
+    await sleep(250);
   }
   // fuzzy fallback for renamed/flavor cards
   for (const n of [...notFound]) {
     try {
-      const res = await fetch("https://api.scryfall.com/cards/named?fuzzy=" + encodeURIComponent(n));
+      // a fuzzy search cannot read "A // B", which is how exports write adventures and MDFCs
+      const res = await scryfallFetch("https://api.scryfall.com/cards/named?fuzzy=" + encodeURIComponent(n.split(" // ")[0]));
       if (res.ok) {
         cache[n] = cardFromScryfall(await res.json());
         notFound.splice(notFound.indexOf(n), 1);
@@ -71,7 +82,7 @@ export async function fetchCheapest(names, cache, onProgress, isCancelled) {
     if (onProgress) onProgress({ done: i, total: targets.length, card: n });
     try {
       const q = '!"' + n.replace(/"/g, '') + '"';
-      const res = await fetch("https://api.scryfall.com/cards/search?unique=prints&order=eur&dir=asc&q=" + encodeURIComponent(q));
+      const res = await scryfallFetch("https://api.scryfall.com/cards/search?unique=prints&order=eur&dir=asc&q=" + encodeURIComponent(q));
       if (res.ok) {
         const data = await res.json();
         let best = null;

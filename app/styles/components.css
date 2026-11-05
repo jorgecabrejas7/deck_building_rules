@@ -465,6 +465,31 @@
 .combo-tag{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;background:var(--toneBg);border:1px solid var(--toneBd);color:var(--toneFg);border-radius:99px;padding:1px 9px;font-size:var(--fs-micro);font-weight:600}
 .tag-legend{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:6px}
 
+/* deck profile panel */
+.pl-rows{display:flex;flex-direction:column;gap:12px}
+.pl-row{display:grid;grid-template-columns:130px 1fr 34px;align-items:center;gap:10px;font-size:var(--fs-body)}
+.pl-track{position:relative;height:8px;border-radius:4px;background:var(--track)}
+.pl-fill{height:100%;width:var(--w);border-radius:4px;background:var(--accent)}
+.pl-tick{position:absolute;top:-3px;left:var(--x);width:2px;height:14px;transform:translateX(-1px);background:var(--marker)}
+.pl-tick.b{top:-5px;height:18px;width:4px;transform:translateX(-2px);border-radius:2px;background:var(--panel);border:1px solid var(--marker)}
+.pl-tick.c{width:2px;background:var(--muted)}
+.pl-val{text-align:right}
+.pl-legend{display:flex;flex-wrap:wrap;gap:4px 16px}
+.pl-legend span{display:inline-flex;align-items:center;gap:6px}
+.pl-key{display:inline-block;width:2px;height:12px;background:var(--marker)}
+.pl-key.b{width:4px;border-radius:2px;background:var(--panel);border:1px solid var(--marker)}
+.pl-key.c{background:var(--muted)}
+.pf-cols,.pf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.pf-block{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pf-block p{margin:0}
+.pf-list{margin:4px 0 0;padding-left:18px;font-size:var(--fs-body);line-height:1.6}
+.pf-table td,.pf-table thead th:not(:first-child){text-align:right}
+.pod-table{margin-top:10px}
+.pod-table tbody th{font-weight:600;min-width:170px}
+.pod-ref th,.pod-ref td{color:var(--muted);font-weight:500}
+.pod-sort{border:none;background:none;padding:2px 0;font-weight:600;color:var(--muted);white-space:nowrap}
+.pod-sort.on{color:var(--text);text-decoration:underline}
+
 /* report parts: the pod's point budget and Wizards' bracket are two separate
    yardsticks, so the Informe states which one you are reading */
 .report-part{display:flex;flex-direction:column;gap:16px}

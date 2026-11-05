@@ -18,6 +18,7 @@ import { renderVerdict } from './ui/verdict.js';
 import { renderCommander } from './ui/commander.js';
 import { renderBracket } from './ui/bracket.js';
 import { renderCombos } from './ui/combos.js';
+import { renderProfile } from './ui/profile.js';
 import { renderBrowser } from './ui/browser.js';
 import { renderTips } from './ui/tips.js';
 import { renderRamp } from './ui/ramp.js';
@@ -71,9 +72,9 @@ export function renderAll() {
   if (has) {
     renderSummary(); renderValidation();
     if (state.tab === 'informe') {
-      // the two part headings are static per language; their ids match their keys
-      for (const k of ['partPodT', 'partPodX', 'partBrT', 'partBrX']) $(k).textContent = t[k];
-      renderCommander(); renderVerdict(); renderPower(); renderBracket(); renderCombos(); renderTips();
+      // the part headings are static per language; their ids match their keys
+      for (const k of ['partPodT', 'partPodX', 'partBrT', 'partBrX', 'partPfT', 'partPfX']) $(k).textContent = t[k];
+      renderCommander(); renderVerdict(); renderPower(); renderBracket(); renderCombos(); renderProfile(); renderTips();
     }
     if (state.tab === 'detalles') { renderComp(); renderCurve(); renderRamp(); renderHand(); renderBrowser(); }
   }

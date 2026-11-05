@@ -28,6 +28,7 @@ export function renderSummary() {
       stat(t.pts, ev.points + ' <span class="stat-cap">· ' + t.capWord + ' ' + budgetN + '</span>',
         ev.points > budgetN ? 'toned ' + tierTone(ev.tier) : '') +
       bracketTile() +
+      stat(t.pfPower, r.profile.wins.checked ? r.power.score : t.brChecking) +
       stat(t.price, '€' + Math.round(r.stats.total_price_eur)) +
       stat(t.cardsN, r.stats.total_cards) +
       '<div class="panel stat-tile"><div class="tile-label">' + t.archetype + '</div><div class="stat-arch">' + esc(archName()) + '</div></div></div>';

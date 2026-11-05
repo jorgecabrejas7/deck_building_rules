@@ -55,6 +55,13 @@ function renderHow() {
 <p>Los tutores ya no tienen límite propio desde octubre de 2025: los más eficientes están en la lista de game changers. Una lista no demuestra la intención, así que la lectura va del Bracket 2 al 4: el 1 depende del tema y el 5 del metajuego competitivo.</p>
 <h3>El bracket de cada combo</h3>
 <p>Cada combo lleva la etiqueta de <b>Commander Spellbook</b>, de Exhibition (B1+) a Ruthless (B4+). Spellbook decide el bracket de cada combo, con su propia lógica: si una leyenda del combo es o no tu comandante, se recalcula igual que hace su estimador. Es su clasificación, no una regla de Wizards. Los combos que exigen una carta como comandante solo cuentan si esa carta está en la zona de mando.</p>
+<h3>Perfil del mazo</h3>
+<p>La tercera parte del informe describe el mazo. <b>No decide nada</b>: el tier del pod y el bracket no la leen.</p>
+<ul>
+<li><b>Poder (1-10):</b> escala propia, no la de otra web. Sale de cuatro pilares (consistencia, eficiencia, interacción y formas de ganar), cada uno medido entre un precon flojo y una lista cEDH mediana. Se calibró con 36 precons y 8 listas cEDH públicas.</li>
+<li><b>Salt:</b> la suma de las valoraciones de la comunidad de EDHREC para cada carta.</li>
+<li><b>Sinergia:</b> cuántas cartas sin tierras tienen sinergia positiva en la página de EDHREC de tu comandante. Mide si sigues lo que juega la gente con él, así que un brew original puntúa bajo sin estar mal construido.</li>
+<li><b>Base de maná:</b> fuentes de cada color frente a sus manás en coste, tierras que siempre entran giradas y curva.</li></ul>
 <h3>Precios, combos y sugerencias</h3>
 <p>Los precios vienen de Scryfall (Cardmarket). El primer análisis usa la impresión por defecto; el botón «Buscar precios más baratos» busca la impresión más barata carta a carta. Los combos infinitos se comprueban automáticamente en cada análisis contra Commander Spellbook y las sugerencias de cartas salen de Scryfall ordenadas por popularidad en EDHREC, filtradas a tu identidad de color y a menos de €5 (mejoras de nivel: menos de €10). Las URLs de Archidekt se cargan a través de proxies públicos (r.jina.ai, allorigins, codetabs — se prueban en orden hasta que uno responde) porque Archidekt bloquea la lectura directa desde el navegador; si prefieres que tu mazo no pase por terceros, pega la lista en texto. Los combos se comprueban contra una base alojada en esta misma web, sin terceros.</p>`
   : `
@@ -90,6 +97,13 @@ function renderHow() {
 <p>Tutors have had no limit of their own since October 2025: the most efficient ones are on the Game Changers list. A list cannot prove intent, so the read runs from Bracket 2 to 4: Bracket 1 depends on theme and Bracket 5 on the competitive metagame.</p>
 <h3>Each combo's bracket</h3>
 <p>Every combo carries <b>Commander Spellbook</b>'s tag, from Exhibition (B1+) to Ruthless (B4+). Spellbook decides each combo's bracket with its own logic: whether a legend in the combo is your commander is recalculated the way its estimator does. It is Spellbook's classification, not a Wizards rule. Combos that need a card as commander only count when that card is in the command zone.</p>
+<h3>Deck profile</h3>
+<p>Part three of the report describes the deck. <b>It decides nothing</b>: the pod tier and the bracket do not read it.</p>
+<ul>
+<li><b>Power (1-10):</b> our own scale, not another site's. It comes from four pillars (consistency, efficiency, interaction and ways to win), each measured between a weak precon and a median cEDH list. Calibrated on 36 precons and 8 public cEDH lists.</li>
+<li><b>Salt:</b> EDHREC's community rating for each card, added up.</li>
+<li><b>Synergy:</b> how many nonland cards have positive synergy on your commander's EDHREC page. It measures how closely you follow what people play with them, so an original brew scores low without being badly built.</li>
+<li><b>Manabase:</b> sources of each colour against its pips, lands that always enter tapped, and the curve.</li></ul>
 <h3>Prices, combos and suggestions</h3>
 <p>Prices come from Scryfall (Cardmarket). The first pass uses the default printing; the "Fetch cheapest prices" button looks up the cheapest printing per card. Infinite combos are checked automatically on every analysis against Commander Spellbook and card suggestions come from Scryfall ranked by EDHREC popularity, filtered to your color identity and under €5 (tier upgrades: under €10). Archidekt URLs load through public proxies (r.jina.ai, allorigins, codetabs — tried in order until one answers) because Archidekt blocks direct browser reads; if you prefer your deck not to transit a third party, paste the list as text. Combos are checked against a database hosted on this very site — no third parties.</p>`;
   $('howBody').innerHTML = html;

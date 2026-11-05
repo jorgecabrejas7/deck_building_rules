@@ -4,7 +4,7 @@ import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { ARCH, DIAL_META, CATS } from './constants.js';
 import { $, esc, tierTone } from './helpers.js';
-import { analyze, getComboDb } from '../pipeline.js';
+import { analyze, getComboDb, getSaltDb } from '../pipeline.js';
 import { renderInput } from './input.js';
 import { slotsFor } from './comp.js';
 import { bindSugPopovers } from './popover.js';
@@ -25,7 +25,7 @@ export function renderTableMode() {
   const res = state.tableResults;
   if (res) {
     html += '<div class="table-scroll"><table class="tm-table">' +
-      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.brTile + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
+      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.brTile + '</th><th>' + t.pfPower + '</th><th>' + t.pfSalt + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
       res.map((d, i) => {
         return '<tr><td>' + esc(d.name) + '</td>' +
           '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + t[d.tier] + '</span></td>' +
@@ -33,6 +33,7 @@ export function renderTableMode() {
           '<td><span class="tier-pill ' + (!d.bracket.fits ? 'tone-bad' : d.bracket.pending ? 'tone-warn' : 'tone-ok') +
             '" title="' + (d.bracket.pending ? esc(t.brPending) : '') + '">' +
             (!d.bracket.fits ? '✕ ' + t.brNo : d.bracket.pending ? t.brChecking : '✓ ' + t.brYes) + '</span></td>' +
+          '<td class="mono">' + (d.power === null ? '—' : d.power) + '</td><td class="mono">' + (d.salt === null ? '—' : d.salt) + '</td>' +
           '<td class="mono">€' + Math.round(d.price) + '</td><td>' + esc(d.arch) + '</td>' +
           '<td><button data-tmload="' + i + '" class="btn-ghost-sm">' + t.tmLoad + '</button></td></tr>';
       }).join('') + '</table></div>';
@@ -148,6 +149,7 @@ export async function runTableMode() {
   try {
     let comboDb = null;
     try { comboDb = await getComboDb(); } catch (e) { /* combos stay unchecked */ }
+    const saltDb = await getSaltDb().catch(() => null);
     for (const text of texts) {
       const parsed = PodEngine.parseDecklist(text);
       const names = [...new Set(parsed.entries.map(e => e.name))];
@@ -174,10 +176,13 @@ export async function runTableMode() {
         loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
         unresolved: notFound.length,
       });
+      const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
         tier: ev.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,
         arch: a.name[state.lang], archKey: det.key, commander: cmd, bracket,
+        power: comboList ? PodEngine.computePower(profile, stats).score : null,
+        salt: saltDb ? PodEngine.saltScore(resolved.map(e => e.name), saltDb).total : null,
         stats, ev, cardsInfo });
     }
     persistCache();

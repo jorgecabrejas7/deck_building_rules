@@ -10,6 +10,7 @@
  *   (e) maybeboard / sideboard cards never reach the analysis.
  *   (f) the commander picker is offered the WHOLE deck, not a shortlist.
  *   (g) the bracket rules, on synthetic cards and on the real combo database.
+ *   (h) the deck profile: manabase arithmetic, salt, synergy and the power scale.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
  * Users of the HTML app never need this.
@@ -263,5 +264,64 @@ const brBad = BR_CASES.filter(([, ok]) => !ok);
 for (const [label] of brBad) console.log(`BRACKET FAIL: ${label}`);
 console.log(`Bracket rules: ${BR_CASES.length - brBad.length}/${BR_CASES.length} correct`);
 if (brBad.length) fails++;
+
+// (h) the deck profile. Small synthetic decks keep the arithmetic checkable; the
+// committed study guards the calibration of the scale against real decks.
+const pfCard = (name, cmc, type_line, extra = {}) => ({ name, cmc, type_line, oracle_text: "", mana_cost: "", produced_mana: [], ...extra });
+const pfDeck = (list) => list.map(([card, qty = 1]) => ({ card, qty, name: card.name, cls: PodEngine.classifyCard(card) }));
+const pfProfile = (info, combos = []) => PodEngine.computeProfile({ cardsInfo: info, stats: {}, combos, commanders: [] });
+const manaDeck = pfDeck([
+  [pfCard("Island", 0, "Basic Land — Island", { produced_mana: ["U"] }), 12],
+  [pfCard("Mountain", 0, "Basic Land — Mountain", { produced_mana: ["R"] }), 4],
+  [pfCard("Guildgate", 0, "Land", { oracle_text: "This land enters tapped.\n{T}: Add {U} or {R}.", produced_mana: ["U", "R"] }), 4],
+  [pfCard("Blue", 2, "Creature — Human", { mana_cost: "{U}{U}" }), 3],
+  [pfCard("Red", 2, "Instant", { mana_cost: "{R}{R}", oracle_text: "Counter target spell." }), 1],
+]);
+const mana = pfProfile(manaDeck).manabase;
+const sameTable = { slug: "x", cards: [{ n: "Blue", s: 0.5 }, { n: "Red", s: -0.1 }] };
+const synOf = (table) => PodEngine.synergyScore({ cardsInfo: manaDeck, commanders: [], table });
+const baseProfile = pfProfile(manaDeck);
+const weak = PodEngine.computePower(baseProfile, {});
+const strong = PodEngine.computePower({ ...baseProfile,
+  consistency: { ...baseProfile.consistency, tutors: 15, cheapDraw: 7 },
+  speed: { ...baseProfile.speed, avgMv: 1.9, cheap: 55, fastMana: 14, ramp: 27 },
+  interaction: { ...baseProfile.interaction, cheapAnswers: 9, counters: 9, stax: 5, free: 5 },
+  manabase: { ...baseProfile.manabase, quality: 100 },
+  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, fastest: 3 },
+}, { game_changers: 20 });
+const study = read_study();
+function read_study() { return JSON.parse(fs.readFileSync(path.join(ROOT, "data", "deck_study.json"), "utf8")); }
+const scores = (g) => study.decks.filter(d => d.group === g).map(d => d.power.score);
+const sorted = (xs) => [...xs].sort((a, b) => a - b);
+const PF_CASES = [
+  ["lands, basics and always-tapped lands are counted", mana.lands === 20 && mana.basics === 16 && mana.tapped === 4],
+  ["a colour's sources include duals", mana.colors.find(c => c.color === "U").sources === 16 && mana.colors.find(c => c.color === "R").sources === 8],
+  ["pips weigh by quantity", mana.colors.find(c => c.color === "U").pips === 6 && mana.colors.find(c => c.color === "R").pips === 2],
+  ["the weakest colour sets the fixing score", mana.weakest === "R" && mana.fixing === 67],
+  ["a conditional tapped land is not always tapped", pfProfile(pfDeck([[pfCard("Check", 0, "Land", { oracle_text: "This land enters tapped unless you control an Island." })]])).manabase.tapped === 0],
+  ["a land search is ramp, not a tutor", pfProfile(pfDeck([[pfCard("Cultivate", 3, "Sorcery", { oracle_text: "Search your library for up to two basic land cards." })]])).consistency.tutors === 0],
+  ["a tutor is read off the card", pfProfile(pfDeck([[pfCard("Tutor", 2, "Sorcery", { oracle_text: "Search your library for an artifact card." })]])).consistency.tutors === 1],
+  ["independent lines share no piece", pfProfile(manaDeck, [
+    { cards: ["A", "B"], win: true, tag: "R", features: ["Win the game"], cardsToFind: 2, deploy: 4 },
+    { cards: ["B", "C"], win: true, tag: "R", features: ["Win the game"], cardsToFind: 2, deploy: 5 },
+    { cards: ["D", "E"], win: true, tag: "R", features: ["Win the game"], cardsToFind: 2, deploy: 6 },
+  ]).wins.lines === 2],
+  ["salt adds up by front face and only once per card", (() => {
+    const s = PodEngine.saltScore(["A // B", "A // B", "C", "Unrated"], { salt: { A: 1.5, C: 0.5 } });
+    return s.total === 2 && s.rated === 2 && s.top[0].name === "A";
+  })()],
+  ["basic lands add no salt", PodEngine.saltScore(["Island", "C"], { salt: { Island: 0.9, C: 0.5 } }).total === 0.5],
+  ["no EDHREC page is no data, not zero", synOf(null).status === "none"],
+  ["synergy covers nonland cards with positive synergy", synOf(sameTable).coverage === 50 && synOf(sameTable).offPlan === 0],
+  ["power reads weak decks low and strong decks at the top", weak.score < 4 && strong.score === 10],
+  ["power explains itself", strong.up.length > 0 && weak.down.length > 0],
+  ["study: every cEDH list scores above every precon", Math.min(...scores("cedh")) > Math.max(...scores("precon"))],
+  ["study: the precon median stays in the casual band", (() => { const p = sorted(scores("precon")); return p[p.length >> 1] < 5; })()],
+  ["study: the pillars stay within 0-100", study.decks.every(d => Object.values(d.power.pillars).every(v => v >= 0 && v <= 100))],
+];
+const pfBad = PF_CASES.filter(([, ok]) => !ok);
+for (const [label] of pfBad) console.log(`PROFILE FAIL: ${label}`);
+console.log(`Deck profile: ${PF_CASES.length - pfBad.length}/${PF_CASES.length} correct`);
+if (pfBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

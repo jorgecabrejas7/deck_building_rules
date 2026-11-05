@@ -6,6 +6,8 @@ import { $, announce } from './ui/helpers.js';
 import { renderInput } from './ui/input.js';
 import { renderBanner } from './ui/tabbar.js';
 import { renderAll } from './main.js';
+import { renderProfile } from './ui/profile.js';
+import { getSynergy } from './synergy.js';
 
 export async function analyze() {
   const text = $('deckText').value;
@@ -50,12 +52,19 @@ export async function getComboDb() {
   if (!comboDb) comboDb = await (await fetch('../data/combos.json')).json();
   return comboDb;
 }
+let saltDb = null;
+export async function getSaltDb() {
+  if (!saltDb) saltDb = await (await fetch('../data/salt.json')).json();
+  return saltDb;
+}
 export async function checkCombos() {
   if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
   state.combosData = { status: 'checking', list: [] };
   renderAll();
   try {
     const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), await getComboDb());
+    // salt is a nicety: a failed fetch leaves its panel waiting, never the combo check
+    state.saltDb = await getSaltDb().catch(() => null);
     state.combosData = { status: 'done', list, cardLists: comboDb, updated: comboDb.updated };
     recompute();
     const inf = state.result.bracket.combos.filter(c => c.infinite).length;
@@ -99,6 +108,10 @@ export function recompute(notFound) {
     loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
     unresolved: missing.length,
   });
+  const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders });
+  const power = PodEngine.computePower(profile, stats);
+  const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
+  const synergy = synergyFor(cardsInfo, commanders);
   // what-if cut deltas for every card that drives a points dial or violation
   const drivingNames = new Set();
   for (const list of Object.values(evalRes.driving)) for (const [n] of list) drivingNames.add(n);
@@ -110,9 +123,29 @@ export function recompute(notFound) {
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
   state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, options,
-    bracket, whatIf, notFound: missing, validation };
+    bracket, profile, power, salt, synergy, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;
+}
+
+// EDHREC's page depends only on the commanders, so it is fetched once per pick. Its
+// answer patches the result directly: a full recompute would throw away the sample
+// hand and the fetched tips for a panel that does not read them.
+function synergyFor(cardsInfo, commanders) {
+  const key = commanders.join('|');
+  if (state.synergyData && state.synergyData.key === key) {
+    return state.synergyData.loading ? { status: 'loading' }
+      : PodEngine.synergyScore({ cardsInfo, commanders, table: state.synergyData.table });
+  }
+  state.synergyData = { key, loading: true, table: null };
+  getSynergy(commanders).catch(() => null).then(table => {
+    if (!state.synergyData || state.synergyData.key !== key) return;
+    state.synergyData = { key, loading: false, table };
+    if (!state.result) return;
+    state.result.synergy = PodEngine.synergyScore({ cardsInfo: state.result.cardsInfo, commanders, table });
+    if (state.tab === 'informe') renderProfile();
+  });
+  return { status: 'loading' };
 }
 
 // The command zone drives colour identity, synergy advice and the archetype

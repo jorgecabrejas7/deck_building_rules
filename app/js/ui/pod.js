@@ -1,6 +1,7 @@
 import { state } from '../state.js';
 import { T } from '../i18n.js';
-import { $, esc } from './helpers.js';
+import { $, esc, tierTone } from './helpers.js';
+import { loadStudy } from './profile.js';
 import { analyze } from '../pipeline.js';
 import { deckToText } from '../advice.js';
 import { runTableMode } from './table.js';
@@ -9,8 +10,36 @@ import { renderAll } from '../main.js';
 // Pod deck registry tab: reference decks stored in data/pod_decks.json
 // (maintained with scripts/pod_decks.py). Any of them can be analyzed in
 // place or compared against the currently loaded deck via table mode.
+const SORTS = {
+  power: d => d.power.score, points: d => d.points, salt: d => d.salt.total,
+  synergy: d => (d.synergy ? d.synergy.coverage : -1), price: d => d.price, bracket: d => d.bracket.checklist,
+};
+
+// All the pod's decks at a glance, from data/deck_study.json. The study prices every
+// card at its cheapest printing, so a tier here can differ from a deck's first
+// analysis until "fetch cheapest prices" runs there.
+function studyTable(t) {
+  const s = state.study;
+  if (!s) return '';
+  const rows = s.decks.filter(d => d.group === 'pod').sort((a, b) => SORTS[state.podSort](b) - SORTS[state.podSort](a));
+  const head = (k, label) => '<th scope="col"><button type="button" class="pod-sort' + (state.podSort === k ? ' on' : '') +
+    '" data-podsort="' + k + '" aria-pressed="' + (state.podSort === k) + '">' + esc(label) + '</button></th>';
+  const ref = (label, m) => '<tr class="pod-ref"><th scope="row">' + esc(label) + '</th><td></td>' +
+    ['power', 'points', 'bracket', 'salt_total', 'synergy_coverage', 'price'].map(k =>
+      '<td class="mono">' + (k === 'bracket' || m[k] === null || m[k] === undefined ? '' : (k === 'price' ? '€' + Math.round(m[k]) : m[k])) + '</td>').join('') + '</tr>';
+  return '<div class="tbl-scroll"><table class="br-table pod-table"><thead><tr><th scope="col">' + esc(t.tmDeck) + '</th><th scope="col">' + esc(t.tierWord) + '</th>' +
+    head('power', t.pfPower) + head('points', t.pts) + head('bracket', t.brTileN) + head('salt', t.pfSalt) + head('synergy', t.pfSyn) + head('price', t.price) + '</tr></thead><tbody>' +
+    rows.map(d => '<tr><th scope="row">' + esc(d.name) + (d.label ? ' <span class="note-sm">· ' + esc(t['podLabel_' + d.label]) + '</span>' : '') + '</th>' +
+      '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + esc(t[d.tier]) + '</span></td>' +
+      '<td class="mono">' + d.power.score + '</td><td class="mono">' + d.points + '</td><td class="mono">' + d.bracket.checklist + '</td>' +
+      '<td class="mono">' + d.salt.total + '</td><td class="mono">' + (d.synergy ? d.synergy.coverage + '%' : '—') + '</td><td class="mono">€' + Math.round(d.price) + '</td></tr>').join('') +
+    ref(t.pfRef_precon, s.medians.precon) + ref(t.pfRef_cedh, s.medians.cedh) +
+    '</tbody></table></div><p class="note-sm">' + esc(t.podStudyNote) + '</p>';
+}
+
 export function renderPod() {
   const t = T();
+  loadStudy();
   const el = $('podPanel');
   if (!state.podDecks) {
     state.podDecks = { status: 'loading', decks: [] };
@@ -40,7 +69,8 @@ export function renderPod() {
     (state.deck ? '<button data-pod-cmp="' + d.id + '" class="btn-ghost-sm">' + t.podCompare + '</button>' : '') +
     '</div></div>').join('') + '</div>';
   el.innerHTML = '<div class="panel panel-pad-lg"><h2 class="secT secT-lg">' + t.podT + '</h2>' +
-    '<div class="lbl-muted">' + esc(t.podHint) + '</div>' + body + '</div>';
+    '<div class="lbl-muted">' + esc(t.podHint) + '</div>' + studyTable(t) + body + '</div>';
+  for (const b of el.querySelectorAll('[data-podsort]')) b.onclick = () => { state.podSort = b.dataset.podsort; renderPod(); };
   for (const b of el.querySelectorAll('[data-pod-load]')) b.onclick = () => {
     const d = pd.decks.find(x => x.id === +b.dataset.podLoad);
     $('deckText').value = d.decklist;

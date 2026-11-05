@@ -12,3 +12,7 @@ export { manaProduced, isLandRamp } from "./ramp.js";
 export { matchCombos, activeCombos } from "./combos.js";
 export { classifyCard, detectArchetype } from "./classify.js";
 export { runSelfTest } from "./selftest.js";
+export { computeProfile, pipCounts } from "./profile.js";
+export { saltScore } from "./salt.js";
+export { synergyScore } from "./synergyScore.js";
+export { computePower } from "./power.js";
