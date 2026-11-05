@@ -38,6 +38,9 @@
    "stax": 1.5,
    "combos": 0,
    "ending_combos": 0,
+   "win_turn": null,
+   "commander_turn": 4,
+   "mana_turn_4": 4.5,
    "two_card_ending": 0,
    "game_changers": 0,
    "price": 68.23,
@@ -72,6 +75,9 @@
    "stax": 1,
    "combos": 0,
    "ending_combos": 0,
+   "win_turn": 7,
+   "commander_turn": 4,
+   "mana_turn_4": 4.45,
    "two_card_ending": 0,
    "game_changers": 0,
    "price": 179.18,
@@ -82,7 +88,7 @@
    "pillar_consistency": 100,
    "pillar_efficiency": 93.5,
    "pillar_interaction": 93.5,
-   "pillar_wins": 98,
+   "pillar_wins": 100,
    "salt_total": 86.3,
    "salt_average": 0.9,
    "synergy_coverage": 89,
@@ -106,6 +112,9 @@
    "stax": 12,
    "combos": 5.5,
    "ending_combos": 4,
+   "win_turn": 4,
+   "commander_turn": 3,
+   "mana_turn_4": 4.3,
    "two_card_ending": 2,
    "game_changers": 19,
    "price": 1907.81,
@@ -121,8 +130,8 @@
     "podOut": 3.3,
     "cedh": 9.9
    },
-   "precon_vs_pod": 0.67,
-   "podIn_vs_podOut": 0.55,
+   "precon_vs_pod": 0.68,
+   "podIn_vs_podOut": 0.53,
    "pod_vs_cedh": 0.98
   },
   {
@@ -167,10 +176,10 @@
     "precon": 0,
     "podIn": 0,
     "podOut": 0,
-    "cedh": 98
+    "cedh": 100
    },
    "precon_vs_pod": 0.51,
-   "podIn_vs_podOut": 0.55,
+   "podIn_vs_podOut": 0.54,
    "pod_vs_cedh": 0.9
   },
   {
@@ -450,6 +459,42 @@
    "pod_vs_cedh": 0.88
   },
   {
+   "key": "win_turn",
+   "medians": {
+    "precon": null,
+    "podIn": null,
+    "podOut": 7,
+    "cedh": 4
+   },
+   "precon_vs_pod": null,
+   "podIn_vs_podOut": null,
+   "pod_vs_cedh": 0
+  },
+  {
+   "key": "commander_turn",
+   "medians": {
+    "precon": 4,
+    "podIn": 4,
+    "podOut": 5,
+    "cedh": 3
+   },
+   "precon_vs_pod": 0.63,
+   "podIn_vs_podOut": 0.73,
+   "pod_vs_cedh": 0.22
+  },
+  {
+   "key": "mana_turn_4",
+   "medians": {
+    "precon": 4.5,
+    "podIn": 4.1,
+    "podOut": 4.5,
+    "cedh": 4.3
+   },
+   "precon_vs_pod": 0.42,
+   "podIn_vs_podOut": 0.75,
+   "pod_vs_cedh": 0.38
+  },
+  {
    "key": "two_card_ending",
    "medians": {
     "precon": 0,
@@ -617,6 +662,26 @@
      },
      "creatures": 22,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.5,
+      4.1,
+      5.8,
+      6.9,
+      7.8,
+      8.6,
+      9.4,
+      10.1,
+      10.8,
+      11.4,
+      12.2
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -775,6 +840,31 @@
      },
      "creatures": 36,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.7,
+      3.9,
+      4.8,
+      5.7,
+      6.4,
+      7,
+      7.6,
+      8.2,
+      8.8,
+      9.3,
+      9.9
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": {
+      "4": 1,
+      "6": 6,
+      "8": 8,
+      "10": 11
+     }
     }
    },
    "salt": {
@@ -801,13 +891,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.8,
-    "raw": 22.5,
+    "score": 3.4,
+    "raw": 19.3,
     "pillars": {
      "consistency": 4,
      "efficiency": 32,
      "interaction": 10,
-     "wins": 44
+     "wins": 31
     }
    }
   },
@@ -936,6 +1026,26 @@
      },
      "creatures": 27,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.4,
+      3.5,
+      4.6,
+      5.6,
+      6.3,
+      7,
+      7.6,
+      8.3,
+      8.8,
+      9.5,
+      10
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -1086,6 +1196,26 @@
      },
      "creatures": 30,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.4,
+      3.4,
+      4.3,
+      5,
+      5.6,
+      6.1,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.6
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -1246,6 +1376,31 @@
      },
      "creatures": 28,
      "throughCommander": 2
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.3,
+      3.7,
+      4.7,
+      5.5,
+      6.2,
+      6.9,
+      7.4,
+      8,
+      8.5,
+      9.1,
+      9.6
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": {
+      "4": 0,
+      "6": 1,
+      "8": 4,
+      "10": 8
+     }
     }
    },
    "salt": {
@@ -1404,6 +1559,26 @@
      },
      "creatures": 36,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.6,
+      3.7,
+      4.6,
+      5.3,
+      5.9,
+      6.5,
+      7.1,
+      7.6,
+      8.1,
+      8.6,
+      9.1
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -1558,6 +1733,31 @@
      },
      "creatures": 33,
      "throughCommander": 3
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.6,
+      4.7,
+      5.5,
+      6.3,
+      7,
+      7.6,
+      8.3,
+      8.9,
+      9.5,
+      10.1
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": {
+      "4": 1,
+      "6": 9,
+      "8": 16,
+      "10": 22
+     }
     }
    },
    "salt": {
@@ -1716,6 +1916,31 @@
      },
      "creatures": 23,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.5,
+      3.6,
+      4.5,
+      5.3,
+      5.9,
+      6.4,
+      7,
+      7.5,
+      8,
+      8.5,
+      9.1
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": {
+      "4": 0,
+      "6": 0,
+      "8": 2,
+      "10": 4
+     }
     }
    },
    "salt": {
@@ -1870,6 +2095,26 @@
      },
      "creatures": 33,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.6,
+      3.6,
+      4.5,
+      5.2,
+      5.9,
+      6.5,
+      6.9,
+      7.5,
+      8,
+      8.5,
+      8.9
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -2020,6 +2265,26 @@
      },
      "creatures": 27,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.5,
+      3.8,
+      4.8,
+      5.6,
+      6.3,
+      6.9,
+      7.6,
+      8.1,
+      8.7,
+      9.2,
+      9.8
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -2194,6 +2459,26 @@
      },
      "creatures": 36,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.7,
+      5,
+      6.3,
+      7.3,
+      8.1,
+      8.9,
+      9.6,
+      10.3,
+      11,
+      11.7
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -2352,6 +2637,26 @@
      },
      "creatures": 28,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.6,
+      4.6,
+      5.4,
+      6.1,
+      6.7,
+      7.2,
+      7.8,
+      8.3,
+      8.8,
+      9.3
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -2510,6 +2815,31 @@
      },
      "creatures": 31,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.5,
+      4.7,
+      5.8,
+      6.7,
+      7.5,
+      8.2,
+      8.9,
+      9.6,
+      10.3,
+      11
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": {
+      "4": 23,
+      "6": 28,
+      "8": 31,
+      "10": 33
+     }
     }
    },
    "salt": {
@@ -2536,13 +2866,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 4.4,
-    "raw": 29.3,
+    "score": 3.9,
+    "raw": 24,
     "pillars": {
      "consistency": 29,
      "efficiency": 25,
      "interaction": 11,
-     "wins": 52
+     "wins": 31
     }
    }
   },
@@ -2668,6 +2998,26 @@
      },
      "creatures": 25,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.3,
+      2.5,
+      3.6,
+      4.5,
+      5.3,
+      6,
+      6.6,
+      7.1,
+      7.6,
+      8.1,
+      8.7,
+      9.2
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -2826,6 +3176,26 @@
      },
      "creatures": 36,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.5,
+      4.4,
+      5.1,
+      5.7,
+      6.2,
+      6.7,
+      7.3,
+      7.8,
+      8.3,
+      8.8
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -2984,6 +3354,26 @@
      },
      "creatures": 25,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.5,
+      4.3,
+      5,
+      5.6,
+      6.2,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.6
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -3148,6 +3538,31 @@
      },
      "creatures": 35,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.3,
+      3.5,
+      4.4,
+      5.2,
+      5.9,
+      6.5,
+      7.1,
+      7.5,
+      8,
+      8.6,
+      9.1
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": {
+      "4": 0,
+      "6": 0,
+      "8": 1,
+      "10": 1
+     }
     }
    },
    "salt": {
@@ -3174,13 +3589,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.6,
-    "raw": 20.5,
+    "score": 3.3,
+    "raw": 17.5,
     "pillars": {
      "consistency": 3,
      "efficiency": 25,
      "interaction": 23,
-     "wins": 31
+     "wins": 19
     }
    }
   },
@@ -3308,6 +3723,26 @@
      },
      "creatures": 23,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.4,
+      3.5,
+      4.3,
+      5,
+      5.7,
+      6.3,
+      6.9,
+      7.4,
+      7.9,
+      8.5,
+      8.9
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -3466,6 +3901,31 @@
      },
      "creatures": 32,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.5,
+      3.6,
+      4.4,
+      5.1,
+      5.7,
+      6.2,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.7
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": {
+      "4": 6,
+      "6": 7,
+      "8": 11,
+      "10": 13
+     }
     }
    },
    "salt": {
@@ -3492,13 +3952,13 @@
     "offPlan": 3
    },
    "power": {
-    "score": 4,
-    "raw": 25,
+    "score": 3.6,
+    "raw": 20.8,
     "pillars": {
      "consistency": 7,
      "efficiency": 21,
      "interaction": 24,
-     "wins": 48
+     "wins": 31
     }
    }
   },
@@ -3625,6 +4085,26 @@
      },
      "creatures": 33,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.8,
+      4.7,
+      5.5,
+      6.2,
+      6.8,
+      7.4,
+      7.9,
+      8.4,
+      9,
+      9.5
+     ],
+     "commanderTurn": 2,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -3777,6 +4257,26 @@
      },
      "creatures": 26,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.7,
+      4.8,
+      5.8,
+      6.6,
+      7.3,
+      7.9,
+      8.5,
+      9.1,
+      9.7,
+      10.3
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -3937,6 +4437,26 @@
      },
      "creatures": 28,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.4,
+      3.7,
+      4.7,
+      5.6,
+      6.3,
+      6.9,
+      7.5,
+      8.1,
+      8.6,
+      9.2,
+      9.7
+     ],
+     "commanderTurn": 8,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -4095,6 +4615,26 @@
      },
      "creatures": 30,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.5,
+      3.6,
+      4.4,
+      5.2,
+      5.8,
+      6.4,
+      6.9,
+      7.4,
+      7.9,
+      8.4,
+      8.9
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -4245,6 +4785,26 @@
      },
      "creatures": 24,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.5,
+      4.5,
+      5.5,
+      6.3,
+      7.1,
+      7.8,
+      8.5,
+      9.1,
+      9.7,
+      10.3
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -4413,6 +4973,26 @@
      },
      "creatures": 20,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.2,
+      3.5,
+      4.5,
+      5.3,
+      6,
+      6.6,
+      7.2,
+      7.7,
+      8.2,
+      8.8,
+      9.3
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -4571,6 +5151,26 @@
      },
      "creatures": 32,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.4,
+      4.2,
+      4.9,
+      5.5,
+      6,
+      6.5,
+      6.9,
+      7.4,
+      7.9,
+      8.3
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -4723,6 +5323,26 @@
      },
      "creatures": 26,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.3,
+      3.2,
+      4,
+      4.6,
+      5.1,
+      5.6,
+      6,
+      6.4,
+      6.9,
+      7.3,
+      7.7
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -4875,6 +5495,26 @@
      },
      "creatures": 26,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.3,
+      4.1,
+      4.8,
+      5.4,
+      6,
+      6.5,
+      7,
+      7.5,
+      8,
+      8.4
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -5025,6 +5665,26 @@
      },
      "creatures": 40,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.4,
+      4.4,
+      5.1,
+      5.8,
+      6.4,
+      6.9,
+      7.5,
+      7.9,
+      8.4,
+      8.9
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -5175,6 +5835,26 @@
      },
      "creatures": 36,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.5,
+      4.5,
+      5.3,
+      5.9,
+      6.5,
+      7,
+      7.6,
+      8.1,
+      8.7,
+      9.2
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -5325,6 +6005,26 @@
      },
      "creatures": 28,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.4,
+      3.6,
+      4.7,
+      5.6,
+      6.3,
+      7,
+      7.5,
+      8.1,
+      8.6,
+      9.2,
+      9.7
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -5485,6 +6185,26 @@
      },
      "creatures": 41,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.6,
+      3.8,
+      4.8,
+      5.6,
+      6.3,
+      6.9,
+      7.5,
+      8,
+      8.6,
+      9.1,
+      9.7
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -5645,6 +6365,26 @@
      },
      "creatures": 19,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.7,
+      3.8,
+      4.6,
+      5.3,
+      6,
+      6.6,
+      7.1,
+      7.6,
+      8.1,
+      8.7,
+      9.2
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -5803,6 +6543,26 @@
      },
      "creatures": 37,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.5,
+      4.6,
+      5.3,
+      6,
+      6.6,
+      7.1,
+      7.6,
+      8.2,
+      8.7,
+      9.3
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -5961,6 +6721,26 @@
      },
      "creatures": 32,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.4,
+      4.1,
+      4.8,
+      5.4,
+      6,
+      6.4,
+      6.9,
+      7.4,
+      7.9,
+      8.4
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -6121,6 +6901,26 @@
      },
      "creatures": 35,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.5,
+      4.3,
+      5.1,
+      5.8,
+      6.4,
+      6.9,
+      7.5,
+      8,
+      8.6,
+      9.1
+     ],
+     "commanderTurn": 7,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -6287,6 +7087,31 @@
      },
      "creatures": 35,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.3,
+      3.5,
+      4.4,
+      5.3,
+      6,
+      6.5,
+      7.1,
+      7.6,
+      8.1,
+      8.6,
+      9.1
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": {
+      "4": 0,
+      "6": 1,
+      "8": 1,
+      "10": 1
+     }
     }
    },
    "salt": {
@@ -6313,13 +7138,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.6,
-    "raw": 20.5,
+    "score": 3.3,
+    "raw": 17.5,
     "pillars": {
      "consistency": 3,
      "efficiency": 25,
      "interaction": 23,
-     "wins": 31
+     "wins": 19
     }
    }
   },
@@ -6454,6 +7279,26 @@
      },
      "creatures": 25,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      3,
+      4.2,
+      5.1,
+      5.9,
+      6.6,
+      7.2,
+      7.7,
+      8.3,
+      8.8,
+      9.3,
+      9.9
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -6622,6 +7467,26 @@
      },
      "creatures": 29,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.5,
+      3.6,
+      4.7,
+      5.5,
+      6.2,
+      6.8,
+      7.3,
+      7.9,
+      8.4,
+      9,
+      9.5
+     ],
+     "commanderTurn": 6,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -6789,6 +7654,26 @@
      },
      "creatures": 13,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.5,
+      3.7,
+      4.8,
+      5.7,
+      6.4,
+      7.1,
+      7.7,
+      8.2,
+      8.8,
+      9.4,
+      9.9
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -6969,6 +7854,31 @@
      },
      "creatures": 27,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.5,
+      2.7,
+      3.6,
+      4.3,
+      4.9,
+      5.5,
+      5.9,
+      6.4,
+      6.8,
+      7.3,
+      7.7,
+      8.2
+     ],
+     "commanderTurn": 4,
+     "winTurn": 7,
+     "winBy": {
+      "4": 10,
+      "6": 24,
+      "8": 34,
+      "10": 43
+     }
     }
    },
    "salt": {
@@ -6995,13 +7905,13 @@
     "offPlan": 12
    },
    "power": {
-    "score": 6.8,
-    "raw": 52.8,
+    "score": 7.1,
+    "raw": 56,
     "pillars": {
      "consistency": 41,
      "efficiency": 47,
      "interaction": 40,
-     "wins": 83
+     "wins": 96
     }
    }
   },
@@ -7136,6 +8046,26 @@
      },
      "creatures": 40,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.4,
+      4.2,
+      4.8,
+      5.4,
+      5.9,
+      6.4,
+      6.9,
+      7.4,
+      7.9,
+      8.4
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -7300,6 +8230,26 @@
      },
      "creatures": 45,
      "throughCommander": 3
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.5,
+      3.6,
+      4.4,
+      4.9,
+      5.5,
+      5.9,
+      6.4,
+      6.9,
+      7.3,
+      7.7,
+      8.1
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -7470,6 +8420,26 @@
      },
      "creatures": 24,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.8,
+      3.9,
+      4.8,
+      5.6,
+      6.2,
+      6.8,
+      7.4,
+      7.9,
+      8.4,
+      8.9,
+      9.5
+     ],
+     "commanderTurn": 6,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -7627,6 +8597,26 @@
      },
      "creatures": 40,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.5,
+      3.6,
+      4.6,
+      5.4,
+      6.1,
+      6.7,
+      7.3,
+      7.8,
+      8.3,
+      8.8,
+      9.3
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -7810,6 +8800,26 @@
      },
      "creatures": 28,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.4,
+      4.3,
+      5.1,
+      5.8,
+      6.4,
+      7,
+      7.5,
+      8,
+      8.5,
+      9
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -7976,6 +8986,26 @@
      },
      "creatures": 23,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.4,
+      3.4,
+      4.1,
+      4.7,
+      5.3,
+      5.7,
+      6.2,
+      6.7,
+      7.1,
+      7.5,
+      8
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -8157,6 +9187,26 @@
      },
      "creatures": 32,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.2,
+      3.1,
+      3.9,
+      4.4,
+      5,
+      5.4,
+      5.8,
+      6.3,
+      6.7,
+      7.1,
+      7.6
+     ],
+     "commanderTurn": 2,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -8310,6 +9360,31 @@
      },
      "creatures": 17,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.6,
+      3.7,
+      4.5,
+      5.2,
+      5.7,
+      6.2,
+      6.7,
+      7.2,
+      7.7,
+      8.1,
+      8.6
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": {
+      "4": 3,
+      "6": 6,
+      "8": 9,
+      "10": 13
+     }
     }
    },
    "salt": {
@@ -8336,13 +9411,13 @@
     "offPlan": 14
    },
    "power": {
-    "score": 7.2,
-    "raw": 57,
+    "score": 6.6,
+    "raw": 50.8,
     "pillars": {
      "consistency": 0,
      "efficiency": 78,
      "interaction": 62,
-     "wins": 88
+     "wins": 63
     }
    }
   },
@@ -8464,6 +9539,26 @@
      },
      "creatures": 19,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.3,
+      3.6,
+      4.7,
+      5.5,
+      6.2,
+      6.8,
+      7.4,
+      8,
+      8.6,
+      9,
+      9.5
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -8624,6 +9719,26 @@
      },
      "creatures": 17,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1,
+      1.9,
+      3,
+      4,
+      4.7,
+      5.3,
+      5.8,
+      6.3,
+      6.8,
+      7.2,
+      7.7,
+      8.1
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -8770,6 +9885,31 @@
      },
      "creatures": 31,
      "throughCommander": 5
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.2,
+      3.1,
+      3.8,
+      4.4,
+      4.9,
+      5.3,
+      5.7,
+      6.1,
+      6.6,
+      6.9,
+      7.3
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": {
+      "4": 5,
+      "6": 12,
+      "8": 19,
+      "10": 27
+     }
     }
    },
    "salt": {
@@ -8796,13 +9936,13 @@
     "offPlan": 21
    },
    "power": {
-    "score": 4.7,
-    "raw": 32,
+    "score": 4.5,
+    "raw": 30,
     "pillars": {
      "consistency": 0,
      "efficiency": 47,
      "interaction": 10,
-     "wins": 71
+     "wins": 63
     }
    }
   },
@@ -8950,6 +10090,26 @@
      },
      "creatures": 32,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.6,
+      4.8,
+      5.7,
+      6.3,
+      6.9,
+      7.6,
+      8.2,
+      8.8,
+      9.4,
+      9.9
+     ],
+     "commanderTurn": 7,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -9104,6 +10264,26 @@
      },
      "creatures": 26,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.3,
+      3.3,
+      4.1,
+      4.8,
+      5.4,
+      6,
+      6.5,
+      7,
+      7.5,
+      7.9,
+      8.5
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -9265,6 +10445,26 @@
      },
      "creatures": 32,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.5,
+      4.5,
+      5.4,
+      6,
+      6.6,
+      7.2,
+      7.7,
+      8.3,
+      8.9,
+      9.4
+     ],
+     "commanderTurn": 2,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -9441,6 +10641,26 @@
      },
      "creatures": 30,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.5,
+      3.5,
+      4.6,
+      5.4,
+      6.1,
+      6.7,
+      7.3,
+      7.9,
+      8.5,
+      9.1,
+      9.7
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -9628,6 +10848,31 @@
      },
      "creatures": 25,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.2,
+      2.6,
+      3.5,
+      4.2,
+      4.8,
+      5.3,
+      5.7,
+      6.1,
+      6.5,
+      6.9,
+      7.4,
+      7.8
+     ],
+     "commanderTurn": 2,
+     "winTurn": 4,
+     "winBy": {
+      "4": 57,
+      "6": 70,
+      "8": 77,
+      "10": 87
+     }
     }
    },
    "salt": {
@@ -9814,6 +11059,31 @@
      },
      "creatures": 24,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.4,
+      2.3,
+      2.9,
+      3.4,
+      3.7,
+      4.1,
+      4.4,
+      4.8,
+      5.1,
+      5.5,
+      5.8,
+      6.2
+     ],
+     "commanderTurn": 3,
+     "winTurn": 5,
+     "winBy": {
+      "4": 35,
+      "6": 55,
+      "8": 69,
+      "10": 78
+     }
     }
    },
    "salt": {
@@ -10012,6 +11282,31 @@
      },
      "creatures": 20,
      "throughCommander": 2
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.4,
+      3,
+      3.8,
+      4.4,
+      4.9,
+      5.3,
+      5.8,
+      6.3,
+      6.8,
+      7.2,
+      7.8,
+      8.2
+     ],
+     "commanderTurn": 3,
+     "winTurn": 3,
+     "winBy": {
+      "4": 80,
+      "6": 92,
+      "8": 97,
+      "10": 99
+     }
     }
    },
    "salt": {
@@ -10209,6 +11504,31 @@
      },
      "creatures": 20,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.5,
+      2.7,
+      3.4,
+      4,
+      4.4,
+      4.9,
+      5.3,
+      5.8,
+      6.2,
+      6.6,
+      7.1,
+      7.5
+     ],
+     "commanderTurn": 3,
+     "winTurn": 5,
+     "winBy": {
+      "4": 40,
+      "6": 56,
+      "8": 70,
+      "10": 77
+     }
     }
    },
    "salt": {
@@ -10379,6 +11699,31 @@
      },
      "creatures": 29,
      "throughCommander": 1
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.9,
+      3.5,
+      4.5,
+      5.2,
+      5.8,
+      6.4,
+      7,
+      7.6,
+      8,
+      8.5,
+      9.1,
+      9.7
+     ],
+     "commanderTurn": 2,
+     "winTurn": 3,
+     "winBy": {
+      "4": 73,
+      "6": 85,
+      "8": 89,
+      "10": 93
+     }
     }
    },
    "salt": {
@@ -10406,12 +11751,12 @@
    },
    "power": {
     "score": 9.8,
-    "raw": 92.8,
+    "raw": 93.8,
     "pillars": {
      "consistency": 100,
      "efficiency": 85,
      "interaction": 90,
-     "wins": 96
+     "wins": 100
     }
    }
   },
@@ -10538,6 +11883,26 @@
      },
      "creatures": 11,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      2,
+      3.2,
+      4,
+      4.6,
+      5.1,
+      5.6,
+      6,
+      6.6,
+      7,
+      7.5,
+      7.9,
+      8.4
+     ],
+     "commanderTurn": 5,
+     "winTurn": null,
+     "winBy": null
     }
    },
    "salt": {
@@ -10705,6 +12070,31 @@
      },
      "creatures": 56,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.8,
+      2.7,
+      3.4,
+      3.9,
+      4.4,
+      4.8,
+      5.2,
+      5.6,
+      6.1,
+      6.6,
+      6.9,
+      7.4
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": {
+      "4": 11,
+      "6": 23,
+      "8": 34,
+      "10": 42
+     }
     }
    },
    "salt": {
@@ -10731,13 +12121,13 @@
     "offPlan": 12
    },
    "power": {
-    "score": 6.8,
-    "raw": 52.5,
+    "score": 6.5,
+    "raw": 50.3,
     "pillars": {
      "consistency": 59,
      "efficiency": 63,
      "interaction": 48,
-     "wins": 40
+     "wins": 31
     }
    }
   },
@@ -10894,6 +12284,31 @@
      },
      "creatures": 23,
      "throughCommander": 0
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.6,
+      2.9,
+      3.7,
+      4.4,
+      4.8,
+      5.3,
+      5.8,
+      6.3,
+      6.8,
+      7.2,
+      7.7,
+      8.1
+     ],
+     "commanderTurn": 1,
+     "winTurn": 4,
+     "winBy": {
+      "4": 57,
+      "6": 73,
+      "8": 80,
+      "10": 85
+     }
     }
    },
    "salt": {

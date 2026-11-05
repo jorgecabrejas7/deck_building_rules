@@ -1,6 +1,7 @@
 import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { ARCH } from './constants.js';
+import { drawOdds } from '../engine/index.js';
 import { $, esc } from './helpers.js';
 import { renderPod } from './pod.js';
 
@@ -104,6 +105,28 @@ function comparison(r, t) {
     '</tbody></table></div>';
 }
 
+// Tempo if nobody interferes, plus how likely each role is to show up by each turn.
+function tempo(r, t) {
+  const g = r.profile.goldfish, L = r.profile.ledger;
+  const turns = [1, 2, 3, 4, 5, 6, 8, 10];
+  const deck = r.stats.total_cards - r.commanders.length;
+  const roles = [['pr_ramp', L.ramp], ['pr_draw', L.draw], ['pr_tutors', L.tutors], ['pr_cheap_answers', L.cheapAnswers]];
+  // seven in hand plus one a turn after the first
+  const odds = [2, 4, 6, 8].map(turn => '<th scope="col">T' + turn + '</th>').join('');
+  return '<details class="br-legend"><summary>' + esc(t.gfT) + '</summary>' +
+    '<p class="note-sm">' + esc(t.gfX.replace('%n', g.games)) + '</p>' +
+    (g.commanderTurn !== null ? '<p class="note-sm">' + esc(t.gfCommander.replace('%v', g.commanderTurn)) + '</p>' : '') +
+    (g.winBy ? '<p class="note-sm">' + esc(g.winTurn !== null ? t.gfWin.replace('%v', g.winTurn) : t.gfNoWin) + ' ' +
+      esc(t.gfWinBy.replace('%a', g.winBy[6]).replace('%b', g.winBy[8]).replace('%c', g.winBy[10])) + '</p>' : '') +
+    '<div class="tbl-scroll"><table class="br-table"><thead><tr><th></th>' + turns.map(n => '<th scope="col">T' + n + '</th>').join('') +
+    '</tr></thead><tbody><tr><th scope="row">' + esc(t.gfMana) + '</th>' + turns.map(n => '<td class="mono">' + g.mana[n - 1] + '</td>').join('') + '</tr></tbody></table></div>' +
+    '<h3 class="mini-title">' + esc(t.gfOddsT) + '</h3>' +
+    '<div class="tbl-scroll"><table class="br-table"><thead><tr><th></th>' + odds + '</tr></thead><tbody>' +
+    roles.map(([label, cards]) => '<tr><th scope="row">' + esc(t[label]) + ' <span class="note-sm mono">' + cards.length + '</span></th>' +
+      [2, 4, 6, 8].map(turn => '<td class="mono">' + Math.round(drawOdds(deck, cards.length, 6 + turn) * 100) + '%</td>').join('') + '</tr>').join('') +
+    '</tbody></table></div></details>';
+}
+
 function manaBlock(m, t) {
   return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfManaT) + ' · <span class="mono">' + m.score + '/100</span></h3>' +
     '<p class="note-sm">' + esc(t.pfManaX.replace('%f', m.fixing).replace('%q', m.quality).replace('%c', m.curve)) + '</p>' +
@@ -155,7 +178,7 @@ export function renderProfile() {
       tile(t.pfSyn, synergy.status === 'done' ? synergy.coverage + '%' : synergy.status === 'loading' ? '…' : '—', t.pfSynSub) +
       tile(t.pfMana, profile.manabase.score, t.pfManaSub) +
     '</div>' +
-    fingerprint(power, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) +
+    fingerprint(power, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) + tempo(r, t) +
     '<div class="pf-grid">' + manaBlock(profile.manabase, t) + saltBlock(salt, t) + synergyBlock(synergy, t) + shapeBlock(profile, t) + '</div>' +
     '<details class="br-legend" open><summary>' + esc(t.pfCompareT) + '</summary>' + comparison(r, t) + '</details>' +
     '<p class="note-sm">' + esc(t.pfNote) + '</p></div>';

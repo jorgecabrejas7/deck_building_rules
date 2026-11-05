@@ -11,6 +11,7 @@
  *   (f) the commander picker is offered the WHOLE deck, not a shortlist.
  *   (g) the bracket rules, on synthetic cards and on the real combo database.
  *   (h) the deck profile: manabase arithmetic, salt, synergy and the power scale.
+ *   (j) the goldfish simulation and draw odds.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -288,7 +289,8 @@ const strong = PodEngine.computePower({ ...baseProfile,
   speed: { ...baseProfile.speed, avgMv: 1.9, cheap: 55, fastMana: 14, ramp: 27 },
   interaction: { ...baseProfile.interaction, cheapAnswers: 12, counters: 11, stax: 13, free: 5 },
   manabase: { ...baseProfile.manabase, quality: 100 },
-  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, fastest: 3 },
+  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2 },
+  goldfish: { ...baseProfile.goldfish, winTurn: 5 },
 }, { game_changers: 20 });
 const study = read_study();
 function read_study() { return JSON.parse(fs.readFileSync(path.join(ROOT, "data", "deck_study.json"), "utf8")); }
@@ -361,5 +363,39 @@ const textOnly = goldenScore(null), tagged = goldenScore(liveTags);
 console.log(`Card reader on ${Object.keys(golden).length} labelled cards: text only precision ${pct(textOnly.precision)} recall ${pct(textOnly.recall)}; with tags precision ${pct(tagged.precision)} recall ${pct(tagged.recall)}`);
 if (process.argv.includes("--misses")) console.log(tagged.misses.join("\n"));
 if (tagged.f1 <= textOnly.f1 || tagged.f1 < 0.9) { console.log("CARD READER FAIL: below 90%, or no better than reading text"); fails++; }
+
+// (j) goldfish. Decks simple enough that the right answer is obvious.
+const gfCard = (name, cmc, type_line, extra = {}) => pfCard(name, cmc, type_line, extra);
+const gfRead = (x) => PodEngine.readCard(x, null);
+const allLands = pfDeck([[gfCard("Land", 0, "Basic Land"), 99], [gfCard("Boss", 4, "Legendary Creature — Human"), 1]]);
+const gfLands = PodEngine.simulateGoldfish({ cardsInfo: allLands, commanders: ["Boss"], read: gfRead, games: 50 });
+const rockDeck = pfDeck([[gfCard("Land", 0, "Basic Land"), 89], [gfCard("Rock", 1, "Artifact", { oracle_text: "{T}: Add {C}{C}." }), 10]]);
+const gfRock = PodEngine.simulateGoldfish({ cardsInfo: rockDeck, commanders: [], read: gfRead, games: 200 });
+const gfPlain = PodEngine.simulateGoldfish({ cardsInfo: pfDeck([[gfCard("Land", 0, "Basic Land"), 99]]), commanders: [], read: gfRead, games: 200 });
+const comboDeck = pfDeck([[gfCard("Land", 0, "Basic Land"), 97], [gfCard("A", 2, "Artifact"), 1], [gfCard("B", 2, "Artifact"), 1]]);
+const tutorDeck = pfDeck([[gfCard("Land", 0, "Basic Land"), 79], [gfCard("A", 2, "Artifact"), 1], [gfCard("B", 2, "Artifact"), 1],
+  [gfCard("Find", 2, "Sorcery", { oracle_text: "Search your library for a card." }), 19]]);
+const line = [{ pieces: ["A", "B"], deploy: 4 }];
+const gfCombo = PodEngine.simulateGoldfish({ cardsInfo: comboDeck, commanders: [], combos: line, read: gfRead, games: 300 });
+const gfTutor = PodEngine.simulateGoldfish({ cardsInfo: tutorDeck, commanders: [], combos: line, read: gfRead, games: 300 });
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const near = (a, b) => Math.abs(a - b) < 1e-9;
+const GF_CASES = [
+  ["an all-land deck makes one mana a turn", gfLands.mana.every((m, i) => m === i + 1)],
+  ["rocks count on the turn they are cast", gfRock.mana[0] > 1],
+  ["the commander lands on the turn its mana arrives", gfLands.commanderTurn === 4],
+  ["the same deck gives the same numbers", same(gfCombo, PodEngine.simulateGoldfish({ cardsInfo: comboDeck, commanders: [], combos: line, read: gfRead, games: 300 }))],
+  ["mana rocks add mana", gfRock.mana[5] > gfPlain.mana[5]],
+  ["no lines means no winning turn", gfPlain.winTurn === null && gfPlain.winBy === null],
+  ["cheap draw finds lands", PodEngine.simulateGoldfish({ cardsInfo: pfDeck([[gfCard("Land", 0, "Basic Land"), 30], [gfCard("Dig", 1, "Instant", { oracle_text: "Draw a card." }), 40], [gfCard("Blank", 3, "Creature"), 29]]), commanders: [], read: gfRead, games: 300 }).mana[5] >
+    PodEngine.simulateGoldfish({ cardsInfo: pfDeck([[gfCard("Land", 0, "Basic Land"), 30], [gfCard("Blank", 3, "Creature"), 69]]), commanders: [], read: gfRead, games: 300 }).mana[5]],
+  ["tutors find combo pieces sooner", gfTutor.winBy[8] > gfCombo.winBy[8]],
+  ["odds of one card in the opening seven of 99", near(PodEngine.drawOdds(99, 1, 7), 7 / 99)],
+  ["odds with no copies, and with every card seen", PodEngine.drawOdds(99, 0, 50) === 0 && near(PodEngine.drawOdds(99, 1, 99), 1)],
+];
+const gfBad = GF_CASES.filter(([, ok]) => !ok);
+for (const [label] of gfBad) console.log(`GOLDFISH FAIL: ${label}`);
+console.log(`Goldfish: ${GF_CASES.length - gfBad.length}/${GF_CASES.length} correct`);
+if (gfBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

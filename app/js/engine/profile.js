@@ -5,6 +5,7 @@
 // count differently here than on a dial.
 import { detectArchetype } from "./classify.js";
 import { isLandRamp } from "./ramp.js";
+import { simulateGoldfish } from "./goldfish.js";
 import { FAST_MANA_RE, KEYWORD_PATTERNS, REMINDER_TEXT_RE } from "./stats.js";
 
 const COLORS = ["W", "U", "B", "R", "G"];
@@ -198,7 +199,9 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
     free: names(x => KEYWORD_PATTERNS.free_spells.test(oracleOf(x.card))),
     draw: names(x => read(x).draw), protection: names(x => read(x).protection), recursion: names(x => read(x).recursion),
     ending: [...new Set(ending.flatMap(c => c.cards))], twoCard: [...new Set(ending.filter(c => c.cardsToFind <= 2).flatMap(c => c.cards))],
-    fastest: cheapest ? cheapest.cards : [],
+    winTurn: cheapest ? cheapest.cards : [],
   };
-  return { manabase: manabase(cardsInfo, avgMv, read), speed, consistency, interaction, wins, shape, ledger };
+  const goldfish = simulateGoldfish({ cardsInfo, commanders, read, combos: priced.map(c => ({
+    pieces: [...c.cards, ...(c.filled || [])], deploy: c.deploy })) });
+  return { manabase: manabase(cardsInfo, avgMv, read), speed, consistency, interaction, wins, shape, ledger, goldfish };
 }

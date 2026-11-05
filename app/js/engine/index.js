@@ -16,3 +16,4 @@ export { computeProfile, pipCounts, readCard, indexCardTags } from "./profile.js
 export { saltScore } from "./salt.js";
 export { synergyScore } from "./synergyScore.js";
 export { computePower, METRIC_RANGE } from "./power.js";
+export { simulateGoldfish, drawOdds } from "./goldfish.js";

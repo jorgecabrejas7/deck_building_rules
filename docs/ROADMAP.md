@@ -19,9 +19,9 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Per-card score and weight in the deck list | CS | 🟡 top cards by jobs done |
 | Score drivers with named boosts and penalties | CS | ✅ replaced by benchmarks |
 | Deck fingerprint: plain-language description of the deck | CS | ✅ |
-| Goldfish turns: when the engine is ready, first must-answer threat | DC | ⬜ M3 |
-| Combo assembly odds by turn, with tutors counted | new | ⬜ M3 |
-| Draw odds calculator | DC | ⬜ M3 |
+| Goldfish turns: mana by turn, commander turn, winning line turn | DC | ✅ |
+| Combo assembly odds by turn, with tutors counted | new | ✅ |
+| Draw odds | DC | ✅ by role and turn |
 | Sample hand, curve, colour requirements | DC, CS | ✅ |
 | Pips vs production per colour | DC, CS | ✅ |
 | Manabase depth: untapped share, fetch and dual quality, utility lands, expected lands | CS | 🟡 M4 |
@@ -92,7 +92,7 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 ## Milestones
 - **M1, card reader:** done.
 - **M2, benchmarks and card ledger:** done.
-- **M3, goldfish engine:** seeded simulation of mana by turn, commander turn, first threat turn and combo assembly odds. Draw odds calculator.
+- **M3, goldfish engine:** done. No draw spells or rituals in the simulation yet (see `shortcut:` in `engine/goldfish.js`).
 - **M4, profile depth:** manabase detail, salt breakdown, combo profile, win-condition and archetype reasons, report card grades.
 - **M5, improvement and sharing:** one-card-away combos, rule-based trim and tuning, precon browser with newer precons, import formats, share links, rule-zero image, buy links, tokens.
 - **M6-M7, as priorities allow:** synergy web, commander comparison, saved versions and history, offline, QR, playtester, rulebook search.

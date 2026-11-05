@@ -5,20 +5,20 @@
 // Informative only: it never decides a pod tier or a bracket.
 
 // [low, high] per metric, set from `node scripts/deck_study.js --metrics`:
-// low = where weak precons sit, high = the median cEDH list. avgMv and fastest run
+// low = where weak precons sit, high = the median cEDH list. avgMv and winTurn run
 // the other way. Measures that do not separate precons from cEDH in the study (total
 // and cheap draw, removal count, recursion, colour coverage) stay in the profile but out of the score.
 export const METRIC_RANGE = {
   tutors: [2, 16], gc: [0, 15],
   avgMv: [3.7, 2], cheap: [13, 50], fastMana: [3, 13], ramp: [9, 24], quality: [76, 100],
   cheapAnswers: [2, 11], counters: [0, 10], stax: [0, 12], free: [0, 4],
-  ending: [0, 4], twoCard: [0, 2], lines: [0, 2], fastest: [10, 4],
+  ending: [0, 4], twoCard: [0, 2], lines: [0, 2], winTurn: [12, 6],
 };
 const PILLARS = {
   consistency: ["tutors", "gc"],
   efficiency: ["avgMv", "cheap", "fastMana", "ramp", "quality"],
   interaction: ["cheapAnswers", "counters", "stax", "free"],
-  wins: ["ending", "twoCard", "lines", "fastest"],
+  wins: ["ending", "twoCard", "lines", "winTurn"],
 };
 // The score broken into questions a player asks. Every scored metric belongs to one
 // benchmark, so these explain the number without changing it. Resilience is read the
@@ -27,7 +27,7 @@ const BENCHMARKS = [
   ["manaSpeed", "efficiency", ["fastMana", "ramp"]], ["curve", "efficiency", ["avgMv", "cheap"]], ["lands", "efficiency", ["quality"]],
   ["finding", "consistency", ["tutors"]], ["strongCards", "consistency", ["gc"]],
   ["answers", "interaction", ["cheapAnswers", "counters"]], ["denial", "interaction", ["stax"]], ["freeSpells", "interaction", ["free"]],
-  ["winSpeed", "wins", ["fastest"]], ["compact", "wins", ["twoCard"]], ["backups", "wins", ["ending", "lines"]],
+  ["winSpeed", "wins", ["winTurn"]], ["compact", "wins", ["twoCard"]], ["backups", "wins", ["ending", "lines"]],
 ];
 const RESILIENCE_RANGE = { draw: [6, 20], protection: [1, 8], recursion: [1, 6] };
 const RESILIENCE = [["cardFlow", ["draw"]], ["shielding", ["protection"]], ["recovery", ["recursion"]]];
@@ -53,12 +53,12 @@ function metricsOf(profile, stats) {
     avgMv: speed.avgMv, cheap: speed.cheap, fastMana: speed.fastMana, ramp: speed.ramp, quality: manabase.quality,
     cheapAnswers: interaction.cheapAnswers, counters: interaction.counters,
     stax: interaction.stax, free: interaction.free,
-    ending: wins.ending, twoCard: wins.twoCard, lines: wins.lines, fastest: wins.fastest,
+    ending: wins.ending, twoCard: wins.twoCard, lines: wins.lines, winTurn: profile.goldfish.winTurn,
   };
 }
 
-// 0..1 between the metric's two anchors. A deck with no game-ending line has no
-// "fastest" to read, which counts as the slow end.
+// 0..1 between the metric's two anchors. A deck that rarely assembles a winning line
+// has no winTurn to read, which counts as the slow end.
 function place(key, value) {
   const [lo, hi] = METRIC_RANGE[key];
   if (value === null || value === undefined) return 0;
