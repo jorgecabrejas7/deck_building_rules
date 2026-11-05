@@ -5,7 +5,7 @@
 // count differently here than on a dial.
 import { detectArchetype } from "./classify.js";
 import { isLandRamp } from "./ramp.js";
-import { FAST_MANA_RE, REMINDER_TEXT_RE } from "./stats.js";
+import { FAST_MANA_RE, KEYWORD_PATTERNS, REMINDER_TEXT_RE } from "./stats.js";
 
 const COLORS = ["W", "U", "B", "R", "G"];
 const front = (n) => String(n).split(" // ")[0];
@@ -22,7 +22,36 @@ const GRAVE_HATE_RE = /exile (?:target player's|each opponent's|all cards from a
 const PRINTED_WIN_RE = /you win the game|target (?:player|opponent) loses the game|each opponent loses the game/i;
 const ENDS_GAME_RE = /infinite (?:damage|lifeloss|turns?|combat|.{0,20}mill)|infinitely (?:large|powerful)/i;
 
-const has = (x, tag) => x.cls.tags.includes(tag);
+// What a card does. Scryfall's oracle tags (data/card_tags.json) answer first; a card
+// they don't list yet, usually a brand-new one, falls back on reading its text.
+export function readCard(x, cardTags) {
+  const name = front(x.card.name || x.name);
+  const tags = cardTags && cardTags.get(name);
+  const o = oracleOf(x.card);
+  const isLand = x.cls.type === "L";
+  if (tags) {
+    const t = (...keys) => keys.some(k => tags.has(k));
+    return { ramp: !isLand && t("ramp", "mana-rock", "mana-dork", "ritual", "land-ramp"), rock: t("mana-rock"), dork: t("mana-dork"),
+      ritual: t("ritual"), landRamp: t("land-ramp"), draw: t("draw", "cantrip", "wheel"), tutor: t("tutor") && !t("land-ramp"),
+      removal: t("removal") && !t("board-wipe"), wipe: t("board-wipe"), counter: t("counterspell"), protection: t("protection"),
+      recursion: t("recursion", "reanimate"), stax: t("hatebear", "tax"), graveHate: t("graveyard-hate"), fetch: t("fetchland"),
+      printedWin: t("win-condition"), massPump: t("overrun", "anthem") };
+  }
+  const has = (tag) => x.cls.tags.includes(tag);
+  return { ramp: has("ramp"), rock: has("ramp") && x.cls.type === "A", dork: has("ramp") && x.cls.type === "C",
+    ritual: (x.cls.type === "I" || x.cls.type === "S") && FAST_MANA_RE.test(o), landRamp: !isLand && isLandRamp(x.card),
+    draw: has("draw"), tutor: TUTOR_RE.test(o), removal: has("rem"), wipe: has("wipe"), counter: has("ctr"), protection: has("prot"),
+    recursion: has("rec"), stax: KEYWORD_PATTERNS.stax_effects.test(o), graveHate: GRAVE_HATE_RE.test(o), fetch: isLand && FETCH_RE.test(o),
+    printedWin: PRINTED_WIN_RE.test(o), massPump: has("anthem") };
+}
+
+// data/card_tags.json is tag -> names; a deck needs name -> tags.
+export function indexCardTags(json) {
+  const index = new Map();
+  for (const [tag, names] of Object.entries(json.tags))
+    for (const n of names) (index.get(n) || index.set(n, new Set()).get(n)).add(tag);
+  return index;
+}
 
 // Coloured pips across the deck; hybrid symbols count for each of their colours.
 export function pipCounts(cardsInfo) {
@@ -37,7 +66,7 @@ export function pipCounts(cardsInfo) {
 // roughly 24 sources for a mono-coloured demand and 12 for a one-in-five share.
 const sourceTarget = (share) => 8 + 16 * share;
 
-function manabase(cardsInfo, avgMv) {
+function manabase(cardsInfo, avgMv, read) {
   const lands = cardsInfo.filter(x => x.cls.type === "L");
   const qty = (list) => list.reduce((s, x) => s + x.qty, 0);
   const landQty = qty(lands);
@@ -45,14 +74,14 @@ function manabase(cardsInfo, avgMv) {
     const o = oracleOf(x.card);
     return ALWAYS_TAPPED_RE.test(o) && !CONDITIONAL_TAPPED_RE.test(o);
   }));
-  const fetches = qty(lands.filter(x => FETCH_RE.test(oracleOf(x.card))));
+  const fetches = qty(lands.filter(x => read(x).fetch));
   const basics = qty(lands.filter(x => (x.card.type_line || "").includes("Basic")));
 
   const pips = pipCounts(cardsInfo);
   const totalPips = COLORS.reduce((s, c) => s + pips[c], 0);
   const colors = COLORS.filter(c => pips[c] > 0).map(c => {
     const sources = qty(cardsInfo.filter(x =>
-      (x.cls.type === "L" || (x.cls.tags.includes("ramp") && (x.card.cmc || 0) <= 3)) &&
+      (x.cls.type === "L" || (read(x).ramp && (x.card.cmc || 0) <= 3)) &&
       (x.card.produced_mana || []).includes(c)));
     const target = sourceTarget(pips[c] / totalPips);
     return { color: c, pips: pips[c], share: pips[c] / totalPips, sources, target: Math.round(target), cover: sources / target };
@@ -79,7 +108,10 @@ function independentLines(combos) {
 }
 
 // combos: the rated list from evaluateBrackets, or null while the check is pending.
-export function computeProfile({ cardsInfo, stats, combos, commanders }) {
+// cardTags: indexCardTags(data/card_tags.json), or null to read card text only.
+export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags = null }) {
+  const memo = new Map();
+  const read = (x) => memo.get(x) || memo.set(x, readCard(x, cardTags)).get(x);
   const zone = new Set((commanders || []).map(front));
   const nonland = cardsInfo.filter(x => x.cls.type !== "L");
   const count = (fn) => cardsInfo.reduce((s, x) => s + (fn(x) ? x.qty : 0), 0);
@@ -90,32 +122,32 @@ export function computeProfile({ cardsInfo, stats, combos, commanders }) {
     avgMv: avgMv === null ? null : Math.round(avgMv * 100) / 100,
     cheap: count(x => x.cls.type !== "L" && (x.card.cmc || 0) <= 2),
     high: count(x => x.cls.type !== "L" && (x.card.cmc || 0) >= 6),
-    ramp: count(x => has(x, "ramp")),
-    rocks: count(x => has(x, "ramp") && x.cls.type === "A"),
-    dorks: count(x => has(x, "ramp") && x.cls.type === "C"),
-    rituals: count(x => (x.cls.type === "I" || x.cls.type === "S") && FAST_MANA_RE.test(oracleOf(x.card))),
-    landRamp: count(x => x.cls.type !== "L" && isLandRamp(x.card)),
+    ramp: count(x => read(x).ramp),
+    rocks: count(x => read(x).rock),
+    dorks: count(x => read(x).dork),
+    rituals: count(x => read(x).ritual),
+    landRamp: count(x => read(x).landRamp),
     fastMana: stats.fast_mana || 0,
   };
 
   const consistency = {
-    draw: count(x => has(x, "draw")),
-    cheapDraw: count(x => has(x, "draw") && (x.card.cmc || 0) <= 2),
-    tutors: count(x => TUTOR_RE.test(oracleOf(x.card))),
-    recursion: count(x => has(x, "rec")),
+    draw: count(x => read(x).draw),
+    cheapDraw: count(x => read(x).draw && (x.card.cmc || 0) <= 2),
+    tutors: count(x => read(x).tutor),
+    recursion: count(x => read(x).recursion),
   };
 
-  const answers = cardsInfo.filter(x => has(x, "ctr") || has(x, "rem") || has(x, "wipe"));
+  const answers = cardsInfo.filter(x => read(x).counter || read(x).removal || read(x).wipe);
   const answerQty = answers.reduce((s, x) => s + x.qty, 0);
   const atInstantSpeed = answers.filter(x => x.cls.type === "I" || /\bflash\b/i.test(oracleOf(x.card)))
     .reduce((s, x) => s + x.qty, 0);
   const interaction = {
-    counters: count(x => has(x, "ctr")),
-    removal: count(x => has(x, "rem")),
-    wipes: count(x => has(x, "wipe")),
-    protection: count(x => has(x, "prot")),
-    graveHate: count(x => GRAVE_HATE_RE.test(oracleOf(x.card))),
-    stax: stats.stax_effects || 0,
+    counters: count(x => read(x).counter),
+    removal: count(x => read(x).removal),
+    wipes: count(x => read(x).wipe),
+    protection: count(x => read(x).protection),
+    graveHate: count(x => read(x).graveHate),
+    stax: count(x => read(x).stax),
     free: stats.free_spells || 0,
     cheapAnswers: answers.filter(x => (x.card.cmc || 0) <= 2).reduce((s, x) => s + x.qty, 0),
     instantShare: answerQty ? Math.round(atInstantSpeed / answerQty * 100) : 0,
@@ -134,8 +166,8 @@ export function computeProfile({ cardsInfo, stats, combos, commanders }) {
     twoCard: ending.filter(c => c.cardsToFind <= 2).length,
     lines: independentLines(ending),
     fastest: priced.length ? Math.min(...priced.map(c => c.deploy)) : null,
-    printed: count(x => PRINTED_WIN_RE.test(oracleOf(x.card))),
-    massPump: count(x => has(x, "anthem")),
+    printed: count(x => read(x).printedWin),
+    massPump: count(x => read(x).massPump),
   };
 
   const creatures = cardsInfo.filter(x => x.cls.type === "C");
@@ -155,5 +187,5 @@ export function computeProfile({ cardsInfo, stats, combos, commanders }) {
     throughCommander: list.filter(c => c.cards.some(n => zone.has(n))).length,
   };
 
-  return { manabase: manabase(cardsInfo, avgMv), speed, consistency, interaction, wins, shape };
+  return { manabase: manabase(cardsInfo, avgMv, read), speed, consistency, interaction, wins, shape };
 }

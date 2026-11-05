@@ -57,6 +57,11 @@ export async function getSaltDb() {
   if (!saltDb) saltDb = await (await fetch('../data/salt.json')).json();
   return saltDb;
 }
+let cardTags = null;
+export async function getCardTags() {
+  if (!cardTags) cardTags = PodEngine.indexCardTags(await (await fetch('../data/card_tags.json')).json());
+  return cardTags;
+}
 export async function checkCombos() {
   if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
   state.combosData = { status: 'checking', list: [] };
@@ -65,6 +70,8 @@ export async function checkCombos() {
     const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), await getComboDb());
     // salt is a nicety: a failed fetch leaves its panel waiting, never the combo check
     state.saltDb = await getSaltDb().catch(() => null);
+    // without tags the profile reads card text, so a failed fetch only costs accuracy
+    state.cardTags = await getCardTags().catch(() => null);
     state.combosData = { status: 'done', list, cardLists: comboDb, updated: comboDb.updated };
     recompute();
     const inf = state.result.bracket.combos.filter(c => c.infinite).length;
@@ -108,7 +115,7 @@ export function recompute(notFound) {
     loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
     unresolved: missing.length,
   });
-  const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders });
+  const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders, cardTags: state.cardTags });
   const power = PodEngine.computePower(profile, stats);
   const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
   const synergy = synergyFor(cardsInfo, commanders);

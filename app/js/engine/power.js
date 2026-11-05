@@ -7,15 +7,15 @@
 // [low, high] per metric, set from `node scripts/deck_study.js --metrics`:
 // low = where weak precons sit, high = the median cEDH list. avgMv and fastest run
 // the other way. Measures that do not separate precons from cEDH in the study (total
-// draw, removal count, recursion, colour coverage) stay in the profile but out of the score.
+// and cheap draw, removal count, recursion, colour coverage) stay in the profile but out of the score.
 export const METRIC_RANGE = {
-  tutors: [0, 14], gc: [0, 15], cheapDraw: [1, 6],
-  avgMv: [3.7, 2], cheap: [13, 50], fastMana: [2, 13], ramp: [7, 26], quality: [76, 100],
-  cheapAnswers: [1, 8], counters: [0, 8], stax: [0, 4], free: [0, 4],
-  ending: [0, 2.5], twoCard: [0, 1.5], lines: [0, 1], fastest: [10, 4],
+  tutors: [2, 16], gc: [0, 15],
+  avgMv: [3.7, 2], cheap: [13, 50], fastMana: [3, 13], ramp: [9, 24], quality: [76, 100],
+  cheapAnswers: [2, 11], counters: [0, 10], stax: [0, 12], free: [0, 4],
+  ending: [0, 4], twoCard: [0, 2], lines: [0, 2], fastest: [10, 4],
 };
 const PILLARS = {
-  consistency: ["tutors", "gc", "cheapDraw"],
+  consistency: ["tutors", "gc"],
   efficiency: ["avgMv", "cheap", "fastMana", "ramp", "quality"],
   interaction: ["cheapAnswers", "counters", "stax", "free"],
   wins: ["ending", "twoCard", "lines", "fastest"],
@@ -35,7 +35,7 @@ function toScale(raw) {
 function metricsOf(profile, stats) {
   const { speed, consistency, interaction, wins, manabase } = profile;
   return {
-    tutors: consistency.tutors, gc: stats.game_changers || 0, cheapDraw: consistency.cheapDraw,
+    tutors: consistency.tutors, gc: stats.game_changers || 0,
     avgMv: speed.avgMv, cheap: speed.cheap, fastMana: speed.fastMana, ramp: speed.ramp, quality: manabase.quality,
     cheapAnswers: interaction.cheapAnswers, counters: interaction.counters,
     stax: interaction.stax, free: interaction.free,

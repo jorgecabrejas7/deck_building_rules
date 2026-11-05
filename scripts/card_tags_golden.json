@@ -1,0 +1,64 @@
+{
+  "_comment": "Hand-labelled, independent of Scryfall's tags: what each card does in a Commander deck. A card lists every function it serves among ramp, draw, tutor, removal, wipe, counter, protection, recursion. Used to measure the deck profile's card reader, so add cards here when it misreads one.",
+  "cards": {
+    "Sol Ring": ["ramp"], "Arcane Signet": ["ramp"], "Mana Crypt": ["ramp"], "Mind Stone": ["ramp"], "Fellwar Stone": ["ramp"],
+    "Commander's Sphere": ["ramp"], "Birds of Paradise": ["ramp"], "Llanowar Elves": ["ramp"], "Elvish Mystic": ["ramp"],
+    "Bloom Tender": ["ramp"], "Cultivate": ["ramp"], "Kodama's Reach": ["ramp"], "Rampant Growth": ["ramp"], "Farseek": ["ramp"],
+    "Nature's Lore": ["ramp"], "Three Visits": ["ramp"], "Sakura-Tribe Elder": ["ramp"], "Wood Elves": ["ramp"],
+    "Solemn Simulacrum": ["ramp", "draw"], "Dark Ritual": ["ramp"], "Pyretic Ritual": ["ramp"], "Smothering Tithe": ["ramp"],
+    "Dockside Extortionist": ["ramp"], "Jeska's Will": ["ramp", "draw"], "Burgeoning": ["ramp"], "Exploration": ["ramp"],
+    "Azusa, Lost but Seeking": ["ramp"], "Dawn's Truce": ["protection"],
+
+    "Rhystic Study": ["draw"], "Mystic Remora": ["draw"], "Esper Sentinel": ["draw"], "Phyrexian Arena": ["draw"],
+    "Sign in Blood": ["draw"], "Night's Whisper": ["draw"], "Read the Bones": ["draw"], "Harmonize": ["draw"],
+    "Beast Whisperer": ["draw"], "Guardian Project": ["draw"], "Skullclamp": ["draw"], "Brainstorm": ["draw"],
+    "Ponder": ["draw"], "Preordain": ["draw"], "Windfall": ["draw"], "Wheel of Fortune": ["draw"],
+    "Fact or Fiction": ["draw"], "Dig Through Time": ["draw"], "Necropotence": ["draw"], "The One Ring": ["draw", "protection"],
+    "Sylvan Library": ["draw"], "Mulldrifter": ["draw"], "Toski, Bearer of Secrets": ["draw"], "Tymna the Weaver": ["draw"],
+    "Ad Nauseam": ["draw"],
+
+    "Demonic Tutor": ["tutor"], "Vampiric Tutor": ["tutor"], "Mystical Tutor": ["tutor"], "Worldly Tutor": ["tutor"],
+    "Enlightened Tutor": ["tutor"], "Gamble": ["tutor"], "Diabolic Intent": ["tutor"], "Grim Tutor": ["tutor"],
+    "Tainted Pact": ["tutor"], "Green Sun's Zenith": ["tutor"], "Chord of Calling": ["tutor"], "Finale of Devastation": ["tutor"],
+    "Natural Order": ["tutor"], "Birthing Pod": ["tutor"], "Fauna Shaman": ["tutor"], "Imperial Recruiter": ["tutor"],
+    "Recruiter of the Guard": ["tutor"], "Trinket Mage": ["tutor"], "Fabricate": ["tutor"], "Whir of Invention": ["tutor"],
+    "Stoneforge Mystic": ["tutor"], "Steelshaper's Gift": ["tutor"], "Idyllic Tutor": ["tutor"], "Sterling Grove": ["tutor", "protection"],
+    "Demonic Consultation": ["tutor"],
+
+    "Swords to Plowshares": ["removal"], "Path to Exile": ["removal"], "Beast Within": ["removal"], "Chaos Warp": ["removal"],
+    "Generous Gift": ["removal"], "Terminate": ["removal"], "Putrefy": ["removal"], "Anguished Unmaking": ["removal"],
+    "Assassin's Trophy": ["removal"], "Abrupt Decay": ["removal"], "Lightning Bolt": ["removal"], "Rapid Hybridization": ["removal"],
+    "Pongify": ["removal"], "Infernal Grasp": ["removal"], "Doom Blade": ["removal"], "Feed the Swarm": ["removal"],
+    "Nature's Claim": ["removal"], "Krosan Grip": ["removal"], "Vandalblast": ["removal"], "Reality Shift": ["removal"],
+    "Oblation": ["removal"], "Fateful Absence": ["removal"], "Bojuka Bog": [],
+
+    "Wrath of God": ["wipe"], "Damnation": ["wipe"], "Blasphemous Act": ["wipe"], "Toxic Deluge": ["wipe"], "Farewell": ["wipe"],
+    "Austere Command": ["wipe"], "Merciless Eviction": ["wipe"], "Vanquish the Horde": ["wipe"], "Cyclonic Rift": ["removal", "wipe"],
+    "Evacuation": ["wipe"], "Crux of Fate": ["wipe"], "Hour of Revelation": ["wipe"], "Fumigate": ["wipe"], "Pestilence": ["wipe"],
+    "Living Death": ["wipe", "recursion"], "Ezuri's Predation": ["wipe"], "Blackcleave Cliffs": [],
+
+    "Counterspell": ["counter"], "Negate": ["counter"], "Swan Song": ["counter"], "Arcane Denial": ["counter"], "Force of Will": ["counter"],
+    "Fierce Guardianship": ["counter"], "Mana Drain": ["counter"], "Pact of Negation": ["counter"], "Dovin's Veto": ["counter"],
+    "An Offer You Can't Refuse": ["counter"], "Dispel": ["counter"], "Flusterstorm": ["counter"], "Mental Misstep": ["counter"],
+    "Stifle": ["counter"], "Lapse of Certainty": ["counter"], "Mystic Confluence": ["counter", "draw"], "Cryptic Command": ["counter", "draw"],
+
+    "Lightning Greaves": ["protection"], "Swiftfoot Boots": ["protection"], "Heroic Intervention": ["protection"], "Teferi's Protection": ["protection"],
+    "Deflecting Swat": ["protection"], "Tamiyo's Safekeeping": ["protection"], "Snakeskin Veil": ["protection"], "Boros Charm": ["protection"],
+    "Selfless Spirit": ["protection"], "Flawless Maneuver": ["protection"], "Mother of Runes": ["protection"], "Giver of Runes": ["protection"],
+    "Loran's Escape": ["protection"], "Akroma's Will": ["protection"],
+
+    "Eternal Witness": ["recursion"], "Animate Dead": ["recursion"], "Reanimate": ["recursion"], "Regrowth": ["recursion"],
+    "Sun Titan": ["recursion"], "Sevinne's Reclamation": ["recursion"], "Unburial Rites": ["recursion"], "Underworld Breach": ["recursion"],
+    "Timeless Witness": ["recursion"], "Bala Ged Recovery": ["recursion"], "Victimize": ["recursion"], "Dread Return": ["recursion"],
+    "Karmic Guide": ["recursion"], "Sevinne, the Chronoclasm": [],
+
+    "Command Tower": [], "Exotic Orchard": [], "Plains": [], "Island": [],
+
+    "Craterhoof Behemoth": [], "Thassa's Oracle": [], "Laboratory Maniac": [], "Grizzly Bears": [], "Isochron Scepter": [],
+    "Dramatic Reversal": [], "Panharmonicon": [], "Ashnod's Altar": ["ramp"], "Phyrexian Altar": ["ramp"], "Goblin Bombardment": [],
+    "Blood Artist": [], "Zulaport Cutthroat": [], "Doubling Season": [], "Parallel Lives": [], "Anointed Procession": [],
+    "Sheoldred, the Apocalypse": [], "Ragavan, Nimble Pilferer": [], "Winter Orb": [], "Stasis": [], "Armageddon": [],
+    "Opposition Agent": [], "Drannith Magistrate": [], "Rule of Law": [], "Sphere of Resistance": [], "Thalia, Guardian of Thraben": [],
+    "Rest in Peace": [], "Grafdigger's Cage": [], "Time Warp": [], "Beacon of Tomorrows": []
+  }
+}

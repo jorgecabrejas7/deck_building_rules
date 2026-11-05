@@ -46,6 +46,7 @@ export const state = {
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
   podDecks: null,    // {status, decks} — lazy-loaded from data/pod_decks.json
   saltDb: null,      // data/salt.json, loaded with the combo database
+  cardTags: null,    // data/card_tags.json as name -> tags, loaded alongside it
   synergyData: null, // {key, table} for the current commander(s)
   study: null,       // data/deck_study.json: reference medians and the pod table
   podSort: 'power',

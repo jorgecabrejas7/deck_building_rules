@@ -4,7 +4,7 @@ import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { ARCH, DIAL_META, CATS } from './constants.js';
 import { $, esc, tierTone } from './helpers.js';
-import { analyze, getComboDb, getSaltDb } from '../pipeline.js';
+import { analyze, getCardTags, getComboDb, getSaltDb } from '../pipeline.js';
 import { renderInput } from './input.js';
 import { slotsFor } from './comp.js';
 import { bindSugPopovers } from './popover.js';
@@ -150,6 +150,7 @@ export async function runTableMode() {
     let comboDb = null;
     try { comboDb = await getComboDb(); } catch (e) { /* combos stay unchecked */ }
     const saltDb = await getSaltDb().catch(() => null);
+    const cardTags = await getCardTags().catch(() => null);
     for (const text of texts) {
       const parsed = PodEngine.parseDecklist(text);
       const names = [...new Set(parsed.entries.map(e => e.name))];
@@ -176,7 +177,7 @@ export async function runTableMode() {
         loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
         unresolved: notFound.length,
       });
-      const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders });
+      const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders, cardTags });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
         tier: ev.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,

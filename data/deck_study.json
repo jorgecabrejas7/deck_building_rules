@@ -10,10 +10,10 @@
  },
  "medians": {
   "precon": {
-   "power": 3.25,
-   "pillar_consistency": 22,
+   "power": 2.85,
+   "pillar_consistency": 3.5,
    "pillar_efficiency": 25,
-   "pillar_interaction": 17,
+   "pillar_interaction": 19,
    "pillar_wins": 0,
    "salt_total": 22.45,
    "salt_average": 0.29,
@@ -26,16 +26,16 @@
    "lands": 38,
    "avg_mv": 3.5,
    "cheap_plays": 20.5,
-   "ramp": 12,
+   "ramp": 13,
    "fast_mana": 5,
-   "draw": 11,
-   "tutors": 1,
-   "recursion": 2,
+   "draw": 15,
+   "tutors": 2.5,
+   "recursion": 4.5,
    "counters": 0,
-   "removal": 4,
-   "wipes": 2,
-   "cheap_answers": 2,
-   "stax": 0,
+   "removal": 9.5,
+   "wipes": 3,
+   "cheap_answers": 4,
+   "stax": 1.5,
    "combos": 0,
    "ending_combos": 0,
    "two_card_ending": 0,
@@ -44,10 +44,10 @@
    "points": 0
   },
   "pod": {
-   "power": 3.65,
-   "pillar_consistency": 19,
-   "pillar_efficiency": 34,
-   "pillar_interaction": 24.5,
+   "power": 3.25,
+   "pillar_consistency": 3,
+   "pillar_efficiency": 35,
+   "pillar_interaction": 25,
    "pillar_wins": 0,
    "salt_total": 26.85,
    "salt_average": 0.34,
@@ -60,16 +60,16 @@
    "lands": 36,
    "avg_mv": 2.99,
    "cheap_plays": 24.5,
-   "ramp": 11,
+   "ramp": 14,
    "fast_mana": 5.5,
-   "draw": 10,
-   "tutors": 1.5,
-   "recursion": 2,
-   "counters": 0.5,
-   "removal": 4.5,
-   "wipes": 1,
-   "cheap_answers": 3,
-   "stax": 0,
+   "draw": 12.5,
+   "tutors": 2,
+   "recursion": 3.5,
+   "counters": 1,
+   "removal": 9,
+   "wipes": 3,
+   "cheap_answers": 4.5,
+   "stax": 1,
    "combos": 0,
    "ending_combos": 0,
    "two_card_ending": 0,
@@ -78,10 +78,10 @@
    "points": 7
   },
   "cedh": {
-   "power": 9.85,
-   "pillar_consistency": 89,
+   "power": 9.9,
+   "pillar_consistency": 100,
    "pillar_efficiency": 93.5,
-   "pillar_interaction": 98,
+   "pillar_interaction": 93.5,
    "pillar_wins": 98,
    "salt_total": 86.3,
    "salt_average": 0.9,
@@ -94,16 +94,16 @@
    "lands": 27.5,
    "avg_mv": 1.97,
    "cheap_plays": 50.5,
-   "ramp": 27,
+   "ramp": 23.5,
    "fast_mana": 13.5,
-   "draw": 9,
-   "tutors": 14.5,
-   "recursion": 1,
-   "counters": 8.5,
-   "removal": 4.5,
-   "wipes": 0,
-   "cheap_answers": 8.5,
-   "stax": 4,
+   "draw": 10,
+   "tutors": 16,
+   "recursion": 3.5,
+   "counters": 10,
+   "removal": 9,
+   "wipes": 1,
+   "cheap_answers": 11,
+   "stax": 12,
    "combos": 5.5,
    "ending_combos": 4,
    "two_card_ending": 2,
@@ -116,25 +116,25 @@
   {
    "key": "power",
    "medians": {
-    "precon": 3.25,
+    "precon": 2.85,
     "podIn": 3.2,
-    "podOut": 3.9,
-    "cedh": 9.85
+    "podOut": 3.3,
+    "cedh": 9.9
    },
-   "precon_vs_pod": 0.6,
-   "podIn_vs_podOut": 0.65,
-   "pod_vs_cedh": 0.99
+   "precon_vs_pod": 0.67,
+   "podIn_vs_podOut": 0.55,
+   "pod_vs_cedh": 0.98
   },
   {
    "key": "pillar_consistency",
    "medians": {
-    "precon": 22,
-    "podIn": 16,
-    "podOut": 22,
-    "cedh": 89
+    "precon": 3.5,
+    "podIn": 0,
+    "podOut": 3,
+    "cedh": 100
    },
-   "precon_vs_pod": 0.52,
-   "podIn_vs_podOut": 0.65,
+   "precon_vs_pod": 0.48,
+   "podIn_vs_podOut": 0.56,
    "pod_vs_cedh": 1
   },
   {
@@ -142,24 +142,24 @@
    "medians": {
     "precon": 25,
     "podIn": 34,
-    "podOut": 35,
+    "podOut": 36,
     "cedh": 93.5
    },
-   "precon_vs_pod": 0.7,
+   "precon_vs_pod": 0.72,
    "podIn_vs_podOut": 0.57,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "pillar_interaction",
    "medians": {
-    "precon": 17,
-    "podIn": 19,
+    "precon": 19,
+    "podIn": 23,
     "podOut": 26,
-    "cedh": 98
+    "cedh": 93.5
    },
-   "precon_vs_pod": 0.66,
-   "podIn_vs_podOut": 0.71,
-   "pod_vs_cedh": 0.97
+   "precon_vs_pod": 0.7,
+   "podIn_vs_podOut": 0.59,
+   "pod_vs_cedh": 0.99
   },
   {
    "key": "pillar_wins",
@@ -170,7 +170,7 @@
     "cedh": 98
    },
    "precon_vs_pod": 0.51,
-   "podIn_vs_podOut": 0.54,
+   "podIn_vs_podOut": 0.55,
    "pod_vs_cedh": 0.9
   },
   {
@@ -265,7 +265,7 @@
     "podOut": 1,
     "cedh": 7
    },
-   "precon_vs_pod": 0.36,
+   "precon_vs_pod": 0.34,
    "podIn_vs_podOut": 0.49,
    "pod_vs_cedh": 0.99
   },
@@ -308,14 +308,14 @@
   {
    "key": "ramp",
    "medians": {
-    "precon": 12,
-    "podIn": 9,
-    "podOut": 11,
-    "cedh": 27
+    "precon": 13,
+    "podIn": 14,
+    "podOut": 14,
+    "cedh": 23.5
    },
-   "precon_vs_pod": 0.48,
-   "podIn_vs_podOut": 0.62,
-   "pod_vs_cedh": 0.96
+   "precon_vs_pod": 0.55,
+   "podIn_vs_podOut": 0.54,
+   "pod_vs_cedh": 0.86
   },
   {
    "key": "fast_mana",
@@ -332,98 +332,98 @@
   {
    "key": "draw",
    "medians": {
-    "precon": 11,
-    "podIn": 10,
-    "podOut": 10,
-    "cedh": 9
+    "precon": 15,
+    "podIn": 12,
+    "podOut": 13,
+    "cedh": 10
    },
-   "precon_vs_pod": 0.42,
-   "podIn_vs_podOut": 0.51,
-   "pod_vs_cedh": 0.33
+   "precon_vs_pod": 0.36,
+   "podIn_vs_podOut": 0.6,
+   "pod_vs_cedh": 0.26
   },
   {
    "key": "tutors",
    "medians": {
-    "precon": 1,
-    "podIn": 1,
+    "precon": 2.5,
+    "podIn": 2,
     "podOut": 2,
-    "cedh": 14.5
+    "cedh": 16
    },
-   "precon_vs_pod": 0.61,
-   "podIn_vs_podOut": 0.64,
+   "precon_vs_pod": 0.4,
+   "podIn_vs_podOut": 0.33,
    "pod_vs_cedh": 1
   },
   {
    "key": "recursion",
    "medians": {
-    "precon": 2,
+    "precon": 4.5,
     "podIn": 3,
-    "podOut": 2,
-    "cedh": 1
+    "podOut": 5,
+    "cedh": 3.5
    },
-   "precon_vs_pod": 0.49,
-   "podIn_vs_podOut": 0.52,
-   "pod_vs_cedh": 0.24
+   "precon_vs_pod": 0.45,
+   "podIn_vs_podOut": 0.63,
+   "pod_vs_cedh": 0.48
   },
   {
    "key": "counters",
    "medians": {
     "precon": 0,
-    "podIn": 0,
-    "podOut": 1,
-    "cedh": 8.5
+    "podIn": 1,
+    "podOut": 2,
+    "cedh": 10
    },
-   "precon_vs_pod": 0.6,
+   "precon_vs_pod": 0.63,
    "podIn_vs_podOut": 0.62,
-   "pod_vs_cedh": 0.86
+   "pod_vs_cedh": 0.91
   },
   {
    "key": "removal",
    "medians": {
-    "precon": 4,
-    "podIn": 4,
-    "podOut": 5,
-    "cedh": 4.5
+    "precon": 9.5,
+    "podIn": 11,
+    "podOut": 8,
+    "cedh": 9
    },
-   "precon_vs_pod": 0.52,
-   "podIn_vs_podOut": 0.45,
-   "pod_vs_cedh": 0.49
+   "precon_vs_pod": 0.44,
+   "podIn_vs_podOut": 0.15,
+   "pod_vs_cedh": 0.52
   },
   {
    "key": "wipes",
    "medians": {
-    "precon": 2,
-    "podIn": 2,
-    "podOut": 1,
-    "cedh": 0
+    "precon": 3,
+    "podIn": 3,
+    "podOut": 3,
+    "cedh": 1
    },
-   "precon_vs_pod": 0.38,
-   "podIn_vs_podOut": 0.32,
-   "pod_vs_cedh": 0.26
+   "precon_vs_pod": 0.39,
+   "podIn_vs_podOut": 0.58,
+   "pod_vs_cedh": 0.2
   },
   {
    "key": "cheap_answers",
    "medians": {
-    "precon": 2,
-    "podIn": 3,
-    "podOut": 3,
-    "cedh": 8.5
+    "precon": 4,
+    "podIn": 5,
+    "podOut": 4,
+    "cedh": 11
    },
-   "precon_vs_pod": 0.64,
-   "podIn_vs_podOut": 0.54,
-   "pod_vs_cedh": 0.89
+   "precon_vs_pod": 0.62,
+   "podIn_vs_podOut": 0.43,
+   "pod_vs_cedh": 0.94
   },
   {
    "key": "stax",
    "medians": {
-    "precon": 0,
-    "podIn": 0,
-    "podOut": 0,
-    "cedh": 4
+    "precon": 1.5,
+    "podIn": 1,
+    "podOut": 1,
+    "cedh": 12
    },
-   "precon_vs_pod": 0.43,
-   "podIn_vs_podOut": 0.65,
-   "pod_vs_cedh": 0.98
+   "precon_vs_pod": 0.48,
+   "podIn_vs_podOut": 0.55,
+   "pod_vs_cedh": 0.87
   },
   {
    "key": "combos",
@@ -560,29 +560,29 @@
      "avgMv": 4.02,
      "cheap": 17,
      "high": 11,
-     "ramp": 23,
-     "rocks": 9,
-     "dorks": 7,
+     "ramp": 28,
+     "rocks": 10,
+     "dorks": 4,
      "rituals": 0,
-     "landRamp": 5,
+     "landRamp": 7,
      "fastMana": 11
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 2,
-     "tutors": 1,
-     "recursion": 1
+     "draw": 15,
+     "cheapDraw": 6,
+     "tutors": 2,
+     "recursion": 2
     },
     "interaction": {
      "counters": 0,
-     "removal": 5,
+     "removal": 9,
      "wipes": 2,
      "protection": 1,
      "graveHate": 0,
      "stax": 0,
      "free": 5,
      "cheapAnswers": 2,
-     "instantShare": 43
+     "instantShare": 36
     },
     "wins": {
      "checked": true,
@@ -593,7 +593,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 3
     },
     "shape": {
      "archetypes": [
@@ -643,12 +643,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.3,
-    "raw": 18.3,
+    "score": 3.1,
+    "raw": 15.8,
     "pillars": {
-     "consistency": 9,
-     "efficiency": 35,
-     "interaction": 29,
+     "consistency": 0,
+     "efficiency": 38,
+     "interaction": 25,
      "wins": 0
     }
    }
@@ -720,27 +720,27 @@
      "high": 9,
      "ramp": 13,
      "rocks": 7,
-     "dorks": 3,
+     "dorks": 1,
      "rituals": 0,
-     "landRamp": 1,
+     "landRamp": 4,
      "fastMana": 8
     },
     "consistency": {
-     "draw": 15,
-     "cheapDraw": 5,
-     "tutors": 1,
+     "draw": 16,
+     "cheapDraw": 6,
+     "tutors": 3,
      "recursion": 3
     },
     "interaction": {
      "counters": 0,
-     "removal": 4,
-     "wipes": 3,
-     "protection": 2,
+     "removal": 10,
+     "wipes": 6,
+     "protection": 5,
      "graveHate": 0,
-     "stax": 1,
+     "stax": 2,
      "free": 0,
-     "cheapAnswers": 2,
-     "instantShare": 29
+     "cheapAnswers": 4,
+     "instantShare": 19
     },
     "wins": {
      "checked": true,
@@ -751,7 +751,7 @@
      "lines": 1,
      "fastest": 7,
      "printed": 0,
-     "massPump": 2
+     "massPump": 3
     },
     "shape": {
      "archetypes": [
@@ -801,13 +801,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 4.9,
-    "raw": 34.3,
+    "score": 3.8,
+    "raw": 22.5,
     "pillars": {
-     "consistency": 29,
-     "efficiency": 34,
+     "consistency": 4,
+     "efficiency": 32,
      "interaction": 10,
-     "wins": 64
+     "wins": 44
     }
    }
   },
@@ -879,29 +879,29 @@
      "avgMv": 3.23,
      "cheap": 22,
      "high": 4,
-     "ramp": 14,
-     "rocks": 5,
-     "dorks": 4,
+     "ramp": 16,
+     "rocks": 6,
+     "dorks": 3,
      "rituals": 0,
-     "landRamp": 3,
+     "landRamp": 6,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 23,
-     "cheapDraw": 7,
-     "tutors": 1,
+     "draw": 27,
+     "cheapDraw": 8,
+     "tutors": 2,
      "recursion": 1
     },
     "interaction": {
      "counters": 2,
-     "removal": 4,
-     "wipes": 0,
-     "protection": 2,
+     "removal": 5,
+     "wipes": 3,
+     "protection": 5,
      "graveHate": 0,
-     "stax": 2,
+     "stax": 5,
      "free": 0,
      "cheapAnswers": 4,
-     "instantShare": 83
+     "instantShare": 60
     },
     "wins": {
      "checked": true,
@@ -962,12 +962,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 4,
-    "raw": 24.8,
+    "score": 2.9,
+    "raw": 14,
     "pillars": {
-     "consistency": 36,
-     "efficiency": 34,
-     "interaction": 29,
+     "consistency": 0,
+     "efficiency": 35,
+     "interaction": 21,
      "wins": 0
     }
    }
@@ -1006,17 +1006,17 @@
        "color": "B",
        "pips": 35,
        "share": 0.44871794871794873,
-       "sources": 27,
+       "sources": 30,
        "target": 15,
-       "cover": 1.7787162162162162
+       "cover": 1.9763513513513515
       },
       {
        "color": "G",
        "pips": 43,
        "share": 0.5512820512820513,
-       "sources": 28,
+       "sources": 32,
        "target": 17,
-       "cover": 1.6646341463414633
+       "cover": 1.9024390243902438
       }
      ],
      "weakest": "G",
@@ -1029,29 +1029,29 @@
      "avgMv": 3.32,
      "cheap": 21,
      "high": 5,
-     "ramp": 9,
+     "ramp": 12,
      "rocks": 4,
-     "dorks": 2,
+     "dorks": 3,
      "rituals": 0,
-     "landRamp": 0,
+     "landRamp": 1,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 13,
-     "cheapDraw": 6,
-     "tutors": 1,
-     "recursion": 0
+     "draw": 16,
+     "cheapDraw": 8,
+     "tutors": 2,
+     "recursion": 1
     },
     "interaction": {
      "counters": 0,
-     "removal": 5,
-     "wipes": 1,
+     "removal": 14,
+     "wipes": 2,
      "protection": 1,
-     "graveHate": 1,
-     "stax": 0,
+     "graveHate": 2,
+     "stax": 1,
      "free": 0,
-     "cheapAnswers": 1,
-     "instantShare": 50
+     "cheapAnswers": 2,
+     "instantShare": 25
     },
     "wins": {
      "checked": true,
@@ -1062,7 +1062,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 4
+     "massPump": 6
     },
     "shape": {
      "archetypes": [
@@ -1112,12 +1112,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.8,
-    "raw": 13,
+    "score": 2,
+    "raw": 4.8,
     "pillars": {
-     "consistency": 36,
-     "efficiency": 16,
-     "interaction": 0,
+     "consistency": 0,
+     "efficiency": 17,
+     "interaction": 2,
      "wins": 0
     }
    }
@@ -1189,29 +1189,29 @@
      "avgMv": 3.68,
      "cheap": 17,
      "high": 10,
-     "ramp": 15,
+     "ramp": 14,
      "rocks": 9,
-     "dorks": 3,
+     "dorks": 2,
      "rituals": 0,
      "landRamp": 2,
      "fastMana": 6
     },
     "consistency": {
-     "draw": 14,
-     "cheapDraw": 3,
-     "tutors": 0,
-     "recursion": 0
+     "draw": 17,
+     "cheapDraw": 4,
+     "tutors": 2,
+     "recursion": 2
     },
     "interaction": {
      "counters": 2,
-     "removal": 3,
-     "wipes": 2,
+     "removal": 6,
+     "wipes": 4,
      "protection": 3,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 1,
      "free": 2,
      "cheapAnswers": 2,
-     "instantShare": 43
+     "instantShare": 33
     },
     "wins": {
      "checked": true,
@@ -1222,7 +1222,7 @@
      "lines": 1,
      "fastest": 12,
      "printed": 0,
-     "massPump": 0
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -1272,13 +1272,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.9,
-    "raw": 33.8,
+    "score": 4,
+    "raw": 24.5,
     "pillars": {
-     "consistency": 13,
-     "efficiency": 25,
-     "interaction": 22,
-     "wins": 75
+     "consistency": 0,
+     "efficiency": 22,
+     "interaction": 20,
+     "wins": 56
     }
    }
   },
@@ -1347,7 +1347,7 @@
      "avgMv": 3.49,
      "cheap": 22,
      "high": 8,
-     "ramp": 10,
+     "ramp": 8,
      "rocks": 8,
      "dorks": 0,
      "rituals": 0,
@@ -1355,21 +1355,21 @@
      "fastMana": 6
     },
     "consistency": {
-     "draw": 12,
-     "cheapDraw": 3,
-     "tutors": 0,
-     "recursion": 4
+     "draw": 21,
+     "cheapDraw": 9,
+     "tutors": 6,
+     "recursion": 11
     },
     "interaction": {
      "counters": 0,
      "removal": 7,
-     "wipes": 1,
-     "protection": 1,
-     "graveHate": 0,
-     "stax": 0,
+     "wipes": 4,
+     "protection": 3,
+     "graveHate": 3,
+     "stax": 1,
      "free": 0,
      "cheapAnswers": 3,
-     "instantShare": 25
+     "instantShare": 27
     },
     "wins": {
      "checked": true,
@@ -1380,7 +1380,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 4
     },
     "shape": {
      "archetypes": [
@@ -1430,12 +1430,12 @@
     "offPlan": 2
    },
    "power": {
-    "score": 2.5,
-    "raw": 9.5,
+    "score": 2.3,
+    "raw": 8,
     "pillars": {
-     "consistency": 13,
-     "efficiency": 18,
-     "interaction": 7,
+     "consistency": 14,
+     "efficiency": 13,
+     "interaction": 5,
      "wins": 0
     }
    }
@@ -1501,29 +1501,29 @@
      "avgMv": 4.21,
      "cheap": 13,
      "high": 14,
-     "ramp": 18,
+     "ramp": 19,
      "rocks": 3,
-     "dorks": 7,
+     "dorks": 2,
      "rituals": 0,
-     "landRamp": 7,
+     "landRamp": 15,
      "fastMana": 4
     },
     "consistency": {
      "draw": 10,
      "cheapDraw": 1,
-     "tutors": 0,
-     "recursion": 4
+     "tutors": 5,
+     "recursion": 7
     },
     "interaction": {
      "counters": 2,
-     "removal": 3,
-     "wipes": 1,
-     "protection": 2,
+     "removal": 6,
+     "wipes": 3,
+     "protection": 1,
      "graveHate": 0,
      "stax": 0,
      "free": 3,
      "cheapAnswers": 2,
-     "instantShare": 50
+     "instantShare": 36
     },
     "wins": {
      "checked": true,
@@ -1534,7 +1534,7 @@
      "lines": 1,
      "fastest": 11,
      "printed": 0,
-     "massPump": 1
+     "massPump": 2
     },
     "shape": {
      "archetypes": [
@@ -1584,13 +1584,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4.5,
-    "raw": 29.8,
+    "score": 4.1,
+    "raw": 26.3,
     "pillars": {
-     "consistency": 0,
+     "consistency": 11,
      "efficiency": 20,
-     "interaction": 29,
-     "wins": 70
+     "interaction": 24,
+     "wins": 50
     }
    }
   },
@@ -1661,27 +1661,27 @@
      "high": 16,
      "ramp": 11,
      "rocks": 6,
-     "dorks": 2,
+     "dorks": 0,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 3,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 13,
+     "draw": 15,
      "cheapDraw": 6,
-     "tutors": 2,
-     "recursion": 4
+     "tutors": 5,
+     "recursion": 7
     },
     "interaction": {
      "counters": 1,
-     "removal": 3,
-     "wipes": 1,
-     "protection": 3,
+     "removal": 9,
+     "wipes": 3,
+     "protection": 5,
      "graveHate": 1,
      "stax": 1,
      "free": 4,
      "cheapAnswers": 2,
-     "instantShare": 60
+     "instantShare": 46
     },
     "wins": {
      "checked": true,
@@ -1742,13 +1742,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 5,
-    "raw": 34.8,
+    "score": 3.5,
+    "raw": 20,
     "pillars": {
-     "consistency": 38,
-     "efficiency": 11,
-     "interaction": 38,
-     "wins": 52
+     "consistency": 11,
+     "efficiency": 8,
+     "interaction": 30,
+     "wins": 31
     }
    }
   },
@@ -1813,29 +1813,29 @@
      "avgMv": 3.5,
      "cheap": 21,
      "high": 7,
-     "ramp": 11,
+     "ramp": 10,
      "rocks": 8,
-     "dorks": 1,
+     "dorks": 0,
      "rituals": 0,
      "landRamp": 1,
      "fastMana": 8
     },
     "consistency": {
-     "draw": 9,
-     "cheapDraw": 2,
-     "tutors": 0,
+     "draw": 14,
+     "cheapDraw": 5,
+     "tutors": 3,
      "recursion": 0
     },
     "interaction": {
      "counters": 0,
-     "removal": 7,
-     "wipes": 2,
-     "protection": 3,
+     "removal": 19,
+     "wipes": 4,
+     "protection": 1,
      "graveHate": 1,
      "stax": 2,
      "free": 1,
-     "cheapAnswers": 3,
-     "instantShare": 44
+     "cheapAnswers": 4,
+     "instantShare": 22
     },
     "wins": {
      "checked": true,
@@ -1896,12 +1896,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.1,
-    "raw": 16,
+    "score": 2.7,
+    "raw": 11.8,
     "pillars": {
-     "consistency": 7,
-     "efficiency": 31,
-     "interaction": 26,
+     "consistency": 4,
+     "efficiency": 27,
+     "interaction": 16,
      "wins": 0
     }
    }
@@ -1965,27 +1965,27 @@
      "high": 11,
      "ramp": 16,
      "rocks": 6,
-     "dorks": 4,
+     "dorks": 1,
      "rituals": 1,
-     "landRamp": 5,
+     "landRamp": 8,
      "fastMana": 6
     },
     "consistency": {
-     "draw": 9,
-     "cheapDraw": 3,
-     "tutors": 1,
-     "recursion": 6
+     "draw": 11,
+     "cheapDraw": 5,
+     "tutors": 3,
+     "recursion": 10
     },
     "interaction": {
      "counters": 0,
-     "removal": 3,
-     "wipes": 0,
-     "protection": 2,
-     "graveHate": 1,
-     "stax": 0,
+     "removal": 10,
+     "wipes": 2,
+     "protection": 3,
+     "graveHate": 2,
+     "stax": 1,
      "free": 1,
-     "cheapAnswers": 0,
-     "instantShare": 33
+     "cheapAnswers": 2,
+     "instantShare": 17
     },
     "wins": {
      "checked": true,
@@ -2046,12 +2046,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.8,
-    "raw": 13,
+    "score": 2.5,
+    "raw": 10,
     "pillars": {
-     "consistency": 16,
-     "efficiency": 30,
-     "interaction": 6,
+     "consistency": 4,
+     "efficiency": 28,
+     "interaction": 8,
      "wins": 0
     }
    }
@@ -2137,29 +2137,29 @@
      "avgMv": 4.25,
      "cheap": 12,
      "high": 16,
-     "ramp": 14,
-     "rocks": 4,
+     "ramp": 17,
+     "rocks": 5,
      "dorks": 5,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 5,
      "fastMana": 7
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 2,
+     "draw": 12,
+     "cheapDraw": 3,
      "tutors": 0,
-     "recursion": 2
+     "recursion": 7
     },
     "interaction": {
      "counters": 0,
-     "removal": 8,
-     "wipes": 2,
-     "protection": 0,
-     "graveHate": 0,
+     "removal": 11,
+     "wipes": 3,
+     "protection": 1,
+     "graveHate": 1,
      "stax": 0,
      "free": 3,
      "cheapAnswers": 2,
-     "instantShare": 30
+     "instantShare": 21
     },
     "wins": {
      "checked": true,
@@ -2170,7 +2170,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 3
+     "massPump": 2
     },
     "shape": {
      "archetypes": [
@@ -2220,12 +2220,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.7,
-    "raw": 11.8,
+    "score": 2.5,
+    "raw": 9.8,
     "pillars": {
-     "consistency": 7,
-     "efficiency": 18,
-     "interaction": 22,
+     "consistency": 0,
+     "efficiency": 20,
+     "interaction": 19,
      "wins": 0
     }
    }
@@ -2295,29 +2295,29 @@
      "avgMv": 3.67,
      "cheap": 17,
      "high": 10,
-     "ramp": 12,
+     "ramp": 11,
      "rocks": 4,
      "dorks": 3,
      "rituals": 0,
-     "landRamp": 0,
+     "landRamp": 2,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 15,
-     "cheapDraw": 4,
-     "tutors": 2,
-     "recursion": 3
+     "draw": 21,
+     "cheapDraw": 7,
+     "tutors": 3,
+     "recursion": 10
     },
     "interaction": {
      "counters": 0,
-     "removal": 8,
-     "wipes": 2,
-     "protection": 1,
+     "removal": 21,
+     "wipes": 7,
+     "protection": 0,
      "graveHate": 0,
      "stax": 1,
      "free": 0,
-     "cheapAnswers": 4,
-     "instantShare": 50
+     "cheapAnswers": 8,
+     "instantShare": 21
     },
     "wins": {
      "checked": true,
@@ -2378,12 +2378,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3,
-    "raw": 14.5,
+    "score": 2.4,
+    "raw": 8.8,
     "pillars": {
-     "consistency": 25,
-     "efficiency": 16,
-     "interaction": 17,
+     "consistency": 4,
+     "efficiency": 12,
+     "interaction": 19,
      "wins": 0
     }
    }
@@ -2453,29 +2453,29 @@
      "avgMv": 3.52,
      "cheap": 16,
      "high": 6,
-     "ramp": 20,
+     "ramp": 22,
      "rocks": 2,
-     "dorks": 3,
+     "dorks": 1,
      "rituals": 0,
-     "landRamp": 5,
+     "landRamp": 19,
      "fastMana": 2
     },
     "consistency": {
-     "draw": 9,
-     "cheapDraw": 2,
-     "tutors": 9,
-     "recursion": 8
+     "draw": 13,
+     "cheapDraw": 5,
+     "tutors": 10,
+     "recursion": 14
     },
     "interaction": {
      "counters": 0,
-     "removal": 8,
-     "wipes": 2,
-     "protection": 1,
+     "removal": 15,
+     "wipes": 3,
+     "protection": 0,
      "graveHate": 2,
      "stax": 0,
      "free": 0,
-     "cheapAnswers": 3,
-     "instantShare": 50
+     "cheapAnswers": 6,
+     "instantShare": 33
     },
     "wins": {
      "checked": true,
@@ -2486,7 +2486,7 @@
      "lines": 1,
      "fastest": 5,
      "printed": 0,
-     "massPump": 0
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -2536,13 +2536,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 4.8,
-    "raw": 32.5,
+    "score": 4.4,
+    "raw": 29.3,
     "pillars": {
-     "consistency": 28,
-     "efficiency": 22,
-     "interaction": 7,
-     "wins": 73
+     "consistency": 29,
+     "efficiency": 25,
+     "interaction": 11,
+     "wins": 52
     }
    }
   },
@@ -2611,7 +2611,7 @@
      "avgMv": 3.33,
      "cheap": 20,
      "high": 8,
-     "ramp": 9,
+     "ramp": 8,
      "rocks": 7,
      "dorks": 1,
      "rituals": 0,
@@ -2619,20 +2619,20 @@
      "fastMana": 5
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 2,
-     "tutors": 0,
-     "recursion": 2
+     "draw": 15,
+     "cheapDraw": 6,
+     "tutors": 2,
+     "recursion": 3
     },
     "interaction": {
      "counters": 1,
-     "removal": 2,
-     "wipes": 2,
-     "protection": 7,
+     "removal": 6,
+     "wipes": 3,
+     "protection": 6,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 1,
      "free": 0,
-     "cheapAnswers": 2,
+     "cheapAnswers": 3,
      "instantShare": 40
     },
     "wins": {
@@ -2694,11 +2694,11 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.3,
-    "raw": 7.5,
+    "score": 2,
+    "raw": 4.8,
     "pillars": {
-     "consistency": 7,
-     "efficiency": 16,
+     "consistency": 0,
+     "efficiency": 12,
      "interaction": 7,
      "wins": 0
     }
@@ -2738,25 +2738,25 @@
        "color": "W",
        "pips": 24,
        "share": 0.2891566265060241,
-       "sources": 22,
+       "sources": 23,
        "target": 13,
-       "cover": 1.7423664122137403
+       "cover": 1.821564885496183
       },
       {
        "color": "B",
        "pips": 33,
        "share": 0.39759036144578314,
-       "sources": 22,
+       "sources": 23,
        "target": 14,
-       "cover": 1.5318791946308723
+       "cover": 1.6015100671140938
       },
       {
        "color": "R",
        "pips": 26,
        "share": 0.3132530120481928,
-       "sources": 24,
+       "sources": 25,
        "target": 13,
-       "cover": 1.8444444444444443
+       "cover": 1.9212962962962963
       }
      ],
      "weakest": "B",
@@ -2769,29 +2769,29 @@
      "avgMv": 3.73,
      "cheap": 18,
      "high": 13,
-     "ramp": 12,
+     "ramp": 16,
      "rocks": 7,
-     "dorks": 3,
+     "dorks": 2,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 3,
      "fastMana": 6
     },
     "consistency": {
-     "draw": 12,
-     "cheapDraw": 4,
-     "tutors": 0,
-     "recursion": 8
+     "draw": 19,
+     "cheapDraw": 5,
+     "tutors": 5,
+     "recursion": 19
     },
     "interaction": {
      "counters": 0,
-     "removal": 4,
-     "wipes": 1,
-     "protection": 2,
-     "graveHate": 1,
+     "removal": 11,
+     "wipes": 3,
+     "protection": 1,
+     "graveHate": 3,
      "stax": 0,
      "free": 1,
-     "cheapAnswers": 0,
-     "instantShare": 40
+     "cheapAnswers": 2,
+     "instantShare": 21
     },
     "wins": {
      "checked": true,
@@ -2852,11 +2852,11 @@
     "offPlan": 2
    },
    "power": {
-    "score": 2.8,
-    "raw": 12.5,
+    "score": 2.6,
+    "raw": 10.8,
     "pillars": {
-     "consistency": 20,
-     "efficiency": 24,
+     "consistency": 11,
+     "efficiency": 26,
      "interaction": 6,
      "wins": 0
     }
@@ -2927,29 +2927,29 @@
      "avgMv": 3.08,
      "cheap": 25,
      "high": 6,
-     "ramp": 9,
-     "rocks": 5,
+     "ramp": 12,
+     "rocks": 3,
      "dorks": 1,
      "rituals": 0,
-     "landRamp": 3,
+     "landRamp": 5,
      "fastMana": 3
     },
     "consistency": {
      "draw": 11,
      "cheapDraw": 6,
-     "tutors": 1,
+     "tutors": 2,
      "recursion": 6
     },
     "interaction": {
      "counters": 0,
-     "removal": 2,
-     "wipes": 3,
-     "protection": 6,
+     "removal": 4,
+     "wipes": 5,
+     "protection": 8,
      "graveHate": 1,
-     "stax": 1,
+     "stax": 2,
      "free": 0,
-     "cheapAnswers": 1,
-     "instantShare": 0
+     "cheapAnswers": 3,
+     "instantShare": 33
     },
     "wins": {
      "checked": true,
@@ -2960,7 +2960,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 1,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -3010,12 +3010,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 17,
+    "score": 2.3,
+    "raw": 8.3,
     "pillars": {
-     "consistency": 36,
+     "consistency": 0,
      "efficiency": 26,
-     "interaction": 6,
+     "interaction": 7,
      "wins": 0
     }
    }
@@ -3091,29 +3091,29 @@
      "avgMv": 3.03,
      "cheap": 24,
      "high": 3,
-     "ramp": 11,
+     "ramp": 13,
      "rocks": 3,
-     "dorks": 5,
+     "dorks": 3,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 6,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 3,
-     "tutors": 3,
-     "recursion": 1
+     "draw": 12,
+     "cheapDraw": 4,
+     "tutors": 2,
+     "recursion": 3
     },
     "interaction": {
-     "counters": 1,
-     "removal": 8,
-     "wipes": 2,
-     "protection": 1,
-     "graveHate": 1,
-     "stax": 1,
+     "counters": 2,
+     "removal": 11,
+     "wipes": 4,
+     "protection": 6,
+     "graveHate": 3,
+     "stax": 3,
      "free": 1,
-     "cheapAnswers": 5,
-     "instantShare": 27
+     "cheapAnswers": 4,
+     "instantShare": 25
     },
     "wins": {
      "checked": true,
@@ -3174,13 +3174,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.7,
-    "raw": 31.5,
+    "score": 3.6,
+    "raw": 20.5,
     "pillars": {
-     "consistency": 23,
+     "consistency": 3,
      "efficiency": 25,
-     "interaction": 30,
-     "wins": 48
+     "interaction": 23,
+     "wins": 31
     }
    }
   },
@@ -3251,28 +3251,28 @@
      "avgMv": 3.38,
      "cheap": 20,
      "high": 6,
-     "ramp": 10,
-     "rocks": 8,
+     "ramp": 11,
+     "rocks": 9,
      "dorks": 0,
      "rituals": 0,
-     "landRamp": 0,
+     "landRamp": 1,
      "fastMana": 6
     },
     "consistency": {
-     "draw": 14,
+     "draw": 17,
      "cheapDraw": 4,
-     "tutors": 1,
-     "recursion": 0
+     "tutors": 5,
+     "recursion": 6
     },
     "interaction": {
      "counters": 2,
-     "removal": 4,
-     "wipes": 2,
-     "protection": 2,
-     "graveHate": 1,
-     "stax": 2,
+     "removal": 12,
+     "wipes": 3,
+     "protection": 1,
+     "graveHate": 2,
+     "stax": 5,
      "free": 3,
-     "cheapAnswers": 2,
+     "cheapAnswers": 4,
      "instantShare": 38
     },
     "wins": {
@@ -3284,7 +3284,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 0
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -3334,12 +3334,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.7,
-    "raw": 22.3,
+    "score": 3.4,
+    "raw": 19,
     "pillars": {
-     "consistency": 22,
-     "efficiency": 26,
-     "interaction": 41,
+     "consistency": 11,
+     "efficiency": 25,
+     "interaction": 40,
      "wins": 0
     }
    }
@@ -3372,7 +3372,7 @@
      "lands": 38,
      "basics": 19,
      "tapped": 4,
-     "fetches": 2,
+     "fetches": 3,
      "colors": [
       {
        "color": "W",
@@ -3409,29 +3409,29 @@
      "avgMv": 3.34,
      "cheap": 17,
      "high": 2,
-     "ramp": 11,
-     "rocks": 7,
-     "dorks": 1,
+     "ramp": 9,
+     "rocks": 6,
+     "dorks": 0,
      "rituals": 0,
-     "landRamp": 1,
+     "landRamp": 2,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 5,
-     "cheapDraw": 2,
-     "tutors": 0,
+     "draw": 18,
+     "cheapDraw": 5,
+     "tutors": 4,
      "recursion": 1
     },
     "interaction": {
      "counters": 1,
-     "removal": 5,
+     "removal": 10,
      "wipes": 2,
      "protection": 5,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 2,
      "free": 1,
-     "cheapAnswers": 4,
-     "instantShare": 25
+     "cheapAnswers": 6,
+     "instantShare": 23
     },
     "wins": {
      "checked": true,
@@ -3442,7 +3442,7 @@
      "lines": 1,
      "fastest": 6,
      "printed": 0,
-     "massPump": 4
+     "massPump": 5
     },
     "shape": {
      "archetypes": [
@@ -3492,13 +3492,13 @@
     "offPlan": 3
    },
    "power": {
-    "score": 4.6,
-    "raw": 30.5,
+    "score": 4,
+    "raw": 25,
     "pillars": {
      "consistency": 7,
-     "efficiency": 27,
-     "interaction": 20,
-     "wins": 68
+     "efficiency": 21,
+     "interaction": 24,
+     "wins": 48
     }
    }
   },
@@ -3537,25 +3537,25 @@
        "color": "W",
        "pips": 31,
        "share": 0.4025974025974026,
-       "sources": 24,
+       "sources": 26,
        "target": 14,
-       "cover": 1.6618705035971222
+       "cover": 1.8003597122302157
       },
       {
        "color": "B",
        "pips": 16,
        "share": 0.2077922077922078,
-       "sources": 20,
+       "sources": 22,
        "target": 11,
-       "cover": 1.7660550458715594
+       "cover": 1.9426605504587153
       },
       {
        "color": "G",
        "pips": 30,
        "share": 0.38961038961038963,
-       "sources": 27,
+       "sources": 29,
        "target": 14,
-       "cover": 1.896897810218978
+       "cover": 2.0374087591240877
       }
      ],
      "weakest": "W",
@@ -3568,29 +3568,29 @@
      "avgMv": 3.26,
      "cheap": 22,
      "high": 6,
-     "ramp": 15,
-     "rocks": 6,
-     "dorks": 3,
+     "ramp": 14,
+     "rocks": 5,
+     "dorks": 4,
      "rituals": 0,
-     "landRamp": 3,
+     "landRamp": 4,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 12,
-     "cheapDraw": 4,
-     "tutors": 1,
+     "draw": 13,
+     "cheapDraw": 5,
+     "tutors": 12,
      "recursion": 3
     },
     "interaction": {
      "counters": 0,
-     "removal": 4,
-     "wipes": 3,
-     "protection": 2,
-     "graveHate": 0,
-     "stax": 0,
+     "removal": 8,
+     "wipes": 4,
+     "protection": 0,
+     "graveHate": 1,
+     "stax": 2,
      "free": 1,
-     "cheapAnswers": 3,
-     "instantShare": 43
+     "cheapAnswers": 5,
+     "instantShare": 42
     },
     "wins": {
      "checked": true,
@@ -3601,7 +3601,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 3
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -3651,12 +3651,12 @@
     "offPlan": 4
    },
    "power": {
-    "score": 3.2,
-    "raw": 17,
+    "score": 3.6,
+    "raw": 21.3,
     "pillars": {
-     "consistency": 22,
-     "efficiency": 33,
-     "interaction": 13,
+     "consistency": 36,
+     "efficiency": 30,
+     "interaction": 19,
      "wins": 0
     }
    }
@@ -3691,7 +3691,7 @@
      "lands": 38,
      "basics": 26,
      "tapped": 4,
-     "fetches": 0,
+     "fetches": 1,
      "colors": [
       {
        "color": "U",
@@ -3720,29 +3720,29 @@
      "avgMv": 3.31,
      "cheap": 21,
      "high": 6,
-     "ramp": 13,
+     "ramp": 18,
      "rocks": 4,
-     "dorks": 6,
+     "dorks": 5,
      "rituals": 0,
-     "landRamp": 4,
+     "landRamp": 8,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 16,
-     "cheapDraw": 6,
-     "tutors": 1,
-     "recursion": 3
+     "draw": 20,
+     "cheapDraw": 8,
+     "tutors": 4,
+     "recursion": 5
     },
     "interaction": {
      "counters": 2,
-     "removal": 3,
-     "wipes": 0,
-     "protection": 4,
-     "graveHate": 0,
-     "stax": 0,
+     "removal": 9,
+     "wipes": 2,
+     "protection": 6,
+     "graveHate": 1,
+     "stax": 1,
      "free": 0,
-     "cheapAnswers": 1,
-     "instantShare": 60
+     "cheapAnswers": 4,
+     "instantShare": 42
     },
     "wins": {
      "checked": true,
@@ -3753,7 +3753,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 2
     },
     "shape": {
      "archetypes": [
@@ -3803,12 +3803,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.4,
-    "raw": 18.5,
+    "score": 2.9,
+    "raw": 14,
     "pillars": {
-     "consistency": 36,
-     "efficiency": 32,
-     "interaction": 6,
+     "consistency": 7,
+     "efficiency": 36,
+     "interaction": 13,
      "wins": 0
     }
    }
@@ -3843,31 +3843,31 @@
      "lands": 38,
      "basics": 19,
      "tapped": 2,
-     "fetches": 2,
+     "fetches": 3,
      "colors": [
       {
        "color": "U",
        "pips": 22,
        "share": 0.2558139534883721,
-       "sources": 17,
+       "sources": 18,
        "target": 12,
-       "cover": 1.4057692307692307
+       "cover": 1.4884615384615385
       },
       {
        "color": "B",
        "pips": 30,
        "share": 0.3488372093023256,
-       "sources": 20,
+       "sources": 21,
        "target": 14,
-       "cover": 1.4726027397260275
+       "cover": 1.5462328767123288
       },
       {
        "color": "R",
        "pips": 34,
        "share": 0.3953488372093023,
-       "sources": 18,
+       "sources": 19,
        "target": 14,
-       "cover": 1.2564935064935066
+       "cover": 1.3262987012987013
       }
      ],
      "weakest": "R",
@@ -3880,7 +3880,7 @@
      "avgMv": 4.16,
      "cheap": 12,
      "high": 15,
-     "ramp": 10,
+     "ramp": 12,
      "rocks": 8,
      "dorks": 0,
      "rituals": 0,
@@ -3888,21 +3888,21 @@
      "fastMana": 4
     },
     "consistency": {
-     "draw": 13,
+     "draw": 18,
      "cheapDraw": 6,
-     "tutors": 0,
-     "recursion": 1
+     "tutors": 5,
+     "recursion": 8
     },
     "interaction": {
      "counters": 1,
-     "removal": 4,
-     "wipes": 2,
+     "removal": 11,
+     "wipes": 5,
      "protection": 2,
-     "graveHate": 0,
-     "stax": 0,
+     "graveHate": 1,
+     "stax": 2,
      "free": 3,
-     "cheapAnswers": 3,
-     "instantShare": 29
+     "cheapAnswers": 4,
+     "instantShare": 12
     },
     "wins": {
      "checked": true,
@@ -3963,12 +3963,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.7,
-    "raw": 22,
+    "score": 3.2,
+    "raw": 16.8,
     "pillars": {
-     "consistency": 36,
-     "efficiency": 23,
-     "interaction": 29,
+     "consistency": 14,
+     "efficiency": 22,
+     "interaction": 31,
      "wins": 0
     }
    }
@@ -4038,7 +4038,7 @@
      "avgMv": 3.35,
      "cheap": 21,
      "high": 6,
-     "ramp": 8,
+     "ramp": 10,
      "rocks": 8,
      "dorks": 0,
      "rituals": 0,
@@ -4046,21 +4046,21 @@
      "fastMana": 7
     },
     "consistency": {
-     "draw": 14,
-     "cheapDraw": 5,
+     "draw": 18,
+     "cheapDraw": 8,
      "tutors": 0,
-     "recursion": 2
+     "recursion": 4
     },
     "interaction": {
      "counters": 1,
      "removal": 6,
-     "wipes": 2,
-     "protection": 6,
+     "wipes": 4,
+     "protection": 7,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 2,
      "free": 2,
      "cheapAnswers": 4,
-     "instantShare": 56
+     "instantShare": 45
     },
     "wins": {
      "checked": true,
@@ -4071,7 +4071,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 2
     },
     "shape": {
      "archetypes": [
@@ -4121,12 +4121,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.5,
-    "raw": 20.3,
+    "score": 2.8,
+    "raw": 13,
     "pillars": {
-     "consistency": 27,
-     "efficiency": 28,
-     "interaction": 26,
+     "consistency": 0,
+     "efficiency": 27,
+     "interaction": 25,
      "wins": 0
     }
    }
@@ -4188,29 +4188,29 @@
      "avgMv": 3.82,
      "cheap": 18,
      "high": 7,
-     "ramp": 8,
-     "rocks": 4,
-     "dorks": 2,
+     "ramp": 13,
+     "rocks": 8,
+     "dorks": 1,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 3,
      "fastMana": 3
     },
     "consistency": {
-     "draw": 11,
-     "cheapDraw": 2,
-     "tutors": 1,
-     "recursion": 5
+     "draw": 23,
+     "cheapDraw": 6,
+     "tutors": 2,
+     "recursion": 6
     },
     "interaction": {
      "counters": 0,
-     "removal": 4,
-     "wipes": 2,
-     "protection": 6,
+     "removal": 11,
+     "wipes": 3,
+     "protection": 8,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 2,
      "free": 0,
-     "cheapAnswers": 1,
-     "instantShare": 50
+     "cheapAnswers": 4,
+     "instantShare": 43
     },
     "wins": {
      "checked": true,
@@ -4221,7 +4221,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 2
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -4271,12 +4271,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.3,
-    "raw": 7.5,
+    "score": 2.4,
+    "raw": 8.5,
     "pillars": {
-     "consistency": 9,
-     "efficiency": 21,
-     "interaction": 0,
+     "consistency": 0,
+     "efficiency": 24,
+     "interaction": 10,
      "wins": 0
     }
    }
@@ -4356,29 +4356,29 @@
      "avgMv": 3.68,
      "cheap": 16,
      "high": 7,
-     "ramp": 12,
+     "ramp": 14,
      "rocks": 3,
      "dorks": 2,
      "rituals": 0,
-     "landRamp": 3,
+     "landRamp": 6,
      "fastMana": 3
     },
     "consistency": {
-     "draw": 10,
+     "draw": 12,
      "cheapDraw": 3,
-     "tutors": 3,
-     "recursion": 1
+     "tutors": 4,
+     "recursion": 2
     },
     "interaction": {
      "counters": 0,
-     "removal": 7,
-     "wipes": 2,
-     "protection": 3,
-     "graveHate": 0,
-     "stax": 0,
+     "removal": 9,
+     "wipes": 5,
+     "protection": 4,
+     "graveHate": 2,
+     "stax": 2,
      "free": 3,
      "cheapAnswers": 3,
-     "instantShare": 22
+     "instantShare": 14
     },
     "wins": {
      "checked": true,
@@ -4439,10 +4439,10 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.3,
-    "raw": 18,
+    "score": 3,
+    "raw": 14.8,
     "pillars": {
-     "consistency": 20,
+     "consistency": 7,
      "efficiency": 26,
      "interaction": 26,
      "wins": 0
@@ -4514,7 +4514,7 @@
      "avgMv": 3.65,
      "cheap": 13,
      "high": 9,
-     "ramp": 8,
+     "ramp": 12,
      "rocks": 7,
      "dorks": 0,
      "rituals": 0,
@@ -4522,21 +4522,21 @@
      "fastMana": 4
     },
     "consistency": {
-     "draw": 11,
-     "cheapDraw": 3,
-     "tutors": 0,
-     "recursion": 2
+     "draw": 21,
+     "cheapDraw": 7,
+     "tutors": 1,
+     "recursion": 7
     },
     "interaction": {
      "counters": 0,
-     "removal": 5,
-     "wipes": 2,
-     "protection": 3,
+     "removal": 10,
+     "wipes": 4,
+     "protection": 1,
      "graveHate": 1,
-     "stax": 1,
+     "stax": 2,
      "free": 1,
-     "cheapAnswers": 2,
-     "instantShare": 57
+     "cheapAnswers": 3,
+     "instantShare": 36
     },
     "wins": {
      "checked": true,
@@ -4547,7 +4547,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 0
+     "massPump": 2
     },
     "shape": {
      "archetypes": [
@@ -4597,12 +4597,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 2.6,
-    "raw": 10.8,
+    "score": 2.2,
+    "raw": 7,
     "pillars": {
-     "consistency": 13,
-     "efficiency": 14,
-     "interaction": 16,
+     "consistency": 0,
+     "efficiency": 15,
+     "interaction": 13,
      "wins": 0
     }
    }
@@ -4666,7 +4666,7 @@
      "avgMv": 2.97,
      "cheap": 24,
      "high": 1,
-     "ramp": 7,
+     "ramp": 4,
      "rocks": 4,
      "dorks": 0,
      "rituals": 0,
@@ -4674,21 +4674,21 @@
      "fastMana": 4
     },
     "consistency": {
-     "draw": 13,
-     "cheapDraw": 5,
-     "tutors": 0,
-     "recursion": 3
+     "draw": 16,
+     "cheapDraw": 6,
+     "tutors": 3,
+     "recursion": 7
     },
     "interaction": {
      "counters": 0,
-     "removal": 1,
-     "wipes": 1,
-     "protection": 8,
+     "removal": 9,
+     "wipes": 3,
+     "protection": 11,
      "graveHate": 1,
-     "stax": 2,
+     "stax": 4,
      "free": 2,
-     "cheapAnswers": 1,
-     "instantShare": 50
+     "cheapAnswers": 4,
+     "instantShare": 25
     },
     "wins": {
      "checked": true,
@@ -4749,12 +4749,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.4,
-    "raw": 18.5,
+    "score": 2.8,
+    "raw": 12.8,
     "pillars": {
-     "consistency": 27,
-     "efficiency": 22,
-     "interaction": 25,
+     "consistency": 4,
+     "efficiency": 21,
+     "interaction": 26,
      "wins": 0
     }
    }
@@ -4818,29 +4818,29 @@
      "avgMv": 4.08,
      "cheap": 18,
      "high": 10,
-     "ramp": 9,
+     "ramp": 15,
      "rocks": 5,
-     "dorks": 2,
+     "dorks": 0,
      "rituals": 2,
-     "landRamp": 1,
+     "landRamp": 2,
      "fastMana": 4
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 3,
-     "tutors": 0,
-     "recursion": 0
+     "draw": 14,
+     "cheapDraw": 4,
+     "tutors": 2,
+     "recursion": 3
     },
     "interaction": {
      "counters": 1,
-     "removal": 4,
+     "removal": 10,
      "wipes": 3,
-     "protection": 0,
+     "protection": 1,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 1,
      "free": 6,
-     "cheapAnswers": 4,
-     "instantShare": 63
+     "cheapAnswers": 5,
+     "instantShare": 64
     },
     "wins": {
      "checked": true,
@@ -4851,7 +4851,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -4901,12 +4901,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.1,
-    "raw": 16.3,
+    "score": 2.9,
+    "raw": 14,
     "pillars": {
-     "consistency": 13,
-     "efficiency": 13,
-     "interaction": 39,
+     "consistency": 0,
+     "efficiency": 18,
+     "interaction": 38,
      "wins": 0
     }
    }
@@ -4968,29 +4968,29 @@
      "avgMv": 3.05,
      "cheap": 26,
      "high": 3,
-     "ramp": 15,
+     "ramp": 13,
      "rocks": 2,
-     "dorks": 7,
+     "dorks": 3,
      "rituals": 1,
      "landRamp": 4,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 5,
-     "tutors": 0,
-     "recursion": 7
+     "draw": 12,
+     "cheapDraw": 6,
+     "tutors": 2,
+     "recursion": 8
     },
     "interaction": {
      "counters": 0,
-     "removal": 3,
-     "wipes": 1,
-     "protection": 2,
-     "graveHate": 2,
+     "removal": 13,
+     "wipes": 3,
+     "protection": 1,
+     "graveHate": 3,
      "stax": 0,
      "free": 0,
-     "cheapAnswers": 2,
-     "instantShare": 50
+     "cheapAnswers": 8,
+     "instantShare": 25
     },
     "wins": {
      "checked": true,
@@ -5001,7 +5001,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 5
     },
     "shape": {
      "archetypes": [
@@ -5051,12 +5051,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.1,
-    "raw": 16,
+    "score": 2.6,
+    "raw": 11.3,
     "pillars": {
-     "consistency": 27,
-     "efficiency": 33,
-     "interaction": 4,
+     "consistency": 0,
+     "efficiency": 28,
+     "interaction": 17,
      "wins": 0
     }
    }
@@ -5095,17 +5095,17 @@
        "color": "W",
        "pips": 57,
        "share": 0.6627906976744186,
-       "sources": 32,
+       "sources": 34,
        "target": 19,
-       "cover": 1.7200000000000002
+       "cover": 1.8275000000000003
       },
       {
        "color": "R",
        "pips": 29,
        "share": 0.3372093023255814,
-       "sources": 25,
+       "sources": 27,
        "target": 13,
-       "cover": 1.8663194444444446
+       "cover": 2.015625
       }
      ],
      "weakest": "W",
@@ -5118,29 +5118,29 @@
      "avgMv": 3.22,
      "cheap": 21,
      "high": 3,
-     "ramp": 12,
-     "rocks": 6,
-     "dorks": 3,
+     "ramp": 18,
+     "rocks": 5,
+     "dorks": 1,
      "rituals": 0,
-     "landRamp": 1,
+     "landRamp": 7,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 5,
-     "tutors": 2,
-     "recursion": 12
+     "draw": 12,
+     "cheapDraw": 6,
+     "tutors": 3,
+     "recursion": 20
     },
     "interaction": {
      "counters": 0,
-     "removal": 5,
-     "wipes": 1,
+     "removal": 8,
+     "wipes": 3,
      "protection": 3,
-     "graveHate": 1,
-     "stax": 0,
+     "graveHate": 2,
+     "stax": 2,
      "free": 1,
-     "cheapAnswers": 4,
-     "instantShare": 33
+     "cheapAnswers": 6,
+     "instantShare": 27
     },
     "wins": {
      "checked": true,
@@ -5151,7 +5151,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 2
+     "massPump": 6
     },
     "shape": {
      "archetypes": [
@@ -5201,12 +5201,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.4,
-    "raw": 18.8,
+    "score": 3,
+    "raw": 14.8,
     "pillars": {
-     "consistency": 31,
-     "efficiency": 27,
-     "interaction": 17,
+     "consistency": 4,
+     "efficiency": 33,
+     "interaction": 22,
      "wins": 0
     }
    }
@@ -5268,29 +5268,29 @@
      "avgMv": 2.4,
      "cheap": 36,
      "high": 0,
-     "ramp": 12,
+     "ramp": 16,
      "rocks": 5,
-     "dorks": 3,
-     "rituals": 0,
-     "landRamp": 0,
+     "dorks": 2,
+     "rituals": 1,
+     "landRamp": 6,
      "fastMana": 4
     },
     "consistency": {
-     "draw": 11,
-     "cheapDraw": 6,
+     "draw": 16,
+     "cheapDraw": 9,
      "tutors": 2,
-     "recursion": 0
+     "recursion": 1
     },
     "interaction": {
      "counters": 3,
-     "removal": 4,
-     "wipes": 1,
+     "removal": 9,
+     "wipes": 3,
      "protection": 4,
-     "graveHate": 0,
-     "stax": 0,
+     "graveHate": 1,
+     "stax": 1,
      "free": 0,
-     "cheapAnswers": 4,
-     "instantShare": 71
+     "cheapAnswers": 7,
+     "instantShare": 58
     },
     "wins": {
      "checked": true,
@@ -5301,7 +5301,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -5351,12 +5351,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4,
-    "raw": 24.8,
+    "score": 3.2,
+    "raw": 16.5,
     "pillars": {
-     "consistency": 38,
-     "efficiency": 41,
-     "interaction": 20,
+     "consistency": 0,
+     "efficiency": 43,
+     "interaction": 23,
      "wins": 0
     }
    }
@@ -5428,29 +5428,29 @@
      "avgMv": 3.35,
      "cheap": 22,
      "high": 7,
-     "ramp": 14,
+     "ramp": 13,
      "rocks": 5,
-     "dorks": 7,
+     "dorks": 6,
      "rituals": 0,
-     "landRamp": 1,
+     "landRamp": 2,
      "fastMana": 7
     },
     "consistency": {
-     "draw": 6,
-     "cheapDraw": 2,
-     "tutors": 1,
-     "recursion": 1
+     "draw": 8,
+     "cheapDraw": 3,
+     "tutors": 2,
+     "recursion": 3
     },
     "interaction": {
      "counters": 0,
-     "removal": 5,
-     "wipes": 1,
-     "protection": 6,
+     "removal": 7,
+     "wipes": 3,
+     "protection": 5,
      "graveHate": 1,
-     "stax": 1,
+     "stax": 2,
      "free": 0,
      "cheapAnswers": 4,
-     "instantShare": 50
+     "instantShare": 40
     },
     "wins": {
      "checked": true,
@@ -5511,12 +5511,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3,
-    "raw": 14.5,
+    "score": 2.5,
+    "raw": 10,
     "pillars": {
-     "consistency": 11,
-     "efficiency": 30,
-     "interaction": 17,
+     "consistency": 3,
+     "efficiency": 27,
+     "interaction": 10,
      "wins": 0
     }
    }
@@ -5557,25 +5557,25 @@
        "color": "W",
        "pips": 15,
        "share": 0.16304347826086957,
-       "sources": 23,
+       "sources": 25,
        "target": 11,
-       "cover": 2.1680327868852456
+       "cover": 2.3565573770491803
       },
       {
        "color": "U",
        "pips": 44,
        "share": 0.4782608695652174,
-       "sources": 25,
+       "sources": 27,
        "target": 16,
-       "cover": 1.597222222222222
+       "cover": 1.7249999999999999
       },
       {
        "color": "R",
        "pips": 33,
        "share": 0.358695652173913,
-       "sources": 22,
+       "sources": 24,
        "target": 14,
-       "cover": 1.60126582278481
+       "cover": 1.7468354430379747
       }
      ],
      "weakest": "U",
@@ -5588,7 +5588,7 @@
      "avgMv": 3.14,
      "cheap": 25,
      "high": 6,
-     "ramp": 9,
+     "ramp": 14,
      "rocks": 7,
      "dorks": 0,
      "rituals": 1,
@@ -5596,21 +5596,21 @@
      "fastMana": 7
     },
     "consistency": {
-     "draw": 14,
-     "cheapDraw": 6,
-     "tutors": 1,
-     "recursion": 0
+     "draw": 24,
+     "cheapDraw": 9,
+     "tutors": 3,
+     "recursion": 2
     },
     "interaction": {
-     "counters": 2,
-     "removal": 5,
-     "wipes": 2,
+     "counters": 3,
+     "removal": 11,
+     "wipes": 3,
      "protection": 0,
      "graveHate": 0,
-     "stax": 1,
+     "stax": 2,
      "free": 6,
-     "cheapAnswers": 3,
-     "instantShare": 78
+     "cheapAnswers": 6,
+     "instantShare": 69
     },
     "wins": {
      "checked": true,
@@ -5671,12 +5671,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.3,
-    "raw": 28,
+    "score": 3.7,
+    "raw": 21.5,
     "pillars": {
-     "consistency": 36,
-     "efficiency": 31,
-     "interaction": 45,
+     "consistency": 4,
+     "efficiency": 34,
+     "interaction": 48,
      "wins": 0
     }
    }
@@ -5746,29 +5746,29 @@
      "avgMv": 3.73,
      "cheap": 20,
      "high": 11,
-     "ramp": 13,
+     "ramp": 16,
      "rocks": 2,
-     "dorks": 4,
+     "dorks": 2,
      "rituals": 0,
-     "landRamp": 6,
+     "landRamp": 12,
      "fastMana": 4
     },
     "consistency": {
-     "draw": 6,
-     "cheapDraw": 1,
+     "draw": 10,
+     "cheapDraw": 4,
      "tutors": 2,
-     "recursion": 15
+     "recursion": 27
     },
     "interaction": {
      "counters": 0,
-     "removal": 4,
-     "wipes": 1,
+     "removal": 7,
+     "wipes": 2,
      "protection": 0,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 2,
      "free": 2,
      "cheapAnswers": 1,
-     "instantShare": 60
+     "instantShare": 33
     },
     "wins": {
      "checked": true,
@@ -5832,9 +5832,9 @@
     "score": 2.3,
     "raw": 8,
     "pillars": {
-     "consistency": 5,
-     "efficiency": 14,
-     "interaction": 13,
+     "consistency": 0,
+     "efficiency": 15,
+     "interaction": 17,
      "wins": 0
     }
    }
@@ -5873,25 +5873,25 @@
        "color": "W",
        "pips": 39,
        "share": 0.5131578947368421,
-       "sources": 23,
+       "sources": 24,
        "target": 16,
-       "cover": 1.418831168831169
+       "cover": 1.4805194805194806
       },
       {
        "color": "B",
        "pips": 20,
        "share": 0.2631578947368421,
-       "sources": 21,
+       "sources": 22,
        "target": 12,
-       "cover": 1.7198275862068968
+       "cover": 1.8017241379310347
       },
       {
        "color": "R",
        "pips": 17,
        "share": 0.2236842105263158,
-       "sources": 19,
+       "sources": 20,
        "target": 12,
-       "cover": 1.6409090909090909
+       "cover": 1.7272727272727273
       }
      ],
      "weakest": "W",
@@ -5904,29 +5904,29 @@
      "avgMv": 3.21,
      "cheap": 23,
      "high": 4,
-     "ramp": 9,
-     "rocks": 6,
-     "dorks": 1,
+     "ramp": 10,
+     "rocks": 5,
+     "dorks": 0,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 3,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 4,
-     "tutors": 1,
+     "draw": 12,
+     "cheapDraw": 6,
+     "tutors": 2,
      "recursion": 1
     },
     "interaction": {
      "counters": 0,
-     "removal": 4,
-     "wipes": 0,
+     "removal": 9,
+     "wipes": 1,
      "protection": 4,
      "graveHate": 2,
      "stax": 0,
      "free": 1,
      "cheapAnswers": 3,
-     "instantShare": 75
+     "instantShare": 50
     },
     "wins": {
      "checked": true,
@@ -5987,12 +5987,12 @@
     "offPlan": 5
    },
    "power": {
-    "score": 3,
-    "raw": 14.5,
+    "score": 2.3,
+    "raw": 7.5,
     "pillars": {
-     "consistency": 22,
-     "efficiency": 23,
-     "interaction": 13,
+     "consistency": 0,
+     "efficiency": 21,
+     "interaction": 9,
      "wins": 0
     }
    }
@@ -6033,25 +6033,25 @@
        "color": "U",
        "pips": 15,
        "share": 0.16483516483516483,
-       "sources": 19,
+       "sources": 20,
        "target": 11,
-       "cover": 1.7861570247933884
+       "cover": 1.8801652892561984
       },
       {
        "color": "R",
        "pips": 56,
        "share": 0.6153846153846154,
-       "sources": 26,
+       "sources": 27,
        "target": 18,
-       "cover": 1.456896551724138
+       "cover": 1.5129310344827587
       },
       {
        "color": "G",
        "pips": 20,
        "share": 0.21978021978021978,
-       "sources": 27,
+       "sources": 28,
        "target": 12,
-       "cover": 2.344465648854962
+       "cover": 2.431297709923664
       }
      ],
      "weakest": "R",
@@ -6064,29 +6064,29 @@
      "avgMv": 4.1,
      "cheap": 13,
      "high": 15,
-     "ramp": 13,
+     "ramp": 18,
      "rocks": 6,
-     "dorks": 0,
+     "dorks": 1,
      "rituals": 0,
-     "landRamp": 4,
+     "landRamp": 7,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 7,
-     "cheapDraw": 0,
+     "draw": 11,
+     "cheapDraw": 2,
      "tutors": 2,
      "recursion": 2
     },
     "interaction": {
      "counters": 0,
-     "removal": 5,
-     "wipes": 3,
-     "protection": 1,
+     "removal": 14,
+     "wipes": 4,
+     "protection": 0,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 1,
      "free": 2,
-     "cheapAnswers": 2,
-     "instantShare": 50
+     "cheapAnswers": 3,
+     "instantShare": 28
     },
     "wins": {
      "checked": true,
@@ -6097,7 +6097,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -6148,11 +6148,11 @@
    },
    "power": {
     "score": 2.5,
-    "raw": 9.8,
+    "raw": 10,
     "pillars": {
-     "consistency": 5,
-     "efficiency": 18,
-     "interaction": 16,
+     "consistency": 0,
+     "efficiency": 23,
+     "interaction": 17,
      "wins": 0
     }
    }
@@ -6230,29 +6230,29 @@
      "avgMv": 3.03,
      "cheap": 24,
      "high": 3,
-     "ramp": 11,
+     "ramp": 13,
      "rocks": 3,
-     "dorks": 5,
+     "dorks": 3,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 6,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 3,
-     "tutors": 3,
-     "recursion": 1
+     "draw": 12,
+     "cheapDraw": 4,
+     "tutors": 2,
+     "recursion": 3
     },
     "interaction": {
-     "counters": 1,
-     "removal": 8,
-     "wipes": 2,
-     "protection": 1,
-     "graveHate": 1,
-     "stax": 1,
+     "counters": 2,
+     "removal": 11,
+     "wipes": 4,
+     "protection": 6,
+     "graveHate": 3,
+     "stax": 3,
      "free": 1,
-     "cheapAnswers": 5,
-     "instantShare": 27
+     "cheapAnswers": 4,
+     "instantShare": 25
     },
     "wins": {
      "checked": true,
@@ -6313,13 +6313,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.7,
-    "raw": 31.5,
+    "score": 3.6,
+    "raw": 20.5,
     "pillars": {
-     "consistency": 23,
+     "consistency": 3,
      "efficiency": 25,
-     "interaction": 30,
-     "wins": 48
+     "interaction": 23,
+     "wins": 31
     }
    }
   },
@@ -6366,25 +6366,25 @@
        "color": "W",
        "pips": 36,
        "share": 0.42857142857142855,
-       "sources": 24,
+       "sources": 26,
        "target": 15,
-       "cover": 1.6153846153846154
+       "cover": 1.75
       },
       {
        "color": "B",
        "pips": 22,
        "share": 0.2619047619047619,
-       "sources": 17,
+       "sources": 19,
        "target": 12,
-       "cover": 1.39453125
+       "cover": 1.55859375
       },
       {
        "color": "R",
        "pips": 26,
        "share": 0.30952380952380953,
-       "sources": 23,
+       "sources": 25,
        "target": 13,
-       "cover": 1.775735294117647
+       "cover": 1.9301470588235294
       }
      ],
      "weakest": "B",
@@ -6397,29 +6397,29 @@
      "avgMv": 2.98,
      "cheap": 25,
      "high": 2,
-     "ramp": 14,
-     "rocks": 11,
+     "ramp": 16,
+     "rocks": 10,
      "dorks": 0,
      "rituals": 0,
-     "landRamp": 1,
+     "landRamp": 4,
      "fastMana": 10
     },
     "consistency": {
-     "draw": 14,
-     "cheapDraw": 4,
+     "draw": 16,
+     "cheapDraw": 5,
      "tutors": 1,
      "recursion": 1
     },
     "interaction": {
      "counters": 0,
-     "removal": 5,
-     "wipes": 1,
-     "protection": 4,
+     "removal": 7,
+     "wipes": 3,
+     "protection": 5,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 2,
      "free": 1,
-     "cheapAnswers": 4,
-     "instantShare": 67
+     "cheapAnswers": 6,
+     "instantShare": 60
     },
     "wins": {
      "checked": true,
@@ -6430,7 +6430,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 2
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -6480,12 +6480,12 @@
     "offPlan": 9
    },
    "power": {
-    "score": 3.8,
-    "raw": 22.8,
+    "score": 3.4,
+    "raw": 18.8,
     "pillars": {
-     "consistency": 22,
-     "efficiency": 52,
-     "interaction": 17,
+     "consistency": 0,
+     "efficiency": 53,
+     "interaction": 22,
      "wins": 0
     }
    }
@@ -6534,25 +6534,25 @@
        "color": "U",
        "pips": 17,
        "share": 0.19540229885057472,
-       "sources": 17,
+       "sources": 18,
        "target": 11,
-       "cover": 1.5278925619834711
+       "cover": 1.6177685950413223
       },
       {
        "color": "B",
        "pips": 50,
        "share": 0.5747126436781609,
-       "sources": 29,
+       "sources": 30,
        "target": 17,
-       "cover": 1.6864973262032086
+       "cover": 1.7446524064171123
       },
       {
        "color": "R",
        "pips": 20,
        "share": 0.22988505747126436,
-       "sources": 17,
+       "sources": 18,
        "target": 12,
-       "cover": 1.455708661417323
+       "cover": 1.5413385826771655
       }
      ],
      "weakest": "R",
@@ -6565,7 +6565,7 @@
      "avgMv": 3.4,
      "cheap": 21,
      "high": 6,
-     "ramp": 7,
+     "ramp": 11,
      "rocks": 6,
      "dorks": 0,
      "rituals": 1,
@@ -6573,21 +6573,21 @@
      "fastMana": 6
     },
     "consistency": {
-     "draw": 9,
+     "draw": 13,
      "cheapDraw": 6,
      "tutors": 2,
-     "recursion": 2
+     "recursion": 8
     },
     "interaction": {
      "counters": 4,
-     "removal": 4,
-     "wipes": 1,
-     "protection": 5,
+     "removal": 8,
+     "wipes": 4,
+     "protection": 2,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 2,
      "free": 1,
-     "cheapAnswers": 3,
-     "instantShare": 63
+     "cheapAnswers": 4,
+     "instantShare": 47
     },
     "wins": {
      "checked": true,
@@ -6648,11 +6648,11 @@
     "offPlan": 5
    },
    "power": {
-    "score": 4,
-    "raw": 24.8,
+    "score": 3.1,
+    "raw": 15.8,
     "pillars": {
-     "consistency": 38,
-     "efficiency": 35,
+     "consistency": 0,
+     "efficiency": 37,
      "interaction": 26,
      "wins": 0
     }
@@ -6732,29 +6732,29 @@
      "avgMv": 2.77,
      "cheap": 28,
      "high": 2,
-     "ramp": 11,
-     "rocks": 10,
+     "ramp": 12,
+     "rocks": 9,
      "dorks": 0,
-     "rituals": 0,
-     "landRamp": 0,
+     "rituals": 1,
+     "landRamp": 1,
      "fastMana": 7
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 4,
-     "tutors": 0,
-     "recursion": 0
+     "draw": 28,
+     "cheapDraw": 9,
+     "tutors": 1,
+     "recursion": 4
     },
     "interaction": {
      "counters": 6,
-     "removal": 5,
-     "wipes": 2,
-     "protection": 1,
+     "removal": 6,
+     "wipes": 4,
+     "protection": 3,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 1,
      "free": 1,
-     "cheapAnswers": 5,
-     "instantShare": 75
+     "cheapAnswers": 6,
+     "instantShare": 67
     },
     "wins": {
      "checked": true,
@@ -6815,12 +6815,12 @@
     "offPlan": 4
    },
    "power": {
-    "score": 3.9,
-    "raw": 24,
+    "score": 3.3,
+    "raw": 17.5,
     "pillars": {
-     "consistency": 20,
-     "efficiency": 37,
-     "interaction": 39,
+     "consistency": 0,
+     "efficiency": 36,
+     "interaction": 34,
      "wins": 0
     }
    }
@@ -6881,25 +6881,25 @@
        "color": "U",
        "pips": 24,
        "share": 0.3333333333333333,
-       "sources": 21,
+       "sources": 24,
        "target": 13,
-       "cover": 1.5750000000000002
+       "cover": 1.8000000000000003
       },
       {
        "color": "B",
        "pips": 18,
        "share": 0.25,
-       "sources": 22,
+       "sources": 25,
        "target": 12,
-       "cover": 1.8333333333333333
+       "cover": 2.0833333333333335
       },
       {
        "color": "R",
        "pips": 30,
        "share": 0.4166666666666667,
-       "sources": 22,
+       "sources": 25,
        "target": 15,
-       "cover": 1.4999999999999998
+       "cover": 1.7045454545454544
       }
      ],
      "weakest": "R",
@@ -6912,29 +6912,29 @@
      "avgMv": 3.06,
      "cheap": 22,
      "high": 3,
-     "ramp": 11,
+     "ramp": 19,
      "rocks": 6,
      "dorks": 0,
-     "rituals": 1,
+     "rituals": 2,
      "landRamp": 0,
      "fastMana": 6
     },
     "consistency": {
-     "draw": 7,
-     "cheapDraw": 1,
-     "tutors": 6,
-     "recursion": 1
+     "draw": 8,
+     "cheapDraw": 2,
+     "tutors": 7,
+     "recursion": 2
     },
     "interaction": {
      "counters": 3,
-     "removal": 4,
-     "wipes": 1,
+     "removal": 5,
+     "wipes": 4,
      "protection": 1,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 1,
      "free": 4,
-     "cheapAnswers": 3,
-     "instantShare": 63
+     "cheapAnswers": 4,
+     "instantShare": 67
     },
     "wins": {
      "checked": true,
@@ -6945,7 +6945,7 @@
      "lines": 3,
      "fastest": 8,
      "printed": 1,
-     "massPump": 0
+     "massPump": 4
     },
     "shape": {
      "archetypes": [
@@ -6995,12 +6995,12 @@
     "offPlan": 12
    },
    "power": {
-    "score": 6.4,
-    "raw": 48.5,
+    "score": 6.8,
+    "raw": 52.8,
     "pillars": {
-     "consistency": 30,
-     "efficiency": 39,
-     "interaction": 42,
+     "consistency": 41,
+     "efficiency": 47,
+     "interaction": 40,
      "wins": 83
     }
    }
@@ -7079,29 +7079,29 @@
      "avgMv": 3.57,
      "cheap": 26,
      "high": 12,
-     "ramp": 9,
+     "ramp": 14,
      "rocks": 2,
-     "dorks": 3,
-     "rituals": 3,
-     "landRamp": 2,
+     "dorks": 1,
+     "rituals": 0,
+     "landRamp": 12,
      "fastMana": 3
     },
     "consistency": {
-     "draw": 8,
-     "cheapDraw": 3,
-     "tutors": 2,
-     "recursion": 13
+     "draw": 10,
+     "cheapDraw": 4,
+     "tutors": 4,
+     "recursion": 18
     },
     "interaction": {
      "counters": 0,
-     "removal": 6,
-     "wipes": 0,
-     "protection": 5,
-     "graveHate": 2,
+     "removal": 8,
+     "wipes": 2,
+     "protection": 4,
+     "graveHate": 5,
      "stax": 0,
      "free": 3,
-     "cheapAnswers": 3,
-     "instantShare": 50
+     "cheapAnswers": 4,
+     "instantShare": 40
     },
     "wins": {
      "checked": true,
@@ -7162,12 +7162,12 @@
     "offPlan": 31
    },
    "power": {
-    "score": 2.9,
-    "raw": 14,
+    "score": 2.7,
+    "raw": 11.5,
     "pillars": {
-     "consistency": 18,
-     "efficiency": 12,
-     "interaction": 26,
+     "consistency": 7,
+     "efficiency": 15,
+     "interaction": 24,
      "wins": 0
     }
    }
@@ -7220,17 +7220,17 @@
        "color": "W",
        "pips": 25,
        "share": 0.2717391304347826,
-       "sources": 21,
+       "sources": 22,
        "target": 12,
-       "cover": 1.7007042253521127
+       "cover": 1.7816901408450705
       },
       {
        "color": "B",
        "pips": 67,
        "share": 0.7282608695652174,
-       "sources": 26,
+       "sources": 27,
        "target": 20,
-       "cover": 1.3230088495575223
+       "cover": 1.3738938053097347
       }
      ],
      "weakest": "B",
@@ -7243,29 +7243,29 @@
      "avgMv": 2.56,
      "cheap": 38,
      "high": 4,
-     "ramp": 11,
+     "ramp": 13,
      "rocks": 6,
-     "dorks": 4,
+     "dorks": 1,
      "rituals": 0,
-     "landRamp": 0,
+     "landRamp": 1,
      "fastMana": 6
     },
     "consistency": {
-     "draw": 12,
-     "cheapDraw": 6,
-     "tutors": 1,
-     "recursion": 4
+     "draw": 14,
+     "cheapDraw": 7,
+     "tutors": 2,
+     "recursion": 9
     },
     "interaction": {
      "counters": 0,
-     "removal": 6,
-     "wipes": 0,
-     "protection": 3,
+     "removal": 10,
+     "wipes": 3,
+     "protection": 1,
      "graveHate": 1,
      "stax": 1,
      "free": 1,
-     "cheapAnswers": 4,
-     "instantShare": 67
+     "cheapAnswers": 7,
+     "instantShare": 38
     },
     "wins": {
      "checked": true,
@@ -7276,7 +7276,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 0
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -7326,12 +7326,12 @@
     "offPlan": 17
    },
    "power": {
-    "score": 4.4,
-    "raw": 29.3,
+    "score": 3.5,
+    "raw": 20.3,
     "pillars": {
-     "consistency": 38,
+     "consistency": 3,
      "efficiency": 56,
-     "interaction": 23,
+     "interaction": 22,
      "wins": 0
     }
    }
@@ -7382,25 +7382,25 @@
        "color": "W",
        "pips": 50,
        "share": 0.5952380952380952,
-       "sources": 31,
+       "sources": 32,
        "target": 18,
-       "cover": 1.7690217391304346
+       "cover": 1.826086956521739
       },
       {
        "color": "U",
        "pips": 13,
        "share": 0.15476190476190477,
-       "sources": 14,
+       "sources": 15,
        "target": 10,
-       "cover": 1.3363636363636364
+       "cover": 1.4318181818181819
       },
       {
        "color": "B",
        "pips": 21,
        "share": 0.25,
-       "sources": 21,
+       "sources": 22,
        "target": 12,
-       "cover": 1.75
+       "cover": 1.8333333333333333
       }
      ],
      "weakest": "U",
@@ -7413,29 +7413,29 @@
      "avgMv": 2.89,
      "cheap": 29,
      "high": 4,
-     "ramp": 10,
+     "ramp": 12,
      "rocks": 8,
      "dorks": 0,
      "rituals": 1,
-     "landRamp": 0,
+     "landRamp": 1,
      "fastMana": 9
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 2,
+     "draw": 11,
+     "cheapDraw": 3,
      "tutors": 0,
-     "recursion": 1
+     "recursion": 2
     },
     "interaction": {
      "counters": 3,
-     "removal": 6,
-     "wipes": 3,
-     "protection": 4,
+     "removal": 10,
+     "wipes": 4,
+     "protection": 2,
      "graveHate": 1,
-     "stax": 3,
+     "stax": 9,
      "free": 0,
-     "cheapAnswers": 5,
-     "instantShare": 58
+     "cheapAnswers": 7,
+     "instantShare": 53
     },
     "wins": {
      "checked": true,
@@ -7496,12 +7496,12 @@
     "offPlan": 2
    },
    "power": {
-    "score": 3.9,
-    "raw": 23.5,
+    "score": 3.7,
+    "raw": 21.5,
     "pillars": {
-     "consistency": 9,
+     "consistency": 3,
      "efficiency": 43,
-     "interaction": 42,
+     "interaction": 40,
      "wins": 0
     }
    }
@@ -7555,9 +7555,9 @@
        "color": "G",
        "pips": 69,
        "share": 0.696969696969697,
-       "sources": 35,
+       "sources": 37,
        "target": 19,
-       "cover": 1.8275316455696202
+       "cover": 1.9319620253164556
       }
      ],
      "weakest": "B",
@@ -7570,29 +7570,29 @@
      "avgMv": 3.12,
      "cheap": 20,
      "high": 3,
-     "ramp": 16,
+     "ramp": 17,
      "rocks": 4,
      "dorks": 7,
-     "rituals": 1,
-     "landRamp": 2,
+     "rituals": 0,
+     "landRamp": 4,
      "fastMana": 6
     },
     "consistency": {
-     "draw": 10,
+     "draw": 11,
      "cheapDraw": 2,
-     "tutors": 2,
+     "tutors": 1,
      "recursion": 5
     },
     "interaction": {
      "counters": 0,
-     "removal": 6,
+     "removal": 10,
      "wipes": 1,
-     "protection": 3,
+     "protection": 4,
      "graveHate": 0,
      "stax": 0,
      "free": 1,
-     "cheapAnswers": 2,
-     "instantShare": 43
+     "cheapAnswers": 3,
+     "instantShare": 27
     },
     "wins": {
      "checked": true,
@@ -7603,7 +7603,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 3
+     "massPump": 8
     },
     "shape": {
      "archetypes": [
@@ -7653,12 +7653,12 @@
     "offPlan": 5
    },
    "power": {
-    "score": 2.9,
-    "raw": 14,
+    "score": 2.6,
+    "raw": 11,
     "pillars": {
-     "consistency": 14,
+     "consistency": 3,
      "efficiency": 32,
-     "interaction": 10,
+     "interaction": 9,
      "wins": 0
     }
    }
@@ -7706,41 +7706,41 @@
        "color": "W",
        "pips": 17,
        "share": 0.19767441860465115,
-       "sources": 28,
+       "sources": 29,
        "target": 11,
-       "cover": 2.5083333333333333
+       "cover": 2.5979166666666664
       },
       {
        "color": "U",
        "pips": 15,
        "share": 0.1744186046511628,
-       "sources": 26,
+       "sources": 27,
        "target": 11,
-       "cover": 2.40948275862069
+       "cover": 2.502155172413793
       },
       {
        "color": "B",
        "pips": 19,
        "share": 0.22093023255813954,
-       "sources": 27,
+       "sources": 28,
        "target": 12,
-       "cover": 2.340725806451613
+       "cover": 2.42741935483871
       },
       {
        "color": "R",
        "pips": 17,
        "share": 0.19767441860465115,
-       "sources": 26,
+       "sources": 27,
        "target": 11,
-       "cover": 2.3291666666666666
+       "cover": 2.4187499999999997
       },
       {
        "color": "G",
        "pips": 18,
        "share": 0.20930232558139536,
-       "sources": 28,
+       "sources": 29,
        "target": 11,
-       "cover": 2.4672131147540983
+       "cover": 2.555327868852459
       }
      ],
      "weakest": "R",
@@ -7753,26 +7753,26 @@
      "avgMv": 3.6,
      "cheap": 12,
      "high": 5,
-     "ramp": 12,
-     "rocks": 7,
-     "dorks": 1,
+     "ramp": 15,
+     "rocks": 6,
+     "dorks": 0,
      "rituals": 0,
-     "landRamp": 4,
+     "landRamp": 5,
      "fastMana": 2
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 1,
-     "tutors": 0,
-     "recursion": 1
+     "draw": 15,
+     "cheapDraw": 6,
+     "tutors": 1,
+     "recursion": 2
     },
     "interaction": {
-     "counters": 1,
-     "removal": 2,
-     "wipes": 0,
-     "protection": 10,
-     "graveHate": 0,
-     "stax": 0,
+     "counters": 2,
+     "removal": 3,
+     "wipes": 1,
+     "protection": 7,
+     "graveHate": 1,
+     "stax": 2,
      "free": 5,
      "cheapAnswers": 1,
      "instantShare": 67
@@ -7786,7 +7786,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 2
+     "massPump": 3
     },
     "shape": {
      "archetypes": [
@@ -7836,12 +7836,12 @@
     "offPlan": 49
    },
    "power": {
-    "score": 2.5,
-    "raw": 9.8,
+    "score": 2.7,
+    "raw": 12,
     "pillars": {
      "consistency": 0,
-     "efficiency": 11,
-     "interaction": 28,
+     "efficiency": 14,
+     "interaction": 34,
      "wins": 0
     }
    }
@@ -7919,28 +7919,28 @@
      "avgMv": 3,
      "cheap": 23,
      "high": 2,
-     "ramp": 14,
+     "ramp": 12,
      "rocks": 5,
      "dorks": 2,
      "rituals": 0,
-     "landRamp": 3,
+     "landRamp": 5,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 15,
-     "cheapDraw": 8,
+     "draw": 18,
+     "cheapDraw": 11,
      "tutors": 5,
-     "recursion": 4
+     "recursion": 6
     },
     "interaction": {
      "counters": 0,
-     "removal": 2,
+     "removal": 6,
      "wipes": 0,
-     "protection": 7,
+     "protection": 6,
      "graveHate": 1,
-     "stax": 1,
+     "stax": 0,
      "free": 2,
-     "cheapAnswers": 0,
+     "cheapAnswers": 1,
      "instantShare": 50
     },
     "wins": {
@@ -7952,7 +7952,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 2
     },
     "shape": {
      "archetypes": [
@@ -8002,12 +8002,12 @@
     "offPlan": 27
    },
    "power": {
-    "score": 3.9,
-    "raw": 23.8,
+    "score": 2.8,
+    "raw": 12.8,
     "pillars": {
-     "consistency": 47,
-     "efficiency": 29,
-     "interaction": 19,
+     "consistency": 14,
+     "efficiency": 24,
+     "interaction": 13,
      "wins": 0
     }
    }
@@ -8102,27 +8102,27 @@
      "high": 0,
      "ramp": 8,
      "rocks": 2,
-     "dorks": 1,
+     "dorks": 0,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 4,
      "fastMana": 2
     },
     "consistency": {
-     "draw": 10,
+     "draw": 11,
      "cheapDraw": 4,
-     "tutors": 2,
-     "recursion": 6
+     "tutors": 3,
+     "recursion": 9
     },
     "interaction": {
      "counters": 0,
-     "removal": 7,
-     "wipes": 0,
-     "protection": 4,
-     "graveHate": 1,
-     "stax": 0,
+     "removal": 9,
+     "wipes": 1,
+     "protection": 6,
+     "graveHate": 2,
+     "stax": 1,
      "free": 0,
      "cheapAnswers": 2,
-     "instantShare": 57
+     "instantShare": 60
     },
     "wins": {
      "checked": true,
@@ -8132,8 +8132,8 @@
      "twoCard": 0,
      "lines": 0,
      "fastest": null,
-     "printed": 1,
-     "massPump": 1
+     "printed": 3,
+     "massPump": 3
     },
     "shape": {
      "archetypes": [
@@ -8183,12 +8183,12 @@
     "offPlan": 8
    },
    "power": {
-    "score": 2.6,
-    "raw": 11.3,
+    "score": 2,
+    "raw": 5.3,
     "pillars": {
-     "consistency": 25,
-     "efficiency": 16,
-     "interaction": 4,
+     "consistency": 4,
+     "efficiency": 15,
+     "interaction": 2,
      "wins": 0
     }
    }
@@ -8238,9 +8238,9 @@
        "color": "U",
        "pips": 57,
        "share": 1,
-       "sources": 31,
+       "sources": 32,
        "target": 24,
-       "cover": 1.2916666666666667
+       "cover": 1.3333333333333333
       }
      ],
      "weakest": "U",
@@ -8253,29 +8253,29 @@
      "avgMv": 2.25,
      "cheap": 44,
      "high": 2,
-     "ramp": 14,
+     "ramp": 15,
      "rocks": 12,
-     "dorks": 2,
+     "dorks": 1,
      "rituals": 1,
      "landRamp": 0,
      "fastMana": 11
     },
     "consistency": {
-     "draw": 20,
-     "cheapDraw": 11,
+     "draw": 26,
+     "cheapDraw": 13,
      "tutors": 1,
-     "recursion": 2
+     "recursion": 5
     },
     "interaction": {
      "counters": 9,
-     "removal": 3,
-     "wipes": 0,
-     "protection": 1,
+     "removal": 9,
+     "wipes": 1,
+     "protection": 2,
      "graveHate": 2,
-     "stax": 0,
+     "stax": 1,
      "free": 2,
-     "cheapAnswers": 11,
-     "instantShare": 100
+     "cheapAnswers": 16,
+     "instantShare": 84
     },
     "wins": {
      "checked": true,
@@ -8336,13 +8336,13 @@
     "offPlan": 14
    },
    "power": {
-    "score": 8.1,
-    "raw": 68,
+    "score": 7.2,
+    "raw": 57,
     "pillars": {
-     "consistency": 36,
+     "consistency": 0,
      "efficiency": 78,
-     "interaction": 63,
-     "wins": 95
+     "interaction": 62,
+     "wins": 88
     }
    }
   },
@@ -8392,9 +8392,9 @@
        "color": "G",
        "pips": 49,
        "share": 0.6712328767123288,
-       "sources": 28,
+       "sources": 29,
        "target": 19,
-       "cover": 1.4941520467836258
+       "cover": 1.547514619883041
       }
      ],
      "weakest": "G",
@@ -8407,29 +8407,29 @@
      "avgMv": 2.7,
      "cheap": 31,
      "high": 2,
-     "ramp": 18,
+     "ramp": 16,
      "rocks": 3,
-     "dorks": 4,
-     "rituals": 1,
-     "landRamp": 6,
+     "dorks": 3,
+     "rituals": 0,
+     "landRamp": 10,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 8,
-     "cheapDraw": 2,
-     "tutors": 0,
+     "draw": 9,
+     "cheapDraw": 3,
+     "tutors": 2,
      "recursion": 3
     },
     "interaction": {
      "counters": 0,
-     "removal": 3,
+     "removal": 11,
      "wipes": 3,
-     "protection": 5,
+     "protection": 6,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 1,
      "free": 3,
-     "cheapAnswers": 5,
-     "instantShare": 67
+     "cheapAnswers": 9,
+     "instantShare": 50
     },
     "wins": {
      "checked": true,
@@ -8440,7 +8440,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 2
+     "massPump": 1
     },
     "shape": {
      "archetypes": [
@@ -8490,12 +8490,12 @@
     "offPlan": 3
    },
    "power": {
-    "score": 3.5,
-    "raw": 20,
+    "score": 3.4,
+    "raw": 19,
     "pillars": {
-     "consistency": 7,
-     "efficiency": 40,
-     "interaction": 33,
+     "consistency": 0,
+     "efficiency": 36,
+     "interaction": 40,
      "wins": 0
     }
    }
@@ -8536,25 +8536,25 @@
        "color": "U",
        "pips": 21,
        "share": 0.23076923076923078,
-       "sources": 14,
+       "sources": 16,
        "target": 12,
-       "cover": 1.1973684210526314
+       "cover": 1.3684210526315788
       },
       {
        "color": "R",
        "pips": 20,
        "share": 0.21978021978021978,
-       "sources": 14,
+       "sources": 16,
        "target": 12,
-       "cover": 1.215648854961832
+       "cover": 1.3893129770992367
       },
       {
        "color": "G",
        "pips": 50,
        "share": 0.5494505494505495,
-       "sources": 18,
+       "sources": 20,
        "target": 17,
-       "cover": 1.0719895287958114
+       "cover": 1.1910994764397904
       }
      ],
      "weakest": "G",
@@ -8567,29 +8567,29 @@
      "avgMv": 2.5,
      "cheap": 37,
      "high": 3,
-     "ramp": 7,
+     "ramp": 13,
      "rocks": 0,
-     "dorks": 1,
-     "rituals": 1,
-     "landRamp": 4,
+     "dorks": 0,
+     "rituals": 0,
+     "landRamp": 9,
      "fastMana": 0
     },
     "consistency": {
-     "draw": 17,
-     "cheapDraw": 8,
-     "tutors": 0,
-     "recursion": 1
+     "draw": 18,
+     "cheapDraw": 9,
+     "tutors": 2,
+     "recursion": 2
     },
     "interaction": {
      "counters": 2,
-     "removal": 3,
+     "removal": 16,
      "wipes": 0,
-     "protection": 9,
+     "protection": 11,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 1,
      "free": 2,
-     "cheapAnswers": 1,
-     "instantShare": 60
+     "cheapAnswers": 7,
+     "instantShare": 75
     },
     "wins": {
      "checked": true,
@@ -8650,12 +8650,12 @@
     "offPlan": 20
    },
    "power": {
-    "score": 3.5,
-    "raw": 19.8,
+    "score": 3.1,
+    "raw": 16.3,
     "pillars": {
-     "consistency": 33,
-     "efficiency": 27,
-     "interaction": 19,
+     "consistency": 0,
+     "efficiency": 32,
+     "interaction": 33,
      "wins": 0
     }
    }
@@ -8698,9 +8698,9 @@
        "color": "R",
        "pips": 71,
        "share": 1,
-       "sources": 37,
+       "sources": 39,
        "target": 24,
-       "cover": 1.5416666666666667
+       "cover": 1.625
       }
      ],
      "weakest": "R",
@@ -8713,29 +8713,29 @@
      "avgMv": 2.56,
      "cheap": 36,
      "high": 2,
-     "ramp": 6,
+     "ramp": 9,
      "rocks": 2,
      "dorks": 1,
-     "rituals": 2,
+     "rituals": 3,
      "landRamp": 0,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 5,
+     "draw": 6,
      "cheapDraw": 3,
-     "tutors": 1,
-     "recursion": 0
+     "tutors": 2,
+     "recursion": 1
     },
     "interaction": {
      "counters": 0,
-     "removal": 8,
+     "removal": 12,
      "wipes": 2,
      "protection": 2,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 1,
      "free": 0,
      "cheapAnswers": 5,
-     "instantShare": 10
+     "instantShare": 21
     },
     "wins": {
      "checked": true,
@@ -8746,7 +8746,7 @@
      "lines": 1,
      "fastest": 8,
      "printed": 0,
-     "massPump": 3
+     "massPump": 6
     },
     "shape": {
      "archetypes": [
@@ -8796,13 +8796,13 @@
     "offPlan": 21
    },
    "power": {
-    "score": 5.6,
-    "raw": 40.5,
+    "score": 4.7,
+    "raw": 32,
     "pillars": {
-     "consistency": 16,
-     "efficiency": 49,
-     "interaction": 14,
-     "wins": 83
+     "consistency": 0,
+     "efficiency": 47,
+     "interaction": 10,
+     "wins": 71
     }
    }
   },
@@ -8893,29 +8893,29 @@
      "avgMv": 4.43,
      "cheap": 12,
      "high": 22,
-     "ramp": 20,
+     "ramp": 22,
      "rocks": 10,
-     "dorks": 4,
+     "dorks": 3,
      "rituals": 0,
-     "landRamp": 2,
+     "landRamp": 3,
      "fastMana": 7
     },
     "consistency": {
-     "draw": 9,
+     "draw": 10,
      "cheapDraw": 2,
-     "tutors": 2,
-     "recursion": 3
+     "tutors": 5,
+     "recursion": 5
     },
     "interaction": {
      "counters": 0,
-     "removal": 3,
-     "wipes": 1,
-     "protection": 8,
-     "graveHate": 0,
-     "stax": 0,
+     "removal": 7,
+     "wipes": 4,
+     "protection": 5,
+     "graveHate": 1,
+     "stax": 4,
      "free": 3,
-     "cheapAnswers": 2,
-     "instantShare": 75
+     "cheapAnswers": 3,
+     "instantShare": 27
     },
     "wins": {
      "checked": true,
@@ -8926,7 +8926,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 2
+     "massPump": 3
     },
     "shape": {
      "archetypes": [
@@ -8976,12 +8976,12 @@
     "offPlan": 21
    },
    "power": {
-    "score": 2.9,
-    "raw": 14,
+    "score": 3.2,
+    "raw": 16.5,
     "pillars": {
      "consistency": 11,
-     "efficiency": 23,
-     "interaction": 22,
+     "efficiency": 25,
+     "interaction": 30,
      "wins": 0
     }
    }
@@ -9047,29 +9047,29 @@
      "avgMv": 4.08,
      "cheap": 18,
      "high": 10,
-     "ramp": 9,
+     "ramp": 15,
      "rocks": 5,
-     "dorks": 2,
+     "dorks": 0,
      "rituals": 2,
-     "landRamp": 1,
+     "landRamp": 2,
      "fastMana": 4
     },
     "consistency": {
-     "draw": 10,
-     "cheapDraw": 3,
-     "tutors": 0,
-     "recursion": 0
+     "draw": 14,
+     "cheapDraw": 4,
+     "tutors": 2,
+     "recursion": 3
     },
     "interaction": {
      "counters": 1,
-     "removal": 4,
+     "removal": 10,
      "wipes": 3,
-     "protection": 0,
+     "protection": 1,
      "graveHate": 0,
-     "stax": 0,
+     "stax": 1,
      "free": 6,
-     "cheapAnswers": 4,
-     "instantShare": 63
+     "cheapAnswers": 5,
+     "instantShare": 64
     },
     "wins": {
      "checked": true,
@@ -9080,7 +9080,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -9130,12 +9130,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.1,
-    "raw": 16.3,
+    "score": 2.9,
+    "raw": 14,
     "pillars": {
-     "consistency": 13,
-     "efficiency": 13,
-     "interaction": 39,
+     "consistency": 0,
+     "efficiency": 18,
+     "interaction": 38,
      "wins": 0
     }
    }
@@ -9177,25 +9177,25 @@
        "color": "W",
        "pips": 33,
        "share": 0.4230769230769231,
-       "sources": 22,
+       "sources": 25,
        "target": 15,
-       "cover": 1.4895833333333333
+       "cover": 1.6927083333333333
       },
       {
        "color": "B",
        "pips": 17,
        "share": 0.21794871794871795,
-       "sources": 19,
+       "sources": 22,
        "target": 11,
-       "cover": 1.6540178571428572
+       "cover": 1.9151785714285714
       },
       {
        "color": "G",
        "pips": 28,
        "share": 0.358974358974359,
-       "sources": 26,
+       "sources": 29,
        "target": 14,
-       "cover": 1.8917910447761193
+       "cover": 2.1100746268656714
       }
      ],
      "weakest": "W",
@@ -9208,29 +9208,29 @@
      "avgMv": 2.86,
      "cheap": 26,
      "high": 1,
-     "ramp": 12,
-     "rocks": 3,
+     "ramp": 14,
+     "rocks": 2,
      "dorks": 4,
      "rituals": 0,
-     "landRamp": 3,
+     "landRamp": 6,
      "fastMana": 5
     },
     "consistency": {
-     "draw": 11,
-     "cheapDraw": 3,
-     "tutors": 2,
+     "draw": 12,
+     "cheapDraw": 4,
+     "tutors": 8,
      "recursion": 4
     },
     "interaction": {
-     "counters": 0,
-     "removal": 4,
-     "wipes": 4,
-     "protection": 4,
+     "counters": 1,
+     "removal": 8,
+     "wipes": 5,
+     "protection": 3,
      "graveHate": 1,
-     "stax": 0,
+     "stax": 3,
      "free": 1,
-     "cheapAnswers": 3,
-     "instantShare": 38
+     "cheapAnswers": 5,
+     "instantShare": 50
     },
     "wins": {
      "checked": true,
@@ -9240,8 +9240,8 @@
      "twoCard": 0,
      "lines": 0,
      "fastest": null,
-     "printed": 0,
-     "massPump": 1
+     "printed": 1,
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -9291,12 +9291,12 @@
     "offPlan": 2
    },
    "power": {
-    "score": 3.1,
-    "raw": 16.3,
+    "score": 3.5,
+    "raw": 19.5,
     "pillars": {
-     "consistency": 18,
+     "consistency": 21,
      "efficiency": 34,
-     "interaction": 13,
+     "interaction": 23,
      "wins": 0
     }
    }
@@ -9384,29 +9384,29 @@
      "avgMv": 4.44,
      "cheap": 13,
      "high": 22,
-     "ramp": 19,
-     "rocks": 8,
-     "dorks": 5,
-     "rituals": 3,
-     "landRamp": 0,
+     "ramp": 23,
+     "rocks": 9,
+     "dorks": 1,
+     "rituals": 0,
+     "landRamp": 2,
      "fastMana": 8
     },
     "consistency": {
-     "draw": 12,
-     "cheapDraw": 2,
-     "tutors": 2,
+     "draw": 14,
+     "cheapDraw": 4,
+     "tutors": 3,
      "recursion": 3
     },
     "interaction": {
      "counters": 2,
-     "removal": 6,
-     "wipes": 1,
-     "protection": 5,
-     "graveHate": 0,
-     "stax": 0,
+     "removal": 15,
+     "wipes": 3,
+     "protection": 6,
+     "graveHate": 1,
+     "stax": 1,
      "free": 2,
-     "cheapAnswers": 2,
-     "instantShare": 50
+     "cheapAnswers": 3,
+     "instantShare": 26
     },
     "wins": {
      "checked": true,
@@ -9417,7 +9417,7 @@
      "lines": 0,
      "fastest": null,
      "printed": 0,
-     "massPump": 4
+     "massPump": 3
     },
     "shape": {
      "archetypes": [
@@ -9468,10 +9468,10 @@
    },
    "power": {
     "score": 3.2,
-    "raw": 16.8,
+    "raw": 16.5,
     "pillars": {
-     "consistency": 11,
-     "efficiency": 34,
+     "consistency": 4,
+     "efficiency": 40,
      "interaction": 22,
      "wins": 0
     }
@@ -9532,33 +9532,33 @@
        "color": "W",
        "pips": 16,
        "share": 0.18823529411764706,
-       "sources": 18,
+       "sources": 19,
        "target": 11,
-       "cover": 1.6346153846153846
+       "cover": 1.7254273504273505
       },
       {
        "color": "U",
        "pips": 34,
        "share": 0.4,
-       "sources": 21,
+       "sources": 22,
        "target": 14,
-       "cover": 1.4583333333333333
+       "cover": 1.5277777777777777
       },
       {
        "color": "B",
        "pips": 13,
        "share": 0.15294117647058825,
-       "sources": 18,
+       "sources": 19,
        "target": 10,
-       "cover": 1.722972972972973
+       "cover": 1.8186936936936937
       },
       {
        "color": "G",
        "pips": 22,
        "share": 0.25882352941176473,
-       "sources": 20,
+       "sources": 21,
        "target": 12,
-       "cover": 1.6472868217054264
+       "cover": 1.7296511627906976
       }
      ],
      "weakest": "U",
@@ -9571,29 +9571,29 @@
      "avgMv": 1.97,
      "cheap": 54,
      "high": 0,
-     "ramp": 22,
+     "ramp": 20,
      "rocks": 6,
-     "dorks": 6,
-     "rituals": 1,
-     "landRamp": 1,
+     "dorks": 3,
+     "rituals": 2,
+     "landRamp": 3,
      "fastMana": 10
     },
     "consistency": {
-     "draw": 12,
-     "cheapDraw": 8,
-     "tutors": 13,
-     "recursion": 1
+     "draw": 13,
+     "cheapDraw": 9,
+     "tutors": 15,
+     "recursion": 4
     },
     "interaction": {
-     "counters": 8,
-     "removal": 7,
-     "wipes": 0,
-     "protection": 1,
-     "graveHate": 0,
-     "stax": 5,
+     "counters": 10,
+     "removal": 11,
+     "wipes": 2,
+     "protection": 2,
+     "graveHate": 2,
+     "stax": 14,
      "free": 4,
-     "cheapAnswers": 12,
-     "instantShare": 80
+     "cheapAnswers": 17,
+     "instantShare": 83
     },
     "wins": {
      "checked": true,
@@ -9604,7 +9604,7 @@
      "lines": 4,
      "fastest": 3,
      "printed": 1,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -9655,10 +9655,10 @@
    },
    "power": {
     "score": 9.9,
-    "raw": 97,
+    "raw": 96.3,
     "pillars": {
-     "consistency": 98,
-     "efficiency": 90,
+     "consistency": 96,
+     "efficiency": 89,
      "interaction": 100,
      "wins": 100
     }
@@ -9718,33 +9718,33 @@
        "color": "W",
        "pips": 17,
        "share": 0.20987654320987653,
-       "sources": 15,
+       "sources": 16,
        "target": 11,
-       "cover": 1.3206521739130435
+       "cover": 1.408695652173913
       },
       {
        "color": "U",
        "pips": 35,
        "share": 0.43209876543209874,
-       "sources": 19,
+       "sources": 20,
        "target": 15,
-       "cover": 1.2740066225165565
+       "cover": 1.3410596026490067
       },
       {
        "color": "B",
        "pips": 17,
        "share": 0.20987654320987653,
-       "sources": 17,
+       "sources": 18,
        "target": 11,
-       "cover": 1.4967391304347826
+       "cover": 1.584782608695652
       },
       {
        "color": "R",
        "pips": 12,
        "share": 0.14814814814814814,
-       "sources": 16,
+       "sources": 17,
        "target": 10,
-       "cover": 1.542857142857143
+       "cover": 1.6392857142857142
       }
      ],
      "weakest": "U",
@@ -9757,29 +9757,29 @@
      "avgMv": 1.97,
      "cheap": 54,
      "high": 0,
-     "ramp": 16,
-     "rocks": 7,
-     "dorks": 1,
-     "rituals": 2,
-     "landRamp": 0,
+     "ramp": 18,
+     "rocks": 6,
+     "dorks": 0,
+     "rituals": 3,
+     "landRamp": 1,
      "fastMana": 9
     },
     "consistency": {
-     "draw": 11,
-     "cheapDraw": 8,
+     "draw": 13,
+     "cheapDraw": 9,
      "tutors": 16,
-     "recursion": 1
+     "recursion": 4
     },
     "interaction": {
-     "counters": 10,
-     "removal": 3,
+     "counters": 11,
+     "removal": 7,
      "wipes": 0,
      "protection": 1,
      "graveHate": 0,
-     "stax": 6,
+     "stax": 17,
      "free": 4,
-     "cheapAnswers": 9,
-     "instantShare": 92
+     "cheapAnswers": 12,
+     "instantShare": 88
     },
     "wins": {
      "checked": true,
@@ -9841,10 +9841,10 @@
    },
    "power": {
     "score": 9.9,
-    "raw": 95.5,
+    "raw": 96,
     "pillars": {
      "consistency": 100,
-     "efficiency": 82,
+     "efficiency": 84,
      "interaction": 100,
      "wins": 100
     }
@@ -9908,41 +9908,41 @@
        "color": "W",
        "pips": 11,
        "share": 0.14864864864864866,
-       "sources": 21,
+       "sources": 22,
        "target": 10,
-       "cover": 2.0234375
+       "cover": 2.1197916666666665
       },
       {
        "color": "U",
        "pips": 19,
        "share": 0.25675675675675674,
-       "sources": 21,
+       "sources": 22,
        "target": 12,
-       "cover": 1.734375
+       "cover": 1.8169642857142856
       },
       {
        "color": "B",
        "pips": 13,
        "share": 0.17567567567567569,
-       "sources": 22,
+       "sources": 23,
        "target": 11,
-       "cover": 2.035
+       "cover": 2.1275
       },
       {
        "color": "R",
        "pips": 12,
        "share": 0.16216216216216217,
-       "sources": 24,
+       "sources": 25,
        "target": 11,
-       "cover": 2.2653061224489797
+       "cover": 2.3596938775510203
       },
       {
        "color": "G",
        "pips": 19,
        "share": 0.25675675675675674,
-       "sources": 24,
+       "sources": 26,
        "target": 12,
-       "cover": 1.982142857142857
+       "cover": 2.1473214285714284
       }
      ],
      "weakest": "U",
@@ -9955,29 +9955,29 @@
      "avgMv": 1.72,
      "cheap": 52,
      "high": 0,
-     "ramp": 30,
-     "rocks": 8,
-     "dorks": 8,
+     "ramp": 25,
+     "rocks": 6,
+     "dorks": 5,
      "rituals": 2,
-     "landRamp": 0,
+     "landRamp": 1,
      "fastMana": 17
     },
     "consistency": {
      "draw": 7,
      "cheapDraw": 3,
      "tutors": 25,
-     "recursion": 1
+     "recursion": 3
     },
     "interaction": {
      "counters": 9,
-     "removal": 5,
+     "removal": 8,
      "wipes": 0,
      "protection": 2,
-     "graveHate": 0,
-     "stax": 4,
+     "graveHate": 1,
+     "stax": 6,
      "free": 5,
      "cheapAnswers": 10,
-     "instantShare": 79
+     "instantShare": 81
     },
     "wins": {
      "checked": true,
@@ -10038,12 +10038,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 9.8,
-    "raw": 95,
+    "score": 9.9,
+    "raw": 95.5,
     "pillars": {
-     "consistency": 80,
+     "consistency": 100,
      "efficiency": 100,
-     "interaction": 100,
+     "interaction": 82,
      "wins": 100
     }
    }
@@ -10105,41 +10105,41 @@
        "color": "W",
        "pips": 12,
        "share": 0.14285714285714285,
-       "sources": 21,
+       "sources": 22,
        "target": 10,
-       "cover": 2.041666666666667
+       "cover": 2.1388888888888893
       },
       {
        "color": "U",
        "pips": 27,
        "share": 0.32142857142857145,
-       "sources": 22,
+       "sources": 23,
        "target": 13,
-       "cover": 1.673913043478261
+       "cover": 1.75
       },
       {
        "color": "B",
        "pips": 24,
        "share": 0.2857142857142857,
-       "sources": 26,
+       "sources": 27,
        "target": 13,
-       "cover": 2.0681818181818183
+       "cover": 2.147727272727273
       },
       {
        "color": "R",
        "pips": 11,
        "share": 0.13095238095238096,
-       "sources": 25,
+       "sources": 26,
        "target": 10,
-       "cover": 2.4764150943396226
+       "cover": 2.5754716981132075
       },
       {
        "color": "G",
        "pips": 10,
        "share": 0.11904761904761904,
-       "sources": 25,
+       "sources": 26,
        "target": 10,
-       "cover": 2.5240384615384612
+       "cover": 2.625
       }
      ],
      "weakest": "U",
@@ -10152,29 +10152,29 @@
      "avgMv": 1.84,
      "cheap": 53,
      "high": 0,
-     "ramp": 32,
-     "rocks": 9,
-     "dorks": 8,
+     "ramp": 28,
+     "rocks": 7,
+     "dorks": 3,
      "rituals": 5,
-     "landRamp": 0,
+     "landRamp": 1,
      "fastMana": 19
     },
     "consistency": {
-     "draw": 10,
+     "draw": 11,
      "cheapDraw": 7,
      "tutors": 19,
-     "recursion": 0
+     "recursion": 3
     },
     "interaction": {
-     "counters": 9,
-     "removal": 4,
+     "counters": 11,
+     "removal": 6,
      "wipes": 0,
      "protection": 1,
-     "graveHate": 0,
-     "stax": 4,
+     "graveHate": 4,
+     "stax": 12,
      "free": 6,
-     "cheapAnswers": 10,
-     "instantShare": 77
+     "cheapAnswers": 11,
+     "instantShare": 81
     },
     "wins": {
      "checked": true,
@@ -10322,29 +10322,29 @@
      "avgMv": 2.91,
      "cheap": 42,
      "high": 12,
-     "ramp": 30,
-     "rocks": 15,
-     "dorks": 8,
+     "ramp": 26,
+     "rocks": 14,
+     "dorks": 5,
      "rituals": 1,
      "landRamp": 1,
      "fastMana": 20
     },
     "consistency": {
-     "draw": 8,
-     "cheapDraw": 3,
-     "tutors": 12,
-     "recursion": 1
+     "draw": 9,
+     "cheapDraw": 4,
+     "tutors": 16,
+     "recursion": 5
     },
     "interaction": {
-     "counters": 8,
-     "removal": 5,
-     "wipes": 0,
-     "protection": 4,
-     "graveHate": 0,
-     "stax": 2,
+     "counters": 10,
+     "removal": 13,
+     "wipes": 1,
+     "protection": 3,
+     "graveHate": 1,
+     "stax": 7,
      "free": 5,
-     "cheapAnswers": 8,
-     "instantShare": 77
+     "cheapAnswers": 11,
+     "instantShare": 65
     },
     "wins": {
      "checked": true,
@@ -10355,7 +10355,7 @@
      "lines": 4,
      "fastest": 5,
      "printed": 0,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -10405,12 +10405,12 @@
     "offPlan": 3
    },
    "power": {
-    "score": 9.5,
-    "raw": 86,
+    "score": 9.8,
+    "raw": 92.8,
     "pillars": {
-     "consistency": 75,
+     "consistency": 100,
      "efficiency": 85,
-     "interaction": 88,
+     "interaction": 90,
      "wins": 96
     }
    }
@@ -10466,9 +10466,9 @@
        "color": "R",
        "pips": 48,
        "share": 1,
-       "sources": 33,
+       "sources": 34,
        "target": 24,
-       "cover": 1.375
+       "cover": 1.4166666666666667
       }
      ],
      "weakest": "R",
@@ -10481,29 +10481,29 @@
      "avgMv": 2.04,
      "cheap": 47,
      "high": 2,
-     "ramp": 25,
-     "rocks": 13,
-     "dorks": 2,
+     "ramp": 24,
+     "rocks": 9,
+     "dorks": 0,
      "rituals": 5,
-     "landRamp": 0,
+     "landRamp": 1,
      "fastMana": 13
     },
     "consistency": {
-     "draw": 6,
-     "cheapDraw": 4,
-     "tutors": 8,
-     "recursion": 1
+     "draw": 8,
+     "cheapDraw": 5,
+     "tutors": 10,
+     "recursion": 3
     },
     "interaction": {
      "counters": 3,
-     "removal": 7,
+     "removal": 17,
      "wipes": 3,
-     "protection": 6,
-     "graveHate": 1,
-     "stax": 1,
+     "protection": 7,
+     "graveHate": 2,
+     "stax": 0,
      "free": 4,
-     "cheapAnswers": 8,
-     "instantShare": 75
+     "cheapAnswers": 13,
+     "instantShare": 67
     },
     "wins": {
      "checked": true,
@@ -10564,12 +10564,12 @@
     "offPlan": 15
    },
    "power": {
-    "score": 7.1,
-    "raw": 55.5,
+    "score": 6.9,
+    "raw": 53.5,
     "pillars": {
      "consistency": 59,
-     "efficiency": 97,
-     "interaction": 66,
+     "efficiency": 98,
+     "interaction": 57,
      "wins": 0
     }
    }
@@ -10648,29 +10648,29 @@
      "avgMv": 2.33,
      "cheap": 39,
      "high": 2,
-     "ramp": 17,
-     "rocks": 7,
-     "dorks": 2,
-     "rituals": 2,
+     "ramp": 11,
+     "rocks": 6,
+     "dorks": 1,
+     "rituals": 0,
      "landRamp": 0,
      "fastMana": 8
     },
     "consistency": {
-     "draw": 3,
+     "draw": 4,
      "cheapDraw": 3,
-     "tutors": 12,
+     "tutors": 13,
      "recursion": 0
     },
     "interaction": {
-     "counters": 0,
-     "removal": 4,
-     "wipes": 0,
-     "protection": 6,
+     "counters": 1,
+     "removal": 10,
+     "wipes": 1,
+     "protection": 7,
      "graveHate": 1,
-     "stax": 10,
+     "stax": 14,
      "free": 1,
-     "cheapAnswers": 3,
-     "instantShare": 75
+     "cheapAnswers": 7,
+     "instantShare": 33
     },
     "wins": {
      "checked": true,
@@ -10681,7 +10681,7 @@
      "lines": 1,
      "fastest": 8,
      "printed": 0,
-     "massPump": 2
+     "massPump": 3
     },
     "shape": {
      "archetypes": [
@@ -10731,13 +10731,13 @@
     "offPlan": 12
    },
    "power": {
-    "score": 7.1,
-    "raw": 56.3,
+    "score": 6.8,
+    "raw": 52.5,
     "pillars": {
-     "consistency": 55,
-     "efficiency": 72,
-     "interaction": 38,
-     "wins": 60
+     "consistency": 59,
+     "efficiency": 63,
+     "interaction": 48,
+     "wins": 40
     }
    }
   },
@@ -10837,29 +10837,29 @@
      "avgMv": 1.96,
      "cheap": 49,
      "high": 1,
-     "ramp": 29,
-     "rocks": 10,
-     "dorks": 7,
+     "ramp": 23,
+     "rocks": 8,
+     "dorks": 4,
      "rituals": 0,
-     "landRamp": 1,
+     "landRamp": 2,
      "fastMana": 14
     },
     "consistency": {
-     "draw": 10,
+     "draw": 12,
      "cheapDraw": 8,
-     "tutors": 20,
-     "recursion": 1
+     "tutors": 22,
+     "recursion": 8
     },
     "interaction": {
-     "counters": 9,
-     "removal": 2,
-     "wipes": 0,
-     "protection": 3,
-     "graveHate": 0,
-     "stax": 4,
+     "counters": 10,
+     "removal": 4,
+     "wipes": 1,
+     "protection": 4,
+     "graveHate": 1,
+     "stax": 12,
      "free": 6,
-     "cheapAnswers": 7,
-     "instantShare": 91
+     "cheapAnswers": 10,
+     "instantShare": 87
     },
     "wins": {
      "checked": true,
@@ -10870,7 +10870,7 @@
      "lines": 2,
      "fastest": 4,
      "printed": 0,
-     "massPump": 1
+     "massPump": 0
     },
     "shape": {
      "archetypes": [
@@ -10921,12 +10921,12 @@
    },
    "power": {
     "score": 9.9,
-    "raw": 96.8,
+    "raw": 95.8,
     "pillars": {
      "consistency": 100,
-     "efficiency": 99,
-     "interaction": 96,
-     "wins": 92
+     "efficiency": 98,
+     "interaction": 97,
+     "wins": 88
     }
    }
   }

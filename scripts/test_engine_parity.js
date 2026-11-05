@@ -11,6 +11,7 @@
  *   (f) the commander picker is offered the WHOLE deck, not a shortlist.
  *   (g) the bracket rules, on synthetic cards and on the real combo database.
  *   (h) the deck profile: manabase arithmetic, salt, synergy and the power scale.
+ *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
  * Users of the HTML app never need this.
@@ -283,9 +284,9 @@ const synOf = (table) => PodEngine.synergyScore({ cardsInfo: manaDeck, commander
 const baseProfile = pfProfile(manaDeck);
 const weak = PodEngine.computePower(baseProfile, {});
 const strong = PodEngine.computePower({ ...baseProfile,
-  consistency: { ...baseProfile.consistency, tutors: 15, cheapDraw: 7 },
+  consistency: { ...baseProfile.consistency, tutors: 17 },
   speed: { ...baseProfile.speed, avgMv: 1.9, cheap: 55, fastMana: 14, ramp: 27 },
-  interaction: { ...baseProfile.interaction, cheapAnswers: 9, counters: 9, stax: 5, free: 5 },
+  interaction: { ...baseProfile.interaction, cheapAnswers: 12, counters: 11, stax: 13, free: 5 },
   manabase: { ...baseProfile.manabase, quality: 100 },
   wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, fastest: 3 },
 }, { game_changers: 20 });
@@ -323,5 +324,35 @@ const pfBad = PF_CASES.filter(([, ok]) => !ok);
 for (const [label] of pfBad) console.log(`PROFILE FAIL: ${label}`);
 console.log(`Deck profile: ${PF_CASES.length - pfBad.length}/${PF_CASES.length} correct`);
 if (pfBad.length) fails++;
+
+// (i) what a card does, measured against labels written independently of any tag.
+const golden = JSON.parse(fs.readFileSync(path.join(ROOT, "scripts", "card_tags_golden.json"), "utf8")).cards;
+const studyCards = JSON.parse(fs.readFileSync(path.join(ROOT, "cache", "study_cards.json"), "utf8"));
+const byFront = new Map(Object.values(studyCards).map(c => [String(c.name).split(" // ")[0], c]));
+const liveTags = PodEngine.indexCardTags(JSON.parse(fs.readFileSync(path.join(ROOT, "data", "card_tags.json"), "utf8")));
+const FUNCTIONS = ["ramp", "draw", "tutor", "removal", "wipe", "counter", "protection", "recursion"];
+function goldenScore(tags) {
+  const score = { tp: 0, fp: 0, fn: 0, misses: [] };
+  for (const [name, labels] of Object.entries(golden)) {
+    const card = byFront.get(name);
+    if (!card) throw new Error(`golden card missing from cache/study_cards.json: ${name}`);
+    const read = PodEngine.readCard({ card, name, qty: 1, cls: PodEngine.classifyCard(card) }, tags);
+    for (const f of FUNCTIONS) {
+      const want = labels.includes(f), got = !!read[f];
+      if (want && got) score.tp++;
+      else if (got) { score.fp++; score.misses.push(`+${f} ${name}`); }
+      else if (want) { score.fn++; score.misses.push(`-${f} ${name}`); }
+    }
+  }
+  score.precision = score.tp / (score.tp + score.fp);
+  score.recall = score.tp / (score.tp + score.fn);
+  score.f1 = 2 * score.precision * score.recall / (score.precision + score.recall);
+  return score;
+}
+const pct = (x) => (x * 100).toFixed(0) + "%";
+const textOnly = goldenScore(null), tagged = goldenScore(liveTags);
+console.log(`Card reader on ${Object.keys(golden).length} labelled cards: text only precision ${pct(textOnly.precision)} recall ${pct(textOnly.recall)}; with tags precision ${pct(tagged.precision)} recall ${pct(tagged.recall)}`);
+if (process.argv.includes("--misses")) console.log(tagged.misses.join("\n"));
+if (tagged.f1 <= textOnly.f1 || tagged.f1 < 0.9) { console.log("CARD READER FAIL: below 90%, or no better than reading text"); fails++; }
 
 process.exit(fails || cmdFails ? 1 : 0);

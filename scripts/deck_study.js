@@ -33,6 +33,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const RULES = read("rules/pod_rules.json");
 const comboDb = read("data/combos.json");
 const saltDb = read("data/salt.json");
+const cardTags = E.indexCardTags(read("data/card_tags.json"));
 const labels = fs.existsSync(path.join(ROOT, "data/pod_labels.json")) ? read("data/pod_labels.json") : {};
 
 // ---- the decks ----
@@ -123,7 +124,7 @@ async function study(d) {
   const validation = E.validateDeck(cardsInfo, commanders, cards, []);
   const bracket = E.evaluateBrackets({ stats, flagged, db: cards, validation, commanders, deckNames: names,
     combos, comboDb, loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
-  const profile = E.computeProfile({ cardsInfo, stats, combos: bracket.combos, commanders });
+  const profile = E.computeProfile({ cardsInfo, stats, combos: bracket.combos, commanders, cardTags });
   const salt = E.saltScore(names, saltDb);
   const synergy = E.synergyScore({ cardsInfo, commanders, table: await synergyTable(commanders) });
   const power = E.computePower(profile, stats);
