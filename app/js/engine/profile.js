@@ -33,7 +33,7 @@ export function readCard(x, cardTags) {
   if (tags) {
     const t = (...keys) => keys.some(k => tags.has(k));
     return { ramp: !isLand && t("ramp", "mana-rock", "mana-dork", "ritual", "land-ramp"), rock: t("mana-rock"), dork: t("mana-dork"),
-      ritual: t("ritual"), landRamp: t("land-ramp"), draw: t("draw", "cantrip", "wheel"), tutor: t("tutor") && !t("land-ramp"),
+      ritual: t("ritual"), landRamp: t("land-ramp"), draw: t("draw", "cantrip", "wheel"), tutor: t("tutor") && !t("land-ramp") && TUTOR_RE.test(o),
       removal: t("removal") && !t("board-wipe"), wipe: t("board-wipe"), counter: t("counterspell"), protection: t("protection"),
       recursion: t("recursion", "reanimate"), stax: t("hatebear", "tax"), graveHate: t("graveyard-hate"), fetch: t("fetchland"),
       printedWin: t("win-condition"), massPump: t("overrun", "anthem") };
@@ -53,6 +53,8 @@ export function indexCardTags(json) {
     for (const n of names) (index.get(n) || index.set(n, new Set()).get(n)).add(tag);
   return index;
 }
+
+const ENGINE_THEMES = ["lifegain", "sacrifice-outlet", "recursion", "reanimate", "burn", "anthem", "overrun", "mill", "discard", "theft", "wheel", "cost-reducer"];
 
 // Coloured pips across the deck; hybrid symbols count for each of their colours.
 export function pipCounts(cardsInfo) {
@@ -110,7 +112,7 @@ function independentLines(combos) {
 
 // combos: the rated list from evaluateBrackets, or null while the check is pending.
 // cardTags: indexCardTags(data/card_tags.json), or null to read card text only.
-export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags = null }) {
+export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags = null, games }) {
   const memo = new Map();
   const read = (x) => memo.get(x) || memo.set(x, readCard(x, cardTags)).get(x);
   const zone = new Set((commanders || []).map(front));
@@ -155,21 +157,36 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
   };
 
   const list = combos || [];
-  // Spellbook's strong tags count too: in practice infinite mana is how a fast deck wins
-  const ending = list.filter(c => c.win || c.tag === "R" || (c.tag === "S" && c.relevant && c.infinite) ||
+  const runsThroughCommander = (c) => c.cards.some(n => zone.has(n));
+  // Any infinite with a real result counts, whatever its tag: the tag says how acceptable
+  // a combo is at a table, not whether it can win. In practice infinite mana wins games.
+  const ending = list.filter(c => c.win || c.tag === "R" || (c.relevant && c.infinite) ||
     ENDS_GAME_RE.test(c.features[0] || ""));
   const priced = ending.filter(c => typeof c.deploy === "number");
   const wins = {
     checked: !!combos,
     combos: list.length,
     infinite: list.filter(c => c.infinite).length,
-    ending: ending.length,
-    twoCard: ending.filter(c => c.cardsToFind <= 2).length,
-    lines: independentLines(ending),
+    // A line through the commander dies to one removal spell on it, so it counts half.
+    ending: ending.reduce((sum, c) => sum + (runsThroughCommander(c) ? 0.5 : 1), 0),
+    twoCard: ending.filter(c => c.cardsToFind <= 2).reduce((sum, c) => sum + (runsThroughCommander(c) ? 0.5 : 1), 0),
+    lines: independentLines(ending.filter(c => !runsThroughCommander(c))),
+    // How many infinite loops the deck can make: losing one piece leaves others standing.
+    web: list.filter(c => c.infinite).reduce((sum, c) => sum + (runsThroughCommander(c) ? 0.5 : 1), 0),
+    throughCommander: ending.filter(runsThroughCommander).length,
     fastest: priced.length ? Math.min(...priced.map(c => c.deploy)) : null,
     printed: count(x => read(x).printedWin),
     massPump: count(x => read(x).massPump),
   };
+
+  // How deep the deck's main engine runs: a plan with 27 lifegain pieces wins games
+  // without any combo. Draw and answers are measured elsewhere, so they aren't themes.
+  const themes = new Map();
+  for (const x of cardsInfo) {
+    const tags = cardTags && cardTags.get(front(x.card.name));
+    if (tags) for (const t of ENGINE_THEMES) if (tags.has(t)) themes.set(t, (themes.get(t) || []).concat(front(x.card.name)));
+  }
+  const [engineTheme, engineCards] = [...themes].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))[0] || [null, []];
 
   const creatures = cardsInfo.filter(x => x.cls.type === "C");
   const types = new Map();
@@ -186,12 +203,13 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
     typal: { type: topType, count: topCount, share: creatureQty ? Math.round(topCount / creatureQty * 100) : 0 },
     creatures: creatureQty,
     throughCommander: list.filter(c => c.cards.some(n => zone.has(n))).length,
+    engine: { theme: engineTheme, count: engineCards.length },
   };
 
   const names = (fn) => cardsInfo.filter(fn).map(x => front(x.card.name));
   const cheapest = priced.length ? priced.reduce((a, b) => (b.deploy < a.deploy ? b : a)) : null;
   const ledger = {
-    tutors: names(x => read(x).tutor), gc: names(x => x.card.game_changer),
+    tutors: names(x => read(x).tutor),
     fastMana: names(x => x.cls.type !== "L" && (x.card.cmc || 0) <= 2 && FAST_MANA_RE.test(oracleOf(x.card))),
     ramp: names(x => read(x).ramp),
     cheapAnswers: answers.filter(x => (x.card.cmc || 0) <= 2).map(x => front(x.card.name)),
@@ -199,9 +217,14 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
     free: names(x => KEYWORD_PATTERNS.free_spells.test(oracleOf(x.card))),
     draw: names(x => read(x).draw), protection: names(x => read(x).protection), recursion: names(x => read(x).recursion),
     ending: [...new Set(ending.flatMap(c => c.cards))], twoCard: [...new Set(ending.filter(c => c.cardsToFind <= 2).flatMap(c => c.cards))],
-    winTurn: cheapest ? cheapest.cards : [],
+    winBy8: cheapest ? cheapest.cards : [],
+    web: [...new Set(list.filter(c => c.infinite).flatMap(c => c.cards))],
+    engine: engineCards,
+    answersTotal: answers.map(x => front(x.card.name)),
   };
-  const goldfish = simulateGoldfish({ cardsInfo, commanders, read, combos: priced.map(c => ({
+  const goldfish = simulateGoldfish({ cardsInfo, commanders, read, games, combos: priced.map(c => ({
     pieces: [...c.cards, ...(c.filled || [])], deploy: c.deploy })) });
-  return { manabase: manabase(cardsInfo, avgMv, read), speed, consistency, interaction, wins, shape, ledger, goldfish };
+  const ranks = nonland.map(x => x.card.edhrec_rank).filter(Boolean).sort((a, b) => a - b);
+  const upgrade = { pricey: count(x => (x.card.price || 0) >= 3), medianRank: ranks.length ? ranks[Math.floor((ranks.length - 1) / 2)] : null };
+  return { manabase: manabase(cardsInfo, avgMv, read), speed, consistency, interaction, wins, shape, ledger, goldfish, upgrade };
 }

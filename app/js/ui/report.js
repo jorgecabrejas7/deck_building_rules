@@ -1,5 +1,4 @@
 import { state } from '../state.js';
-import { RULES } from '../rules.js';
 import { COMBO_TAGS } from '../engine/index.js';
 import { T } from '../i18n.js';
 import { MSG, EXTRA_PTS, dialName } from './constants.js';
@@ -12,8 +11,9 @@ export function copyReport() {
   if (!state.result) return;
   const t = T(), lang = state.lang, ev = state.result.evalRes;
   const lines = ['La guía del Yoryi — ' + t.power,
-    t.tierWord + ': ' + t[ev.tier],
-    t.pts + ': ' + ev.points + ' / ' + RULES.tiers.tier2.max_points,
+    t.tierWord + ': ' + t[state.result.verdict.tier],
+    t.pfPractical + ': ' + state.result.verdict.bracket + ' (' + state.result.verdict.score + ' / 10)',
+    t.pts + ': ' + ev.points,
     t.price + ': €' + Math.round(state.result.stats.total_price_eur),
     t.cardsN + ': ' + state.result.stats.total_cards,
     t.archetype + ': ' + archName()];

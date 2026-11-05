@@ -2,7 +2,7 @@
 
 Every feature worth considering for the checker, from commandersalt.com (CS), deckcheck.co (DC) and our own ideas. Update the status in the same commit that changes it.
 
-**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. Pod rules alone decide a tier; profile measures are informative unless a rule change is approved. Learn from those sites' published methods, and use none of their data, scores or look: DeckCheck's API terms ban scraping and competing databases.
+**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. Since November 2026 the pod verdict comes from the practical bracket (`power_tiers` in `rules/pod_rules.json`), plus the banned list: precons anchor Bracket 2, then 2*, 3, 3*, 4, 4*, 5. Tier 1 is 2, Tier 2 is 2*, Tier 3 is out. Points and price are informative. Jorge's read of his own decks is locked in the parity test: if a scoring change breaks one, ask him. Learn from those sites' published methods, and use none of their data, scores or look: DeckCheck's API terms ban scraping and competing databases.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
 
@@ -99,11 +99,10 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 
 ## Every milestone must pass
 - `node scripts/test_engine_parity.js`
-- `python3 scripts/tier_rules.py --calibrate` (32 / 4 / 0: no pod rule changes without approval)
+- `python3 scripts/tier_rules.py --calibrate` (points only, 32 / 4 / 0)
 - `node scripts/deck_study.js` after any engine change: every cEDH list above every precon
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing
 
 ## Open questions for Jorge
-- Which pod decks feel wrongly placed? (`data/pod_labels.json`)
-- Which of the study's four rule proposals to apply?
+- Which of the 13 decks he has not placed read wrongly?
 - Are the Lightning and Luffy commander tags right?

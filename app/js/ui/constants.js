@@ -6,7 +6,7 @@ export const CATS = {land:{es:'Tierras',en:'Lands'},ramp:{es:'Rampeo',en:'Ramp'}
 
 // Dial display: order, names and help texts describing the REAL pod rules (v1.1).
 export const DIAL_META = [
-{k:'game_changers',name:{es:'Cambia-partidas',en:'Game changers'},help:{
+{k:'game_changers',name:{es:'Game changers',en:'Game changers'},help:{
  es:'Cartas de la lista oficial de game changers de Wizards: generan una ventaja desproporcionada por sí solas. El primero cuesta 2 puntos y cada uno más suma +1 punto extra — el contador nunca se para. Un game changer paga SOLO en este dial: no vuelve a contar en las bandas de precio, así que uno caro y uno barato pesan lo mismo. Además, si llevas alguno, el RESTO del mazo no puede subir de 3 cartas de €10–20 ni llevar ninguna de €20–30: es tu único lujo.',
  en:'Cards on Wizards’ official game-changer list: they generate outsized advantage on their own. The first costs 2 points and each extra adds +1 more — the counter never stops. A game changer pays on THIS dial only: it never counts again on a price band, so a cheap one and an expensive one weigh the same. And with any of them the REST of the deck can’t exceed 3 cards at €10–20 or run any at €20–30: it must be your only luxury.'}},
 {k:'extra_turns',name:{es:'Turnos extra',en:'Extra turns'},help:{
@@ -171,6 +171,13 @@ const COMBO_FEATURE_ES = {
 'Near-infinite creature ETB':'Entradas al campo (ETB) casi infinitas',
 'Infinitely large creature until end of turn':'Criatura infinitamente grande hasta el final del turno',
 'Infinitely powerful creature until end of turn':'Criatura infinitamente poderosa hasta el final del turno',
+'Infinite mana nonland permanents you control can produce':'Maná infinito de tus permanentes que no son tierras',
+'Infinite creature tokens with haste':'Tokens de criatura infinitos con prisa',
+'Infinite artifact ETB':'Entradas al campo de artefactos infinitas',
+'Infinite lifegain':'Ganancia de vidas infinita',
+'Infinite storm count':'Storm infinito',
+'Win the game':'Gana la partida',
+'Infinite green mana':'Maná verde infinito',
 };
 export const comboFeatureText = (f, lang) =>
   (lang === 'es' && COMBO_FEATURE_ES[f]) ? COMBO_FEATURE_ES[f] : f;

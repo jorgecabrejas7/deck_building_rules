@@ -40,8 +40,8 @@ export async function analyze() {
   renderAll();
   // announce the verdict to screen readers (result panels are not live regions)
   if (state.result && !state.error) {
-    const t = T(), ev = state.result.evalRes;
-    announce(t.tierWord + ': ' + t[ev.tier] + ' · ' + ev.points + ' pts');
+    const t = T(), v = state.result.verdict;
+    announce(t.tierWord + ': ' + t[v.tier] + ' · ' + t.pfPower + ' ' + v.score);
   }
   if (state.result && location.protocol !== 'file:') checkCombos();
 }
@@ -117,6 +117,10 @@ export function recompute(notFound) {
   });
   const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders, cardTags: state.cardTags });
   const power = PodEngine.computePower(profile, stats);
+  const verdict = PodEngine.podVerdict({ power, evalRes, rules: RULES, checked: !!combos });
+  // Only a deck outside Tier 1 needs a route, and only once its combos are known.
+  const cutPlan = combos && verdict.tier === 'above' ? PodEngine.powerCutPlan({ entries: resolved, db: cardCache,
+    combos: bracket.combos, commanders, cardTags: state.cardTags, classify: PodEngine.classifyCard, rules: RULES, banned: verdict.banned }) : null;
   const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
   const synergy = synergyFor(cardsInfo, commanders);
   // what-if cut deltas for every card that drives a points dial or violation
@@ -130,7 +134,7 @@ export function recompute(notFound) {
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
   state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, options,
-    bracket, profile, power, salt, synergy, whatIf, notFound: missing, validation };
+    bracket, profile, power, verdict, cutPlan, salt, synergy, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;
 }
@@ -177,27 +181,4 @@ export async function startCheapest() {
   recompute();
   state.fetchSt = 'done';
   renderAll();
-}
-
-// ================= advice (tip) =================
-// One short verdict sentence; the ordered lists below it carry the detail.
-export function buildTip() {
-  const r = state.result, lang = state.lang, ev = r.evalRes, es = lang === 'es';
-  const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
-  if (ev.tier === 'above') {
-    const over = Math.max(ev.points - t2, 0);
-    return es
-      ? 'Sobre el nivel del pod' + (over ? ' (+' + over + ' pts sobre Tier 2)' : '') + ': arregla las violaciones y sigue el orden de cortes.'
-      : 'Above pod level' + (over ? ' (+' + over + ' pts over Tier 2)' : '') + ': fix the violations and follow the cut order.';
-  }
-  if (ev.tier === 'tier2') {
-    const need = ev.points - t1, room = t2 - ev.points;
-    return es
-      ? 'Tier 2 (' + ev.points + '/' + t2 + '). Bajar a Tier 1: −' + need + ' pts. Subir dentro de Tier 2: +' + room + ' pts de margen.'
-      : 'Tier 2 (' + ev.points + '/' + t2 + '). Drop to Tier 1: shed ' + need + ' pts. Climb within Tier 2: ' + room + ' pts of headroom.';
-  }
-  const margin = t1 - ev.points, room = t2 - ev.points;
-  return es
-    ? 'Tier 1 limpio (' + ev.points + '/' + t1 + '). Margen: +' + margin + ' pts sin salir de Tier 1, +' + room + ' hasta el tope de Tier 2.'
-    : 'Clean Tier 1 (' + ev.points + '/' + t1 + '). Headroom: +' + margin + ' pts inside Tier 1, +' + room + ' to the Tier 2 cap.';
 }

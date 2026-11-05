@@ -41,6 +41,7 @@ window.addEventListener('error', function (e) {
   if (/\/js\//.test(String(src))) window.__pdcRecover();
 }, true);
 </script>
+<a class="skip-link" href="#mainContent"></a>
 <div class="page">
 <div class="hero">
   <div class="hero-glow1"></div>
@@ -64,11 +65,12 @@ window.addEventListener('error', function (e) {
     </div>
   </div>
 </div>
-<main class="main">
+<main id="mainContent" class="main" tabindex="-1">
   <div id="stickySentinel" class="sticky-sentinel"></div>
   <div id="stickyWrap" class="sticky-wrap">
     <div id="summary" class="summary-row"></div>
-    <nav id="tabbar" class="tabbar" role="tablist"></nav>
+    <div id="tabbar" class="tabbar" role="tablist"></div>
+    <nav id="sectionNav" class="section-nav" hidden></nav>
   </div>
 
   <div id="banner" aria-live="polite"></div>
@@ -78,19 +80,19 @@ window.addEventListener('error', function (e) {
       <h2 id="inputTitle" class="secT secT-lg">ANALIZAR MAZO</h2>
       <textarea id="deckText" rows="10" class="mono deck-input"></textarea>
       <div id="inputNotice" class="input-notice"></div>
-      <div class="chips-row">
-        <span id="tryLabel" class="lbl-muted"></span>
-        <span id="samples" style="display:contents"></span>
-      </div>
       <div class="controls-row">
-        <label class="arch-field">
-          <span id="archLabel"></span>
-          <select id="archSel" class="arch-select"></select>
-        </label>
         <button id="analyzeBtn" class="btn-primary"></button>
         <button id="tableModeBtn" class="btn-ghost"></button>
         <button id="validJump" type="button" class="valid-jump" style="display:none"></button>
       </div>
+      <div class="chips-row">
+        <span id="tryLabel" class="lbl-muted"></span>
+        <span id="samples" style="display:contents"></span>
+      </div>
+      <label class="arch-field">
+        <span id="archLabel"></span>
+        <select id="archSel" class="arch-select"></select>
+      </label>
     </div>
     <div id="validation" style="display:none"></div>
     <div id="tableMode" style="display:none"></div>
@@ -100,36 +102,37 @@ window.addEventListener('error', function (e) {
       </div>
       <div id="emptyT" class="empty-title"></div>
       <div id="emptyX" class="empty-text"></div>
+      <button id="emptyPod" type="button" class="btn-ghost-sm"></button>
     </div>
   </div>
 
-  <!-- Informe: one scrolling report in two parts. Part one is the pod's own
-       point budget (verdict, the why, then what to do); part two is Wizards'
-       brackets and the deck's combos, a separate yardstick judged on its own. -->
+  <!-- Informe: the verdict and what to do about it first, then the evidence. Power
+       decides the pod tier; the brackets are a separate yardstick judged on their own,
+       and points are kept below as information. -->
   <div id="tab-informe" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-informe">
+    <div id="verdict"></div>
     <div id="commanderPanel"></div>
-    <section class="report-part" aria-labelledby="partPodT">
-      <div class="part-head"><span id="partPodN" class="part-n mono">1</span>
-        <div><h2 id="partPodT" class="part-title"></h2><p id="partPodX" class="part-sub"></p></div></div>
-      <div id="verdict"></div>
-      <div id="power" class="panel power-panel"></div>
+    <section id="sec-plan" class="report-part" aria-labelledby="partPlanT">
+      <div class="part-head"><h2 id="partPlanT" class="part-title"></h2></div>
       <div id="tips" class="stack-16">
         <div id="tipsMain" class="panel panel-pad-lg"></div>
         <div id="tipsUp" class="panel panel-pad-lg" aria-live="polite"></div>
-        <div id="tipsComp" class="panel panel-pad-lg" aria-live="polite"></div>
+        <details class="panel adv-fold"><summary id="tipsCompT"></summary><div id="tipsComp" class="panel-pad-lg" aria-live="polite"></div></details>
       </div>
     </section>
-    <section class="report-part" aria-labelledby="partBrT">
-      <div class="part-head"><span id="partBrN" class="part-n mono">2</span>
-        <div><h2 id="partBrT" class="part-title"></h2><p id="partBrX" class="part-sub"></p></div></div>
+    <section id="sec-profile" class="report-part" aria-labelledby="partPfT">
+      <div class="part-head"><div><h2 id="partPfT" class="part-title"></h2><p id="partPfX" class="part-sub"></p></div></div>
+      <div id="profile"></div>
+    </section>
+    <section id="sec-bracket" class="report-part" aria-labelledby="partBrT">
+      <div class="part-head"><div><h2 id="partBrT" class="part-title"></h2><p id="partBrX" class="part-sub"></p></div></div>
       <div id="bracket"></div>
       <div id="combos"></div>
     </section>
-    <section class="report-part" aria-labelledby="partPfT">
-      <div class="part-head"><span id="partPfN" class="part-n mono">3</span>
-        <div><h2 id="partPfT" class="part-title"></h2><p id="partPfX" class="part-sub"></p></div></div>
-      <div id="profile"></div>
-    </section>
+    <details id="sec-points" class="report-part points-part">
+      <summary class="part-head"><div><h2 id="partPodT" class="part-title"></h2><p id="partPodX" class="part-sub"></p></div></summary>
+      <div id="power" class="panel power-panel"></div>
+    </details>
     <div id="informeEnd"></div>
   </div>
 

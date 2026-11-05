@@ -4,7 +4,7 @@ import { T } from '../i18n.js';
 import { COMBO_TAGS } from '../engine/index.js';
 import { MSG } from './constants.js';
 import { comboInline, tagChip } from './combos.js';
-import { $, esc } from './helpers.js';
+import { $, esc, fill } from './helpers.js';
 
 // The bracket report, deliberately separate from the pod's point budget: the
 // two answer different questions and a deck can pass one and fail the other.
@@ -13,7 +13,6 @@ import { $, esc } from './helpers.js';
 const ORDER = ['game_changers', 'mass_land_denial', 'extra_turns', 'combos', 'legality'];
 
 const list = (names) => names.map(n => esc(n.split(' // ')[0])).join(', ');
-const fill = (s, vals) => Object.entries(vals).reduce((out, [k, v]) => out.replace('%' + k, v), s);
 const inlineList = (combos, cls) => combos.map(c => comboInline(c, cls)).join('');
 
 // What the row says about this deck: the state on one line, then the evidence.
@@ -50,7 +49,8 @@ function detail(c, t, lang) {
 }
 
 function rows(b, t, lang) {
-  return ORDER.map(id => {
+  // what fails reads first
+  return [...ORDER].sort((x, y) => b.failed.includes(y) - b.failed.includes(x)).map(id => {
     const c = b.checks.find(x => x.id === id);
     const d = detail(c, t, lang);
     const waiting = c.pending && c.ok;
@@ -108,7 +108,7 @@ function reads(b, t) {
       '<span class="note-sm">' + esc(b.pending ? t.brPending : t['brName' + b.checklist]) + '</span></div>' +
     '<div class="br-read"><span class="tile-label">' + esc(t.brReadSb) + '</span>' +
       '<span class="br-read-n mono">' + (b.pending ? '…' : esc(estimate)) + '</span>' +
-      '<span class="note-sm">' + (b.pending ? '' : tagChip(b.estimate, t)) + '</span></div>' +
+      '<span class="note-sm">' + (b.pending || b.estimate === 'B' ? '' : tagChip(b.estimate, t)) + '</span></div>' +
     '</div>';
 }
 
@@ -124,9 +124,10 @@ function legend(t) {
 
 export function renderBracket() {
   const t = T(), lang = state.lang, b = state.result.bracket;
+  const legal = (b.checks.find(c => c.id === 'legality').issues || [])[0];
   const summary = b.pending ? t.brPending
     : b.fits ? t.brSumFits
-    : fill(t.brSumFails, { v: b.failed.map(id => t['brShort_' + id]).join(', ') });
+    : fill(t.brSumFails, { v: b.failed.map(id => id === 'legality' ? MSG['valid_' + legal.id][lang](legal) : t['brShort_' + id]).join(', ') });
 
   // No title here: the part header above the panel already names this section,
   // so the panel leads straight with the verdict and the two reads.
@@ -146,10 +147,9 @@ export function renderBracket() {
 export function bracketTile() {
   const t = T(), b = state.result.bracket;
   const tone = !b.fits ? 'tone-bad' : b.pending ? '' : 'tone-ok';
-  const value = b.pending ? t.brChecking
-    : b.checklist + ' <span class="stat-cap">· B3 ' + (b.fits ? '✓' : '✕') + '</span>';
+  const value = b.pending ? t.brChecking : (b.fits ? '✓ ' + t.brYes : '✕ ' + t.brNo);
   return '<div class="panel stat-tile' + (tone ? ' toned ' + tone : '') + '"' +
     (b.pending ? ' title="' + esc(t.brPending) + '"' : '') + '>' +
-    '<div class="tile-label">' + t.brTileN + '</div>' +
+    '<div class="tile-label">' + t.brTile + '</div>' +
     '<div class="mono stat-value">' + value + '</div></div>';
 }

@@ -3,8 +3,6 @@ export const store = {
   set lang(v){ localStorage.setItem('pdc_lang', v); },
   get theme(){ return localStorage.getItem('pdc_theme') || ''; },
   set theme(v){ localStorage.setItem('pdc_theme', v); },
-  get priceNoteSeen(){ return localStorage.getItem('pdc_price_note') === '1'; },
-  set priceNoteSeen(v){ localStorage.setItem('pdc_price_note', v ? '1' : ''); },
 };
 
 export let cardCache = {};
@@ -49,7 +47,8 @@ export const state = {
   cardTags: null,    // data/card_tags.json as name -> tags, loaded alongside it
   synergyData: null, // {key, table} for the current commander(s)
   study: null,       // data/deck_study.json: reference medians and the pod table
-  podSort: 'power',
+  podSort: { key: 'power', dir: -1 },
+  cmdOpen: false,   // the commander picker stays folded until asked for
   comboFilter: 'all', comboAll: false, // bracket report: combo list filter + show-all
   cmpView: 'all',    // side-by-side card comparison: 'all' | 'diff'
 };

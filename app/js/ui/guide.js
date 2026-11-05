@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { ARCH } from './constants.js';
-import { $, esc } from './helpers.js';
+import { $, announce, esc } from './helpers.js';
 import { renderAll } from '../main.js';
 
 export function renderGuide() {
@@ -29,5 +29,5 @@ export function renderGuide() {
       if (el) el.focus({ preventScroll: true });
     };
   for (const b of $('guideBody').querySelectorAll('[data-build]'))
-    b.onclick = (e) => { e.stopPropagation(); state.arch = b.dataset.build; state.openArch = null; renderAll(); };
+    b.onclick = (e) => { e.stopPropagation(); state.arch = b.dataset.build; state.openArch = null; state.tab = 'load'; renderAll(); announce(ARCH.find(a => a.k === b.dataset.build).name[lang]); };
 }

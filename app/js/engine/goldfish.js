@@ -102,7 +102,8 @@ export function simulateGoldfish({ cardsInfo, commanders, combos = [], read, gam
       }
       const made = lands + sources;
       manaTotals[turn - 1] += made;
-      if (winTurn === null && lines.some(l =>
+      // a line through the commander needs it on the table, not just in the command zone
+      if (winTurn === null && lines.some(l => (commanderCast || !l.pieces.some(p => zone.has(p))) &&
         l.pieces.filter(p => !seen.has(p)).length <= tutors && made + lastMana >= l.deploy)) winTurn = turn;
       lastMana = made;
     }
@@ -115,6 +116,7 @@ export function simulateGoldfish({ cardsInfo, commanders, combos = [], read, gam
     mana: manaTotals.map(total => Math.round(total / games * 10) / 10),
     commanderTurn: median(commanderTurns),
     winTurn: winTurns.length * 2 >= games ? median(winTurns) : null,
+    // how often a line is ready by mid-game, which rewards redundant lines a median cannot show
     winBy: lines.length ? { 4: byTurn(4), 6: byTurn(6), 8: byTurn(8), 10: byTurn(10) } : null,
   };
 }

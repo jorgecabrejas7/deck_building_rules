@@ -27,7 +27,8 @@
   /* scrollable tab bar */
   .tabbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .tabbar::-webkit-scrollbar{display:none}
-  .tab-btn{flex:0 0 auto;padding:12px 14px}
+  .tab-btn{flex:0 0 auto;padding:12px 10px}
+  .section-nav a{min-height:36px;display:flex;align-items:center}
 
   /* panels tighten */
   .input-panel,.power-panel,.comp-panel,.browser-panel,.panel-pad,.panel-pad-lg,.tm-panel{padding:14px}
@@ -50,7 +51,6 @@
 
   /* denser card grids */
   .card-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
-  .sug-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
   .hand-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
   .tile-name{font-size:var(--fs-micro)}
 
@@ -64,12 +64,19 @@
   .modal-body{padding:18px 16px}
 
   /* ≥44px touch targets on real controls */
-  .pod-sort,.combo-filter,.tab-btn,.btn-primary,.btn-ghost,.btn-accent,.btn-accent-sm,.btn-outline,
+  .bm summary,.br-legend summary,.adv-disclosure summary,.adv-fold>summary,.cmd-chip,.cmd-search,.combo-link,.pod-sort,.combo-filter,.tab-btn,.btn-primary,.btn-ghost,.btn-accent,.btn-accent-sm,.btn-outline,
   .btn-outline-accent,.btn-tone-outline,.btn-ghost-sm,.chip-dashed,.cf-btn,
   .comp-clear,.pill-clear,.btn-build,.seg-toggle button,.seg-toggle-sm button,
   .modal-close,.price-pill,.banner-x,.valid-jump{min-height:44px}
   .icon-btn{width:44px;height:44px}
-  .catHelp{width:22px;height:22px;font-size:var(--fs-caption)}
+  .catHelp{width:22px;height:22px;font-size:var(--fs-caption);position:relative}
+  .catHelp::after{content:"";position:absolute;inset:-11px}
+  .modal-close{width:44px}
+  /* under 16px, iOS zooms the page on focus */
+  .deck-input,.arch-select,.cmd-search,.tm-ta{font-size:16px}
+  .brand-tag{display:none}
+  .combo-link{display:inline-flex;align-items:center}
+  .verdict-hero{padding:16px}
 }
 
 @media (max-width: 999px) {
@@ -77,8 +84,6 @@
   .pl-row{grid-template-columns:96px 1fr 30px}
   .bm summary{min-height:44px}
   .pf-keycards{columns:1}
-  .pod-row{gap:8px}
-  .pod-actions{margin-left:0;width:100%}
 }
 
 @media (max-width: 480px) {
@@ -91,7 +96,8 @@
   .header-actions .btn-outline,.header-actions .btn-outline-accent{min-width:44px;padding:0;font-size:var(--fs-ui)}
   .card-grid{grid-template-columns:repeat(3,1fr);gap:6px}
   .hand-grid{grid-template-columns:repeat(3,1fr)}
-  .sug-grid{grid-template-columns:repeat(2,1fr)}
+  .vh-tier,.vh-power{font-size:var(--fs-display)}
+  .bm-groups{grid-template-columns:1fr}
   .tm-grid{grid-template-columns:1fr}
 }
 

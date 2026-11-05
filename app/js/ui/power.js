@@ -1,8 +1,7 @@
 import { state, cardCache } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
-import { DIAL_META, MSG } from './constants.js';
-import { comboInline } from './combos.js';
+import { DIAL_META, EXTRA_PTS, MSG, dialName } from './constants.js';
 import { $, esc } from './helpers.js';
 import { checkCombos } from '../pipeline.js';
 import { bindSugPopovers } from './popover.js';
@@ -54,8 +53,19 @@ export function renderPower() {
   const activeD = dials.filter(d => d.active).sort((a, b) => rank(b) - rank(a));
   const quietD = dials.filter(d => !d.active);
 
-  let html = '<div class="power-head">' +
-    '<h2 class="secT secT-lg">' + t.power + '</h2><span class="mono power-pts">' + ev.points + ' ' + t.ptsOf + ' ' + budgetN + '</span></div>';
+  // what spends points, biggest first: this is the "why" behind the number
+  const spends = Object.entries(ev.breakdown).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  const gMax = Math.max(budgetN + 3, ev.points);
+  const pct = ev.points / gMax * 100;
+  let html = '<div class="gauge-wrap">' +
+    '<div class="power-head"><h3 class="mini-title">' + t.budget + '</h3><span class="mono power-pts">' + ev.points + ' pts</span></div>' +
+    '<div class="gauge" aria-hidden="true">' +
+    '<div class="gauge-fill" style="--w:' + pct.toFixed(1) + '%"></div>' +
+    '<div class="gauge-tick" style="--x:' + (t1N / gMax * 100).toFixed(1) + '%"></div>' +
+    '<div class="gauge-tick" style="--x:' + (budgetN / gMax * 100).toFixed(1) + '%"></div></div>' +
+    '<div class="mono gauge-scale"><span>0</span><span>' + t1N + '</span><span>' + budgetN + '</span><span>' + gMax + '</span></div>' +
+    (spends.length ? '<ul class="spend-list">' + spends.map(([k, v]) => '<li>' + esc(EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang)) + ' <b class="mono">+' + v + '</b></li>').join('') + '</ul>' : '') +
+    '</div>';
 
   for (const d of activeD) {
     const { m, spec, value, pts, over, isCombo } = d;
@@ -83,7 +93,8 @@ export function renderPower() {
   if (!activeD.length) html += '<div class="note-ok power-clear-note">✓ ' + t.powerAllQuiet + '</div>';
 
   // violations + flags
-  const viols = ev.violations.map(v => {
+  // the budget line would read as a verdict, and points no longer give one
+  const viols = ev.violations.filter(v => v.id !== 'budget').map(v => {
     if (v.id === 'conditional') return (MSG.conditional[v.condId] ? MSG.conditional[v.condId][lang](v) : v.condId);
     return MSG[v.id] ? MSG[v.id][lang](v) : JSON.stringify(v);
   });
@@ -110,16 +121,6 @@ export function renderPower() {
         (d.spec.baseline_max > 0 ? d.value + '/≤' + d.spec.baseline_max : String(d.value)) + '</span></div>').join('') + '</div>';
   }
 
-  // budget gauge — scale spans 0..(t2+3) so overspending stays visible
-  const gMax = budgetN + 3;
-  const pct = Math.min(ev.points / gMax * 100, 100);
-  html += '<div class="gauge-wrap">' +
-    '<h3 class="mini-title">' + t.budget + '</h3>' +
-    '<div class="gauge" aria-hidden="true">' +
-    '<div class="gauge-fill" style="--w:' + pct.toFixed(1) + '%"></div>' +
-    '<div class="gauge-tick" style="--x:' + (t1N / gMax * 100).toFixed(1) + '%"></div>' +
-    '<div class="gauge-tick" style="--x:' + (budgetN / gMax * 100).toFixed(1) + '%"></div></div>' +
-    '<div class="mono gauge-scale"><span>0</span><span>Tier 1 ≤' + t1N + '</span><span>Tier 2 ≤' + budgetN + '</span><span>' + gMax + '</span></div></div>';
   $('power').innerHTML = html;
   bindSugPopovers($('power'));
   const cb = document.getElementById('comboBtn');
@@ -138,7 +139,7 @@ function comboBlock() {
   }
   if (cd.status === 'checking') return '<div class="note-muted">' + t.comboChecking + '</div>';
   const inf = state.result.bracket.combos.filter(c => c.infinite);
+  // the combo list lives in one place; the dial only points at it
   if (!inf.length) return '<div class="note-ok">✓ ' + t.comboNone + '</div>';
-  return '<div class="stack-6">' + inf.slice(0, 12).map(c => '<div class="combo-line">' + comboInline(c) + '</div>').join('') +
-    (inf.length > 12 ? '<div class="note-sm">' + t.comboSeeAll.replace('%v', inf.length) + '</div>' : '') + '</div>';
+  return '<a class="combo-link" href="#combos">' + t.comboSeeAll.replace('%v', inf.length) + ' ↓</a>';
 }

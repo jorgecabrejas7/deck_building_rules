@@ -25,7 +25,7 @@ export function renderTableMode() {
   const res = state.tableResults;
   if (res) {
     html += '<div class="table-scroll"><table class="tm-table">' +
-      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.brTile + '</th><th>' + t.pfPower + '</th><th>' + t.pfSalt + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
+      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.brTile + '</th><th>' + t.pfPractical + '</th><th>' + t.pfSalt + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
       res.map((d, i) => {
         return '<tr><td>' + esc(d.name) + '</td>' +
           '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + t[d.tier] + '</span></td>' +
@@ -113,7 +113,7 @@ function cmpCards(res) {
   const chip = (x) => {
     const c = x.card, shared = inDecks.get(x.name) === res.length;
     if (diff && shared) return '';
-    return '<span class="sugTile card-chip' + (shared ? ' chip-shared' : '') + '" data-img="' + esc(c.img_normal || '') + '">' +
+    return '<span class="sugTile card-chip' + (shared ? ' chip-shared' : '') + '" data-img="' + esc(c.img_normal || '') + '">' + (shared ? '<span title="=">≡</span> ' : '') +
       '<span class="chip-art"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
       esc(x.name.split(' // ')[0]) + (c.price != null ? ' <span class="mono chip-price">€' + c.price + '</span>' : '') + '</span>';
   };
@@ -178,11 +178,13 @@ export async function runTableMode() {
         unresolved: notFound.length,
       });
       const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders, cardTags });
+      const power = PodEngine.computePower(profile, stats);
+      const verdict = PodEngine.podVerdict({ power, evalRes: ev, rules: RULES, checked: !!comboList });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
-        tier: ev.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,
+        tier: verdict.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,
         arch: a.name[state.lang], archKey: det.key, commander: cmd, bracket,
-        power: comboList ? PodEngine.computePower(profile, stats).score : null,
+        power: comboList ? verdict.bracket + ' · ' + power.score : null,
         salt: saltDb ? PodEngine.saltScore(resolved.map(e => e.name), saltDb).total : null,
         stats, ev, cardsInfo });
     }

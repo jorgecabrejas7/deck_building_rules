@@ -12,6 +12,7 @@
  *   (g) the bracket rules, on synthetic cards and on the real combo database.
  *   (h) the deck profile: manabase arithmetic, salt, synergy and the power scale.
  *   (j) the goldfish simulation and draw odds.
+ *   (k) the pod verdict: power limits, the banned list and the cut plan.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -287,10 +288,11 @@ const weak = PodEngine.computePower(baseProfile, {});
 const strong = PodEngine.computePower({ ...baseProfile,
   consistency: { ...baseProfile.consistency, tutors: 17 },
   speed: { ...baseProfile.speed, avgMv: 1.9, cheap: 55, fastMana: 14, ramp: 27 },
-  interaction: { ...baseProfile.interaction, cheapAnswers: 12, counters: 11, stax: 13, free: 5 },
+  interaction: { ...baseProfile.interaction, cheapAnswers: 12, counters: 11, stax: 13, free: 5, removal: 15, wipes: 3 },
   manabase: { ...baseProfile.manabase, quality: 100 },
-  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2 },
-  goldfish: { ...baseProfile.goldfish, winTurn: 5 },
+  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, web: 13 },
+  shape: { ...baseProfile.shape, engine: { theme: "burn", count: 30 } },
+  goldfish: { ...baseProfile.goldfish, winBy: { 8: 70 } },
 }, { game_changers: 20 });
 const study = read_study();
 function read_study() { return JSON.parse(fs.readFileSync(path.join(ROOT, "data", "deck_study.json"), "utf8")); }
@@ -317,6 +319,9 @@ const PF_CASES = [
   ["no EDHREC page is no data, not zero", synOf(null).status === "none"],
   ["synergy covers nonland cards with positive synergy", synOf(sameTable).coverage === 50 && synOf(sameTable).offPlan === 0],
   ["power reads weak decks low and strong decks at the top", weak.score < 4 && strong.score === 10],
+  ["no Game Changer metric: those cards score for what they do", !("gc" in PodEngine.METRIC_RANGE)],
+  ["a line through the commander counts half", PodEngine.computeProfile({ cardsInfo: manaDeck, stats: {}, commanders: ["Boss"], combos: [
+    { cards: ["Boss", "X"], infinite: true, relevant: true, win: false, tag: "S", features: ["Infinite mana"], cardsToFind: 1, deploy: 4 }] }).wins.ending === 0.5],
   ["every scored metric sits in a benchmark, so tiers explain the score", Object.keys(PodEngine.METRIC_RANGE).every(k => strong.benchmarks.some(b => b.scored && b.values.some(v => v.key === k)))],
   ["benchmarks read top tier on a strong deck and low on a weak one", strong.benchmarks.filter(b => b.scored).every(b => b.tier === "S") && weak.benchmarks.find(b => b.key === "finding").tier === "F"],
   ["a benchmark names the cards behind it", (() => {
@@ -397,5 +402,37 @@ const gfBad = GF_CASES.filter(([, ok]) => !ok);
 for (const [label] of gfBad) console.log(`GOLDFISH FAIL: ${label}`);
 console.log(`Goldfish: ${GF_CASES.length - gfBad.length}/${GF_CASES.length} correct`);
 if (gfBad.length) fails++;
+
+// (k) the verdict. Limits come from the rules file, so these move with it.
+const vLimits = RULES.power_tiers;
+const vFor = (score, violations = []) => PodEngine.podVerdict({ power: { score }, evalRes: { violations }, rules: RULES, checked: true });
+const studyNow = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "deck_study.json"), "utf8"));
+const vPod = (n) => studyNow.decks.find(d => d.group === "pod" && d.name.startsWith(n));
+const V_CASES = [
+  ["at the Tier 1 limit is Tier 1", vFor(vLimits.tier1_max).tier === "tier1"],
+  ["just over is Tier 2", vFor(vLimits.tier1_max + 0.1).tier === "tier2"],
+  ["over the Tier 2 limit is out", vFor(vLimits.tier2_max + 0.1).tier === "above"],
+  ["a banned card is out at any power", vFor(1, [{ id: "banned", cards: ["Mana Crypt"] }]).tier === "above" && vFor(1, [{ id: "banned", cards: ["Mana Crypt"] }]).banned[0] === "Mana Crypt"],
+  ["other violations no longer decide", vFor(1, [{ id: "price_cap" }, { id: "budget" }]).tier === "tier1"],
+  ["no precon reads out of the pod", studyNow.decks.filter(d => d.group === "precon" && d.tier === "above").length === 0],
+  ["every cEDH list reads out, above every precon", studyNow.decks.filter(d => d.group === "cedh").every(d => d.tier === "above")],
+  // Jorge's read of his own pod, November 2026. If a scoring change breaks one, ask him.
+  ["Urza is the strongest, well above Luffy", vPod("Urza").power.score >= vPod("Luffy").power.score + 0.5 && vPod("Urza").power.score > vPod("Teysha").power.score],
+  ["Urza stays below Bracket 4", ["3", "3*"].includes(vPod("Urza").practicalBracket)],
+  ["Urza and Teysha read Tier 3", vPod("Urza").tier === "above" && vPod("Teysha").tier === "above"],
+  ["Luffy reads Tier 3 or high Tier 2 on power", vPod("Luffy").power.score > vLimits.tier2_max - 0.5],
+  ["Oloro is well above Krenko", vPod("Oloro").power.score >= vPod("Krenko").power.score + 1],
+  ["Teysha is well above Krenko", vPod("Teysha").power.score >= vPod("Krenko").power.score + 1],
+  ["Frodo & Sam reads Tier 1: it is mostly a precon", vPod("Frodo").tier === "tier1"],
+  ["Ezio stays near stock", vPod("Ezio").practicalBracket === "2"],
+  ["the decks Jorge calls upgraded read above Bracket 2", ["Tiamat", "Lathril", "Betor", "Cloud"].every(n => vPod(n).practicalBracket !== "2")],
+  ["most precons read Bracket 2", studyNow.decks.filter(d => d.group === "precon" && d.practicalBracket === "2").length >= 30],
+  ["Krenko reads Tier 2", vPod("Krenko").tier === "tier2"],
+  ["Nekusar is below Krenko and close to Lightning", vPod("Nekusar").power.score < vPod("Krenko").power.score && Math.abs(vPod("Nekusar").power.score - vPod("Lightning").power.score) <= 0.5],
+];
+const vBad = V_CASES.filter(([, ok]) => !ok);
+for (const [label] of vBad) console.log(`VERDICT FAIL: ${label}`);
+console.log(`Pod verdict: ${V_CASES.length - vBad.length}/${V_CASES.length} correct`);
+if (vBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

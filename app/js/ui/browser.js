@@ -3,6 +3,7 @@ import { T } from '../i18n.js';
 import { TYPES, TYPE_ORDER, CATS } from './constants.js';
 import { $, esc, badgeFor, helpIcon } from './helpers.js';
 import { bindCardTilePopover } from './popover.js';
+import { inCat } from './comp.js';
 
 export function renderBrowser() {
   const t = T(), lang = state.lang, r = state.result;
@@ -25,7 +26,7 @@ export function renderBrowser() {
       '<div class="card-grid">' +
       gmap[g].sort((a, b) => (a.card.cmc || 0) - (b.card.cmc || 0) || a.name.localeCompare(b.name)).map(x => {
         const badge = badgeFor(x.name);
-        const dim = state.hl && x.cls.cat !== state.hl && !x.cls.tags.includes(state.hl);
+        const dim = state.hl && !inCat(x, state.hl);
         const hit = state.hl && !dim;
         const mana = (x.card.mana_cost || '').replace(/[{}]/g, '') || '—';
         const wi = whatIfChip(x.name);
@@ -50,11 +51,9 @@ export function renderBrowser() {
 export function whatIfChip(name) {
   const r = state.result;
   const wi = r && r.whatIf && r.whatIf[name];
-  if (!wi || (wi.dPts <= 0 && !wi.fixes)) return '';
+  if (!wi) return '';
   const t = T();
-  const tierUp = wi.tier !== r.evalRes.tier;
-  const label = (wi.dPts > 0 ? '−' + wi.dPts + ' pt' + (wi.dPts > 1 ? 's' : '') : '') +
-    (tierUp ? (wi.dPts > 0 ? ' → ' : '→ ') + t[wi.tier].split(' · ')[0] : '');
-  if (!label) return '';
+  if (wi.dPts <= 0) return '';
+  const label = '−' + wi.dPts + ' pt' + (wi.dPts > 1 ? 's' : '');
   return '<span title="' + t.whatIf + '" class="wi-chip">✂ ' + label + '</span>';
 }

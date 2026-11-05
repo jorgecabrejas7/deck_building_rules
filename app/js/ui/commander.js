@@ -38,7 +38,7 @@ export function renderCommander() {
       '<span class="cmd-seat-art sugTile" data-img="' + esc(c.img_normal || '') + '" data-name="' + esc(front(name)) + '"' +
       (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
       '<div><div class="cmd-name">' + esc(front(name)) + '</div>' +
-      '<div class="ci-pips">' + (c.color_identity || []).map(k =>
+      '<div class="ci-pips" role="img" aria-label="' + esc((c.color_identity || []).join(' ') || t.colorless) + '">' + (c.color_identity || []).map(k =>
         '<span class="ci-pip" style="--pip:' + PIP[k] + '"></span>').join('') + '</div></div></div>';
   };
 
@@ -70,14 +70,17 @@ export function renderCommander() {
   const pairable = picked.length === 1 && options.some(o =>
     (o.kind === 'solo' || o.kind === 'second') && PodEngine.canPair(cardCache[picked[0]], o.card));
 
-  el.innerHTML = '<div class="panel panel-pad">' +
-    '<div class="row-between"><h2 class="secT secT-lg">' + t.cmdT + '</h2>' +
-    '<span class="comp-sub">' + esc(manual ? t.cmdManualTag : t.cmdAutoTag) + '</span></div>' +
-    (picked.length
-      ? '<div class="cmd-seats">' + picked.map(seat).join('') + '</div>'
-      : '<div class="note-warn">' + esc(t.cmdNone) + '</div>') +
-    (options.length
-      ? '<div class="row-between"><span class="mini-title">' + esc(t.cmdPick) + '</span>' +
+  // Correcting detection is rare, so the picker stays folded unless detection found
+  // nobody. Its chips only render when open: 90 tab stops must not precede the report.
+  const open = state.cmdOpen || !picked.length;
+  el.innerHTML = '<div class="panel cmd-panel">' +
+    '<div class="cmd-line">' +
+    (picked.length ? '<div class="cmd-seats">' + picked.map(seat).join('') + '</div>' : '<div class="note-warn">' + esc(t.cmdNone) + '</div>') +
+    '<span class="comp-sub">' + esc(manual ? t.cmdManualTag : t.cmdAutoTag) + '</span>' +
+    (picked.length ? '<button type="button" id="cmdToggle" class="btn-ghost-sm" aria-expanded="' + open + '">' + esc(open ? t.cmdClose : t.cmdChange) + '</button>' : '') +
+    '</div>' +
+    (open && options.length
+      ? '<div class="cmd-picker"><div class="row-between"><span class="mini-title">' + esc(t.cmdPick) + '</span>' +
         '<span class="comp-sub">' + t.cmdLegalCount.replace('%n', eligible).replace('%t', options.length) + '</span></div>' +
         '<div class="cmd-tools">' +
         '<input id="cmdSearch" type="search" class="cmd-search" autocomplete="off"' +
@@ -86,9 +89,11 @@ export function renderCommander() {
         '</div>' +
         '<div id="cmdList" class="cmd-chips">' + options.map(chip).join('') +
         '<div id="cmdNoMatch" class="note-sm" hidden>' + esc(t.cmdNoMatch) + '</div></div>' +
-        (pairable ? '<div class="note-sm">' + esc(t.cmdPairHint) + '</div>' : '')
-      : '');
+        (pairable ? '<div class="note-sm">' + esc(t.cmdPairHint) + '</div>' : '') + '</div>'
+      : '') + '</div>';
 
+  const toggle = $('cmdToggle');
+  if (toggle) toggle.onclick = () => { state.cmdOpen = !state.cmdOpen; renderCommander(); $('cmdToggle').focus(); };
   for (const b of el.querySelectorAll('[data-cmd]'))
     b.onclick = () => setCommanders(pickOn(b.dataset.cmd, picked));
   const auto = el.querySelector('[data-cmd-auto]');

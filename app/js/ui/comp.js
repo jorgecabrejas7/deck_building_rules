@@ -1,3 +1,4 @@
+import { readCard } from '../engine/index.js';
 import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { ARCH, BASECOMP, CATS } from './constants.js';
@@ -11,8 +12,14 @@ export function slotsFor(key) {
   return [...merged.entries()].map(([cat, [mn, mx]]) => ({ cat, min: mn, max: mx }));
 }
 export function compSlots() { return slotsFor(archKey()); }
+// One count per concept across the report: the same reader as the deck profile.
+const READ = { ramp: 'ramp', draw: 'draw', rem: 'removal', wipe: 'wipe', prot: 'protection', ctr: 'counter', tut: 'tutor', rec: 'recursion' };
+export function inCat(x, cat) {
+  if (cat === 'land') return x.cls.type === 'L';
+  return READ[cat] ? !!readCard(x, state.cardTags)[READ[cat]] : x.cls.cat === cat || x.cls.tags.includes(cat);
+}
 export function tagCount(cat) {
-  return state.result.cardsInfo.reduce((s, x) => s + ((x.cls.cat === cat || x.cls.tags.includes(cat)) ? x.qty : 0), 0);
+  return state.result.cardsInfo.reduce((s, x) => s + (inCat(x, cat) ? x.qty : 0), 0);
 }
 
 export function renderComp() {
@@ -30,7 +37,9 @@ export function renderComp() {
       '<div class="comp-track" aria-hidden="true">' +
       '<div class="comp-band" style="--l:' + (s.min / scale * 100).toFixed(1) + '%;--w:' + ((s.max - s.min) / scale * 100).toFixed(1) + '%"></div>' +
       '<div class="dial-marker" style="--x:' + Math.min(v / scale * 100, 98).toFixed(1) + '%"></div></div>' +
-      '<span class="comp-pill ' + (status === 'ok' ? 'pill-ok' : 'pill-warn') + '">' + t[status] + ' · ' + v + '/' + s.min + '–' + s.max + '</span></div>';
+      '<span class="comp-pill ' + (status === 'ok' ? 'pill-ok' : 'pill-warn') + '">' + t[status] + ' · ' + v + '/' + s.min + '–' + s.max + '</span></div>' +
+      (state.hl === s.cat ? '<p class="comp-cards">' + state.result.cardsInfo.filter(x => inCat(x, s.cat))
+        .map(x => esc(x.name.split(' // ')[0])).join(', ') + '</p>' : '');
   }
   html += '</div><div class="comp-hint"><span>' + t.compHint + '</span>' +
     (state.hl ? '<button id="clearHl" class="comp-clear">✕ ' + t.clear + ': ' + CATS[state.hl][lang] + '</button>' : '') + '</div>';

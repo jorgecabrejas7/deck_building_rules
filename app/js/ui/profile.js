@@ -2,13 +2,12 @@ import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { ARCH } from './constants.js';
 import { drawOdds } from '../engine/index.js';
-import { $, esc } from './helpers.js';
+import { $, esc, fill } from './helpers.js';
 import { renderPod } from './pod.js';
 
-// Part three of the report: what the deck does, measured against the 36 precons,
-// the pod's decks and public cEDH lists (data/deck_study.json). Informative only:
-// the pod's tier and the bracket verdict never read anything shown here.
-const PILLAR_KEYS = ['consistency', 'efficiency', 'interaction', 'wins'];
+// The evidence behind the verdict: what the deck does, measured against the 36
+// precons, the pod's decks and public cEDH lists (data/deck_study.json). Its
+// power decides the pod tier (engine/verdict.js); the rest here is information.
 const BANDS = [[5, 'casual'], [6.5, 'upgraded'], [7.6, 'mid'], [9, 'high'], [Infinity, 'cedh']];
 export const powerBand = (score) => BANDS.find(([top]) => score < top)[1];
 
@@ -46,8 +45,8 @@ function pillars(power, t) {
     return v === null ? '' : '<span class="pl-tick ' + cls + '" style="--x:' + Math.min(v, 100) + '%" title="' +
       esc(t['pfRef_' + group] + ': ' + v) + '"></span>';
   };
-  return '<div class="pl-rows">' + PILLAR_KEYS.map(k =>
-    '<div class="pl-row"><span class="pl-name">' + esc(t['pf_' + k]) + '</span>' +
+  return '<div class="pl-rows">' + Object.keys(power.pillars).map(k =>
+    '<div class="pl-row"><span class="pl-name">' + esc(t['pf_' + k] || k) + '</span>' +
     '<div class="pl-track" aria-hidden="true"><div class="pl-fill" style="--w:' + power.pillars[k] + '%"></div>' +
     tick('precon', 'a', k) + tick('pod', 'b', k) + tick('cedh', 'c', k) + '</div>' +
     '<span class="mono pl-val">' + power.pillars[k] + '</span></div>').join('') + '</div>' +
@@ -66,17 +65,19 @@ function fingerprint(power, t) {
 
 // Each benchmark opens to the question it answers and the cards behind its tier.
 function benchmarks(power, t) {
-  const groups = [...PILLAR_KEYS, 'resilience'];
-  const row = (b) => '<details class="bm"><summary><span class="bm-tier mono t-' + b.tier + '">' + b.tier + '</span>' +
-    '<span class="bm-name">' + esc(t['bm_' + b.key]) + '</span>' +
-    '<span class="note-sm mono">' + b.values.map(v => show(v.value)).join(' · ') + '</span></summary>' +
-    '<p class="note-sm">' + esc(t['bmq_' + b.key]) + '</p>' +
-    '<p class="note-sm">' + b.values.map(v => esc(t['pm_' + v.key]) + ': <b class="mono">' + show(v.value) + '</b>').join(' · ') + '</p>' +
+  const groups = [...new Set(power.benchmarks.map(b => b.pillar))];
+  // no reading isn't a failing grade: a deck with no combo line has nothing to rate
+  const grade = (b) => (b.values.every(v => v.value === null || v.value === undefined) ? '—' : b.tier);
+  const row = (b) => '<details class="bm"><summary><span class="bm-tier mono t-' + grade(b) + '">' + grade(b) + '</span>' +
+    '<span class="bm-name">' + esc(t['bm_' + b.key] || b.key) + '</span>' +
+    '<span class="bm-vals note-sm">' + b.values.map(v => esc(t['pm_' + v.key] || v.key) + ' <b class="mono">' + show(v.value) + '</b>').join(' · ') + '</span></summary>' +
+    '<p class="note-sm">' + esc(t['bmq_' + b.key] || '') + '</p>' +
     (b.cards.length ? '<p class="bm-cards">' + b.cards.map(esc).join(', ') + '</p>' : '') + '</details>';
   return '<div class="bm-groups">' + groups.map(g =>
-    '<div class="bm-group"><h3 class="mini-title">' + esc(t['pf_' + g]) + '</h3>' +
+    '<div class="bm-group"><h3 class="mini-title">' + esc(t['pf_' + g] || g) + '</h3>' +
     power.benchmarks.filter(b => b.pillar === g).map(row).join('') +
-    (g === 'resilience' ? '<p class="note-sm">' + esc(t.pfNotScored) + '</p>' : '') + '</div>').join('') + '</div>';
+    (power.benchmarks.some(b => b.pillar === g && !b.scored) ? '<p class="note-sm">' + esc(t.pfNotScored) + '</p>' : '') + '</div>').join('') + '</div>' +
+    '<p class="note-sm">' + esc(t.bmLegend) + '</p>';
 }
 
 function keyCards(power, t) {
@@ -95,14 +96,27 @@ function comparison(r, t) {
     ['lands', p.manabase.lands], ['fetches', p.manabase.fetches], ['counters', p.interaction.counters],
     ['removal', p.interaction.removal], ['wipes', p.interaction.wipes], ['cheap_answers', p.interaction.cheapAnswers],
     ['stax', p.interaction.stax], ['ending_combos', p.wins.checked ? p.wins.ending : null],
-    ['price', Math.round(r.stats.total_price_eur)],
+    ['price', r.stats.total_price_eur],
   ];
-  return '<div class="tbl-scroll"><table class="br-table pf-table"><thead><tr><th></th>' +
+  // what sets this deck apart comes first: distance from the pod, in units of the precon-to-cEDH span
+  const off = ([k, v]) => {
+    const pod = med('pod', k), span = Math.abs((med('cedh', k) ?? 0) - (med('precon', k) ?? 0)) || 1;
+    return v === null || pod === null ? -1 : Math.abs(v - pod) / span;
+  };
+  const sorted = rows.slice().sort((a, b) => off(b) - off(a));
+  const round = (k, v) => (v === null ? null : k === 'price' ? '€' + Math.round(v) : v);
+  const mark = (k, v) => {
+    const lo = Math.min(med('precon', k) ?? v, med('pod', k) ?? v), hi = Math.max(med('precon', k) ?? v, med('pod', k) ?? v);
+    return v === null ? '' : v > hi ? ' ↑' : v < lo ? ' ↓' : '';
+  };
+  const table = (list) => '<div class="tbl-scroll"><table class="br-table pf-table"><thead><tr><th></th>' +
     '<th scope="col">' + esc(t.pfThisDeck) + '</th><th scope="col">' + esc(t.pfRef_precon) + '</th>' +
     '<th scope="col">' + esc(t.pfRef_pod) + '</th><th scope="col">' + esc(t.pfRef_cedh) + '</th></tr></thead><tbody>' +
-    rows.map(([k, v]) => '<tr><th scope="row">' + esc(t['pr_' + k]) + '</th><td class="mono"><b>' + show(v) + '</b></td>' +
-      ['precon', 'pod', 'cedh'].map(g => '<td class="mono">' + show(med(g, k)) + '</td>').join('') + '</tr>').join('') +
+    list.map(([k, v]) => '<tr><th scope="row">' + esc(t['pr_' + k]) + '</th><td class="mono"><b>' + show(round(k, v)) + esc(mark(k, v)) + '</b></td>' +
+      ['precon', 'pod', 'cedh'].map(g => '<td class="mono">' + show(round(k, med(g, k))) + '</td>').join('') + '</tr>').join('') +
     '</tbody></table></div>';
+  return '<h3 class="mini-title">' + esc(t.pfCompareT) + '</h3>' + table(sorted.slice(0, 5)) +
+    '<details class="br-legend"><summary>' + esc(fill(t.pfCompareMore, { v: sorted.length })) + '</summary>' + table(sorted) + '</details>';
 }
 
 // Tempo if nobody interferes, plus how likely each role is to show up by each turn.
@@ -115,9 +129,6 @@ function tempo(r, t) {
   const odds = [2, 4, 6, 8].map(turn => '<th scope="col">T' + turn + '</th>').join('');
   return '<details class="br-legend"><summary>' + esc(t.gfT) + '</summary>' +
     '<p class="note-sm">' + esc(t.gfX.replace('%n', g.games)) + '</p>' +
-    (g.commanderTurn !== null ? '<p class="note-sm">' + esc(t.gfCommander.replace('%v', g.commanderTurn)) + '</p>' : '') +
-    (g.winBy ? '<p class="note-sm">' + esc(g.winTurn !== null ? t.gfWin.replace('%v', g.winTurn) : t.gfNoWin) + ' ' +
-      esc(t.gfWinBy.replace('%a', g.winBy[6]).replace('%b', g.winBy[8]).replace('%c', g.winBy[10])) + '</p>' : '') +
     '<div class="tbl-scroll"><table class="br-table"><thead><tr><th></th>' + turns.map(n => '<th scope="col">T' + n + '</th>').join('') +
     '</tr></thead><tbody><tr><th scope="row">' + esc(t.gfMana) + '</th>' + turns.map(n => '<td class="mono">' + g.mana[n - 1] + '</td>').join('') + '</tr></tbody></table></div>' +
     '<h3 class="mini-title">' + esc(t.gfOddsT) + '</h3>' +
@@ -125,6 +136,20 @@ function tempo(r, t) {
     roles.map(([label, cards]) => '<tr><th scope="row">' + esc(t[label]) + ' <span class="note-sm mono">' + cards.length + '</span></th>' +
       [2, 4, 6, 8].map(turn => '<td class="mono">' + Math.round(drawOdds(deck, cards.length, 6 + turn) * 100) + '%</td>').join('') + '</tr>').join('') +
     '</tbody></table></div></details>';
+}
+
+function tempoLead(r, t) {
+  const g = r.profile.goldfish;
+  const parts = [g.commanderTurn !== null ? t.gfCommander.replace('%v', g.commanderTurn) : '',
+    g.winBy ? (g.winTurn !== null ? t.gfWin.replace('%v', g.winTurn) : t.gfNoWin) + ' ' +
+      t.gfWinBy.replace('%a', g.winBy[6]).replace('%b', g.winBy[8]).replace('%c', g.winBy[10]) : ''];
+  return parts.some(Boolean) ? '<p class="pf-lead">' + esc(parts.filter(Boolean).join(' ')) + '</p>' : '';
+}
+
+// Salt means little as a bare number, so say where it sits among the pod's decks.
+function saltRank(salt, t) {
+  const pod = state.study ? state.study.decks.filter(d => d.group === 'pod').map(d => d.salt.total) : [];
+  return salt && pod.length ? fill(t.pfSaltRank, { v: Math.round(pod.filter(x => x < salt.total).length / pod.length * 100) }) : '';
 }
 
 function manaBlock(m, t) {
@@ -141,7 +166,7 @@ function saltBlock(salt, t) {
   if (!salt) return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfSaltT) + '</h3><p class="note-muted">' + esc(t.brChecking) + '</p></div>';
   return '<div class="pf-block"><h3 class="mini-title">' + esc(t.pfSaltT) + ' · <span class="mono">' + salt.total + '</span></h3>' +
     '<p class="note-sm">' + esc(t.pfSaltX.replace('%a', salt.average)) + '</p>' +
-    (salt.top.length ? '<ul class="pf-list">' + salt.top.map(c => '<li>' + esc(c.name) + ' <b class="mono">' + c.salt + '</b></li>').join('') + '</ul>' : '') + '</div>';
+    (salt.top.length ? '<ul class="pf-list">' + salt.top.slice(0, 5).map(c => '<li>' + esc(c.name) + ' <b class="mono">' + c.salt + '</b></li>').join('') + '</ul>' : '') + '</div>';
 }
 
 function synergyBlock(s, t) {
@@ -173,13 +198,13 @@ export function renderProfile() {
   const waiting = !profile.wins.checked;
   root.innerHTML = '<div class="panel panel-pad-lg">' +
     '<div class="combo-stats">' +
-      tile(t.pfPower, waiting ? '…' : power.score + ' <span class="stat-cap">/ 10</span>', waiting ? t.brPending : t['band_' + powerBand(power.score)]) +
-      tile(t.pfSalt, salt ? salt.total : '…', med('pod', 'salt_total') !== null ? t.pfVsPod.replace('%v', med('pod', 'salt_total')) : '') +
+      tile(t.pfPractical, waiting ? '…' : esc(r.verdict.bracket) + ' <span class="stat-cap">' + power.score + ' / 10</span>', waiting ? t.brPending : t['band_' + powerBand(power.score)]) +
+      tile(t.pfSalt, salt ? salt.total : '…', saltRank(salt, t)) +
       tile(t.pfSyn, synergy.status === 'done' ? synergy.coverage + '%' : synergy.status === 'loading' ? '…' : '—', t.pfSynSub) +
       tile(t.pfMana, profile.manabase.score, t.pfManaSub) +
     '</div>' +
-    fingerprint(power, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) + tempo(r, t) +
+    fingerprint(power, t) + tempoLead(r, t) + pillars(power, t) + benchmarks(power, t) + keyCards(power, t) + tempo(r, t) +
     '<div class="pf-grid">' + manaBlock(profile.manabase, t) + saltBlock(salt, t) + synergyBlock(synergy, t) + shapeBlock(profile, t) + '</div>' +
-    '<details class="br-legend" open><summary>' + esc(t.pfCompareT) + '</summary>' + comparison(r, t) + '</details>' +
+    comparison(r, t) +
     '<p class="note-sm">' + esc(t.pfNote) + '</p></div>';
 }

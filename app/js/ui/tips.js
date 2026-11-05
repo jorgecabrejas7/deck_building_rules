@@ -3,11 +3,11 @@ import { state, cardCache } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { BLOCK_MSG, CATS, dialName } from './constants.js';
-import { $, esc, archKey, catLabel } from './helpers.js';
+import { $, esc, archKey, bannedCards, catLabel, fill } from './helpers.js';
 import { bindSugPopovers } from './popover.js';
-import { buildTip } from '../pipeline.js';
+import { compositionHtml } from './verdict.js';
 import { compSlots, tagCount } from './comp.js';
-import { orderedCuts, powerUpOptions, roomCuts, fetchUpgradeCards, deckColorIdentity, synergyAdvice, UPGRADE_QUERIES } from '../advice.js';
+import { powerUpOptions, roomCuts, fetchUpgradeCards, deckColorIdentity, synergyAdvice, UPGRADE_QUERIES } from '../advice.js';
 
 // Compact "why this card" line: rank · price · speed. One glance, no prose.
 function whyAdd(c) {
@@ -25,24 +25,20 @@ function whyCut(x) {
 function fmtRank(r) { return r >= 1000 ? Math.round(r / 1000) + 'k' : String(r); }
 const frontFace = n => n.split(' // ')[0];
 
-// Suggestion tile: card image + name + why + a direct cut to make room.
-// x.why overrides the generic stat line (synergy picks bring their own reason);
-// x.cost labels the pod-point price of adding the card; x.cutWhy explains the cut.
+// Suggestion row: art thumb, name, why, and the direct cut that makes room. The full
+// card opens on hover or tap, so the art never outweighs the verdict.
 function bigSugTile(c, cut, x = {}) {
   const t = T();
   const price = c.price != null ? '€' + c.price : '';
-  const img = c.img_normal
-    ? '<img src="' + c.img_normal + '" loading="lazy" class="sug-img" alt="">'
-    : '<div class="sug-ph">' + esc(c.name) + '</div>';
-  return '<div class="sugTile sug-tile" data-img="' + esc(c.img_normal || '') + '" data-name="' + esc(c.name) + '">' + img +
-    '<div class="sug-name">' + esc(c.name) +
-    (price ? ' <span class="mono chip-price">' + price + '</span>' : '') +
-    (x.cost ? ' <span class="mono sug-pts">+' + x.cost + ' pt' + (x.cost > 1 ? 's' : '') + '</span>' : '') + '</div>' +
+  return '<div class="sugTile sug-tile" data-img="' + esc(c.img_normal || '') + '" data-name="' + esc(c.name) + '">' +
+    '<span class="sug-thumb"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
+    '<div class="sug-body"><div class="sug-name">' + esc(c.name) +
+    (price ? ' <span class="mono chip-price">' + price + '</span>' : '') + '</div>' +
     '<div class="sug-why">' + esc(x.why || whyAdd(c)) + '</div>' +
     (cut ? '<div class="sug-cut">✂ ' + esc(t.tipsSwap) + ': <b>' + esc(cut.name) + '</b>' +
       (x.cutWhy ? ' <span class="why">(' + esc(x.cutWhy) + ')</span>'
         : cut.card && cut.card.edhrec_rank ? ' <span class="mono">#' + fmtRank(cut.card.edhrec_rank) + '</span>' : '') + '</div>' : '') +
-    '</div>';
+    '</div></div>';
 }
 
 function sugChip(c) {
@@ -53,7 +49,7 @@ function sugChip(c) {
 }
 
 function tipsKey() {
-  return state.result.stats.total_price_eur + '|' + state.result.stats.total_cards + '|' + archKey() + '|' + state.lang + '|' + state.fetchSt + '|' + (state.combosData ? state.combosData.status : '');
+  return state.result.verdict.tier + '|' + state.result.verdict.score + '|' + state.result.stats.total_price_eur + '|' + state.result.stats.total_cards + '|' + archKey() + '|' + state.lang + '|' + state.fetchSt + '|' + (state.combosData ? state.combosData.status : '');
 }
 
 function retryRow() {
@@ -70,8 +66,24 @@ function slotState() {
     many: slots.filter(sl => sl.v > sl.max) };
 }
 
+// The way back into the pod, with power after each cut. Banned cards go first: they
+// keep a deck out at any power. Honest when the listed cuts don't get there.
+function cutPlanHtml(r, t) {
+  const plan = r.cutPlan, banned = bannedCards(r);
+  const steps = plan ? plan.steps.filter(st => !st.banned && st.card !== 'undefined') : [];
+  const row = (card, tail) => {
+    const c = cardCache[card] || Object.values(cardCache).find(x => x && String(x.name).split(' // ')[0] === card) || { name: card };
+    return '<li class="plan-step">' + sugChip({ name: card, price: c.price, img_art: c.img_art, img_normal: c.img_normal }) +
+      '<span class="plan-after">' + tail + '</span></li>';
+  };
+  return '<ol class="plan-list">' +
+    banned.map(n => row(n, esc(t.planBanned))).join('') +
+    steps.map(st => row(st.card, '<span class="mono">→ ' + st.power + '</span>')).join('') + '</ol>' +
+    (plan ? '<p class="note-sm">' + esc(plan.reaches ? fill(t.planReaches, { v: plan.final, m: r.verdict.limits.tier2_max }) : fill(t.planShort, { v: plan.final, m: r.verdict.limits.tier2_max })) + '</p>' : '');
+}
+
 export function renderTips() {
-  const t = T(), r = state.result, lang = state.lang, ev = r.evalRes;
+  const t = T(), r = state.result, v = r.verdict;
   // #tipsMain/#tipsUp/#tipsComp are static shells (index.html); the async ones
   // are aria-live, so swapping their innerHTML announces loading → results.
   if (state.tipsCache && state.tipsCache.key === tipsKey()) {
@@ -81,41 +93,12 @@ export function renderTips() {
     bindTips();
     return;
   }
-  // sync skeleton first: verdict + point-shedding cuts (headline only when the
-  // deck is over pod level; otherwise collapsed — synergy advice is the default)
-  let html = '<h2 class="secT secT-lg">' + t.tipsT + '</h2>' +
-    '<div class="tip-note">' + esc(buildTip()) + '</div>';
-  const cuts = orderedCuts(r);
-  if (cuts.length || ev.violations.length) {
-    // headline framing: how many points (and/or violations) stand between the
-    // deck and the target level — carried over from the old Poder advice box
-    const es = lang === 'es';
-    const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
-    const need = ev.tier === 'above' ? Math.max(ev.points - t2, 0) : Math.max(ev.points - t1, 0);
-    const needTxt = ev.tier === 'above'
-      ? (ev.violations.length ? (es ? 'arregla las violaciones' : 'fix the violations') + (need ? ' · −' + need + ' pts' : '') : '−' + need + ' pts')
-      : need > 0 ? '−' + need + ' pt' + (need > 1 ? 's' : '') : '';
-    const list = '<h3 class="secT">' + (ev.tier === 'above' ? t.advDownPod : t.advDownT1) +
-      (needTxt ? ' <span class="mono adv-need">' + needTxt + '</span>' : '') + '</h3>' +
-      '<div class="stack-8">' + cuts.slice(0, 10).map((c, i) => {
-        const card = cardCache[c.name] || { name: c.name };
-        return '<div class="tips-block"><div class="tips-block-head">' +
-          '<span class="mono">' + (i + 1) + '.</span>' +
-          '<div class="chip-row">' + sugChip({ name: c.name, price: card.price, img_art: card.img_art, img_normal: card.img_normal }) + '</div>' +
-          '<span class="mono">' + (c.dPts > 0 ? '−' + c.dPts + ' pts' : '') +
-          (c.fixes ? (c.dPts > 0 ? ' · ' : '') + '✕→✓' : '') + '</span></div>' +
-          '<div class="up-note">' + esc(dialName(c.dial, lang)) +
-          (card.edhrec_rank ? ' · EDHREC #' + fmtRank(card.edhrec_rank) : '') +
-          (c.tier !== ev.tier ? ' · ' + (lang === 'es' ? 'te deja en' : 'drops you to') + ' ' + t[c.tier].split(' · ')[0] : '') +
-          '</div></div>';
-      }).join('') + '</div>' +
-      '<div class="adv-note">' + t.advCutOrder + '</div>';
-    html += ev.tier === 'above' ? list
-      : '<details class="adv-disclosure"><summary>' + t.downToggle + '</summary>' +
-        '<div class="adv-disc-body">' + list + '</div></details>';
-  }
-  $('tipsMain').innerHTML = html;
-  $('tipsUp').innerHTML = '<h2 class="secT secT-lg">' + t.synT + '</h2><div class="note-muted">' + t.tipsLoading + '</div>';
+  // Out of the pod: only the route back. In the pod: nothing to cut, so the synergy
+  // swaps below are the whole plan and this stays one line.
+  $('tipsMain').innerHTML = v.tier === 'above' && !v.pending
+    ? '<h3 class="secT secT-lg">' + esc(fill(t.planOutT, { v: v.score })) + '</h3>' + cutPlanHtml(r, t)
+    : '<p class="plan-note">' + esc(v.pending ? t.vPending : t['planIn_' + v.tier]) + '</p>';
+  $('tipsUp').innerHTML = '<h3 class="secT secT-lg">' + t.synT + '</h3><div class="note-muted">' + t.tipsLoading + '</div>';
   renderCompBrief();
   bindTips();
   fillAsync();
@@ -165,8 +148,8 @@ async function fillSynergy(key) {
   } else {
     const cmdShort = r.commander ? frontFace(r.commander).split(',')[0] : '';
     body += '<div class="up-note">' + esc(es
-      ? 'Las cartas que más sinergia tienen con ' + cmdShort + ' según EDHREC, ya filtradas a las reglas del pod (≤€' + RULES.hard_bans.max_card_price_eur + ', sin prohibidas) y a tu presupuesto de puntos.'
-      : 'The cards with the most synergy with ' + cmdShort + ' per EDHREC, pre-filtered to pod rules (≤€' + RULES.hard_bans.max_card_price_eur + ', no banned cards) and your points budget.') + '</div>';
+      ? 'Las cartas que más sinergia tienen con ' + cmdShort + ' según EDHREC, sin prohibidas ni cartas de más de €' + RULES.hard_bans.max_card_price_eur + '.'
+      : 'The cards with the most synergy with ' + cmdShort + ' per EDHREC, leaving out banned cards and anything over €' + RULES.hard_bans.max_card_price_eur + '.') + '</div>';
     const podBanned = new Set(Object.values(RULES.hard_bans.banned_cards).flat());
     const used = new Set();
     // pair each add with the least plan-relevant unused cut; prefer a same-
@@ -180,7 +163,7 @@ async function fillSynergy(key) {
       if (found) used.add(found.x.name);
       return found;
     };
-    body += '<div class="sug-grid">' + data.picks.map(p => {
+    const tiles = data.picks.map(p => {
       const cut = pickCut(p);
       const why = [(es ? 'sinergia +' : 'synergy +') + Math.round(p.synergy * 100) + '%']
         .concat(p.incl !== null ? [es
@@ -196,40 +179,23 @@ async function fillSynergy(key) {
           // reads like a reason to KEEP the card
           : (es ? 'sinergia ' : 'synergy ') + (cut.syn >= 0 ? '+' : '') + Math.round(cut.syn * 100) + '%' +
             (cut.syn >= 0 ? ' · ' + t.cutCompare : '');
-      return bigSugTile(p.card, cut ? { name: cut.x.name, card: cut.x.card } : null, { why, cost: p.cost, cutWhy });
-    }).join('') + '</div>';
+      return bigSugTile(p.card, cut ? { name: cut.x.name, card: cut.x.card } : null, { why, cutWhy });
+    });
+    body += '<div class="sug-grid">' + tiles.slice(0, 3).join('') + '</div>' +
+      (tiles.length > 3 ? '<details class="adv-disclosure"><summary>' + esc(fill(t.sugMore, { v: tiles.length - 3 })) + '</summary>' +
+        '<div class="adv-disc-body sug-grid">' + tiles.slice(3).join('') + '</div></details>' : '');
   }
-  // tier-up advice is opt-in: collapsed, fetched only on demand
-  body += '<details class="adv-disclosure" data-up-lazy><summary>' + t.tierUpToggle + '</summary>' +
+  // tier-up advice is opt-in: collapsed, fetched only on demand, and pointless out of the pod
+  if (r.verdict.tier !== 'above') body += '<details class="adv-disclosure" data-up-lazy><summary>' + t.tierUpToggle + '</summary>' +
     '<div class="adv-disc-body" data-up-body><div class="note-muted">' + t.tipsLoading + '</div></div></details>';
-  el.innerHTML = '<h2 class="secT secT-lg">' + t.synT + '</h2>' + body;
+  el.innerHTML = '<h3 class="secT secT-lg">' + t.synT + '</h3>' + body;
   bindTips();
   return failNote ? 'degrade' : 'ok';
 }
 
-// ---- composition status: honest diagnosis, demoted to a secondary note ----
+// ---- composition status: honest diagnosis, folded away as quiet polish ----
 function renderCompBrief() {
-  const t = T(), lang = state.lang, es = lang === 'es', r = state.result;
-  const { few, many } = slotState();
-  let body = '';
-  // canonical composition notation everywhere: "Estado · valor/min–max"
-  for (const sl of few)
-    body += '<div class="over-line"><b>' + catLabel(sl.cat, lang) + '</b> — <span class="few">' + t.few + '</span> · ' +
-      sl.v + '/' + sl.min + '–' + sl.max + '</div>';
-  for (const m of many) {
-    const cands = r.cardsInfo
-      .filter(x => (x.cls.cat === m.cat || x.cls.tags.includes(m.cat)) && x.cls.type !== 'L')
-      .sort((a, b) => (b.card.edhrec_rank || 1e9) - (a.card.edhrec_rank || 1e9)).slice(0, 3);
-    body += '<div class="over-line"><b>' + catLabel(m.cat, lang) + '</b> — ' + t.many + ' · ' + m.v + '/' + m.min + '–' + m.max +
-      ' — ' + t.tipsCutLabel + ': ' +
-      cands.map(x => esc(x.name) + (whyCut(x) ? ' <span class="why">(' + esc(whyCut(x)) + ')</span>' : '')).join(' · ') + '</div>';
-  }
-  if (few.length)
-    body += '<div class="up-note">' + (es
-      ? 'Las sugerencias de arriba marcadas «' + t.synCovers + ' …» llenan estos huecos con cartas que además hacen sinergia.'
-      : 'Suggestions above marked "' + t.synCovers + ' …" fill these gaps with cards that are also synergistic.') + '</div>';
-  if (!body) body = '<div class="over-line">' + t.tipsNone + '</div>';
-  $('tipsComp').innerHTML = '<h2 class="secT secT-lg">' + t.tipsComp + '</h2>' + body;
+  $('tipsComp').innerHTML = compositionHtml();
 }
 
 // ---- degraded path: category suggestions when synergy data is unavailable ----
@@ -260,31 +226,24 @@ async function fillCompFull(key) {
   const el = $('tipsComp');
   if (!el || tipsKey() !== key) return;
   if (few.length) {
-    el.innerHTML = '<h2 class="secT secT-lg">' + t.tipsComp + '</h2>' + body;
+    el.innerHTML = compositionHtml() + body;
     bindTips();
   }
 }
 
 // ---- tier-up options (opt-in): concrete cards per open upgrade path ----
 async function fillUpgrades(details, key) {
-  const t = T(), r = state.result, lang = state.lang, es = lang === 'es';
-  const { room, options } = powerUpOptions(r);
+  const t = T(), r = state.result, lang = state.lang;
+  const { options } = powerUpOptions(r);
   const many = slotState().many;
   const cutPool = roomCuts(r, many.map(m => m.cat), 12);
   let body = '', failed = false, cutIdx = 0;
-  if (r.evalRes.tier === 'above') {
-    body = '<div class="note-muted">' + (es ? 'Primero baja al nivel del pod (ver arriba).' : 'First get back to pod level (see above).') + '</div>';
-  } else if (room <= 0) {
-    body = '<div class="note-muted">' + t.tipsUpNone + '</div>';
-  } else {
+  {
     body += '<div class="up-note">' + esc(t.tipsUpFrame) + '</div>';
-    body += '<div class="up-note">' + (es
-      ? 'Margen: ' + room + ' pt' + (room !== 1 ? 's' : '') + ' hasta el tope de Tier 2 (≤' + RULES.tiers.tier2.max_points + '). Cartas de <€10 para no tocar las bandas de precio.'
-      : 'Headroom: ' + room + ' pt' + (room !== 1 ? 's' : '') + ' to the Tier 2 cap (≤' + RULES.tiers.tier2.max_points + '). Cards under €10 so price bands stay untouched.') + '</div>';
     // paid upgrades are the point of climbing; free dial headroom comes after
-    const affordable = options.filter(o => !o.blocked && o.cost <= room && UPGRADE_QUERIES[o.dial]);
-    const open = [...affordable.filter(o => o.cost > 0).sort((a, b) => a.cost - b.cost),
-      ...affordable.filter(o => o.cost === 0)].slice(0, 3);
+    const usable = options.filter(o => !o.blocked && UPGRADE_QUERIES[o.dial]);
+    const open = [...usable.filter(o => o.cost > 0).sort((a, b) => a.cost - b.cost),
+      ...usable.filter(o => o.cost === 0)].slice(0, 3);
     const suggested = [];
     for (const o of open) {
       let cards = [];
@@ -301,7 +260,7 @@ async function fillUpgrades(details, key) {
         }).join('') + '</div></div>';
     }
     const comboOpt = options.find(o => o.dial === 'combos');
-    if (comboOpt && !comboOpt.blocked && comboOpt.cost <= room) {
+    if (comboOpt && !comboOpt.blocked) {
       const cmd = r.commander ? frontFace(r.commander) : '';
       body += '<div class="up-note">∞ ' + esc(t.tipsComboHint) + (cmd
         ? ' <a href="https://commanderspellbook.com/search/?q=' + encodeURIComponent('"' + cmd + '"') + '" target="_blank" rel="noopener">Commander Spellbook ↗</a>' : '') + '</div>';

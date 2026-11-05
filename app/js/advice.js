@@ -54,11 +54,9 @@ export function upgradePenalty(dial, stats) {
 // Dials that make sense as deliberate power upgrades, strongest-feel first.
 const UP_DIALS = ['game_changers', 'tutors', 'combos', 'extra_turns', 'fast_mana', 'free_spells', 'counterspells', 'board_wipes', 'price_10_20', 'price_20_30'];
 
-// All upgrade paths toward Tier 2: point cost of the next unit, whether a
-// conditional blocks it, and the room left in the Tier 2 budget.
+// Upgrade paths: point cost of the next unit and whether a conditional blocks it.
 export function powerUpOptions(result) {
-  const stats = result.stats, ev = result.evalRes;
-  const room = RULES.tiers.tier2.max_points - ev.points;
+  const stats = result.stats;
   const options = [];
   for (const dial of UP_DIALS) {
     const spec = RULES.dials[dial];
@@ -75,24 +73,7 @@ export function powerUpOptions(result) {
       cost: dialUnitCost(dial, value) + upgradePenalty(dial, stats),
       blocked: upgradeBlock(dial, stats) });
   }
-  return { room, options };
-}
-
-// Cut candidates to shed points, best cut first: violation-fixers, then most
-// points freed, then (tie) the least-played card per EDHREC.
-export function orderedCuts(result) {
-  const rank = n => (cardCache[n] && cardCache[n].edhrec_rank) || 0;
-  const seen = new Map();
-  for (const [dial, list] of Object.entries(result.evalRes.driving)) {
-    for (const [n] of list) {
-      const wi = result.whatIf[n];
-      if (!wi || (wi.dPts <= 0 && !wi.fixes)) continue;
-      const cur = seen.get(n);
-      if (!cur || wi.dPts > cur.dPts) seen.set(n, { name: n, dial, dPts: wi.dPts, fixes: wi.fixes, tier: wi.tier });
-    }
-  }
-  return [...seen.values()].sort((a, b) =>
-    (b.fixes ? 1 : 0) - (a.fixes ? 1 : 0) || b.dPts - a.dPts || rank(b.name) - rank(a.name));
+  return { options };
 }
 
 // Cut candidates to MAKE ROOM for an addition (not about points): cards from
@@ -233,7 +214,6 @@ export async function synergyAdvice(result, shortfallCats, limit = 6) {
   persistCache();
   const ci = new Set(deckColorIdentity(result));
   const cap = RULES.hard_bans.max_card_price_eur;
-  const budget = Math.max(RULES.tiers.tier2.max_points - result.evalRes.points, 0);
   const short = new Set(shortfallCats || []);
   const picks = [];
   for (const s of pool) {
@@ -244,7 +224,7 @@ export async function synergyAdvice(result, shortfallCats, limit = 6) {
     if ((card.type_line || '').includes('Land')) continue;
     if (![...(card.color_identity || [])].every(c => ci.has(c))) continue;
     const cost = cardAddCost(card, result.stats);
-    if (cost === null || cost > budget) continue;
+    if (cost === null) continue;
     const cls = PodEngine.classifyCard(card);
     const fills = [cls.cat, ...cls.tags].find(c => short.has(c)) || null;
     picks.push({ card, cls, cost, fills, synergy: s.s, incl: s.pd ? s.nd / s.pd : null,

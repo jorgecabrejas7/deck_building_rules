@@ -66,7 +66,7 @@ export function renderCurve() {
     ['W', 'U', 'B', 'R', 'G'].filter(k => pipCnt[k] > 0).map(k => {
       const pc = Math.round(pipCnt[k] / pipTot * 100);
       const bar = k === 'W' ? 'oklch(0.8 0.07 95)' : PIP[k];
-      return '<div class="pip-row"><div class="pip-dot" style="--pip:' + PIP[k] + '"></div>' +
+      return '<div class="pip-row"><span class="mono pip-letter">' + k + '</span><div class="pip-dot" style="--pip:' + PIP[k] + '" aria-hidden="true"></div>' +
         '<div class="pip-track"><div class="pip-fill" style="--w:' + pc + '%;--c:' + bar + '"></div></div>' +
         '<span class="mono pip-pct">' + pc + '%</span></div>';
     }).join('') + '</div></div>';

@@ -4,16 +4,16 @@
  "labelled": 0,
  "groups": {
   "precon": 36,
-  "podIn": 7,
-  "podOut": 13,
+  "podIn": 16,
+  "podOut": 4,
   "cedh": 8
  },
  "medians": {
   "precon": {
-   "power": 2.85,
-   "pillar_consistency": 3.5,
+   "power": 3.15,
+   "pillar_consistency": 0,
    "pillar_efficiency": 25,
-   "pillar_interaction": 19,
+   "pillar_interaction": 26,
    "pillar_wins": 0,
    "salt_total": 22.45,
    "salt_average": 0.29,
@@ -29,7 +29,7 @@
    "ramp": 13,
    "fast_mana": 5,
    "draw": 15,
-   "tutors": 2.5,
+   "tutors": 0,
    "recursion": 4.5,
    "counters": 0,
    "removal": 9.5,
@@ -40,17 +40,17 @@
    "ending_combos": 0,
    "win_turn": null,
    "commander_turn": 4,
-   "mana_turn_4": 4.5,
+   "mana_turn_4": 4.6,
    "two_card_ending": 0,
    "game_changers": 0,
    "price": 68.23,
    "points": 0
   },
   "pod": {
-   "power": 3.25,
-   "pillar_consistency": 3,
+   "power": 4,
+   "pillar_consistency": 0,
    "pillar_efficiency": 35,
-   "pillar_interaction": 25,
+   "pillar_interaction": 34.5,
    "pillar_wins": 0,
    "salt_total": 26.85,
    "salt_average": 0.34,
@@ -66,7 +66,7 @@
    "ramp": 14,
    "fast_mana": 5.5,
    "draw": 12.5,
-   "tutors": 2,
+   "tutors": 1,
    "recursion": 3.5,
    "counters": 1,
    "removal": 9,
@@ -75,20 +75,20 @@
    "stax": 1,
    "combos": 0,
    "ending_combos": 0,
-   "win_turn": 7,
+   "win_turn": null,
    "commander_turn": 4,
-   "mana_turn_4": 4.45,
+   "mana_turn_4": 4.5,
    "two_card_ending": 0,
    "game_changers": 0,
    "price": 179.18,
    "points": 7
   },
   "cedh": {
-   "power": 9.9,
-   "pillar_consistency": 100,
+   "power": 9.7,
+   "pillar_consistency": 89.5,
    "pillar_efficiency": 93.5,
-   "pillar_interaction": 93.5,
-   "pillar_wins": 100,
+   "pillar_interaction": 91.5,
+   "pillar_wins": 81,
    "salt_total": 86.3,
    "salt_average": 0.9,
    "synergy_coverage": 89,
@@ -103,7 +103,7 @@
    "ramp": 23.5,
    "fast_mana": 13.5,
    "draw": 10,
-   "tutors": 16,
+   "tutors": 14.5,
    "recursion": 3.5,
    "counters": 10,
    "removal": 9,
@@ -111,7 +111,7 @@
    "cheap_answers": 11,
    "stax": 12,
    "combos": 5.5,
-   "ending_combos": 4,
+   "ending_combos": 5,
    "win_turn": 4,
    "commander_turn": 3,
    "mana_turn_4": 4.3,
@@ -125,121 +125,121 @@
   {
    "key": "power",
    "medians": {
-    "precon": 2.85,
-    "podIn": 3.2,
-    "podOut": 3.3,
-    "cedh": 9.9
+    "precon": 3.15,
+    "podIn": 4,
+    "podOut": 6.05,
+    "cedh": 9.7
    },
-   "precon_vs_pod": 0.68,
-   "podIn_vs_podOut": 0.53,
-   "pod_vs_cedh": 0.98
+   "precon_vs_pod": 0.83,
+   "podIn_vs_podOut": 1,
+   "pod_vs_cedh": 0.99
   },
   {
    "key": "pillar_consistency",
    "medians": {
-    "precon": 3.5,
+    "precon": 0,
     "podIn": 0,
-    "podOut": 3,
-    "cedh": 100
+    "podOut": 0,
+    "cedh": 89.5
    },
-   "precon_vs_pod": 0.48,
-   "podIn_vs_podOut": 0.56,
+   "precon_vs_pod": 0.54,
+   "podIn_vs_podOut": 0.6,
    "pod_vs_cedh": 1
   },
   {
    "key": "pillar_efficiency",
    "medians": {
     "precon": 25,
-    "podIn": 34,
-    "podOut": 36,
+    "podIn": 32,
+    "podOut": 51.5,
     "cedh": 93.5
    },
    "precon_vs_pod": 0.72,
-   "podIn_vs_podOut": 0.57,
+   "podIn_vs_podOut": 0.95,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "pillar_interaction",
    "medians": {
-    "precon": 19,
-    "podIn": 23,
-    "podOut": 26,
-    "cedh": 93.5
+    "precon": 26,
+    "podIn": 33,
+    "podOut": 48.5,
+    "cedh": 91.5
    },
-   "precon_vs_pod": 0.7,
-   "podIn_vs_podOut": 0.59,
-   "pod_vs_cedh": 0.99
+   "precon_vs_pod": 0.67,
+   "podIn_vs_podOut": 0.8,
+   "pod_vs_cedh": 0.98
   },
   {
    "key": "pillar_wins",
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 0,
-    "cedh": 100
+    "podOut": 66,
+    "cedh": 81
    },
-   "precon_vs_pod": 0.51,
-   "podIn_vs_podOut": 0.54,
-   "pod_vs_cedh": 0.9
+   "precon_vs_pod": 0.57,
+   "podIn_vs_podOut": 1,
+   "pod_vs_cedh": 0.93
   },
   {
    "key": "salt_total",
    "medians": {
     "precon": 22.45,
-    "podIn": 23.4,
-    "podOut": 29,
+    "podIn": 25.55,
+    "podOut": 32.8,
     "cedh": 86.3
    },
    "precon_vs_pod": 0.78,
-   "podIn_vs_podOut": 0.78,
+   "podIn_vs_podOut": 0.89,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "salt_average",
    "medians": {
     "precon": 0.29,
-    "podIn": 0.32,
-    "podOut": 0.34,
+    "podIn": 0.33,
+    "podOut": 0.43,
     "cedh": 0.9
    },
    "precon_vs_pod": 0.82,
-   "podIn_vs_podOut": 0.71,
+   "podIn_vs_podOut": 0.96,
    "pod_vs_cedh": 1
   },
   {
    "key": "synergy_coverage",
    "medians": {
     "precon": 100,
-    "podIn": 87,
-    "podOut": 71,
+    "podIn": 79,
+    "podOut": 67.5,
     "cedh": 89
    },
    "precon_vs_pod": 0.12,
-   "podIn_vs_podOut": 0.23,
+   "podIn_vs_podOut": 0.36,
    "pod_vs_cedh": 0.69
   },
   {
    "key": "synergy_average",
    "medians": {
     "precon": 40.5,
-    "podIn": 36,
-    "podOut": 18,
+    "podIn": 23,
+    "podOut": 19.5,
     "cedh": 33
    },
    "precon_vs_pod": 0.15,
-   "podIn_vs_podOut": 0.24,
+   "podIn_vs_podOut": 0.34,
    "pod_vs_cedh": 0.61
   },
   {
    "key": "manabase_score",
    "medians": {
     "precon": 74.5,
-    "podIn": 86,
-    "podOut": 82,
+    "podIn": 81,
+    "podOut": 91.5,
     "cedh": 100
    },
    "precon_vs_pod": 0.75,
-   "podIn_vs_podOut": 0.49,
+   "podIn_vs_podOut": 0.85,
    "pod_vs_cedh": 0.96
   },
   {
@@ -251,7 +251,7 @@
     "cedh": 100
    },
    "precon_vs_pod": 0.48,
-   "podIn_vs_podOut": 0.57,
+   "podIn_vs_podOut": 0.53,
    "pod_vs_cedh": 0.53
   },
   {
@@ -259,11 +259,11 @@
    "medians": {
     "precon": 83,
     "podIn": 82,
-    "podOut": 82,
+    "podOut": 95.5,
     "cedh": 100
    },
    "precon_vs_pod": 0.53,
-   "podIn_vs_podOut": 0.59,
+   "podIn_vs_podOut": 0.87,
    "pod_vs_cedh": 0.95
   },
   {
@@ -271,47 +271,47 @@
    "medians": {
     "precon": 2,
     "podIn": 2,
-    "podOut": 1,
+    "podOut": 0,
     "cedh": 7
    },
    "precon_vs_pod": 0.34,
-   "podIn_vs_podOut": 0.49,
+   "podIn_vs_podOut": 0.36,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "lands",
    "medians": {
     "precon": 38,
-    "podIn": 37,
-    "podOut": 36,
+    "podIn": 36.5,
+    "podOut": 33,
     "cedh": 27.5
    },
    "precon_vs_pod": 0.22,
-   "podIn_vs_podOut": 0.4,
+   "podIn_vs_podOut": 0.32,
    "pod_vs_cedh": 0.01
   },
   {
    "key": "avg_mv",
    "medians": {
     "precon": 3.5,
-    "podIn": 2.86,
-    "podOut": 3.03,
+    "podIn": 3.01,
+    "podOut": 2.73,
     "cedh": 1.97
    },
    "precon_vs_pod": 0.26,
-   "podIn_vs_podOut": 0.6,
+   "podIn_vs_podOut": 0.24,
    "pod_vs_cedh": 0.06
   },
   {
    "key": "cheap_plays",
    "medians": {
     "precon": 20.5,
-    "podIn": 26,
-    "podOut": 24,
+    "podIn": 24,
+    "podOut": 33.5,
     "cedh": 50.5
    },
    "precon_vs_pod": 0.73,
-   "podIn_vs_podOut": 0.43,
+   "podIn_vs_podOut": 0.8,
    "pod_vs_cedh": 0.99
   },
   {
@@ -323,7 +323,7 @@
     "cedh": 23.5
    },
    "precon_vs_pod": 0.55,
-   "podIn_vs_podOut": 0.54,
+   "podIn_vs_podOut": 0.53,
    "pod_vs_cedh": 0.86
   },
   {
@@ -331,71 +331,71 @@
    "medians": {
     "precon": 5,
     "podIn": 5,
-    "podOut": 6,
+    "podOut": 7.5,
     "cedh": 13.5
    },
    "precon_vs_pod": 0.56,
-   "podIn_vs_podOut": 0.76,
+   "podIn_vs_podOut": 0.83,
    "pod_vs_cedh": 0.95
   },
   {
    "key": "draw",
    "medians": {
     "precon": 15,
-    "podIn": 12,
-    "podOut": 13,
+    "podIn": 12.5,
+    "podOut": 12.5,
     "cedh": 10
    },
    "precon_vs_pod": 0.36,
-   "podIn_vs_podOut": 0.6,
+   "podIn_vs_podOut": 0.48,
    "pod_vs_cedh": 0.26
   },
   {
    "key": "tutors",
    "medians": {
-    "precon": 2.5,
-    "podIn": 2,
-    "podOut": 2,
-    "cedh": 16
+    "precon": 0,
+    "podIn": 1,
+    "podOut": 1,
+    "cedh": 14.5
    },
-   "precon_vs_pod": 0.4,
-   "podIn_vs_podOut": 0.33,
+   "precon_vs_pod": 0.71,
+   "podIn_vs_podOut": 0.58,
    "pod_vs_cedh": 1
   },
   {
    "key": "recursion",
    "medians": {
     "precon": 4.5,
-    "podIn": 3,
-    "podOut": 5,
+    "podIn": 3.5,
+    "podOut": 3.5,
     "cedh": 3.5
    },
    "precon_vs_pod": 0.45,
-   "podIn_vs_podOut": 0.63,
+   "podIn_vs_podOut": 0.49,
    "pod_vs_cedh": 0.48
   },
   {
    "key": "counters",
    "medians": {
     "precon": 0,
-    "podIn": 1,
-    "podOut": 2,
+    "podIn": 0.5,
+    "podOut": 3,
     "cedh": 10
    },
    "precon_vs_pod": 0.63,
-   "podIn_vs_podOut": 0.62,
+   "podIn_vs_podOut": 0.75,
    "pod_vs_cedh": 0.91
   },
   {
    "key": "removal",
    "medians": {
     "precon": 9.5,
-    "podIn": 11,
-    "podOut": 8,
+    "podIn": 8.5,
+    "podOut": 9.5,
     "cedh": 9
    },
    "precon_vs_pod": 0.44,
-   "podIn_vs_podOut": 0.15,
+   "podIn_vs_podOut": 0.46,
    "pod_vs_cedh": 0.52
   },
   {
@@ -403,23 +403,23 @@
    "medians": {
     "precon": 3,
     "podIn": 3,
-    "podOut": 3,
+    "podOut": 3.5,
     "cedh": 1
    },
    "precon_vs_pod": 0.39,
-   "podIn_vs_podOut": 0.58,
+   "podIn_vs_podOut": 0.6,
    "pod_vs_cedh": 0.2
   },
   {
    "key": "cheap_answers",
    "medians": {
     "precon": 4,
-    "podIn": 5,
-    "podOut": 4,
+    "podIn": 4,
+    "podOut": 7,
     "cedh": 11
    },
    "precon_vs_pod": 0.62,
-   "podIn_vs_podOut": 0.43,
+   "podIn_vs_podOut": 0.82,
    "pod_vs_cedh": 0.94
   },
   {
@@ -439,11 +439,11 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 0,
+    "podOut": 8,
     "cedh": 5.5
    },
    "precon_vs_pod": 0.5,
-   "podIn_vs_podOut": 0.58,
+   "podIn_vs_podOut": 0.84,
    "pod_vs_cedh": 0.81
   },
   {
@@ -451,59 +451,59 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 0,
-    "cedh": 4
+    "podOut": 5,
+    "cedh": 5
    },
-   "precon_vs_pod": 0.51,
-   "podIn_vs_podOut": 0.53,
-   "pod_vs_cedh": 0.88
+   "precon_vs_pod": 0.52,
+   "podIn_vs_podOut": 0.86,
+   "pod_vs_cedh": 0.84
   },
   {
    "key": "win_turn",
    "medians": {
     "precon": null,
     "podIn": null,
-    "podOut": 7,
+    "podOut": null,
     "cedh": 4
    },
    "precon_vs_pod": null,
    "podIn_vs_podOut": null,
-   "pod_vs_cedh": 0
+   "pod_vs_cedh": null
   },
   {
    "key": "commander_turn",
    "medians": {
     "precon": 4,
-    "podIn": 4,
-    "podOut": 5,
+    "podIn": 4.5,
+    "podOut": 4,
     "cedh": 3
    },
    "precon_vs_pod": 0.63,
-   "podIn_vs_podOut": 0.73,
+   "podIn_vs_podOut": 0.53,
    "pod_vs_cedh": 0.22
   },
   {
    "key": "mana_turn_4",
    "medians": {
-    "precon": 4.5,
-    "podIn": 4.1,
-    "podOut": 4.5,
+    "precon": 4.6,
+    "podIn": 4.5,
+    "podOut": 4.45,
     "cedh": 4.3
    },
-   "precon_vs_pod": 0.42,
-   "podIn_vs_podOut": 0.75,
-   "pod_vs_cedh": 0.38
+   "precon_vs_pod": 0.36,
+   "podIn_vs_podOut": 0.54,
+   "pod_vs_cedh": 0.36
   },
   {
    "key": "two_card_ending",
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 0,
+    "podOut": 1,
     "cedh": 2
    },
    "precon_vs_pod": 0.5,
-   "podIn_vs_podOut": 0.49,
+   "podIn_vs_podOut": 0.72,
    "pod_vs_cedh": 0.85
   },
   {
@@ -511,35 +511,35 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 0,
+    "podOut": 1,
     "cedh": 19
    },
    "precon_vs_pod": 0.61,
-   "podIn_vs_podOut": 0.73,
+   "podIn_vs_podOut": 0.8,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "price",
    "medians": {
     "precon": 68.23,
-    "podIn": 80.13,
-    "podOut": 206.79,
+    "podIn": 165.8,
+    "podOut": 237.16,
     "cedh": 1907.81
    },
    "precon_vs_pod": 0.87,
-   "podIn_vs_podOut": 0.98,
+   "podIn_vs_podOut": 0.7,
    "pod_vs_cedh": 1
   },
   {
    "key": "points",
    "medians": {
     "precon": 0,
-    "podIn": 1,
-    "podOut": 10,
+    "podIn": 5,
+    "podOut": 30,
     "cedh": 71
    },
    "precon_vs_pod": 0.84,
-   "podIn_vs_podOut": 0.94,
+   "podIn_vs_podOut": 0.95,
    "pod_vs_cedh": 0.99
   }
  ],
@@ -553,7 +553,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier2",
+   "banned": [],
    "points": 6,
    "breakdown": {
     "free_spells": 1,
@@ -615,7 +618,7 @@
     "consistency": {
      "draw": 15,
      "cheapDraw": 6,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 2
     },
     "interaction": {
@@ -633,10 +636,12 @@
      "checked": true,
      "combos": 1,
      "infinite": 1,
-     "ending": 0,
+     "ending": 1,
      "twoCard": 0,
-     "lines": 0,
-     "fastest": null,
+     "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
+     "fastest": 12,
      "printed": 0,
      "massPump": 3
     },
@@ -661,27 +666,40 @@
       "share": 23
      },
      "creatures": 22,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 9
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.5,
-      4.1,
-      5.8,
-      6.9,
-      7.8,
-      8.6,
-      9.4,
-      10.1,
-      10.8,
-      11.4,
-      12.2
+      4.2,
+      5.9,
+      7,
+      7.9,
+      8.7,
+      9.6,
+      10.3,
+      10.9,
+      11.6,
+      12.3
      ],
      "commanderTurn": 3,
      "winTurn": null,
-     "winBy": null
+     "winBy": {
+      "4": 0,
+      "6": 0,
+      "8": 0,
+      "10": 0
+     }
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 832
     }
    },
    "salt": {
@@ -708,13 +726,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.1,
-    "raw": 15.8,
+    "score": 3.8,
+    "raw": 23,
     "pillars": {
      "consistency": 0,
      "efficiency": 38,
-     "interaction": 25,
-     "wins": 0
+     "interaction": 24,
+     "wins": 21
     }
    }
   },
@@ -728,6 +746,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -793,7 +814,7 @@
     "consistency": {
      "draw": 16,
      "cheapDraw": 6,
-     "tutors": 3,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -814,6 +835,8 @@
      "ending": 1,
      "twoCard": 1,
      "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
      "fastest": 7,
      "printed": 0,
      "massPump": 3
@@ -839,32 +862,40 @@
       "share": 17
      },
      "creatures": 36,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 5
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
-      2.7,
+      2.8,
       3.9,
-      4.8,
+      4.9,
       5.7,
-      6.4,
-      7,
-      7.6,
-      8.2,
-      8.8,
-      9.3,
-      9.9
+      6.5,
+      7.2,
+      7.8,
+      8.4,
+      9,
+      9.5,
+      10.1
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": {
       "4": 1,
-      "6": 6,
-      "8": 8,
-      "10": 11
+      "6": 1,
+      "8": 2,
+      "10": 3
      }
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 1565
     }
    },
    "salt": {
@@ -891,13 +922,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.4,
-    "raw": 19.3,
+    "score": 3.7,
+    "raw": 21.5,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 32,
-     "interaction": 10,
-     "wins": 31
+     "interaction": 23,
+     "wins": 22
     }
    }
   },
@@ -910,7 +941,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier2",
+   "banned": [],
    "points": 4,
    "breakdown": {
     "extra_turns": 3,
@@ -979,7 +1013,7 @@
     "consistency": {
      "draw": 27,
      "cheapDraw": 8,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 1
     },
     "interaction": {
@@ -1000,6 +1034,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 3,
      "massPump": 0
@@ -1025,7 +1061,11 @@
       "share": 22
      },
      "creatures": 27,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
@@ -1033,19 +1073,23 @@
       1.2,
       2.4,
       3.5,
-      4.6,
-      5.6,
-      6.3,
-      7,
-      7.6,
-      8.3,
-      8.8,
-      9.5,
-      10
+      4.7,
+      5.7,
+      6.5,
+      7.2,
+      7.8,
+      8.4,
+      9,
+      9.6,
+      10.2
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 7,
+     "medianRank": 1529
     }
    },
    "salt": {
@@ -1072,12 +1116,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 2.9,
-    "raw": 14,
+    "score": 3.2,
+    "raw": 16.6,
     "pillars": {
      "consistency": 0,
      "efficiency": 35,
-     "interaction": 21,
+     "interaction": 26,
      "wins": 0
     }
    }
@@ -1092,6 +1136,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -1149,7 +1196,7 @@
     "consistency": {
      "draw": 16,
      "cheapDraw": 8,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 1
     },
     "interaction": {
@@ -1167,10 +1214,12 @@
      "checked": true,
      "combos": 1,
      "infinite": 1,
-     "ending": 0,
+     "ending": 1,
      "twoCard": 0,
-     "lines": 0,
-     "fastest": null,
+     "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
+     "fastest": 11,
      "printed": 0,
      "massPump": 6
     },
@@ -1195,27 +1244,40 @@
       "share": 30
      },
      "creatures": 30,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 18
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
-      2.4,
+      2.5,
       3.4,
       4.3,
-      5,
-      5.6,
-      6.1,
-      6.7,
-      7.2,
-      7.7,
-      8.2,
-      8.6
+      5.1,
+      5.7,
+      6.3,
+      6.9,
+      7.3,
+      7.9,
+      8.3,
+      8.8
      ],
      "commanderTurn": 4,
      "winTurn": null,
-     "winBy": null
+     "winBy": {
+      "4": 0,
+      "6": 0,
+      "8": 0,
+      "10": 0
+     }
+    },
+    "upgrade": {
+     "pricey": 9,
+     "medianRank": 1443
     }
    },
    "salt": {
@@ -1242,13 +1304,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2,
-    "raw": 4.8,
+    "score": 3,
+    "raw": 14.8,
     "pillars": {
      "consistency": 0,
      "efficiency": 17,
-     "interaction": 2,
-     "wins": 0
+     "interaction": 14,
+     "wins": 21
     }
    }
   },
@@ -1261,7 +1323,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier2",
+   "banned": [],
    "points": 4,
    "breakdown": {
     "combos": 4
@@ -1329,7 +1394,7 @@
     "consistency": {
      "draw": 17,
      "cheapDraw": 4,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 2
     },
     "interaction": {
@@ -1347,9 +1412,11 @@
      "checked": true,
      "combos": 4,
      "infinite": 4,
-     "ending": 3,
-     "twoCard": 3,
+     "ending": 2,
+     "twoCard": 2,
      "lines": 1,
+     "web": 3,
+     "throughCommander": 2,
      "fastest": 12,
      "printed": 0,
      "massPump": 1
@@ -1375,7 +1442,11 @@
       "share": 36
      },
      "creatures": 28,
-     "throughCommander": 2
+     "throughCommander": 2,
+     "engine": {
+      "theme": "burn",
+      "count": 6
+     }
     },
     "goldfish": {
      "games": 500,
@@ -1384,23 +1455,27 @@
       2.3,
       3.7,
       4.7,
-      5.5,
-      6.2,
-      6.9,
-      7.4,
-      8,
-      8.5,
+      5.6,
+      6.3,
+      7,
+      7.5,
+      8.1,
+      8.6,
       9.1,
-      9.6
+      9.7
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": {
       "4": 0,
-      "6": 1,
-      "8": 4,
-      "10": 8
+      "6": 0,
+      "8": 1,
+      "10": 2
      }
+    },
+    "upgrade": {
+     "pricey": 6,
+     "medianRank": 2233
     }
    },
    "salt": {
@@ -1427,13 +1502,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4,
-    "raw": 24.5,
+    "score": 3.7,
+    "raw": 21.7,
     "pillars": {
      "consistency": 0,
      "efficiency": 22,
-     "interaction": 20,
-     "wins": 56
+     "interaction": 22,
+     "wins": 32
     }
    }
   },
@@ -1447,6 +1522,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -1512,7 +1590,7 @@
     "consistency": {
      "draw": 21,
      "cheapDraw": 9,
-     "tutors": 6,
+     "tutors": 0,
      "recursion": 11
     },
     "interaction": {
@@ -1533,6 +1611,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 4
@@ -1558,27 +1638,35 @@
       "share": 81
      },
      "creatures": 36,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 11
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
-      2.6,
-      3.7,
-      4.6,
-      5.3,
-      5.9,
-      6.5,
-      7.1,
-      7.6,
-      8.1,
-      8.6,
-      9.1
+      2.7,
+      3.8,
+      4.7,
+      5.4,
+      6.1,
+      6.7,
+      7.3,
+      7.8,
+      8.3,
+      8.8,
+      9.3
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 2424
     }
    },
    "salt": {
@@ -1605,12 +1693,12 @@
     "offPlan": 2
    },
    "power": {
-    "score": 2.3,
-    "raw": 8,
+    "score": 2.1,
+    "raw": 6.3,
     "pillars": {
-     "consistency": 14,
+     "consistency": 0,
      "efficiency": 13,
-     "interaction": 5,
+     "interaction": 10,
      "wins": 0
     }
    }
@@ -1625,6 +1713,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 1,
    "breakdown": {
     "combos": 1
@@ -1686,7 +1777,7 @@
     "consistency": {
      "draw": 10,
      "cheapDraw": 1,
-     "tutors": 5,
+     "tutors": 0,
      "recursion": 7
     },
     "interaction": {
@@ -1704,9 +1795,11 @@
      "checked": true,
      "combos": 3,
      "infinite": 3,
-     "ending": 2,
-     "twoCard": 2,
-     "lines": 1,
+     "ending": 1.5,
+     "twoCard": 1,
+     "lines": 0,
+     "web": 1.5,
+     "throughCommander": 3,
      "fastest": 11,
      "printed": 0,
      "massPump": 2
@@ -1732,32 +1825,40 @@
       "share": 24
      },
      "creatures": 33,
-     "throughCommander": 3
+     "throughCommander": 3,
+     "engine": {
+      "theme": "mill",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.4,
-      3.6,
-      4.7,
-      5.5,
-      6.3,
-      7,
-      7.6,
-      8.3,
-      8.9,
-      9.5,
-      10.1
+      3.7,
+      4.8,
+      5.7,
+      6.5,
+      7.2,
+      7.9,
+      8.5,
+      9.1,
+      9.8,
+      10.3
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": {
-      "4": 1,
-      "6": 9,
-      "8": 16,
-      "10": 22
+      "4": 0,
+      "6": 1,
+      "8": 2,
+      "10": 3
      }
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 2470
     }
    },
    "salt": {
@@ -1784,13 +1885,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4.1,
-    "raw": 26.3,
+    "score": 3.1,
+    "raw": 15.8,
     "pillars": {
-     "consistency": 11,
+     "consistency": 0,
      "efficiency": 20,
-     "interaction": 24,
-     "wins": 50
+     "interaction": 23,
+     "wins": 13
     }
    }
   },
@@ -1804,6 +1905,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -1869,7 +1973,7 @@
     "consistency": {
      "draw": 15,
      "cheapDraw": 6,
-     "tutors": 5,
+     "tutors": 2,
      "recursion": 7
     },
     "interaction": {
@@ -1890,6 +1994,8 @@
      "ending": 1,
      "twoCard": 1,
      "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
      "fastest": 18,
      "printed": 0,
      "massPump": 0
@@ -1915,32 +2021,40 @@
       "share": 39
      },
      "creatures": 23,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
-      2.5,
-      3.6,
-      4.5,
-      5.3,
-      5.9,
-      6.4,
-      7,
-      7.5,
-      8,
-      8.5,
-      9.1
+      2.6,
+      3.7,
+      4.6,
+      5.4,
+      6.1,
+      6.6,
+      7.2,
+      7.7,
+      8.3,
+      8.8,
+      9.3
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": {
       "4": 0,
       "6": 0,
-      "8": 2,
-      "10": 4
+      "8": 1,
+      "10": 2
      }
+    },
+    "upgrade": {
+     "pricey": 7,
+     "medianRank": 2046
     }
    },
    "salt": {
@@ -1967,13 +2081,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.5,
-    "raw": 20,
+    "score": 3.3,
+    "raw": 17.9,
     "pillars": {
-     "consistency": 11,
+     "consistency": 0,
      "efficiency": 8,
-     "interaction": 30,
-     "wins": 31
+     "interaction": 32,
+     "wins": 21
     }
    }
   },
@@ -1987,6 +2101,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "tier2",
+   "banned": [],
    "points": 5,
    "breakdown": {
     "stax_effects": 1,
@@ -2048,7 +2165,7 @@
     "consistency": {
      "draw": 14,
      "cheapDraw": 5,
-     "tutors": 3,
+     "tutors": 0,
      "recursion": 0
     },
     "interaction": {
@@ -2069,6 +2186,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -2094,27 +2213,35 @@
       "share": 27
      },
      "creatures": 33,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 25
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.6,
-      3.6,
-      4.5,
-      5.2,
-      5.9,
-      6.5,
-      6.9,
-      7.5,
-      8,
-      8.5,
-      8.9
+      3.7,
+      4.6,
+      5.4,
+      6.1,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.7,
+      9.2
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 13,
+     "medianRank": 1480
     }
    },
    "salt": {
@@ -2141,12 +2268,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.7,
-    "raw": 11.8,
+    "score": 4,
+    "raw": 17.9,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 27,
-     "interaction": 16,
+     "interaction": 37,
      "wins": 0
     }
    }
@@ -2161,6 +2288,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2218,7 +2348,7 @@
     "consistency": {
      "draw": 11,
      "cheapDraw": 5,
-     "tutors": 3,
+     "tutors": 0,
      "recursion": 10
     },
     "interaction": {
@@ -2239,6 +2369,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -2264,7 +2396,11 @@
       "share": 22
      },
      "creatures": 27,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "mill",
+      "count": 21
+     }
     },
     "goldfish": {
      "games": 500,
@@ -2272,19 +2408,23 @@
       1.2,
       2.5,
       3.8,
-      4.8,
-      5.6,
-      6.3,
-      6.9,
-      7.6,
-      8.1,
-      8.7,
-      9.2,
-      9.8
+      4.9,
+      5.8,
+      6.5,
+      7.2,
+      7.8,
+      8.4,
+      8.9,
+      9.5,
+      10.1
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 6,
+     "medianRank": 2398
     }
    },
    "salt": {
@@ -2311,12 +2451,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.5,
-    "raw": 10,
+    "score": 2.6,
+    "raw": 10.9,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 28,
-     "interaction": 8,
+     "interaction": 13,
      "wins": 0
     }
    }
@@ -2331,6 +2471,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2433,6 +2576,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 2
@@ -2458,7 +2603,11 @@
       "share": 92
      },
      "creatures": 36,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
@@ -2479,6 +2628,10 @@
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 2436
     }
    },
    "salt": {
@@ -2505,12 +2658,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.5,
-    "raw": 9.8,
+    "score": 2.7,
+    "raw": 12.2,
     "pillars": {
      "consistency": 0,
      "efficiency": 20,
-     "interaction": 19,
+     "interaction": 24,
      "wins": 0
     }
    }
@@ -2525,6 +2678,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2590,7 +2746,7 @@
     "consistency": {
      "draw": 21,
      "cheapDraw": 7,
-     "tutors": 3,
+     "tutors": 1,
      "recursion": 10
     },
     "interaction": {
@@ -2611,6 +2767,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 2,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -2636,27 +2794,35 @@
       "share": 14
      },
      "creatures": 28,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 10
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.4,
-      3.6,
-      4.6,
-      5.4,
-      6.1,
-      6.7,
-      7.2,
-      7.8,
-      8.3,
-      8.8,
-      9.3
+      3.7,
+      4.7,
+      5.5,
+      6.2,
+      6.8,
+      7.4,
+      7.9,
+      8.5,
+      9,
+      9.5
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 3,
+     "medianRank": 3803
     }
    },
    "salt": {
@@ -2683,13 +2849,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.4,
-    "raw": 8.8,
+    "score": 3.2,
+    "raw": 17.1,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 12,
-     "interaction": 19,
-     "wins": 0
+     "interaction": 43,
+     "wins": 4
     }
    }
   },
@@ -2702,7 +2868,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2768,7 +2937,7 @@
     "consistency": {
      "draw": 13,
      "cheapDraw": 5,
-     "tutors": 10,
+     "tutors": 5,
      "recursion": 14
     },
     "interaction": {
@@ -2789,6 +2958,8 @@
      "ending": 1,
      "twoCard": 1,
      "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
      "fastest": 5,
      "printed": 0,
      "massPump": 1
@@ -2814,32 +2985,40 @@
       "share": 19
      },
      "creatures": 31,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "sacrifice-outlet",
+      "count": 16
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.3,
-      3.5,
-      4.7,
-      5.8,
-      6.7,
-      7.5,
-      8.2,
-      8.9,
-      9.6,
-      10.3,
-      11
+      3.6,
+      4.9,
+      6,
+      7,
+      7.8,
+      8.5,
+      9.2,
+      9.9,
+      10.5,
+      11.2
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": {
-      "4": 23,
-      "6": 28,
-      "8": 31,
-      "10": 33
+      "4": 9,
+      "6": 13,
+      "8": 15,
+      "10": 17
      }
+    },
+    "upgrade": {
+     "pricey": 3,
+     "medianRank": 1180
     }
    },
    "salt": {
@@ -2866,13 +3045,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.9,
-    "raw": 24,
+    "score": 4.1,
+    "raw": 25.9,
     "pillars": {
-     "consistency": 29,
+     "consistency": 21,
      "efficiency": 25,
-     "interaction": 11,
-     "wins": 31
+     "interaction": 28,
+     "wins": 27
     }
    }
   },
@@ -2886,6 +3065,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -2951,7 +3133,7 @@
     "consistency": {
      "draw": 15,
      "cheapDraw": 6,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -2972,6 +3154,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 1,
      "massPump": 0
@@ -2997,7 +3181,11 @@
       "share": 24
      },
      "creatures": 25,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 3
+     }
     },
     "goldfish": {
      "games": 500,
@@ -3006,18 +3194,22 @@
       2.5,
       3.6,
       4.5,
-      5.3,
-      6,
-      6.6,
-      7.1,
-      7.6,
-      8.1,
-      8.7,
-      9.2
+      5.4,
+      6.1,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.8,
+      9.3
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 1508
     }
    },
    "salt": {
@@ -3044,12 +3236,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2,
-    "raw": 4.8,
+    "score": 2.1,
+    "raw": 6.3,
     "pillars": {
      "consistency": 0,
      "efficiency": 12,
-     "interaction": 7,
+     "interaction": 11,
      "wins": 0
     }
    }
@@ -3064,6 +3256,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -3129,7 +3324,7 @@
     "consistency": {
      "draw": 19,
      "cheapDraw": 5,
-     "tutors": 5,
+     "tutors": 0,
      "recursion": 19
     },
     "interaction": {
@@ -3150,6 +3345,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 1
@@ -3175,27 +3372,35 @@
       "share": 50
      },
      "creatures": 36,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 19
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.4,
-      3.5,
-      4.4,
-      5.1,
-      5.7,
-      6.2,
-      6.7,
-      7.3,
-      7.8,
-      8.3,
-      8.8
+      3.6,
+      4.5,
+      5.2,
+      5.9,
+      6.5,
+      7,
+      7.5,
+      8.1,
+      8.6,
+      9.1
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 2486
     }
    },
    "salt": {
@@ -3223,11 +3428,11 @@
    },
    "power": {
     "score": 2.6,
-    "raw": 10.8,
+    "raw": 10.7,
     "pillars": {
-     "consistency": 11,
+     "consistency": 0,
      "efficiency": 26,
-     "interaction": 6,
+     "interaction": 14,
      "wins": 0
     }
    }
@@ -3242,6 +3447,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -3307,7 +3515,7 @@
     "consistency": {
      "draw": 11,
      "cheapDraw": 6,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 6
     },
     "interaction": {
@@ -3328,6 +3536,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 1,
      "massPump": 0
@@ -3353,7 +3563,11 @@
       "share": 72
      },
      "creatures": 25,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 6
+     }
     },
     "goldfish": {
      "games": 500,
@@ -3361,19 +3575,23 @@
       1.1,
       2.3,
       3.5,
-      4.3,
-      5,
-      5.6,
-      6.2,
-      6.7,
-      7.2,
-      7.7,
-      8.2,
-      8.6
+      4.4,
+      5.1,
+      5.7,
+      6.3,
+      6.8,
+      7.3,
+      7.8,
+      8.3,
+      8.7
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 8,
+     "medianRank": 2376
     }
    },
    "salt": {
@@ -3400,12 +3618,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.3,
-    "raw": 8.3,
+    "score": 2.5,
+    "raw": 9.5,
     "pillars": {
      "consistency": 0,
      "efficiency": 26,
-     "interaction": 7,
+     "interaction": 10,
      "wins": 0
     }
    }
@@ -3419,7 +3637,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "above",
+   "banned": [],
    "points": 5,
    "breakdown": {
     "game_changers": 2,
@@ -3429,7 +3650,7 @@
     "price_cap",
     "gc_locks_price"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 155.47,
    "gc": 1,
@@ -3491,7 +3712,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 4,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -3512,6 +3733,8 @@
      "ending": 1,
      "twoCard": 0,
      "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
      "fastest": 7,
      "printed": 0,
      "massPump": 0
@@ -3537,7 +3760,11 @@
       "share": 40
      },
      "creatures": 35,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
@@ -3545,24 +3772,28 @@
       1.2,
       2.3,
       3.5,
-      4.4,
-      5.2,
-      5.9,
-      6.5,
-      7.1,
-      7.5,
-      8,
-      8.6,
-      9.1
+      4.5,
+      5.3,
+      6,
+      6.6,
+      7.2,
+      7.7,
+      8.2,
+      8.8,
+      9.3
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": {
       "4": 0,
       "6": 0,
-      "8": 1,
-      "10": 1
+      "8": 0,
+      "10": 0
      }
+    },
+    "upgrade": {
+     "pricey": 9,
+     "medianRank": 2682
     }
    },
    "salt": {
@@ -3589,13 +3820,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.3,
-    "raw": 17.5,
+    "score": 3.8,
+    "raw": 23.3,
     "pillars": {
-     "consistency": 3,
+     "consistency": 0,
      "efficiency": 25,
-     "interaction": 23,
-     "wins": 19
+     "interaction": 36,
+     "wins": 21
     }
    }
   },
@@ -3609,6 +3840,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 1,
    "breakdown": {
     "stax_effects": 1
@@ -3676,7 +3910,7 @@
     "consistency": {
      "draw": 17,
      "cheapDraw": 4,
-     "tutors": 5,
+     "tutors": 0,
      "recursion": 6
     },
     "interaction": {
@@ -3697,6 +3931,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 1
@@ -3722,27 +3958,35 @@
       "share": 39
      },
      "creatures": 23,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 13
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
-      2.4,
+      2.5,
       3.5,
-      4.3,
-      5,
-      5.7,
-      6.3,
-      6.9,
-      7.4,
-      7.9,
-      8.5,
-      8.9
+      4.5,
+      5.2,
+      5.9,
+      6.6,
+      7.1,
+      7.6,
+      8.1,
+      8.7,
+      9.2
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 2490
     }
    },
    "salt": {
@@ -3769,13 +4013,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.4,
-    "raw": 19,
+    "score": 3.7,
+    "raw": 22.4,
     "pillars": {
-     "consistency": 11,
+     "consistency": 0,
      "efficiency": 25,
-     "interaction": 40,
-     "wins": 0
+     "interaction": 51,
+     "wins": 3
     }
    }
   },
@@ -3789,6 +4033,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -3854,7 +4101,7 @@
     "consistency": {
      "draw": 18,
      "cheapDraw": 5,
-     "tutors": 4,
+     "tutors": 0,
      "recursion": 1
     },
     "interaction": {
@@ -3875,6 +4122,8 @@
      "ending": 1,
      "twoCard": 1,
      "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
      "fastest": 6,
      "printed": 0,
      "massPump": 5
@@ -3900,7 +4149,11 @@
       "share": 91
      },
      "creatures": 32,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 6
+     }
     },
     "goldfish": {
      "games": 500,
@@ -3908,24 +4161,28 @@
       1.1,
       2.5,
       3.6,
-      4.4,
-      5.1,
-      5.7,
-      6.2,
-      6.7,
-      7.2,
-      7.7,
-      8.2,
-      8.7
+      4.5,
+      5.2,
+      5.9,
+      6.4,
+      7,
+      7.5,
+      7.9,
+      8.4,
+      8.9
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": {
-      "4": 6,
-      "6": 7,
-      "8": 11,
-      "10": 13
+      "4": 1,
+      "6": 1,
+      "8": 2,
+      "10": 3
      }
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 3451
     }
    },
    "salt": {
@@ -3953,12 +4210,12 @@
    },
    "power": {
     "score": 3.6,
-    "raw": 20.8,
+    "raw": 21.5,
     "pillars": {
-     "consistency": 7,
+     "consistency": 0,
      "efficiency": 21,
-     "interaction": 24,
-     "wins": 31
+     "interaction": 32,
+     "wins": 22
     }
    }
   },
@@ -3973,6 +4230,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -4038,7 +4298,7 @@
     "consistency": {
      "draw": 13,
      "cheapDraw": 5,
-     "tutors": 12,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -4059,6 +4319,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 1
@@ -4084,7 +4346,11 @@
       "share": 45
      },
      "creatures": 33,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 26
+     }
     },
     "goldfish": {
      "games": 500,
@@ -4092,19 +4358,23 @@
       1.1,
       2.4,
       3.8,
-      4.7,
-      5.5,
-      6.2,
-      6.8,
-      7.4,
-      7.9,
-      8.4,
-      9,
-      9.5
+      4.9,
+      5.7,
+      6.4,
+      7,
+      7.6,
+      8.2,
+      8.7,
+      9.3,
+      9.8
      ],
      "commanderTurn": 2,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 2391
     }
    },
    "salt": {
@@ -4131,12 +4401,12 @@
     "offPlan": 4
    },
    "power": {
-    "score": 3.6,
-    "raw": 21.3,
+    "score": 3,
+    "raw": 15.3,
     "pillars": {
-     "consistency": 36,
+     "consistency": 0,
      "efficiency": 30,
-     "interaction": 19,
+     "interaction": 26,
      "wins": 0
     }
    }
@@ -4151,6 +4421,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "tier2",
+   "banned": [],
    "points": 3,
    "breakdown": {
     "extra_turns": 3
@@ -4210,7 +4483,7 @@
     "consistency": {
      "draw": 20,
      "cheapDraw": 8,
-     "tutors": 4,
+     "tutors": 0,
      "recursion": 5
     },
     "interaction": {
@@ -4231,6 +4504,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 2
@@ -4256,27 +4531,35 @@
       "share": 77
      },
      "creatures": 26,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 5
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
-      2.3,
+      2.4,
       3.7,
-      4.8,
-      5.8,
-      6.6,
-      7.3,
-      7.9,
-      8.5,
-      9.1,
-      9.7,
-      10.3
+      4.9,
+      5.9,
+      6.8,
+      7.5,
+      8.1,
+      8.7,
+      9.3,
+      9.9,
+      10.5
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 13,
+     "medianRank": 2333
     }
    },
    "salt": {
@@ -4303,12 +4586,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.9,
-    "raw": 14,
+    "score": 4,
+    "raw": 15,
     "pillars": {
-     "consistency": 7,
+     "consistency": 0,
      "efficiency": 36,
-     "interaction": 13,
+     "interaction": 20,
      "wins": 0
     }
    }
@@ -4322,7 +4605,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 2,
    "breakdown": {
     "game_changers": 2
@@ -4390,7 +4676,7 @@
     "consistency": {
      "draw": 18,
      "cheapDraw": 6,
-     "tutors": 5,
+     "tutors": 0,
      "recursion": 8
     },
     "interaction": {
@@ -4411,6 +4697,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -4436,27 +4724,35 @@
       "share": 21
      },
      "creatures": 28,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "theft",
+      "count": 12
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
       2.4,
-      3.7,
-      4.7,
-      5.6,
-      6.3,
-      6.9,
-      7.5,
-      8.1,
-      8.6,
-      9.2,
-      9.7
+      3.8,
+      4.9,
+      5.8,
+      6.5,
+      7.1,
+      7.7,
+      8.3,
+      8.9,
+      9.4,
+      9.9
      ],
      "commanderTurn": 8,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 11,
+     "medianRank": 2797
     }
    },
    "salt": {
@@ -4483,12 +4779,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 16.8,
+    "score": 4,
+    "raw": 18.1,
     "pillars": {
-     "consistency": 14,
+     "consistency": 0,
      "efficiency": 22,
-     "interaction": 31,
+     "interaction": 42,
      "wins": 0
     }
    }
@@ -4503,6 +4799,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -4589,6 +4888,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 2
@@ -4614,7 +4915,11 @@
       "share": 90
      },
      "creatures": 30,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
@@ -4635,6 +4940,10 @@
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 9647
     }
    },
    "salt": {
@@ -4661,12 +4970,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.8,
-    "raw": 13,
+    "score": 3,
+    "raw": 15.2,
     "pillars": {
      "consistency": 0,
      "efficiency": 27,
-     "interaction": 25,
+     "interaction": 28,
      "wins": 0
     }
    }
@@ -4681,6 +4990,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -4738,7 +5050,7 @@
     "consistency": {
      "draw": 23,
      "cheapDraw": 6,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 6
     },
     "interaction": {
@@ -4759,6 +5071,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 1
@@ -4784,7 +5098,11 @@
       "share": 63
      },
      "creatures": 24,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 6
+     }
     },
     "goldfish": {
      "games": 500,
@@ -4792,19 +5110,23 @@
       1.1,
       2.3,
       3.5,
-      4.5,
-      5.5,
-      6.3,
-      7.1,
-      7.8,
-      8.5,
-      9.1,
-      9.7,
-      10.3
+      4.6,
+      5.6,
+      6.5,
+      7.3,
+      8,
+      8.7,
+      9.3,
+      9.9,
+      10.5
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 9715
     }
    },
    "salt": {
@@ -4831,12 +5153,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.4,
-    "raw": 8.5,
+    "score": 2.7,
+    "raw": 12,
     "pillars": {
      "consistency": 0,
      "efficiency": 24,
-     "interaction": 10,
+     "interaction": 20,
      "wins": 0
     }
    }
@@ -4851,6 +5173,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 2,
    "breakdown": {
     "tutors": 2
@@ -4926,7 +5251,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 3,
-     "tutors": 4,
+     "tutors": 1,
      "recursion": 2
     },
     "interaction": {
@@ -4947,6 +5272,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -4972,7 +5299,11 @@
       "share": 70
      },
      "creatures": 20,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
@@ -4980,19 +5311,23 @@
       1.1,
       2.2,
       3.5,
-      4.5,
-      5.3,
-      6,
-      6.6,
-      7.2,
-      7.7,
-      8.2,
-      8.8,
-      9.3
+      4.6,
+      5.5,
+      6.2,
+      6.9,
+      7.5,
+      8,
+      8.5,
+      9,
+      9.5
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 7,
+     "medianRank": 7586
     }
    },
    "salt": {
@@ -5019,12 +5354,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3,
-    "raw": 14.8,
+    "score": 3.1,
+    "raw": 16.1,
     "pillars": {
-     "consistency": 7,
+     "consistency": 0,
      "efficiency": 26,
-     "interaction": 26,
+     "interaction": 32,
      "wins": 0
     }
    }
@@ -5039,6 +5374,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -5104,7 +5442,7 @@
     "consistency": {
      "draw": 21,
      "cheapDraw": 7,
-     "tutors": 1,
+     "tutors": 0,
      "recursion": 7
     },
     "interaction": {
@@ -5125,6 +5463,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 2
@@ -5150,27 +5490,35 @@
       "share": 91
      },
      "creatures": 32,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
-      2.3,
+      2.4,
       3.4,
-      4.2,
+      4.3,
       4.9,
       5.5,
-      6,
-      6.5,
-      6.9,
-      7.4,
-      7.9,
-      8.3
+      6.1,
+      6.6,
+      7,
+      7.5,
+      8,
+      8.4
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 9,
+     "medianRank": 8294
     }
    },
    "salt": {
@@ -5197,12 +5545,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 2.2,
-    "raw": 7,
+    "score": 2.5,
+    "raw": 10.4,
     "pillars": {
      "consistency": 0,
      "efficiency": 15,
-     "interaction": 13,
+     "interaction": 22,
      "wins": 0
     }
    }
@@ -5217,6 +5565,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 1,
    "breakdown": {
     "stax_effects": 1
@@ -5276,7 +5627,7 @@
     "consistency": {
      "draw": 16,
      "cheapDraw": 6,
-     "tutors": 3,
+     "tutors": 0,
      "recursion": 7
     },
     "interaction": {
@@ -5297,6 +5648,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -5322,27 +5675,35 @@
       "share": 31
      },
      "creatures": 26,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 8
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
-      2.3,
-      3.2,
+      2.4,
+      3.3,
       4,
-      4.6,
-      5.1,
-      5.6,
-      6,
-      6.4,
-      6.9,
-      7.3,
-      7.7
+      4.7,
+      5.2,
+      5.7,
+      6.2,
+      6.6,
+      7,
+      7.5,
+      7.9
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 2619
     }
    },
    "salt": {
@@ -5369,12 +5730,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.8,
-    "raw": 12.8,
+    "score": 3,
+    "raw": 14.9,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 21,
-     "interaction": 26,
+     "interaction": 32,
      "wins": 0
     }
    }
@@ -5389,6 +5750,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 2,
    "breakdown": {
     "free_spells": 2
@@ -5448,7 +5812,7 @@
     "consistency": {
      "draw": 14,
      "cheapDraw": 4,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -5469,6 +5833,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -5494,7 +5860,11 @@
       "share": 31
      },
      "creatures": 26,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 8
+     }
     },
     "goldfish": {
      "games": 500,
@@ -5502,19 +5872,23 @@
       1.1,
       2.3,
       3.3,
-      4.1,
-      4.8,
-      5.4,
-      6,
-      6.5,
-      7,
-      7.5,
-      8,
-      8.4
+      4.2,
+      4.9,
+      5.5,
+      6.1,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.6
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 7,
+     "medianRank": 1688
     }
    },
    "salt": {
@@ -5541,12 +5915,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.9,
-    "raw": 14,
+    "score": 3.2,
+    "raw": 17.4,
     "pillars": {
      "consistency": 0,
      "efficiency": 18,
-     "interaction": 38,
+     "interaction": 43,
      "wins": 0
     }
    }
@@ -5561,6 +5935,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -5618,7 +5995,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 6,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 8
     },
     "interaction": {
@@ -5639,6 +6016,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 5
@@ -5664,7 +6043,11 @@
       "share": 18
      },
      "creatures": 40,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 22
+     }
     },
     "goldfish": {
      "games": 500,
@@ -5672,19 +6055,23 @@
       1.1,
       2.3,
       3.4,
-      4.4,
-      5.1,
-      5.8,
-      6.4,
-      6.9,
-      7.5,
-      7.9,
-      8.4,
-      8.9
+      4.5,
+      5.2,
+      5.9,
+      6.5,
+      7.1,
+      7.6,
+      8.1,
+      8.6,
+      9
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 1564
     }
    },
    "salt": {
@@ -5711,12 +6098,12 @@
     "offPlan": 1
    },
    "power": {
-    "score": 2.6,
-    "raw": 11.3,
+    "score": 3.1,
+    "raw": 16.3,
     "pillars": {
      "consistency": 0,
      "efficiency": 28,
-     "interaction": 17,
+     "interaction": 31,
      "wins": 0
     }
    }
@@ -5731,6 +6118,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -5788,7 +6178,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 6,
-     "tutors": 3,
+     "tutors": 0,
      "recursion": 20
     },
     "interaction": {
@@ -5809,6 +6199,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 6
@@ -5834,7 +6226,11 @@
       "share": 53
      },
      "creatures": 36,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 20
+     }
     },
     "goldfish": {
      "games": 500,
@@ -5844,17 +6240,21 @@
       3.5,
       4.5,
       5.3,
-      5.9,
-      6.5,
-      7,
-      7.6,
-      8.1,
-      8.7,
-      9.2
+      6,
+      6.6,
+      7.2,
+      7.7,
+      8.3,
+      8.8,
+      9.4
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 2567
     }
    },
    "salt": {
@@ -5881,12 +6281,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3,
-    "raw": 14.8,
+    "score": 3.2,
+    "raw": 16.7,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 33,
-     "interaction": 22,
+     "interaction": 28,
      "wins": 0
     }
    }
@@ -5901,6 +6301,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -5958,7 +6361,7 @@
     "consistency": {
      "draw": 16,
      "cheapDraw": 9,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 1
     },
     "interaction": {
@@ -5979,6 +6382,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -6004,27 +6409,35 @@
       "share": 32
      },
      "creatures": 28,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
       2.4,
-      3.6,
-      4.7,
-      5.6,
-      6.3,
-      7,
-      7.5,
-      8.1,
-      8.6,
-      9.2,
-      9.7
+      3.7,
+      4.8,
+      5.7,
+      6.5,
+      7.1,
+      7.7,
+      8.2,
+      8.8,
+      9.4,
+      9.9
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 3324
     }
    },
    "salt": {
@@ -6051,12 +6464,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 16.5,
+    "score": 3.6,
+    "raw": 21.3,
     "pillars": {
      "consistency": 0,
      "efficiency": 43,
-     "interaction": 23,
+     "interaction": 35,
      "wins": 0
     }
    }
@@ -6071,6 +6484,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 2,
    "breakdown": {
     "game_changers": 2
@@ -6138,7 +6554,7 @@
     "consistency": {
      "draw": 8,
      "cheapDraw": 3,
-     "tutors": 2,
+     "tutors": 1,
      "recursion": 3
     },
     "interaction": {
@@ -6159,6 +6575,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 3
@@ -6184,7 +6602,11 @@
       "share": 20
      },
      "creatures": 41,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 9
+     }
     },
     "goldfish": {
      "games": 500,
@@ -6194,17 +6616,21 @@
       3.8,
       4.8,
       5.6,
-      6.3,
-      6.9,
+      6.4,
+      7,
       7.5,
-      8,
+      8.1,
       8.6,
-      9.1,
+      9.2,
       9.7
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 2813
     }
    },
    "salt": {
@@ -6231,12 +6657,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.5,
-    "raw": 10,
+    "score": 2.6,
+    "raw": 11.3,
     "pillars": {
-     "consistency": 3,
+     "consistency": 0,
      "efficiency": 27,
-     "interaction": 10,
+     "interaction": 15,
      "wins": 0
     }
    }
@@ -6250,7 +6676,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 2,
    "breakdown": {
     "free_spells": 2
@@ -6318,7 +6747,7 @@
     "consistency": {
      "draw": 24,
      "cheapDraw": 9,
-     "tutors": 3,
+     "tutors": 1,
      "recursion": 2
     },
     "interaction": {
@@ -6339,6 +6768,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 2,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -6364,7 +6795,11 @@
       "share": 42
      },
      "creatures": 19,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
@@ -6372,19 +6807,23 @@
       1.1,
       2.7,
       3.8,
-      4.6,
-      5.3,
-      6,
-      6.6,
-      7.1,
-      7.6,
-      8.1,
-      8.7,
-      9.2
+      4.7,
+      5.4,
+      6.1,
+      6.7,
+      7.3,
+      7.8,
+      8.3,
+      8.9,
+      9.4
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 889
     }
    },
    "salt": {
@@ -6411,13 +6850,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.7,
-    "raw": 21.5,
+    "score": 4.2,
+    "raw": 26.8,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 34,
-     "interaction": 48,
-     "wins": 0
+     "interaction": 57,
+     "wins": 4
     }
    }
   },
@@ -6430,7 +6869,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -6496,7 +6938,7 @@
     "consistency": {
      "draw": 10,
      "cheapDraw": 4,
-     "tutors": 2,
+     "tutors": 1,
      "recursion": 27
     },
     "interaction": {
@@ -6517,6 +6959,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -6542,27 +6986,35 @@
       "share": 16
      },
      "creatures": 37,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 27
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.3,
-      3.5,
+      3.6,
       4.6,
-      5.3,
-      6,
-      6.6,
-      7.1,
-      7.6,
-      8.2,
-      8.7,
+      5.4,
+      6.1,
+      6.7,
+      7.2,
+      7.7,
+      8.3,
+      8.8,
       9.3
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 10,
+     "medianRank": 1518
     }
    },
    "salt": {
@@ -6589,12 +7041,12 @@
     "offPlan": 4
    },
    "power": {
-    "score": 2.3,
-    "raw": 8,
+    "score": 4,
+    "raw": 8.6,
     "pillars": {
      "consistency": 0,
      "efficiency": 15,
-     "interaction": 17,
+     "interaction": 16,
      "wins": 0
     }
    }
@@ -6609,6 +7061,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -6674,7 +7129,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 6,
-     "tutors": 2,
+     "tutors": 1,
      "recursion": 1
     },
     "interaction": {
@@ -6695,6 +7150,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 4
@@ -6720,7 +7177,11 @@
       "share": 28
      },
      "creatures": 32,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "sacrifice-outlet",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
@@ -6728,19 +7189,23 @@
       1.1,
       2.4,
       3.4,
-      4.1,
-      4.8,
-      5.4,
+      4.2,
+      4.9,
+      5.5,
       6,
-      6.4,
-      6.9,
-      7.4,
-      7.9,
+      6.5,
+      7,
+      7.5,
+      8,
       8.4
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 7,
+     "medianRank": 1795
     }
    },
    "salt": {
@@ -6767,12 +7232,12 @@
     "offPlan": 5
    },
    "power": {
-    "score": 2.3,
-    "raw": 7.5,
+    "score": 2.4,
+    "raw": 8.6,
     "pillars": {
      "consistency": 0,
      "efficiency": 21,
-     "interaction": 9,
+     "interaction": 11,
      "wins": 0
     }
    }
@@ -6787,6 +7252,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 1,
    "breakdown": {
     "price_1_5": 1
@@ -6854,7 +7322,7 @@
     "consistency": {
      "draw": 11,
      "cheapDraw": 2,
-     "tutors": 2,
+     "tutors": 1,
      "recursion": 2
     },
     "interaction": {
@@ -6875,6 +7343,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -6900,7 +7370,11 @@
       "share": 83
      },
      "creatures": 35,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 15
+     }
     },
     "goldfish": {
      "games": 500,
@@ -6908,19 +7382,23 @@
       1.1,
       2.4,
       3.5,
-      4.3,
+      4.4,
       5.1,
       5.8,
-      6.4,
-      6.9,
-      7.5,
-      8,
-      8.6,
-      9.1
+      6.5,
+      7,
+      7.6,
+      8.1,
+      8.7,
+      9.2
      ],
      "commanderTurn": 7,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 5,
+     "medianRank": 2402
     }
    },
    "salt": {
@@ -6947,12 +7425,12 @@
     "offPlan": 3
    },
    "power": {
-    "score": 2.5,
-    "raw": 10,
+    "score": 3,
+    "raw": 14.8,
     "pillars": {
      "consistency": 0,
      "efficiency": 23,
-     "interaction": 17,
+     "interaction": 30,
      "wins": 0
     }
    }
@@ -6968,7 +7446,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "above",
+   "banned": [],
    "points": 5,
    "breakdown": {
     "game_changers": 2,
@@ -6978,7 +7459,7 @@
     "price_cap",
     "gc_locks_price"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 155.47,
    "gc": 1,
@@ -7040,7 +7521,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 4,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -7061,6 +7542,8 @@
      "ending": 1,
      "twoCard": 0,
      "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
      "fastest": 7,
      "printed": 0,
      "massPump": 0
@@ -7086,32 +7569,40 @@
       "share": 40
      },
      "creatures": 35,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.2,
       2.3,
-      3.5,
-      4.4,
-      5.3,
-      6,
-      6.5,
-      7.1,
-      7.6,
-      8.1,
-      8.6,
-      9.1
+      3.6,
+      4.5,
+      5.4,
+      6.1,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.8,
+      9.3
      ],
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": {
       "4": 0,
-      "6": 1,
-      "8": 1,
-      "10": 1
+      "6": 0,
+      "8": 0,
+      "10": 0
      }
+    },
+    "upgrade": {
+     "pricey": 9,
+     "medianRank": 2682
     }
    },
    "salt": {
@@ -7138,13 +7629,13 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.3,
-    "raw": 17.5,
+    "score": 3.8,
+    "raw": 23.3,
     "pillars": {
-     "consistency": 3,
+     "consistency": 0,
      "efficiency": 25,
-     "interaction": 23,
-     "wins": 19
+     "interaction": 36,
+     "wins": 21
     }
    }
   },
@@ -7159,7 +7650,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 10,
    "breakdown": {
     "fast_mana": 2,
@@ -7170,7 +7664,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 222.41,
    "gc": 0,
@@ -7253,6 +7747,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 1
@@ -7278,7 +7774,11 @@
       "share": 44
      },
      "creatures": 25,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 6
+     }
     },
     "goldfish": {
      "games": 500,
@@ -7299,6 +7799,10 @@
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 20,
+     "medianRank": 695
     }
    },
    "salt": {
@@ -7325,12 +7829,12 @@
     "offPlan": 9
    },
    "power": {
-    "score": 3.4,
-    "raw": 18.8,
+    "score": 4.1,
+    "raw": 21.1,
     "pillars": {
      "consistency": 0,
      "efficiency": 53,
-     "interaction": 22,
+     "interaction": 26,
      "wins": 0
     }
    }
@@ -7346,7 +7850,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 19,
    "breakdown": {
     "tutors": 5,
@@ -7356,7 +7863,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 362.23,
    "gc": 0,
@@ -7441,6 +7948,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -7466,7 +7975,11 @@
       "share": 41
      },
      "creatures": 29,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 8
+     }
     },
     "goldfish": {
      "games": 500,
@@ -7487,6 +8000,10 @@
      "commanderTurn": 6,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 24,
+     "medianRank": 3192
     }
    },
    "salt": {
@@ -7513,12 +8030,12 @@
     "offPlan": 5
    },
    "power": {
-    "score": 3.1,
-    "raw": 15.8,
+    "score": 4,
+    "raw": 20,
     "pillars": {
      "consistency": 0,
      "efficiency": 37,
-     "interaction": 26,
+     "interaction": 36,
      "wins": 0
     }
    }
@@ -7534,7 +8051,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 11,
    "breakdown": {
     "counterspells": 1,
@@ -7543,7 +8063,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 196.02,
    "gc": 0,
@@ -7607,7 +8127,7 @@
     "consistency": {
      "draw": 28,
      "cheapDraw": 9,
-     "tutors": 1,
+     "tutors": 0,
      "recursion": 4
     },
     "interaction": {
@@ -7628,6 +8148,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -7653,7 +8175,11 @@
       "share": 31
      },
      "creatures": 13,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 10
+     }
     },
     "goldfish": {
      "games": 500,
@@ -7674,6 +8200,10 @@
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 23,
+     "medianRank": 1462
     }
    },
    "salt": {
@@ -7700,13 +8230,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 3.3,
-    "raw": 17.5,
+    "score": 4.3,
+    "raw": 22.8,
     "pillars": {
      "consistency": 0,
      "efficiency": 36,
-     "interaction": 34,
-     "wins": 0
+     "interaction": 44,
+     "wins": 2
     }
    }
   },
@@ -7722,6 +8252,16 @@
    "cards": 101,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "3",
+   "pointsTier": "above",
+   "banned": [
+    "Dockside Extortionist",
+    "Jeska's Will",
+    "Jeweled Lotus",
+    "Mana Crypt",
+    "Mox Opal",
+    "Timestream Navigator"
+   ],
    "points": 31,
    "breakdown": {
     "game_changers": 8,
@@ -7807,7 +8347,7 @@
     "consistency": {
      "draw": 8,
      "cheapDraw": 2,
-     "tutors": 7,
+     "tutors": 6,
      "recursion": 2
     },
     "interaction": {
@@ -7828,6 +8368,8 @@
      "ending": 4,
      "twoCard": 4,
      "lines": 3,
+     "web": 3,
+     "throughCommander": 0,
      "fastest": 8,
      "printed": 1,
      "massPump": 4
@@ -7853,7 +8395,11 @@
       "share": 89
      },
      "creatures": 27,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "theft",
+      "count": 7
+     }
     },
     "goldfish": {
      "games": 500,
@@ -7862,23 +8408,27 @@
       2.7,
       3.6,
       4.3,
-      4.9,
+      5,
       5.5,
-      5.9,
-      6.4,
-      6.8,
+      6,
+      6.5,
+      6.9,
       7.3,
-      7.7,
+      7.8,
       8.2
      ],
      "commanderTurn": 4,
-     "winTurn": 7,
+     "winTurn": null,
      "winBy": {
-      "4": 10,
-      "6": 24,
-      "8": 34,
-      "10": 43
+      "4": 8,
+      "6": 22,
+      "8": 31,
+      "10": 41
      }
+    },
+    "upgrade": {
+     "pricey": 40,
+     "medianRank": 693
     }
    },
    "salt": {
@@ -7905,13 +8455,13 @@
     "offPlan": 12
    },
    "power": {
-    "score": 7.1,
-    "raw": 56,
+    "score": 6.4,
+    "raw": 49.1,
     "pillars": {
-     "consistency": 41,
+     "consistency": 29,
      "efficiency": 47,
-     "interaction": 40,
-     "wins": 96
+     "interaction": 41,
+     "wins": 69
     }
    }
   },
@@ -7926,7 +8476,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 20,
    "breakdown": {
     "tutors": 2,
@@ -7937,7 +8490,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 326.01,
    "gc": 0,
@@ -7999,7 +8552,7 @@
     "consistency": {
      "draw": 10,
      "cheapDraw": 4,
-     "tutors": 4,
+     "tutors": 1,
      "recursion": 18
     },
     "interaction": {
@@ -8020,6 +8573,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 7,
      "massPump": 0
@@ -8045,27 +8600,35 @@
       "share": 28
      },
      "creatures": 40,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 23
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.3,
-      3.4,
-      4.2,
-      4.8,
-      5.4,
-      5.9,
-      6.4,
-      6.9,
-      7.4,
-      7.9,
-      8.4
+      3.5,
+      4.3,
+      5,
+      5.6,
+      6.1,
+      6.6,
+      7.1,
+      7.6,
+      8.1,
+      8.6
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 28,
+     "medianRank": 1401
     }
    },
    "salt": {
@@ -8092,12 +8655,12 @@
     "offPlan": 31
    },
    "power": {
-    "score": 2.7,
-    "raw": 11.5,
+    "score": 4,
+    "raw": 11.3,
     "pillars": {
-     "consistency": 7,
+     "consistency": 0,
      "efficiency": 15,
-     "interaction": 24,
+     "interaction": 25,
      "wins": 0
     }
    }
@@ -8114,6 +8677,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "3",
+   "pointsTier": "above",
+   "banned": [],
    "points": 36,
    "breakdown": {
     "game_changers": 2,
@@ -8183,7 +8749,7 @@
     "consistency": {
      "draw": 14,
      "cheapDraw": 7,
-     "tutors": 2,
+     "tutors": 1,
      "recursion": 9
     },
     "interaction": {
@@ -8201,10 +8767,12 @@
      "checked": true,
      "combos": 20,
      "infinite": 20,
-     "ending": 0,
+     "ending": 10,
      "twoCard": 0,
-     "lines": 0,
-     "fastest": null,
+     "lines": 1,
+     "web": 18.5,
+     "throughCommander": 0,
+     "fastest": 8,
      "printed": 0,
      "massPump": 1
     },
@@ -8229,7 +8797,11 @@
       "share": 27
      },
      "creatures": 45,
-     "throughCommander": 3
+     "throughCommander": 3,
+     "engine": {
+      "theme": "sacrifice-outlet",
+      "count": 16
+     }
     },
     "goldfish": {
      "games": 500,
@@ -8249,7 +8821,16 @@
      ],
      "commanderTurn": 4,
      "winTurn": null,
-     "winBy": null
+     "winBy": {
+      "4": 0,
+      "6": 0,
+      "8": 1,
+      "10": 2
+     }
+    },
+    "upgrade": {
+     "pricey": 16,
+     "medianRank": 1156
     }
    },
    "salt": {
@@ -8276,13 +8857,13 @@
     "offPlan": 17
    },
    "power": {
-    "score": 3.5,
-    "raw": 20.3,
+    "score": 5.7,
+    "raw": 42.2,
     "pillars": {
-     "consistency": 3,
+     "consistency": 0,
      "efficiency": 56,
-     "interaction": 22,
-     "wins": 0
+     "interaction": 31,
+     "wins": 63
     }
    }
   },
@@ -8298,6 +8879,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "3",
+   "pointsTier": "above",
+   "banned": [],
    "points": 10,
    "breakdown": {
     "game_changers": 2,
@@ -8394,6 +8978,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -8419,7 +9005,11 @@
       "share": 29
      },
      "creatures": 24,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 27
+     }
     },
     "goldfish": {
      "games": 500,
@@ -8440,6 +9030,10 @@
      "commanderTurn": 6,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 24,
+     "medianRank": 689
     }
    },
    "salt": {
@@ -8466,13 +9060,13 @@
     "offPlan": 2
    },
    "power": {
-    "score": 3.7,
-    "raw": 21.5,
+    "score": 5.6,
+    "raw": 41.4,
     "pillars": {
-     "consistency": 3,
+     "consistency": 0,
      "efficiency": 43,
-     "interaction": 40,
-     "wins": 0
+     "interaction": 56,
+     "wins": 46
     }
    }
   },
@@ -8487,7 +9081,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 5,
    "breakdown": {
     "game_changers": 2,
@@ -8496,7 +9093,7 @@
    "violations": [
     "gc_locks_price"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 176.13,
    "gc": 1,
@@ -8571,6 +9168,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 8
@@ -8596,7 +9195,11 @@
       "share": 100
      },
      "creatures": 40,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 10
+     }
     },
     "goldfish": {
      "games": 500,
@@ -8617,6 +9220,10 @@
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 19,
+     "medianRank": 1984
     }
    },
    "salt": {
@@ -8643,12 +9250,12 @@
     "offPlan": 5
    },
    "power": {
-    "score": 2.6,
-    "raw": 11,
+    "score": 4,
+    "raw": 11.9,
     "pillars": {
-     "consistency": 3,
+     "consistency": 0,
      "efficiency": 32,
-     "interaction": 9,
+     "interaction": 13,
      "wins": 0
     }
    }
@@ -8664,7 +9271,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 9,
    "breakdown": {
     "free_spells": 1,
@@ -8675,7 +9285,7 @@
    "violations": [
     "budget"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 309.7,
    "gc": 0,
@@ -8753,7 +9363,7 @@
     "consistency": {
      "draw": 15,
      "cheapDraw": 6,
-     "tutors": 1,
+     "tutors": 0,
      "recursion": 2
     },
     "interaction": {
@@ -8774,6 +9384,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 3
@@ -8799,7 +9411,11 @@
       "share": 43
      },
      "creatures": 28,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
@@ -8810,16 +9426,20 @@
       4.3,
       5.1,
       5.8,
-      6.4,
+      6.5,
       7,
-      7.5,
-      8,
-      8.5,
-      9
+      7.6,
+      8.1,
+      8.6,
+      9.1
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 31,
+     "medianRank": 4015
     }
    },
    "salt": {
@@ -8846,12 +9466,12 @@
     "offPlan": 49
    },
    "power": {
-    "score": 2.7,
-    "raw": 12,
+    "score": 4,
+    "raw": 12.2,
     "pillars": {
      "consistency": 0,
      "efficiency": 14,
-     "interaction": 34,
+     "interaction": 29,
      "wins": 0
     }
    }
@@ -8867,7 +9487,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 8,
    "breakdown": {
     "game_changers": 2,
@@ -8877,7 +9500,7 @@
     "price_cap",
     "gc_locks_price"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 182.23,
    "gc": 1,
@@ -8939,7 +9562,7 @@
     "consistency": {
      "draw": 18,
      "cheapDraw": 11,
-     "tutors": 5,
+     "tutors": 3,
      "recursion": 6
     },
     "interaction": {
@@ -8960,6 +9583,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 2
@@ -8985,7 +9610,11 @@
       "share": 61
      },
      "creatures": 23,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "cost-reducer",
+      "count": 6
+     }
     },
     "goldfish": {
      "games": 500,
@@ -8993,19 +9622,23 @@
       1.2,
       2.4,
       3.4,
-      4.1,
-      4.7,
+      4.2,
+      4.8,
       5.3,
-      5.7,
-      6.2,
+      5.8,
+      6.3,
       6.7,
-      7.1,
-      7.5,
-      8
+      7.2,
+      7.6,
+      8.1
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 11,
+     "medianRank": 3411
     }
    },
    "salt": {
@@ -9032,12 +9665,12 @@
     "offPlan": 27
    },
    "power": {
-    "score": 2.8,
-    "raw": 12.8,
+    "score": 4,
+    "raw": 10.1,
     "pillars": {
-     "consistency": 14,
+     "consistency": 7,
      "efficiency": 24,
-     "interaction": 13,
+     "interaction": 10,
      "wins": 0
     }
    }
@@ -9053,7 +9686,10 @@
    ],
    "cards": 101,
    "missing": 0,
-   "tier": "tier2",
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier2",
+   "banned": [],
    "points": 5,
    "breakdown": {
     "price_1_5": 2,
@@ -9140,7 +9776,7 @@
     "consistency": {
      "draw": 11,
      "cheapDraw": 4,
-     "tutors": 3,
+     "tutors": 1,
      "recursion": 9
     },
     "interaction": {
@@ -9161,6 +9797,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 3,
      "massPump": 3
@@ -9186,7 +9824,11 @@
       "share": 91
      },
      "creatures": 32,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 9
+     }
     },
     "goldfish": {
      "games": 500,
@@ -9207,6 +9849,10 @@
      "commanderTurn": 2,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 11,
+     "medianRank": 6275
     }
    },
    "salt": {
@@ -9236,9 +9882,9 @@
     "score": 2,
     "raw": 5.3,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 15,
-     "interaction": 2,
+     "interaction": 5,
      "wins": 0
     }
    }
@@ -9255,6 +9901,9 @@
    "cards": 101,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "3*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 29,
    "breakdown": {
     "counterspells": 4,
@@ -9331,9 +9980,11 @@
      "checked": true,
      "combos": 12,
      "infinite": 12,
-     "ending": 2,
+     "ending": 6,
      "twoCard": 2,
      "lines": 2,
+     "web": 12,
+     "throughCommander": 0,
      "fastest": 4,
      "printed": 2,
      "massPump": 1
@@ -9359,7 +10010,11 @@
       "share": 29
      },
      "creatures": 17,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 5
+     }
     },
     "goldfish": {
      "games": 500,
@@ -9381,10 +10036,14 @@
      "winTurn": null,
      "winBy": {
       "4": 3,
-      "6": 6,
-      "8": 9,
-      "10": 13
+      "6": 7,
+      "8": 10,
+      "10": 15
      }
+    },
+    "upgrade": {
+     "pricey": 11,
+     "medianRank": 937
     }
    },
    "salt": {
@@ -9411,13 +10070,13 @@
     "offPlan": 14
    },
    "power": {
-    "score": 6.6,
-    "raw": 50.8,
+    "score": 7.7,
+    "raw": 63,
     "pillars": {
      "consistency": 0,
      "efficiency": 78,
-     "interaction": 62,
-     "wins": 63
+     "interaction": 66,
+     "wins": 79
     }
    }
   },
@@ -9433,6 +10092,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 1,
    "breakdown": {
     "price_1_5": 1
@@ -9492,7 +10154,7 @@
     "consistency": {
      "draw": 9,
      "cheapDraw": 3,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -9513,6 +10175,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 1
@@ -9538,7 +10202,11 @@
       "share": 26
      },
      "creatures": 19,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 11
+     }
     },
     "goldfish": {
      "games": 500,
@@ -9559,6 +10227,10 @@
      "commanderTurn": 3,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 4,
+     "medianRank": 4108
     }
    },
    "salt": {
@@ -9585,13 +10257,13 @@
     "offPlan": 3
    },
    "power": {
-    "score": 3.4,
-    "raw": 19,
+    "score": 3.9,
+    "raw": 23.7,
     "pillars": {
      "consistency": 0,
      "efficiency": 36,
-     "interaction": 40,
-     "wins": 0
+     "interaction": 46,
+     "wins": 3
     }
    }
   },
@@ -9607,6 +10279,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -9672,7 +10347,7 @@
     "consistency": {
      "draw": 18,
      "cheapDraw": 9,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 2
     },
     "interaction": {
@@ -9693,6 +10368,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -9718,27 +10395,35 @@
       "share": 18
      },
      "creatures": 17,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 11
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1,
-      1.9,
-      3,
-      4,
-      4.7,
-      5.3,
-      5.8,
-      6.3,
-      6.8,
-      7.2,
-      7.7,
-      8.1
+      2,
+      3.1,
+      4.1,
+      4.8,
+      5.4,
+      6,
+      6.5,
+      6.9,
+      7.4,
+      7.9,
+      8.3
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 1,
+     "medianRank": 3391
     }
    },
    "salt": {
@@ -9765,13 +10450,13 @@
     "offPlan": 20
    },
    "power": {
-    "score": 3.1,
-    "raw": 16.3,
+    "score": 3.8,
+    "raw": 22.7,
     "pillars": {
      "consistency": 0,
      "efficiency": 32,
-     "interaction": 33,
-     "wins": 0
+     "interaction": 47,
+     "wins": 2
     }
    }
   },
@@ -9787,6 +10472,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "tier2",
+   "banned": [],
    "points": 6,
    "breakdown": {
     "combos": 6
@@ -9838,7 +10526,7 @@
     "consistency": {
      "draw": 6,
      "cheapDraw": 3,
-     "tutors": 2,
+     "tutors": 1,
      "recursion": 1
     },
     "interaction": {
@@ -9856,9 +10544,11 @@
      "checked": true,
      "combos": 5,
      "infinite": 5,
-     "ending": 5,
-     "twoCard": 5,
-     "lines": 1,
+     "ending": 2.5,
+     "twoCard": 2.5,
+     "lines": 0,
+     "web": 2.5,
+     "throughCommander": 5,
      "fastest": 8,
      "printed": 0,
      "massPump": 6
@@ -9884,7 +10574,11 @@
       "share": 97
      },
      "creatures": 31,
-     "throughCommander": 5
+     "throughCommander": 5,
+     "engine": {
+      "theme": "burn",
+      "count": 13
+     }
     },
     "goldfish": {
      "games": 500,
@@ -9905,11 +10599,15 @@
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": {
-      "4": 5,
-      "6": 12,
-      "8": 19,
-      "10": 27
+      "4": 4,
+      "6": 8,
+      "8": 12,
+      "10": 17
      }
+    },
+    "upgrade": {
+     "pricey": 12,
+     "medianRank": 3062
     }
    },
    "salt": {
@@ -9936,13 +10634,13 @@
     "offPlan": 21
    },
    "power": {
-    "score": 4.5,
-    "raw": 30,
+    "score": 4.6,
+    "raw": 25.9,
     "pillars": {
      "consistency": 0,
      "efficiency": 47,
-     "interaction": 10,
-     "wins": 63
+     "interaction": 21,
+     "wins": 26
     }
    }
   },
@@ -9957,7 +10655,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "above",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "pointsTier": "above",
+   "banned": [],
    "points": 2,
    "breakdown": {
     "price_1_5": 2
@@ -9965,7 +10666,7 @@
    "violations": [
     "price_cap"
    ],
-   "verdict": "out",
+   "verdict": "in",
    "label": null,
    "price": 206.79,
    "gc": 0,
@@ -10043,7 +10744,7 @@
     "consistency": {
      "draw": 10,
      "cheapDraw": 2,
-     "tutors": 5,
+     "tutors": 2,
      "recursion": 5
     },
     "interaction": {
@@ -10064,6 +10765,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 3
@@ -10089,27 +10792,35 @@
       "share": 84
      },
      "creatures": 32,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 5
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
-      2.4,
-      3.6,
-      4.8,
-      5.7,
-      6.3,
-      6.9,
-      7.6,
-      8.2,
-      8.8,
-      9.4,
-      9.9
+      2.5,
+      3.7,
+      5,
+      5.9,
+      6.6,
+      7.2,
+      7.8,
+      8.5,
+      9.1,
+      9.6,
+      10.2
      ],
      "commanderTurn": 7,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 21,
+     "medianRank": 2211
     }
    },
    "salt": {
@@ -10136,12 +10847,12 @@
     "offPlan": 21
    },
    "power": {
-    "score": 3.2,
-    "raw": 16.5,
+    "score": 4,
+    "raw": 16.2,
     "pillars": {
-     "consistency": 11,
+     "consistency": 0,
      "efficiency": 25,
-     "interaction": 30,
+     "interaction": 33,
      "wins": 0
     }
    }
@@ -10158,6 +10869,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 2,
    "breakdown": {
     "free_spells": 2
@@ -10217,7 +10931,7 @@
     "consistency": {
      "draw": 14,
      "cheapDraw": 4,
-     "tutors": 2,
+     "tutors": 0,
      "recursion": 3
     },
     "interaction": {
@@ -10238,6 +10952,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -10263,27 +10979,35 @@
       "share": 31
      },
      "creatures": 26,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 8
+     }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
       2.3,
-      3.3,
-      4.1,
-      4.8,
-      5.4,
-      6,
-      6.5,
-      7,
-      7.5,
-      7.9,
-      8.5
+      3.4,
+      4.2,
+      4.9,
+      5.5,
+      6.1,
+      6.6,
+      7.1,
+      7.7,
+      8.1,
+      8.6
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 7,
+     "medianRank": 1688
     }
    },
    "salt": {
@@ -10310,12 +11034,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 2.9,
-    "raw": 14,
+    "score": 3.2,
+    "raw": 17.4,
     "pillars": {
      "consistency": 0,
      "efficiency": 18,
-     "interaction": 38,
+     "interaction": 43,
      "wins": 0
     }
    }
@@ -10333,6 +11057,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -10398,7 +11125,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 4,
-     "tutors": 8,
+     "tutors": 1,
      "recursion": 4
     },
     "interaction": {
@@ -10419,6 +11146,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 1,
      "massPump": 0
@@ -10444,7 +11173,11 @@
       "share": 63
      },
      "creatures": 32,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 28
+     }
     },
     "goldfish": {
      "games": 500,
@@ -10453,18 +11186,22 @@
       2.4,
       3.5,
       4.5,
-      5.4,
-      6,
-      6.6,
-      7.2,
-      7.7,
-      8.3,
-      8.9,
-      9.4
+      5.5,
+      6.1,
+      6.7,
+      7.3,
+      7.8,
+      8.4,
+      9,
+      9.5
      ],
      "commanderTurn": 2,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 9,
+     "medianRank": 1619
     }
    },
    "salt": {
@@ -10491,12 +11228,12 @@
     "offPlan": 2
    },
    "power": {
-    "score": 3.5,
-    "raw": 19.5,
+    "score": 3.3,
+    "raw": 18.4,
     "pillars": {
-     "consistency": 21,
+     "consistency": 0,
      "efficiency": 34,
-     "interaction": 23,
+     "interaction": 33,
      "wins": 0
     }
    }
@@ -10513,6 +11250,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
+   "practicalBracket": "2",
+   "pointsTier": "tier1",
+   "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -10594,7 +11334,7 @@
     "consistency": {
      "draw": 14,
      "cheapDraw": 4,
-     "tutors": 3,
+     "tutors": 2,
      "recursion": 3
     },
     "interaction": {
@@ -10615,6 +11355,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 3
@@ -10640,7 +11382,11 @@
       "share": 97
      },
      "creatures": 30,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "sacrifice-outlet",
+      "count": 5
+     }
     },
     "goldfish": {
      "games": 500,
@@ -10651,16 +11397,20 @@
       4.6,
       5.4,
       6.1,
-      6.7,
-      7.3,
-      7.9,
-      8.5,
-      9.1,
+      6.8,
+      7.4,
+      8,
+      8.6,
+      9.2,
       9.7
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 6,
+     "medianRank": 2590
     }
    },
    "salt": {
@@ -10687,12 +11437,12 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 16.5,
+    "score": 3.6,
+    "raw": 21.1,
     "pillars": {
-     "consistency": 4,
+     "consistency": 0,
      "efficiency": 40,
-     "interaction": 22,
+     "interaction": 37,
      "wins": 0
     }
    }
@@ -10709,6 +11459,14 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "5",
+   "pointsTier": "above",
+   "banned": [
+    "Chrome Mox",
+    "Gaea's Cradle",
+    "Grim Monolith",
+    "Mox Amber"
+   ],
    "points": 68,
    "breakdown": {
     "game_changers": 20,
@@ -10801,7 +11559,7 @@
     "consistency": {
      "draw": 13,
      "cheapDraw": 9,
-     "tutors": 15,
+     "tutors": 13,
      "recursion": 4
     },
     "interaction": {
@@ -10819,10 +11577,12 @@
      "checked": true,
      "combos": 10,
      "infinite": 8,
-     "ending": 7,
+     "ending": 10,
      "twoCard": 7,
-     "lines": 4,
-     "fastest": 3,
+     "lines": 5,
+     "web": 8,
+     "throughCommander": 0,
+     "fastest": 2,
      "printed": 1,
      "massPump": 0
     },
@@ -10847,7 +11607,11 @@
       "share": 36
      },
      "creatures": 25,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 5
+     }
     },
     "goldfish": {
      "games": 500,
@@ -10868,11 +11632,15 @@
      "commanderTurn": 2,
      "winTurn": 4,
      "winBy": {
-      "4": 57,
-      "6": 70,
-      "8": 77,
-      "10": 87
+      "4": 53,
+      "6": 67,
+      "8": 73,
+      "10": 83
      }
+    },
+    "upgrade": {
+     "pricey": 72,
+     "medianRank": 460
     }
    },
    "salt": {
@@ -10899,13 +11667,13 @@
     "offPlan": 6
    },
    "power": {
-    "score": 9.9,
-    "raw": 96.3,
+    "score": 9.7,
+    "raw": 91.7,
     "pillars": {
-     "consistency": 96,
+     "consistency": 79,
      "efficiency": 89,
      "interaction": 100,
-     "wins": 100
+     "wins": 92
     }
    }
   },
@@ -10921,6 +11689,14 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "5",
+   "pointsTier": "above",
+   "banned": [
+    "Chrome Mox",
+    "Lotus Petal",
+    "Mox Diamond",
+    "Mox Opal"
+   ],
    "points": 58,
    "breakdown": {
     "game_changers": 20,
@@ -11033,6 +11809,8 @@
      "ending": 4,
      "twoCard": 2,
      "lines": 2,
+     "web": 2,
+     "throughCommander": 0,
      "fastest": 4,
      "printed": 1,
      "massPump": 0
@@ -11058,7 +11836,11 @@
       "share": 33
      },
      "creatures": 24,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "mill",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
@@ -11084,6 +11866,10 @@
       "8": 69,
       "10": 78
      }
+    },
+    "upgrade": {
+     "pricey": 67,
+     "medianRank": 408
     }
    },
    "salt": {
@@ -11110,13 +11896,13 @@
     "offPlan": 4
    },
    "power": {
-    "score": 9.9,
-    "raw": 96,
+    "score": 9.6,
+    "raw": 87.9,
     "pillars": {
      "consistency": 100,
      "efficiency": 84,
-     "interaction": 100,
-     "wins": 100
+     "interaction": 94,
+     "wins": 79
     }
    }
   },
@@ -11131,6 +11917,16 @@
    "cards": 99,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "5",
+   "pointsTier": "above",
+   "banned": [
+    "Ancient Tomb",
+    "Chrome Mox",
+    "Lion's Eye Diamond",
+    "Lotus Petal",
+    "Mana Vault",
+    "Mox Diamond"
+   ],
    "points": 80,
    "breakdown": {
     "game_changers": 21,
@@ -11253,9 +12049,11 @@
      "checked": true,
      "combos": 6,
      "infinite": 4,
-     "ending": 6,
-     "twoCard": 4,
-     "lines": 3,
+     "ending": 5,
+     "twoCard": 3,
+     "lines": 2,
+     "web": 3,
+     "throughCommander": 2,
      "fastest": 4,
      "printed": 1,
      "massPump": 0
@@ -11281,7 +12079,11 @@
       "share": 30
      },
      "creatures": 20,
-     "throughCommander": 2
+     "throughCommander": 2,
+     "engine": {
+      "theme": "burn",
+      "count": 3
+     }
     },
     "goldfish": {
      "games": 500,
@@ -11302,11 +12104,15 @@
      "commanderTurn": 3,
      "winTurn": 3,
      "winBy": {
-      "4": 80,
+      "4": 79,
       "6": 92,
       "8": 97,
       "10": 99
      }
+    },
+    "upgrade": {
+     "pricey": 66,
+     "medianRank": 350
     }
    },
    "salt": {
@@ -11333,13 +12139,13 @@
     "offPlan": 1
    },
    "power": {
-    "score": 9.9,
-    "raw": 95.5,
+    "score": 9.7,
+    "raw": 90.1,
     "pillars": {
      "consistency": 100,
      "efficiency": 100,
-     "interaction": 82,
-     "wins": 100
+     "interaction": 86,
+     "wins": 81
     }
    }
   },
@@ -11354,6 +12160,18 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "5",
+   "pointsTier": "above",
+   "banned": [
+    "Ancient Tomb",
+    "Chrome Mox",
+    "Lion's Eye Diamond",
+    "Lotus Petal",
+    "Mana Vault",
+    "Mox Amber",
+    "Mox Diamond",
+    "Mox Opal"
+   ],
    "points": 81,
    "breakdown": {
     "game_changers": 21,
@@ -11475,9 +12293,11 @@
      "checked": true,
      "combos": 5,
      "infinite": 3,
-     "ending": 4,
+     "ending": 5,
      "twoCard": 2,
-     "lines": 2,
+     "lines": 3,
+     "web": 3,
+     "throughCommander": 0,
      "fastest": 4,
      "printed": 1,
      "massPump": 0
@@ -11503,7 +12323,11 @@
       "share": 30
      },
      "creatures": 20,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "sacrifice-outlet",
+      "count": 4
+     }
     },
     "goldfish": {
      "games": 500,
@@ -11527,8 +12351,12 @@
       "4": 40,
       "6": 56,
       "8": 70,
-      "10": 77
+      "10": 78
      }
+    },
+    "upgrade": {
+     "pricey": 72,
+     "medianRank": 439
     }
    },
    "salt": {
@@ -11555,13 +12383,13 @@
     "offPlan": 20
    },
    "power": {
-    "score": 10,
-    "raw": 100,
+    "score": 9.7,
+    "raw": 92.2,
     "pillars": {
      "consistency": 100,
      "efficiency": 100,
-     "interaction": 100,
-     "wins": 100
+     "interaction": 93,
+     "wins": 81
     }
    }
   },
@@ -11576,6 +12404,20 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "5",
+   "pointsTier": "above",
+   "banned": [
+    "Ancient Tomb",
+    "Chrome Mox",
+    "Gaea's Cradle",
+    "Grim Monolith",
+    "Lotus Petal",
+    "Mana Crypt",
+    "Mana Vault",
+    "Mox Amber",
+    "Mox Diamond",
+    "Mox Opal"
+   ],
    "points": 89,
    "breakdown": {
     "game_changers": 16,
@@ -11652,7 +12494,7 @@
     "consistency": {
      "draw": 9,
      "cheapDraw": 4,
-     "tutors": 16,
+     "tutors": 12,
      "recursion": 5
     },
     "interaction": {
@@ -11670,9 +12512,11 @@
      "checked": true,
      "combos": 14,
      "infinite": 14,
-     "ending": 7,
-     "twoCard": 7,
-     "lines": 4,
+     "ending": 10.5,
+     "twoCard": 7.5,
+     "lines": 3,
+     "web": 13.5,
+     "throughCommander": 1,
      "fastest": 5,
      "printed": 0,
      "massPump": 0
@@ -11698,7 +12542,11 @@
       "share": 17
      },
      "creatures": 29,
-     "throughCommander": 1
+     "throughCommander": 1,
+     "engine": {
+      "theme": "recursion",
+      "count": 5
+     }
     },
     "goldfish": {
      "games": 500,
@@ -11719,11 +12567,15 @@
      "commanderTurn": 2,
      "winTurn": 3,
      "winBy": {
-      "4": 73,
-      "6": 85,
-      "8": 89,
-      "10": 93
+      "4": 62,
+      "6": 75,
+      "8": 79,
+      "10": 85
      }
+    },
+    "upgrade": {
+     "pricey": 68,
+     "medianRank": 554
     }
    },
    "salt": {
@@ -11750,12 +12602,12 @@
     "offPlan": 3
    },
    "power": {
-    "score": 9.8,
-    "raw": 93.8,
+    "score": 9.7,
+    "raw": 91.3,
     "pillars": {
-     "consistency": 100,
+     "consistency": 71,
      "efficiency": 85,
-     "interaction": 90,
+     "interaction": 98,
      "wins": 100
     }
    }
@@ -11771,6 +12623,21 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "3",
+   "pointsTier": "above",
+   "banned": [
+    "Ancient Tomb",
+    "Chrome Mox",
+    "Dockside Extortionist",
+    "Jeska's Will",
+    "Jeweled Lotus",
+    "Lion's Eye Diamond",
+    "Lotus Petal",
+    "Mana Crypt",
+    "Mana Vault",
+    "Mox Diamond",
+    "Mox Opal"
+   ],
    "points": 36,
    "breakdown": {
     "game_changers": 10,
@@ -11836,7 +12703,7 @@
     "consistency": {
      "draw": 8,
      "cheapDraw": 5,
-     "tutors": 10,
+     "tutors": 8,
      "recursion": 3
     },
     "interaction": {
@@ -11857,6 +12724,8 @@
      "ending": 0,
      "twoCard": 0,
      "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
      "fastest": null,
      "printed": 0,
      "massPump": 0
@@ -11882,7 +12751,11 @@
       "share": 27
      },
      "creatures": 11,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 14
+     }
     },
     "goldfish": {
      "games": 500,
@@ -11891,18 +12764,22 @@
       3.2,
       4,
       4.6,
-      5.1,
-      5.6,
-      6,
+      5.2,
+      5.7,
+      6.1,
       6.6,
-      7,
+      7.1,
       7.5,
-      7.9,
-      8.4
+      8,
+      8.5
      ],
      "commanderTurn": 5,
      "winTurn": null,
      "winBy": null
+    },
+    "upgrade": {
+     "pricey": 47,
+     "medianRank": 918
     }
    },
    "salt": {
@@ -11929,13 +12806,13 @@
     "offPlan": 15
    },
    "power": {
-    "score": 6.9,
-    "raw": 53.5,
+    "score": 7,
+    "raw": 55.3,
     "pillars": {
-     "consistency": 59,
+     "consistency": 43,
      "efficiency": 98,
-     "interaction": 57,
-     "wins": 0
+     "interaction": 66,
+     "wins": 15
     }
    }
   },
@@ -11950,6 +12827,19 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "3",
+   "pointsTier": "above",
+   "banned": [
+    "Ancient Tomb",
+    "Chrome Mox",
+    "City of Traitors",
+    "Dockside Extortionist",
+    "Jeweled Lotus",
+    "Lotus Petal",
+    "Mana Crypt",
+    "Mana Vault",
+    "Mox Diamond"
+   ],
    "points": 31,
    "breakdown": {
     "game_changers": 7,
@@ -12023,7 +12913,7 @@
     "consistency": {
      "draw": 4,
      "cheapDraw": 3,
-     "tutors": 13,
+     "tutors": 12,
      "recursion": 0
     },
     "interaction": {
@@ -12044,6 +12934,8 @@
      "ending": 1,
      "twoCard": 1,
      "lines": 1,
+     "web": 1,
+     "throughCommander": 0,
      "fastest": 8,
      "printed": 0,
      "massPump": 3
@@ -12069,7 +12961,11 @@
       "share": 50
      },
      "creatures": 56,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 8
+     }
     },
     "goldfish": {
      "games": 500,
@@ -12077,24 +12973,28 @@
       1.8,
       2.7,
       3.4,
-      3.9,
+      4,
       4.4,
       4.8,
-      5.2,
-      5.6,
+      5.3,
+      5.7,
       6.1,
       6.6,
-      6.9,
+      7,
       7.4
      ],
      "commanderTurn": 4,
      "winTurn": null,
      "winBy": {
-      "4": 11,
+      "4": 10,
       "6": 23,
-      "8": 34,
-      "10": 42
+      "8": 33,
+      "10": 41
      }
+    },
+    "upgrade": {
+     "pricey": 52,
+     "medianRank": 1697
     }
    },
    "salt": {
@@ -12121,13 +13021,13 @@
     "offPlan": 12
    },
    "power": {
-    "score": 6.5,
-    "raw": 50.3,
+    "score": 6.7,
+    "raw": 51.6,
     "pillars": {
-     "consistency": 59,
+     "consistency": 71,
      "efficiency": 63,
-     "interaction": 48,
-     "wins": 31
+     "interaction": 49,
+     "wins": 35
     }
    }
   },
@@ -12143,6 +13043,19 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
+   "practicalBracket": "5",
+   "pointsTier": "above",
+   "banned": [
+    "Ancient Tomb",
+    "Chrome Mox",
+    "Gaea's Cradle",
+    "Lion's Eye Diamond",
+    "Lotus Petal",
+    "Mana Vault",
+    "Mox Amber",
+    "Mox Diamond",
+    "Mox Opal"
+   ],
    "points": 74,
    "breakdown": {
     "game_changers": 21,
@@ -12237,7 +13150,7 @@
     "consistency": {
      "draw": 12,
      "cheapDraw": 8,
-     "tutors": 22,
+     "tutors": 20,
      "recursion": 8
     },
     "interaction": {
@@ -12255,9 +13168,11 @@
      "checked": true,
      "combos": 7,
      "infinite": 7,
-     "ending": 4,
+     "ending": 6,
      "twoCard": 1,
-     "lines": 2,
+     "lines": 3,
+     "web": 7,
+     "throughCommander": 0,
      "fastest": 4,
      "printed": 0,
      "massPump": 0
@@ -12283,7 +13198,11 @@
       "share": 26
      },
      "creatures": 23,
-     "throughCommander": 0
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 8
+     }
     },
     "goldfish": {
      "games": 500,
@@ -12304,11 +13223,15 @@
      "commanderTurn": 1,
      "winTurn": 4,
      "winBy": {
-      "4": 57,
-      "6": 73,
-      "8": 80,
-      "10": 85
+      "4": 51,
+      "6": 66,
+      "8": 74,
+      "10": 81
      }
+    },
+    "upgrade": {
+     "pricey": 68,
+     "medianRank": 396
     }
    },
    "salt": {
@@ -12335,13 +13258,13 @@
     "offPlan": 2
    },
    "power": {
-    "score": 9.9,
-    "raw": 95.8,
+    "score": 9.8,
+    "raw": 93.5,
     "pillars": {
      "consistency": 100,
      "efficiency": 98,
-     "interaction": 97,
-     "wins": 88
+     "interaction": 90,
+     "wins": 90
     }
    }
   }

@@ -128,10 +128,11 @@ async function study(d) {
   const salt = E.saltScore(names, saltDb);
   const synergy = E.synergyScore({ cardsInfo, commanders, table: await synergyTable(commanders) });
   const power = E.computePower(profile, stats);
-  const verdict = ev.tier === "above" ? "out" : "in";
+  const podTier = E.podVerdict({ power, evalRes: ev, rules: RULES, checked: true });
+  const verdict = podTier.tier === "above" ? "out" : "in";
   return { id: d.id, name: d.name, group: d.group, url: d.url, podId: d.podId, commanders,
     cards: stats.total_cards, missing: d.parsed.entries.length - resolved.length,
-    tier: ev.tier, points: ev.points, breakdown: ev.breakdown, violations: ev.violations.map(v => v.id === "conditional" ? v.condId : v.id),
+    tier: podTier.tier, practicalBracket: podTier.bracket, pointsTier: ev.tier, banned: podTier.banned, points: ev.points, breakdown: ev.breakdown, violations: ev.violations.map(v => v.id === "conditional" ? v.condId : v.id),
     verdict, label: labels[d.podId] || null, price: stats.total_price_eur, gc: stats.game_changers,
     bracket: { fits: bracket.fits, checklist: bracket.checklist, estimate: bracket.estimate, failed: bracket.failed },
     profile: { ...profile, ledger: undefined }, salt: { total: salt.total, average: salt.average, top: salt.top.slice(0, 3) },

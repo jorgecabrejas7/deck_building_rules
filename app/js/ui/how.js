@@ -7,6 +7,7 @@ import { $, esc } from './helpers.js';
 function renderHow() {
   const lang = state.lang;
   const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
+  const pow = RULES.power_tiers;
   const P = lang === 'es';
   const dialRows = DIAL_META.map(m => {
     const spec = RULES.dials[m.k];
@@ -25,18 +26,20 @@ function renderHow() {
   const html = P ? `
 <button id="howClose" class="modal-close" aria-label="Cerrar">✕</button>
 <h2 id="howTitle">¿Cómo funciona esta guía?</h2>
-<p class="lead">Las reglas del pod sustituyen a los brackets oficiales. La referencia es sencilla: <b>Tier 1 = un precon de caja</b>. Están calibradas con datos reales de 36 precons oficiales (2024–2026).</p>
-<h3>El presupuesto de puntos</h3>
-<p>Cada mazo gasta puntos al pasarse de lo que hace un precon en cada «dial». <b>Tier 1: hasta ${t1} puntos. Tier 2: hasta ${t2}.</b> Más de ${t2}: por encima del nivel del pod. Los puntos <b>nunca dejan de contarse</b>: pasado el último escalón de un dial, cada unidad extra suma +1. Puedes concentrar todo tu presupuesto en un solo eje (p. ej. dos game changers), pero entonces el resto del mazo debe quedarse a nivel precon.</p>
+<p class="lead">El nivel del pod lo decide el <b>poder</b> del mazo. La referencia es sencilla: <b>Tier 1 = un precon de caja</b>.</p>
+<h3>Quién entra en el pod</h3>
+<p><b>Tier 1: poder hasta ${pow.tier1_max}. Tier 2: hasta ${pow.tier2_max}. Más: fuera del pod.</b> Las cartas prohibidas dejan fuera a un mazo tenga el poder que tenga. El poder es una escala propia de 1 a 10, calibrada con 36 precons y 8 listas cEDH públicas.</p>
+<h3>Los puntos, solo como información</h3>
+<p>Los puntos ya no deciden: miden cuánto se aleja un mazo de un precon en cada «dial», y el precio pesa mucho en ellos. Referencias: ${t1} y ${t2} puntos.</p>
 <h3>Los diales</h3>
-<div class="table-scroll"><table>${dialRows}</table></div>
-<h3>Prohibiciones duras (nada de puntos: no se juegan)</h3>
+<div class="table-scroll"><table><thead><tr><th>Dial</th><th>Cantidad → puntos</th></tr></thead><tbody>${dialRows}</tbody></table></div>
+<h3>Prohibiciones</h3>
 <ul>
 <li>Ninguna carta de más de <b>€${RULES.hard_bans.max_card_price_eur}</b> (impresión más barata de Cardmarket) sin aprobación explícita de la mesa.</li>
 <li>Maná explosivo repetible: ${bans.true_fast_mana.slice(0, 6).join(', ')}… (${bans.true_fast_mana.length} cartas). Los rituales de un solo uso (Dark Ritual…) SÍ se permiten.</li>
 <li>Turnos extra repetibles: ${bans.extra_turn_recursion.join(', ')}.</li>
 <li>Destrucción masiva de tierras.</li></ul>
-<h3>Condicionales (un lujo excluye otros)</h3>
+<h3>Condicionales de los puntos (informativos)</h3>
 <ul>
 <li>Con un game changer: en el RESTO del mazo, máximo 3 cartas de €10–20 y ninguna de €20–30. (Un game changer paga solo en su dial: no cuenta además como carta cara, así que uno barato y uno caro pesan igual. El tope duro de €30 sí se aplica a todas las cartas.)</li>
 <li>Con tutores: cero game changers.</li>
@@ -55,8 +58,10 @@ function renderHow() {
 <p>Los tutores ya no tienen límite propio desde octubre de 2025: los más eficientes están en la lista de game changers. Una lista no demuestra la intención, así que la lectura va del Bracket 2 al 4: el 1 depende del tema y el 5 del metajuego competitivo.</p>
 <h3>El bracket de cada combo</h3>
 <p>Cada combo lleva la etiqueta de <b>Commander Spellbook</b>, de Exhibition (B1+) a Ruthless (B4+). Spellbook decide el bracket de cada combo, con su propia lógica: si una leyenda del combo es o no tu comandante, se recalcula igual que hace su estimador. Es su clasificación, no una regla de Wizards. Los combos que exigen una carta como comandante solo cuentan si esa carta está en la zona de mando.</p>
+<h3>Bracket práctico</h3>
+<p>El nivel del pod sale de una estimación propia de cómo juega el mazo, en la escala de brackets: los precons de caja son 2, y sube a 2*, 3, 3*, 4, 4* y 5. Tier 1 es Bracket 2, Tier 2 es 2* y Tier 3 (fuera del pod) es 3 o más. Las cartas prohibidas del pod dejan fuera a cualquier mazo. Es distinto de la lista oficial de Wizards, que se comprueba aparte. Un mazo con 10 o más cartas de 3 € o más y una lista que la gente juega se considera mejorado y sube un poco: el precio solo sirve como prueba de que no es un mazo de caja.</p>
 <h3>Perfil del mazo</h3>
-<p>La tercera parte del informe describe el mazo. <b>No decide nada</b>: el tier del pod y el bracket no la leen.</p>
+<p>El perfil explica el poder, y el poder decide el nivel del pod. Salt, sinergia y base de maná solo informan.</p>
 <ul>
 <li><b>Poder (1-10):</b> escala propia, no la de otra web. Sale de cuatro pilares (consistencia, eficiencia, interacción y formas de ganar), cada uno medido entre un precon flojo y una lista cEDH mediana. Se calibró con 36 precons y 8 listas cEDH públicas.</li>
 <li><b>Salt:</b> la suma de las valoraciones de la comunidad de EDHREC para cada carta.</li>
@@ -68,9 +73,11 @@ function renderHow() {
   : `
 <button id="howClose" class="modal-close" aria-label="Close">✕</button>
 <h2 id="howTitle">How this guide works</h2>
-<p class="lead">The pod rules replace the official brackets. The reference is simple: <b>Tier 1 = a boxed precon</b>. Everything is calibrated on real data from 36 official precons (2024–2026).</p>
-<h3>The point budget</h3>
-<p>A deck spends points whenever it exceeds what precons do on each "dial". <b>Tier 1: up to ${t1} points. Tier 2: up to ${t2}.</b> More than ${t2}: above pod level. Points <b>never stop counting</b>: past a dial's last priced step, each extra unit adds +1. You may pour the whole budget into one axis (say, two game changers) — but then the rest of the deck must stay at precon level.</p>
+<p class="lead">A deck's <b>power</b> decides its pod level. The reference is simple: <b>Tier 1 = a boxed precon</b>.</p>
+<h3>Who is in the pod</h3>
+<p><b>Tier 1: power up to ${pow.tier1_max}. Tier 2: up to ${pow.tier2_max}. Higher: out of the pod.</b> Banned cards keep a deck out at any power. Power is our own 1-10 scale, calibrated on 36 precons and 8 public cEDH lists.</p>
+<h3>Points, as information only</h3>
+<p>Points no longer decide: they measure how far a deck strays from a precon on each "dial", and price weighs heavily in them. Reference marks: ${t1} and ${t2} points.</p>
 <h3>The dials</h3>
 <div class="table-scroll"><table>${dialRows}</table></div>
 <h3>Hard bans (no points involved: just don't)</h3>
@@ -98,8 +105,10 @@ function renderHow() {
 <p>Tutors have had no limit of their own since October 2025: the most efficient ones are on the Game Changers list. A list cannot prove intent, so the read runs from Bracket 2 to 4: Bracket 1 depends on theme and Bracket 5 on the competitive metagame.</p>
 <h3>Each combo's bracket</h3>
 <p>Every combo carries <b>Commander Spellbook</b>'s tag, from Exhibition (B1+) to Ruthless (B4+). Spellbook decides each combo's bracket with its own logic: whether a legend in the combo is your commander is recalculated the way its estimator does. It is Spellbook's classification, not a Wizards rule. Combos that need a card as commander only count when that card is in the command zone.</p>
+<h3>Practical bracket</h3>
+<p>The pod level comes from our own estimate of how the deck plays, on the bracket scale: boxed precons are 2, rising through 2*, 3, 3*, 4, 4* and 5. Tier 1 is Bracket 2, Tier 2 is 2*, and Tier 3 (out of the pod) is 3 or higher. The pod's banned cards keep any deck out. This is separate from Wizards' official checklist, which is checked on its own. A deck with 10 or more cards worth €3 or more, on a list people actually play, counts as upgraded and rises slightly: price only serves as evidence it isn't a boxed deck.</p>
 <h3>Deck profile</h3>
-<p>Part three of the report describes the deck. <b>It decides nothing</b>: the pod tier and the bracket do not read it.</p>
+<p>The profile explains power, and power decides the pod level. Salt, synergy and the manabase are information only.</p>
 <ul>
 <li><b>Power (1-10):</b> our own scale, not another site's. It comes from four pillars (consistency, efficiency, interaction and ways to win), each measured between a weak precon and a median cEDH list. Calibrated on 36 precons and 8 public cEDH lists.</li>
 <li><b>Salt:</b> EDHREC's community rating for each card, added up.</li>
@@ -132,6 +141,7 @@ export function openHow() {
   opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const m = $('howModal');
   m.style.display = 'block';
+  document.body.classList.add('modal-open');
   m.addEventListener('keydown', trapTab);
   $('howClose').focus();
 }
@@ -139,6 +149,7 @@ export function closeHow() {
   const m = $('howModal');
   if (m.style.display !== 'block') return;
   m.style.display = 'none';
+  document.body.classList.remove('modal-open');
   m.removeEventListener('keydown', trapTab);
   if (opener && opener.isConnected) opener.focus();
   opener = null;

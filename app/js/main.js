@@ -10,7 +10,7 @@ import { $ } from './ui/helpers.js';
 import { applyTheme, renderHeader } from './ui/header.js';
 import { renderInput } from './ui/input.js';
 import { renderSummary } from './ui/summary.js';
-import { renderTabbar, renderBanner } from './ui/tabbar.js';
+import { renderTabbar, renderBanner, renderSectionNav } from './ui/tabbar.js';
 import { renderPower } from './ui/power.js';
 import { renderValidation } from './ui/validation.js';
 import { renderComp } from './ui/comp.js';
@@ -67,14 +67,20 @@ export function renderAll() {
   $('footer').textContent = t.footer;
   const has = !!state.result;
   $('empty').style.display = has || state.tableOpen ? 'none' : '';
-  $('summary').style.display = has ? '' : 'none';
+  // the summary belongs to the deck's own tabs: Pod and Guide are about other things
+  $('summary').style.display = has && (state.tab === 'informe' || state.tab === 'detalles') ? '' : 'none';
+  renderSectionNav();
+  document.documentElement.lang = state.lang;
+  document.querySelector('.skip-link').textContent = t.skipLink;
+  $('themeBtn').title = t.themeTitle;
+  $('emptyPod').textContent = t.emptyPod;
   renderBanner();
   if (has) {
     renderSummary(); renderValidation();
     if (state.tab === 'informe') {
       // the part headings are static per language; their ids match their keys
-      for (const k of ['partPodT', 'partPodX', 'partBrT', 'partBrX', 'partPfT', 'partPfX']) $(k).textContent = t[k];
-      renderCommander(); renderVerdict(); renderPower(); renderBracket(); renderCombos(); renderProfile(); renderTips();
+      for (const k of ['partPlanT', 'partPodT', 'partPodX', 'partBrT', 'partBrX', 'partPfT', 'partPfX', 'tipsCompT']) $(k).textContent = t[k];
+      renderVerdict(); renderCommander(); renderPower(); renderBracket(); renderCombos(); renderProfile(); renderTips();
     }
     if (state.tab === 'detalles') { renderComp(); renderCurve(); renderRamp(); renderHand(); renderBrowser(); }
   }
@@ -110,6 +116,7 @@ const __boot = () => {
     }
   });
   $('analyzeBtn').onclick = analyze;
+  $('emptyPod').onclick = () => { state.tab = 'pod'; renderAll(); };
   $('archSel').onchange = (e) => { state.arch = e.target.value; renderAll(); };
   $('deckText').oninput = () => { state.error = null; renderInput(); saveSession(); };
   $('gtBtn').onclick = () => { state.grp = 'type'; renderBrowser(); };

@@ -8,8 +8,9 @@ import { checkCombos } from '../pipeline.js';
 
 // Every combo says which bracket it belongs to. The tag is Commander Spellbook's
 // own classification, so what the page calls "Bracket 4+" is what its editors do.
-const TAG_TONE = { B: 'tone-bad', R: 'tone-bad', S: 'tone-warn', P: 'tone-warn', O: 'tone-tip', C: 'tone-tip', E: 'tone-ok' };
-const PAGE = 20;
+// Green stays reserved for the verdict: only tags that bear on Bracket 3 get a colour.
+const TAG_TONE = { B: 'tone-bad', R: 'tone-bad', S: 'tone-warn', P: 'tone-neutral', O: 'tone-neutral', C: 'tone-neutral', E: 'tone-neutral' };
+const PAGE = 5;
 
 export function tagChip(tag, t) {
   const m = COMBO_TAGS[tag];
@@ -62,7 +63,7 @@ function comboRow(c, t, imgOf) {
   return '<li class="combo-item' + (breaksB3(c) ? ' breaks' : '') + '">' +
     '<div class="combo-main"><div class="combo-pieces">' + pieces + '</div>' + tagChip(c.tag, t) + '</div>' +
     '<div class="combo-result">→ ' + esc(comboFeatureText(c.features[0] || '', state.lang)) +
-      (c.templates && c.templates.length ? ' <span class="txt-muted">(' + c.templates.map(esc).join(', ') + ')</span>' : '') + '</div>' +
+      (c.templates && c.templates.some(n => !n.includes('{')) ? ' <span class="txt-muted">(' + c.templates.filter(n => !n.includes('{')).map(esc).join(', ') + ')</span>' : '') + '</div>' +
     '<div class="combo-foot"><div class="combo-flags">' + badges + '</div>' +
       '<span class="mono combo-mana">' + esc(manaText(c, t)) + '</span>' +
       '<a class="combo-link" href="' + spellbookUrl(c) + '" target="_blank" rel="noopener noreferrer">' + esc(t.comboSteps) + ' ↗</a></div></li>';
@@ -94,7 +95,7 @@ function tagLegend(t) {
 export function renderCombos() {
   const t = T(), cd = state.combosData, root = $('combos');
   const isFile = location.protocol === 'file:';
-  const head = '<div class="row-between"><h3 class="secT">' + esc(t.combosT) + '</h3>' +
+  const head = '<div class="row-between"><h3 class="secT secT-lg">' + esc(t.combosT) + '</h3>' +
     (cd && cd.updated ? '<span class="note-sm">' + esc(t.comboDbDate) + ' ' + esc(cd.updated.slice(0, 10)) + '</span>' : '') + '</div>';
   if (!cd || cd.status === 'error') {
     root.innerHTML = '<div class="panel panel-pad-lg">' + head +
