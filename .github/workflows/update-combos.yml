@@ -17,10 +17,12 @@ jobs:
           python-version: "3.12"
       - name: Rebuild data/combos.json from Commander Spellbook bulk export
         run: python3 scripts/build_combo_db.py
+      - name: Rebuild data/salt.json from EDHREC's salt ratings
+        run: python3 scripts/build_salt_db.py
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/combos.json
+          git add data/combos.json data/salt.json
           git diff --cached --quiet || git commit -m "Update combo database (weekly refresh)"
           git push

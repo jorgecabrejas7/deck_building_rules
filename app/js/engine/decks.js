@@ -11,7 +11,10 @@ const HEADER_RE = /^(commander|deck|mainboard|sideboard|maybeboard|considering|c
 // not the deck, so none of it is analyzed. Shared with the Archidekt loader,
 // whose Sideboard category ships includedInDeck:true and would otherwise sail
 // straight into the stats.
-export const OUT_OF_DECK_RE = /^(sideboard|maybeboard|considering|companion|tokens?)s?$/i;
+// "Tokens" is NOT here: as an Archidekt category it holds real token-MAKING cards
+// that count toward the 100 (Krenko's Command). Only a text export's section
+// header means actual token objects, and sectionFor handles that separately.
+export const OUT_OF_DECK_RE = /^(sideboard|maybeboard|considering|companion)s?$/i;
 
 export function detectInput(text) {
   const t = text.trim();
@@ -50,7 +53,7 @@ export function parseDecklist(text) {
 }
 function sectionFor(word) {
   if (/commander/i.test(word)) return "commander";
-  return OUT_OF_DECK_RE.test(word) ? "skip" : "main";
+  return OUT_OF_DECK_RE.test(word) || /^tokens?$/i.test(word) ? "skip" : "main";
 }
 function stripLine(line) {
   let skip = false;

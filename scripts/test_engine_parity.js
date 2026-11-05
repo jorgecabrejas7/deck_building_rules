@@ -157,6 +157,8 @@ const OUT_CASES = [
   ["Archidekt [Maybeboard] tag", "1x Sol Ring (c21) 263 [Artifact]\n1x Mana Crypt (2xm) 270 [Maybeboard]", ["Sol Ring"], ["Mana Crypt"]],
   ["comment section marker", "1 Sol Ring\n// Maybeboard\n1 Mana Crypt", ["Sol Ring"], ["Mana Crypt"]],
   ["skip section ends at the next header", "Maybeboard\n1 Mana Crypt\nDeck\n1 Sol Ring", ["Sol Ring"], ["Mana Crypt"]],
+  ["Archidekt [Tokens] holds real deck cards", "1x Sol Ring (c21) 263 [Artifact]\n1x Krenko's Command (ddt) 53 [Tokens]", ["Sol Ring", "Krenko's Command"], []],
+  ["a text export's Tokens section is not deck cards", "1 Sol Ring\n\nTOKENS:\n1 Goblin", ["Sol Ring"], ["Goblin"]],
   ["an ordinary comment is not a section", "// budget build\n1 Sol Ring", ["Sol Ring"], []],
 ];
 let outBad = 0;

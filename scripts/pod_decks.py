@@ -34,6 +34,9 @@ DB_PATH = ROOT / "data" / "pod_decks.sqlite"
 JSON_PATH = ROOT / "data" / "pod_decks.json"
 
 
+OUT_OF_DECK_RE = re.compile(r"(sideboard|maybeboard|considering|companion)s?", re.I)
+
+
 def connect():
     DB_PATH.parent.mkdir(exist_ok=True)
     con = sqlite3.connect(DB_PATH)
@@ -55,7 +58,10 @@ def fetch_archidekt(deck_id: str):
     req = urllib.request.Request(api, headers={"User-Agent": "pod-deck-checker"})
     with urllib.request.urlopen(req, timeout=30) as res:
         data = json.load(res)
-    excluded = {c["name"] for c in data.get("categories", []) if c.get("includedInDeck") is False}
+    # Archidekt ships its Sideboard category with includedInDeck:true, so the flag
+    # alone lets it through. Same list as OUT_OF_DECK_RE in app/js/engine/decks.js.
+    excluded = {c["name"] for c in data.get("categories", [])
+                if c.get("includedInDeck") is False or OUT_OF_DECK_RE.fullmatch(c["name"])}
     lines, commanders = [], []
     for c in data.get("cards", []):
         cats = c.get("categories") or []

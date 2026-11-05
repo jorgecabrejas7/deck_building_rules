@@ -19,6 +19,7 @@ function cardFromScryfall(c) {
     price: isNaN(eur) ? null : eur,
     game_changer: !!c.game_changer,
     keywords: c.keywords || [],
+    produced_mana: c.produced_mana || (faces ? [...new Set(faces.flatMap(f => f.produced_mana || []))] : []),
     legal_commander: (c.legalities && c.legalities.commander) || "unknown",
     edhrec_rank: c.edhrec_rank || null,
     img_art: imgs.art_crop || "", img_normal: imgs.normal || "", img_small: imgs.small || "",

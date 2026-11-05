@@ -8,10 +8,10 @@ export const store = {
 };
 
 export let cardCache = {};
-try { const raw = JSON.parse(localStorage.getItem('pdc_cards_v2') || '{}');
+try { const raw = JSON.parse(localStorage.getItem('pdc_cards_v3') || '{}');
   if (raw._ts && Date.now() - raw._ts < 30 * 864e5) cardCache = raw.cards || {};
 } catch (e) {}
-export function persistCache(){ try { localStorage.setItem('pdc_cards_v2', JSON.stringify({ _ts: Date.now(), cards: cardCache })); } catch (e) {} }
+export function persistCache(){ try { localStorage.setItem('pdc_cards_v3', JSON.stringify({ _ts: Date.now(), cards: cardCache })); } catch (e) {} }
 
 // ---- session persistence: survive refresh / tab eviction ----
 // One versioned blob with the raw inputs only (deck text, archetype, active
