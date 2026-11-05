@@ -23,6 +23,9 @@ import { REMINDER_TEXT_RE } from "./stats.js";
 import { isLegalCommander } from "./commander.js";
 
 export const BRACKET3 = {
+  // A two-card line playable on a mana curve up to this per turn is Bracket 4. Permanents
+  // can land on separate turns, so the total does not protect a 7+ mana pair.
+  fast_pair_turn_mana: 6,
   game_changers_max: 3,
   // "Low quantities" — one or two one-shot extra turns read as a build-around,
   // three or more read as a turns deck.
@@ -107,6 +110,20 @@ function comboDeploy(combo, db, idx) {
     mv += c.cmc;
   }
   return mv;
+}
+
+// The most mana the combo needs in a single turn. Permanents can come down on earlier
+// turns, so the dearest of them sets the bar; spells must all be cast when it happens,
+// along with any extra mana it needs. null when a piece cannot be priced.
+function comboTurnCost(combo, db, idx) {
+  let dearest = 0, spells = 0;
+  for (const n of [...combo.cards, ...(combo.filled || [])]) {
+    const c = db[n] || idx.get(front(n));
+    if (!c || typeof c.cmc !== "number") return null;
+    if (/Instant|Sorcery/.test(String(c.type_line).split(" // ")[0])) spells += c.cmc;
+    else dearest = Math.max(dearest, c.cmc);
+  }
+  return Math.max(dearest, spells) + (combo.extraMana || 0);
 }
 
 // Spellbook's classification of one combo, now that the commander is known
@@ -218,7 +235,10 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, c
       turns: c.cards.filter(n => turnSet.has(n)).length,
       mld: c.cards.some(n => mldSet.has(n)),
     });
-    return { ...c, tag, cardsToFind, deploy: comboDeploy(c, db, idx) };
+    const turnCost = comboTurnCost(c, db, idx);
+    // Two cards, a real result and playable on curve is Bracket 4, whatever else it is.
+    const fastPair = c.n === 2 && c.relevant && (c.infinite || c.win) && turnCost !== null && turnCost <= BRACKET3.fast_pair_turn_mana;
+    return { ...c, tag: fastPair && c.tag !== "B" ? "R" : tag, cardsToFind, deploy: comboDeploy(c, db, idx), turnCost, fastPair };
   });
 
   const checks = [];
@@ -275,8 +295,17 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, c
   const breaking = [...tooStrong, ...mldCombos, ...turnCombos];
   const cuts = cutsToFit({ combos: [...new Set(breaking)], mld: mldCards, turnCards, looped, gcCards, commanders });
 
+  // These put a deck in Bracket 4 whatever its power says: land denial, by card or combo,
+  // and a fast two-card line. A deck can be Bracket 4 without being strong overall.
+  const fastPairs = rated.filter(c => c.fastPair);
+  const floorCuts = cutsToFit({ combos: [...mldCombos, ...fastPairs], mld: mldCards, turnCards: [], looped: [], gcCards: [], commanders }).cards;
+  const floor = mldCards.length || mldCombos.length || fastPairs.length ? { bracket: 4,
+    reason: mldCards.length || mldCombos.length ? "mld" : "combo",
+    mld: [...mldCards, ...mldCombos.map(c => c.cards.join(" + "))], combos: fastPairs.map(c => c.cards.join(" + ")),
+    cuts: floorCuts.map(c => ({ card: front(c.card), reason: c.reasons.includes("mass_land_denial") ? "mld" : "combo" })) } : null;
+
   return {
-    checks, failed: failed.map(c => c.id), pending,
+    floor, checks, failed: failed.map(c => c.id), pending,
     fits: !failed.length,
     checklist,                    // Wizards' read: 2..4
     estimate,                     // Spellbook's read: a COMBO_TAGS key

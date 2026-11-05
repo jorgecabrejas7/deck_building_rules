@@ -5,7 +5,7 @@
  "groups": {
   "precon": 36,
   "podIn": 16,
-  "podOut": 4,
+  "podOut": 5,
   "cedh": 8
  },
  "medians": {
@@ -48,30 +48,30 @@
   },
   "pod": {
    "power": 4.1,
-   "pillar_salt": 18,
+   "pillar_salt": 19,
    "pillar_synergy": 0,
-   "pillar_interaction": 34.5,
+   "pillar_interaction": 36,
    "pillar_wins": 9,
-   "salt_total": 26.85,
-   "salt_average": 0.34,
-   "synergy_coverage": 75.5,
+   "salt_total": 27.1,
+   "salt_average": 0.33,
+   "synergy_coverage": 77,
    "synergy_average": 21,
-   "manabase_score": 84,
+   "manabase_score": 86,
    "manabase_fixing": 100,
    "manabase_quality": 82,
-   "fetches": 1.5,
+   "fetches": 1,
    "lands": 36,
-   "avg_mv": 2.99,
-   "cheap_plays": 24.5,
+   "avg_mv": 3,
+   "cheap_plays": 25,
    "ramp": 14,
-   "fast_mana": 5.5,
-   "draw": 12.5,
+   "fast_mana": 6,
+   "draw": 13,
    "tutors": 1,
-   "recursion": 3.5,
+   "recursion": 4,
    "counters": 1,
-   "removal": 9,
+   "removal": 8,
    "wipes": 3,
-   "cheap_answers": 4.5,
+   "cheap_answers": 5,
    "stax": 1,
    "combos": 0,
    "ending_combos": 0,
@@ -80,15 +80,15 @@
    "mana_turn_4": 4.5,
    "two_card_ending": 0,
    "game_changers": 0,
-   "price": 179.18,
-   "points": 7
+   "price": 176.13,
+   "points": 6
   },
   "cedh": {
-   "power": 9.35,
+   "power": 9.5,
    "pillar_salt": 100,
    "pillar_synergy": 0,
    "pillar_interaction": 91.5,
-   "pillar_wins": 78,
+   "pillar_wins": 81,
    "salt_total": 86.3,
    "salt_average": 0.9,
    "synergy_coverage": 89,
@@ -127,23 +127,23 @@
    "medians": {
     "precon": 3.05,
     "podIn": 4.1,
-    "podOut": 6.55,
-    "cedh": 9.35
+    "podOut": 6.5,
+    "cedh": 9.5
    },
-   "precon_vs_pod": 0.83,
-   "podIn_vs_podOut": 1,
-   "pod_vs_cedh": 0.95
+   "precon_vs_pod": 0.79,
+   "podIn_vs_podOut": 0.85,
+   "pod_vs_cedh": 0.96
   },
   {
    "key": "pillar_salt",
    "medians": {
     "precon": 11.5,
     "podIn": 16,
-    "podOut": 27.5,
+    "podOut": 25,
     "cedh": 100
    },
-   "precon_vs_pod": 0.78,
-   "podIn_vs_podOut": 0.89,
+   "precon_vs_pod": 0.79,
+   "podIn_vs_podOut": 0.85,
    "pod_vs_cedh": 0.99
   },
   {
@@ -151,23 +151,23 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 5,
+    "podOut": 0,
     "cedh": 0
    },
-   "precon_vs_pod": 0.54,
-   "podIn_vs_podOut": 0.64,
-   "pod_vs_cedh": 0.42
+   "precon_vs_pod": 0.53,
+   "podIn_vs_podOut": 0.59,
+   "pod_vs_cedh": 0.43
   },
   {
    "key": "pillar_interaction",
    "medians": {
     "precon": 26,
     "podIn": 33,
-    "podOut": 48.5,
+    "podOut": 55,
     "cedh": 91.5
    },
-   "precon_vs_pod": 0.67,
-   "podIn_vs_podOut": 0.8,
+   "precon_vs_pod": 0.68,
+   "podIn_vs_podOut": 0.84,
    "pod_vs_cedh": 0.98
   },
   {
@@ -175,23 +175,23 @@
    "medians": {
     "precon": 4,
     "podIn": 6.5,
-    "podOut": 76.5,
-    "cedh": 78
+    "podOut": 71,
+    "cedh": 81
    },
-   "precon_vs_pod": 0.58,
-   "podIn_vs_podOut": 0.8,
-   "pod_vs_cedh": 0.82
+   "precon_vs_pod": 0.55,
+   "podIn_vs_podOut": 0.69,
+   "pod_vs_cedh": 0.85
   },
   {
    "key": "salt_total",
    "medians": {
     "precon": 22.45,
     "podIn": 25.55,
-    "podOut": 32.8,
+    "podOut": 31.3,
     "cedh": 86.3
    },
-   "precon_vs_pod": 0.78,
-   "podIn_vs_podOut": 0.89,
+   "precon_vs_pod": 0.79,
+   "podIn_vs_podOut": 0.85,
    "pod_vs_cedh": 0.99
   },
   {
@@ -199,11 +199,11 @@
    "medians": {
     "precon": 0.29,
     "podIn": 0.33,
-    "podOut": 0.43,
+    "podOut": 0.4,
     "cedh": 0.9
    },
    "precon_vs_pod": 0.82,
-   "podIn_vs_podOut": 0.96,
+   "podIn_vs_podOut": 0.84,
    "pod_vs_cedh": 1
   },
   {
@@ -211,35 +211,35 @@
    "medians": {
     "precon": 100,
     "podIn": 79,
-    "podOut": 67.5,
+    "podOut": 74,
     "cedh": 89
    },
    "precon_vs_pod": 0.12,
-   "podIn_vs_podOut": 0.36,
-   "pod_vs_cedh": 0.69
+   "podIn_vs_podOut": 0.43,
+   "pod_vs_cedh": 0.66
   },
   {
    "key": "synergy_average",
    "medians": {
     "precon": 40.5,
     "podIn": 23,
-    "podOut": 19.5,
+    "podOut": 21,
     "cedh": 33
    },
-   "precon_vs_pod": 0.15,
-   "podIn_vs_podOut": 0.34,
-   "pod_vs_cedh": 0.61
+   "precon_vs_pod": 0.16,
+   "podIn_vs_podOut": 0.36,
+   "pod_vs_cedh": 0.6
   },
   {
    "key": "manabase_score",
    "medians": {
     "precon": 74.5,
     "podIn": 81,
-    "podOut": 91.5,
+    "podOut": 91,
     "cedh": 100
    },
    "precon_vs_pod": 0.75,
-   "podIn_vs_podOut": 0.85,
+   "podIn_vs_podOut": 0.87,
    "pod_vs_cedh": 0.96
   },
   {
@@ -250,20 +250,20 @@
     "podOut": 100,
     "cedh": 100
    },
-   "precon_vs_pod": 0.48,
-   "podIn_vs_podOut": 0.53,
-   "pod_vs_cedh": 0.53
+   "precon_vs_pod": 0.5,
+   "podIn_vs_podOut": 0.5,
+   "pod_vs_cedh": 0.5
   },
   {
    "key": "manabase_quality",
    "medians": {
     "precon": 83,
     "podIn": 82,
-    "podOut": 95.5,
+    "podOut": 94,
     "cedh": 100
    },
-   "precon_vs_pod": 0.53,
-   "podIn_vs_podOut": 0.87,
+   "precon_vs_pod": 0.55,
+   "podIn_vs_podOut": 0.84,
    "pod_vs_cedh": 0.95
   },
   {
@@ -274,7 +274,7 @@
     "podOut": 0,
     "cedh": 7
    },
-   "precon_vs_pod": 0.34,
+   "precon_vs_pod": 0.33,
    "podIn_vs_podOut": 0.36,
    "pod_vs_cedh": 0.99
   },
@@ -283,35 +283,35 @@
    "medians": {
     "precon": 38,
     "podIn": 36.5,
-    "podOut": 33,
+    "podOut": 34,
     "cedh": 27.5
    },
-   "precon_vs_pod": 0.22,
-   "podIn_vs_podOut": 0.32,
+   "precon_vs_pod": 0.21,
+   "podIn_vs_podOut": 0.3,
    "pod_vs_cedh": 0.01
   },
   {
    "key": "avg_mv",
    "medians": {
     "precon": 3.5,
-    "podIn": 3.01,
-    "podOut": 2.73,
+    "podIn": 3.08,
+    "podOut": 2.61,
     "cedh": 1.97
    },
    "precon_vs_pod": 0.26,
-   "podIn_vs_podOut": 0.24,
+   "podIn_vs_podOut": 0.21,
    "pod_vs_cedh": 0.06
   },
   {
    "key": "cheap_plays",
    "medians": {
     "precon": 20.5,
-    "podIn": 24,
-    "podOut": 33.5,
+    "podIn": 23.5,
+    "podOut": 36,
     "cedh": 50.5
    },
-   "precon_vs_pod": 0.73,
-   "podIn_vs_podOut": 0.8,
+   "precon_vs_pod": 0.72,
+   "podIn_vs_podOut": 0.83,
    "pod_vs_cedh": 0.99
   },
   {
@@ -319,36 +319,36 @@
    "medians": {
     "precon": 13,
     "podIn": 14,
-    "podOut": 14,
+    "podOut": 13,
     "cedh": 23.5
    },
-   "precon_vs_pod": 0.55,
-   "podIn_vs_podOut": 0.53,
-   "pod_vs_cedh": 0.86
+   "precon_vs_pod": 0.56,
+   "podIn_vs_podOut": 0.5,
+   "pod_vs_cedh": 0.85
   },
   {
    "key": "fast_mana",
    "medians": {
     "precon": 5,
     "podIn": 5,
-    "podOut": 7.5,
+    "podOut": 6,
     "cedh": 13.5
    },
-   "precon_vs_pod": 0.56,
-   "podIn_vs_podOut": 0.83,
-   "pod_vs_cedh": 0.95
+   "precon_vs_pod": 0.57,
+   "podIn_vs_podOut": 0.8,
+   "pod_vs_cedh": 0.96
   },
   {
    "key": "draw",
    "medians": {
     "precon": 15,
-    "podIn": 12.5,
-    "podOut": 12.5,
+    "podIn": 13,
+    "podOut": 11,
     "cedh": 10
    },
-   "precon_vs_pod": 0.36,
-   "podIn_vs_podOut": 0.48,
-   "pod_vs_cedh": 0.26
+   "precon_vs_pod": 0.35,
+   "podIn_vs_podOut": 0.39,
+   "pod_vs_cedh": 0.27
   },
   {
    "key": "tutors",
@@ -358,8 +358,8 @@
     "podOut": 1,
     "cedh": 14.5
    },
-   "precon_vs_pod": 0.71,
-   "podIn_vs_podOut": 0.58,
+   "precon_vs_pod": 0.67,
+   "podIn_vs_podOut": 0.53,
    "pod_vs_cedh": 1
   },
   {
@@ -367,47 +367,47 @@
    "medians": {
     "precon": 4.5,
     "podIn": 3.5,
-    "podOut": 3.5,
+    "podOut": 4,
     "cedh": 3.5
    },
    "precon_vs_pod": 0.45,
-   "podIn_vs_podOut": 0.49,
-   "pod_vs_cedh": 0.48
+   "podIn_vs_podOut": 0.51,
+   "pod_vs_cedh": 0.47
   },
   {
    "key": "counters",
    "medians": {
     "precon": 0,
-    "podIn": 0.5,
+    "podIn": 1,
     "podOut": 3,
     "cedh": 10
    },
-   "precon_vs_pod": 0.63,
-   "podIn_vs_podOut": 0.75,
-   "pod_vs_cedh": 0.91
+   "precon_vs_pod": 0.66,
+   "podIn_vs_podOut": 0.78,
+   "pod_vs_cedh": 0.9
   },
   {
    "key": "removal",
    "medians": {
     "precon": 9.5,
-    "podIn": 8.5,
-    "podOut": 9.5,
+    "podIn": 8,
+    "podOut": 9,
     "cedh": 9
    },
-   "precon_vs_pod": 0.44,
-   "podIn_vs_podOut": 0.46,
-   "pod_vs_cedh": 0.52
+   "precon_vs_pod": 0.42,
+   "podIn_vs_podOut": 0.43,
+   "pod_vs_cedh": 0.54
   },
   {
    "key": "wipes",
    "medians": {
     "precon": 3,
     "podIn": 3,
-    "podOut": 3.5,
+    "podOut": 3,
     "cedh": 1
    },
    "precon_vs_pod": 0.39,
-   "podIn_vs_podOut": 0.6,
+   "podIn_vs_podOut": 0.59,
    "pod_vs_cedh": 0.2
   },
   {
@@ -418,8 +418,8 @@
     "podOut": 7,
     "cedh": 11
    },
-   "precon_vs_pod": 0.62,
-   "podIn_vs_podOut": 0.82,
+   "precon_vs_pod": 0.64,
+   "podIn_vs_podOut": 0.84,
    "pod_vs_cedh": 0.94
   },
   {
@@ -430,8 +430,8 @@
     "podOut": 1,
     "cedh": 12
    },
-   "precon_vs_pod": 0.48,
-   "podIn_vs_podOut": 0.55,
+   "precon_vs_pod": 0.52,
+   "podIn_vs_podOut": 0.62,
    "pod_vs_cedh": 0.87
   },
   {
@@ -439,24 +439,24 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 8,
+    "podOut": 4,
     "cedh": 5.5
    },
-   "precon_vs_pod": 0.5,
-   "podIn_vs_podOut": 0.84,
-   "pod_vs_cedh": 0.81
+   "precon_vs_pod": 0.49,
+   "podIn_vs_podOut": 0.76,
+   "pod_vs_cedh": 0.82
   },
   {
    "key": "ending_combos",
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 5,
+    "podOut": 4,
     "cedh": 5
    },
    "precon_vs_pod": 0.52,
-   "podIn_vs_podOut": 0.86,
-   "pod_vs_cedh": 0.84
+   "podIn_vs_podOut": 0.78,
+   "pod_vs_cedh": 0.85
   },
   {
    "key": "win_turn",
@@ -478,20 +478,20 @@
     "podOut": 4,
     "cedh": 3
    },
-   "precon_vs_pod": 0.63,
-   "podIn_vs_podOut": 0.53,
-   "pod_vs_cedh": 0.22
+   "precon_vs_pod": 0.62,
+   "podIn_vs_podOut": 0.51,
+   "pod_vs_cedh": 0.21
   },
   {
    "key": "mana_turn_4",
    "medians": {
     "precon": 4.6,
     "podIn": 4.5,
-    "podOut": 4.45,
+    "podOut": 4.4,
     "cedh": 4.3
    },
-   "precon_vs_pod": 0.36,
-   "podIn_vs_podOut": 0.54,
+   "precon_vs_pod": 0.35,
+   "podIn_vs_podOut": 0.52,
    "pod_vs_cedh": 0.36
   },
   {
@@ -499,12 +499,12 @@
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 1,
+    "podOut": 0,
     "cedh": 2
    },
    "precon_vs_pod": 0.5,
-   "podIn_vs_podOut": 0.72,
-   "pod_vs_cedh": 0.85
+   "podIn_vs_podOut": 0.67,
+   "pod_vs_cedh": 0.86
   },
   {
    "key": "game_changers",
@@ -514,8 +514,8 @@
     "podOut": 1,
     "cedh": 19
    },
-   "precon_vs_pod": 0.61,
-   "podIn_vs_podOut": 0.8,
+   "precon_vs_pod": 0.6,
+   "podIn_vs_podOut": 0.73,
    "pod_vs_cedh": 0.99
   },
   {
@@ -523,11 +523,11 @@
    "medians": {
     "precon": 68.23,
     "podIn": 165.8,
-    "podOut": 237.16,
+    "podOut": 196.88,
     "cedh": 1907.81
    },
-   "precon_vs_pod": 0.87,
-   "podIn_vs_podOut": 0.7,
+   "precon_vs_pod": 0.88,
+   "podIn_vs_podOut": 0.64,
    "pod_vs_cedh": 1
   },
   {
@@ -535,11 +535,11 @@
    "medians": {
     "precon": 0,
     "podIn": 5,
-    "podOut": 30,
+    "podOut": 29,
     "cedh": 71
    },
-   "precon_vs_pod": 0.84,
-   "podIn_vs_podOut": 0.95,
+   "precon_vs_pod": 0.85,
+   "podIn_vs_podOut": 0.83,
    "pod_vs_cedh": 0.99
   }
  ],
@@ -555,6 +555,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier2",
    "banned": [],
    "points": 6,
@@ -642,6 +644,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 12,
+     "lineCost": 6,
      "printed": 0,
      "massPump": 3
     },
@@ -726,10 +729,10 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.4,
-    "raw": 16.9,
+    "score": 3.7,
+    "raw": 19.3,
     "pillars": {
-     "wins": 23,
+     "wins": 29,
      "interaction": 24,
      "salt": 11,
      "synergy": 0
@@ -745,22 +748,32 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
-   "practicalBracket": "2",
+   "tier": "above",
+   "practicalBracket": "4",
+   "powerBracket": "2",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Combat Celebrant + Helm of the Host"
+    ]
+   },
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 51.51,
    "gc": 0,
    "bracket": {
-    "fits": true,
-    "checklist": 3,
-    "estimate": "S",
-    "failed": []
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "combos"
+    ]
    },
    "profile": {
     "manabase": {
@@ -838,6 +851,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 7,
+     "lineCost": 4,
      "printed": 0,
      "massPump": 3
     },
@@ -922,10 +936,10 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.4,
-    "raw": 16.5,
+    "score": 3.9,
+    "raw": 21.3,
     "pillars": {
-     "wins": 23,
+     "wins": 35,
      "interaction": 23,
      "salt": 10,
      "synergy": 0
@@ -943,6 +957,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier2",
    "banned": [],
    "points": 4,
@@ -1037,6 +1053,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 3,
      "massPump": 0
     },
@@ -1137,6 +1154,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -1220,6 +1239,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 11,
+     "lineCost": 6,
      "printed": 0,
      "massPump": 6
     },
@@ -1304,10 +1324,10 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.2,
-    "raw": 14.7,
+    "score": 3.4,
+    "raw": 17.1,
     "pillars": {
-     "wins": 23,
+     "wins": 29,
      "interaction": 14,
      "salt": 13,
      "synergy": 0
@@ -1323,8 +1343,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
-   "practicalBracket": "2",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "tier2",
    "banned": [],
    "points": 4,
@@ -1418,6 +1440,7 @@
      "web": 3,
      "throughCommander": 2,
      "fastest": 12,
+     "lineCost": 5,
      "printed": 0,
      "massPump": 1
     },
@@ -1502,10 +1525,10 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4,
-    "raw": 22.1,
+    "score": 4.2,
+    "raw": 24.1,
     "pillars": {
-     "wins": 38,
+     "wins": 43,
      "interaction": 22,
      "salt": 9,
      "synergy": 0
@@ -1523,6 +1546,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -1614,6 +1639,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 4
     },
@@ -1714,6 +1740,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 1,
@@ -1801,6 +1829,7 @@
      "web": 1.5,
      "throughCommander": 3,
      "fastest": 11,
+     "lineCost": 5,
      "printed": 0,
      "massPump": 2
     },
@@ -1885,10 +1914,10 @@
     "offPlan": 4
    },
    "power": {
-    "score": 3.3,
-    "raw": 15.5,
+    "score": 3.7,
+    "raw": 19.5,
     "pillars": {
-     "wins": 19,
+     "wins": 29,
      "interaction": 23,
      "salt": 14,
      "synergy": 0
@@ -1906,6 +1935,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -1997,6 +2028,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 18,
+     "lineCost": 13,
      "printed": 0,
      "massPump": 0
     },
@@ -2081,10 +2113,10 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.7,
-    "raw": 19,
+    "score": 3.4,
+    "raw": 16.6,
     "pillars": {
-     "wins": 23,
+     "wins": 17,
      "interaction": 32,
      "salt": 12,
      "synergy": 0
@@ -2102,6 +2134,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "tier2",
    "banned": [],
    "points": 5,
@@ -2189,6 +2223,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -2289,6 +2324,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -2372,6 +2409,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -2472,6 +2510,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -2579,6 +2619,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 2
     },
@@ -2679,6 +2720,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -2770,6 +2813,7 @@
      "web": 2,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -2850,9 +2894,9 @@
    },
    "power": {
     "score": 3.2,
-    "raw": 15.1,
+    "raw": 14.7,
     "pillars": {
-     "wins": 5,
+     "wins": 4,
      "interaction": 43,
      "salt": 6,
      "synergy": 7
@@ -2868,22 +2912,32 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
-   "practicalBracket": "2",
+   "tier": "above",
+   "practicalBracket": "4",
+   "powerBracket": "2*",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Dakmor Salvage + The Gitrog Monster"
+    ]
+   },
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 52.86,
    "gc": 0,
    "bracket": {
-    "fits": true,
-    "checklist": 3,
-    "estimate": "S",
-    "failed": []
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "combos"
+    ]
    },
    "profile": {
     "manabase": {
@@ -2961,6 +3015,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 5,
+     "lineCost": 5,
      "printed": 0,
      "massPump": 1
     },
@@ -3045,10 +3100,10 @@
     "offPlan": 1
    },
    "power": {
-    "score": 3.8,
-    "raw": 20.4,
+    "score": 4.2,
+    "raw": 24,
     "pillars": {
-     "wins": 25,
+     "wins": 34,
      "interaction": 28,
      "salt": 17,
      "synergy": 4
@@ -3066,6 +3121,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -3157,6 +3214,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 1,
      "massPump": 0
     },
@@ -3257,6 +3315,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -3348,6 +3408,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 1
     },
@@ -3448,6 +3509,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -3539,6 +3602,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 1,
      "massPump": 0
     },
@@ -3637,8 +3701,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
-   "practicalBracket": "2",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 5,
@@ -3736,6 +3802,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 7,
+     "lineCost": 6,
      "printed": 0,
      "massPump": 0
     },
@@ -3820,10 +3887,10 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.9,
-    "raw": 21.1,
+    "score": 4.1,
+    "raw": 23.5,
     "pillars": {
-     "wins": 23,
+     "wins": 29,
      "interaction": 36,
      "salt": 19,
      "synergy": 0
@@ -3841,6 +3908,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 1,
@@ -3934,6 +4003,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 1
     },
@@ -4032,22 +4102,32 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
-   "practicalBracket": "2",
+   "tier": "above",
+   "practicalBracket": "4",
+   "powerBracket": "2*",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Gilraen, Dúnedain Protector + Village Bell-Ringer"
+    ]
+   },
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
    "breakdown": {},
    "violations": [],
-   "verdict": "in",
+   "verdict": "out",
    "label": null,
    "price": 45.97,
    "gc": 0,
    "bracket": {
-    "fits": true,
-    "checklist": 3,
-    "estimate": "S",
-    "failed": []
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "combos"
+    ]
    },
    "profile": {
     "manabase": {
@@ -4125,6 +4205,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 6,
+     "lineCost": 3,
      "printed": 0,
      "massPump": 5
     },
@@ -4209,10 +4290,10 @@
     "offPlan": 3
    },
    "power": {
-    "score": 3.6,
-    "raw": 18.6,
+    "score": 4.2,
+    "raw": 24.2,
     "pillars": {
-     "wins": 23,
+     "wins": 37,
      "interaction": 32,
      "salt": 9,
      "synergy": 0
@@ -4231,6 +4312,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -4322,6 +4405,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 1
     },
@@ -4422,6 +4506,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "tier2",
    "banned": [],
    "points": 3,
@@ -4507,6 +4593,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 2
     },
@@ -4607,6 +4694,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 2,
@@ -4700,6 +4789,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -4800,6 +4890,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -4891,6 +4983,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 2
     },
@@ -4991,6 +5084,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -5074,6 +5169,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 1
     },
@@ -5174,6 +5270,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 2,
@@ -5275,6 +5373,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -5375,6 +5474,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -5466,6 +5567,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 2
     },
@@ -5566,6 +5668,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 1,
@@ -5651,6 +5755,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -5751,6 +5856,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 2,
@@ -5836,6 +5943,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -5936,6 +6044,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -6019,6 +6129,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 5
     },
@@ -6119,6 +6230,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -6202,6 +6315,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 6
     },
@@ -6302,6 +6416,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -6385,6 +6501,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -6485,6 +6602,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 2,
@@ -6578,6 +6697,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 3
     },
@@ -6678,6 +6798,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 2,
@@ -6771,6 +6893,7 @@
      "web": 2,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -6851,9 +6974,9 @@
    },
    "power": {
     "score": 3.6,
-    "raw": 18.5,
+    "raw": 18.1,
     "pillars": {
-     "wins": 5,
+     "wins": 4,
      "interaction": 57,
      "salt": 15,
      "synergy": 0
@@ -6871,6 +6994,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -6962,6 +7087,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -7062,6 +7188,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -7153,6 +7281,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 4
     },
@@ -7253,6 +7382,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 1,
@@ -7346,6 +7477,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -7446,8 +7578,10 @@
    ],
    "cards": 100,
    "missing": 0,
-   "tier": "tier1",
-   "practicalBracket": "2",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 5,
@@ -7545,6 +7679,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 7,
+     "lineCost": 6,
      "printed": 0,
      "massPump": 0
     },
@@ -7629,10 +7764,10 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.9,
-    "raw": 21.1,
+    "score": 4.1,
+    "raw": 23.5,
     "pillars": {
-     "wins": 23,
+     "wins": 29,
      "interaction": 36,
      "salt": 19,
      "synergy": 0
@@ -7652,6 +7787,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 10,
@@ -7750,6 +7887,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 1
     },
@@ -7852,6 +7990,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 19,
@@ -7951,6 +8091,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -8053,6 +8194,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 11,
@@ -8151,6 +8294,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -8252,7 +8396,16 @@
    "cards": 101,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "3",
+   "practicalBracket": "4",
+   "powerBracket": "3",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Glint-Horn Buccaneer + Malcolm, Keen-Eyed Navigator",
+     "Helm of the Host + Port Razer"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Dockside Extortionist",
@@ -8371,6 +8524,7 @@
      "web": 3,
      "throughCommander": 0,
      "fastest": 8,
+     "lineCost": 5,
      "printed": 1,
      "massPump": 4
     },
@@ -8455,10 +8609,10 @@
     "offPlan": 12
    },
    "power": {
-    "score": 6.6,
-    "raw": 47.3,
+    "score": 6.5,
+    "raw": 46.5,
     "pillars": {
-     "wins": 73,
+     "wins": 71,
      "interaction": 41,
      "salt": 52,
      "synergy": 0
@@ -8478,6 +8632,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 20,
@@ -8576,6 +8732,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 7,
      "massPump": 0
     },
@@ -8677,7 +8834,15 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "3",
+   "practicalBracket": "4",
+   "powerBracket": "3",
+   "floor": {
+    "reason": "mld",
+    "mld": [
+     "Liliana, Dreadhorde General"
+    ],
+    "combos": []
+   },
    "pointsTier": "above",
    "banned": [],
    "points": 36,
@@ -8773,6 +8938,7 @@
      "web": 18.5,
      "throughCommander": 0,
      "fastest": 8,
+     "lineCost": 4,
      "printed": 0,
      "massPump": 1
     },
@@ -8880,6 +9046,8 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "3",
+   "powerBracket": "3",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 10,
@@ -8981,6 +9149,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -9083,6 +9252,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 5,
@@ -9171,6 +9342,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 8
     },
@@ -9273,6 +9445,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 9,
@@ -9387,6 +9561,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 3
     },
@@ -9489,6 +9664,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 8,
@@ -9586,6 +9763,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 2
     },
@@ -9684,111 +9862,111 @@
    "commanders": [
     "Ezio Auditore da Firenze"
    ],
-   "cards": 101,
+   "cards": 100,
    "missing": 0,
-   "tier": "tier1",
-   "practicalBracket": "2",
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "tier2",
    "banned": [],
    "points": 5,
    "breakdown": {
-    "price_1_5": 2,
-    "price_20_30": 3
+    "stax_effects": 1,
+    "price_1_5": 4
    },
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 109.68,
+   "price": 138.06,
    "gc": 0,
    "bracket": {
-    "fits": false,
+    "fits": true,
     "checklist": 2,
     "estimate": "E",
-    "failed": [
-     "legality"
-    ]
+    "failed": []
    },
    "profile": {
     "manabase": {
      "lands": 34,
-     "basics": 22,
-     "tapped": 8,
+     "basics": 20,
+     "tapped": 6,
      "fetches": 1,
      "colors": [
       {
        "color": "W",
-       "pips": 18,
-       "share": 0.18947368421052632,
-       "sources": 12,
+       "pips": 17,
+       "share": 0.17346938775510204,
+       "sources": 16,
        "target": 11,
-       "cover": 1.0877862595419847
+       "cover": 1.4848484848484849
       },
       {
        "color": "U",
-       "pips": 19,
-       "share": 0.2,
-       "sources": 14,
+       "pips": 20,
+       "share": 0.20408163265306123,
+       "sources": 16,
        "target": 11,
-       "cover": 1.25
+       "cover": 1.4202898550724639
       },
       {
        "color": "B",
-       "pips": 34,
-       "share": 0.35789473684210527,
-       "sources": 18,
+       "pips": 39,
+       "share": 0.3979591836734694,
+       "sources": 23,
        "target": 14,
-       "cover": 1.3113496932515338
+       "cover": 1.6008522727272727
       },
       {
        "color": "R",
-       "pips": 17,
-       "share": 0.17894736842105263,
-       "sources": 11,
+       "pips": 16,
+       "share": 0.16326530612244897,
+       "sources": 15,
        "target": 11,
-       "cover": 1.0125968992248062
+       "cover": 1.4134615384615385
       },
       {
        "color": "G",
-       "pips": 7,
-       "share": 0.07368421052631578,
-       "sources": 9,
+       "pips": 6,
+       "share": 0.061224489795918366,
+       "sources": 12,
        "target": 9,
-       "cover": 0.9805045871559633
+       "cover": 1.3363636363636364
       }
      ],
      "weakest": "G",
-     "fixing": 98,
-     "quality": 76,
-     "curve": 69,
-     "score": 81
+     "fixing": 100,
+     "quality": 82,
+     "curve": 52,
+     "score": 78
     },
     "speed": {
-     "avgMv": 2.96,
-     "cheap": 24,
-     "high": 0,
-     "ramp": 8,
-     "rocks": 2,
+     "avgMv": 3.26,
+     "cheap": 21,
+     "high": 3,
+     "ramp": 11,
+     "rocks": 5,
      "dorks": 0,
      "rituals": 0,
-     "landRamp": 4,
-     "fastMana": 2
+     "landRamp": 3,
+     "fastMana": 3
     },
     "consistency": {
-     "draw": 11,
-     "cheapDraw": 4,
-     "tutors": 1,
-     "recursion": 9
+     "draw": 13,
+     "cheapDraw": 3,
+     "tutors": 0,
+     "recursion": 8
     },
     "interaction": {
-     "counters": 0,
-     "removal": 9,
+     "counters": 1,
+     "removal": 7,
      "wipes": 1,
-     "protection": 6,
+     "protection": 8,
      "graveHate": 2,
-     "stax": 1,
+     "stax": 2,
      "free": 0,
      "cheapAnswers": 2,
-     "instantShare": 60
+     "instantShare": 56
     },
     "wins": {
      "checked": true,
@@ -9800,91 +9978,92 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
-     "printed": 3,
-     "massPump": 3
+     "lineCost": null,
+     "printed": 2,
+     "massPump": 6
     },
     "shape": {
      "archetypes": [
       {
+       "key": "tokens",
+       "share": 18
+      },
+      {
        "key": "equipment",
-       "share": 29
+       "share": 18
       },
       {
        "key": "voltron",
-       "share": 20
-      },
-      {
-       "key": "tokens",
-       "share": 18
+       "share": 15
       }
      ],
      "typal": {
       "type": "Assassin",
-      "count": 29,
-      "share": 91
+      "count": 31,
+      "share": 89
      },
-     "creatures": 32,
+     "creatures": 35,
      "throughCommander": 0,
      "engine": {
-      "theme": "recursion",
-      "count": 9
+      "theme": "lifegain",
+      "count": 8
      }
     },
     "goldfish": {
      "games": 500,
      "mana": [
       1.1,
-      2.2,
-      3.1,
-      3.9,
-      4.4,
-      5,
-      5.4,
-      5.8,
-      6.3,
-      6.7,
-      7.1,
-      7.6
+      2.3,
+      3.3,
+      4,
+      4.7,
+      5.2,
+      5.7,
+      6.2,
+      6.6,
+      7,
+      7.5,
+      8
      ],
      "commanderTurn": 2,
      "winTurn": null,
      "winBy": null
     },
     "upgrade": {
-     "pricey": 11,
-     "medianRank": 6275
+     "pricey": 18,
+     "medianRank": 3800
     }
    },
    "salt": {
-    "total": 26.9,
-    "average": 0.36,
+    "total": 29.4,
+    "average": 0.38,
     "top": [
      {
       "name": "Sol Ring",
       "salt": 1.46
      },
      {
-      "name": "Unstoppable Slasher",
-      "salt": 0.88
+      "name": "Propaganda",
+      "salt": 1.12
      },
      {
-      "name": "Ramses, Assassin Lord",
-      "salt": 0.81
+      "name": "The Lord of Pain",
+      "salt": 0.97
      }
     ]
    },
    "synergy": {
-    "coverage": 86,
-    "average": 35,
-    "offPlan": 8
+    "coverage": 97,
+    "average": 42,
+    "offPlan": 1
    },
    "power": {
-    "score": 2.9,
-    "raw": 12.4,
+    "score": 4.1,
+    "raw": 17.3,
     "pillars": {
-     "wins": 21,
-     "interaction": 5,
-     "salt": 18,
+     "wins": 30,
+     "interaction": 8,
+     "salt": 22,
      "synergy": 0
     }
    }
@@ -9901,7 +10080,15 @@
    "cards": 101,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "3*",
+   "practicalBracket": "4",
+   "powerBracket": "3*",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Dramatic Reversal + Isochron Scepter"
+    ]
+   },
    "pointsTier": "above",
    "banned": [],
    "points": 29,
@@ -9920,9 +10107,10 @@
    "gc": 0,
    "bracket": {
     "fits": false,
-    "checklist": 3,
-    "estimate": "S",
+    "checklist": 4,
+    "estimate": "R",
     "failed": [
+     "combos",
      "legality"
     ]
    },
@@ -9986,6 +10174,7 @@
      "web": 12,
      "throughCommander": 0,
      "fastest": 4,
+     "lineCost": 2,
      "printed": 2,
      "massPump": 1
     },
@@ -10093,6 +10282,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 1,
@@ -10178,6 +10369,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 1
     },
@@ -10280,6 +10472,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -10371,6 +10565,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -10473,6 +10668,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "tier2",
    "banned": [],
    "points": 6,
@@ -10550,6 +10747,7 @@
      "web": 2.5,
      "throughCommander": 5,
      "fastest": 8,
+     "lineCost": 4,
      "printed": 0,
      "massPump": 6
     },
@@ -10634,10 +10832,10 @@
     "offPlan": 21
    },
    "power": {
-    "score": 4.3,
-    "raw": 20.4,
+    "score": 4.7,
+    "raw": 24.4,
     "pillars": {
-     "wins": 33,
+     "wins": 43,
      "interaction": 21,
      "salt": 13,
      "synergy": 0
@@ -10657,6 +10855,8 @@
    "missing": 0,
    "tier": "tier2",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [],
    "points": 2,
@@ -10768,6 +10968,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 3
     },
@@ -10870,6 +11071,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 2,
@@ -10955,6 +11158,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -11058,6 +11262,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -11149,6 +11355,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 1,
      "massPump": 0
     },
@@ -11251,6 +11458,8 @@
    "missing": 0,
    "tier": "tier1",
    "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
    "pointsTier": "tier1",
    "banned": [],
    "points": 0,
@@ -11358,6 +11567,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 3
     },
@@ -11448,6 +11658,212 @@
    }
   },
   {
+   "id": "pod:22",
+   "name": "Kotis, the Fangkeeper",
+   "group": "pod",
+   "url": "",
+   "podId": 22,
+   "commanders": [
+    "Kotis, the Fangkeeper"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "above",
+   "practicalBracket": "4",
+   "powerBracket": "2",
+   "floor": {
+    "reason": "mld",
+    "mld": [
+     "Worldslayer"
+    ],
+    "combos": []
+   },
+   "pointsTier": "tier2",
+   "banned": [],
+   "points": 4,
+   "breakdown": {
+    "price_1_5": 4
+   },
+   "violations": [],
+   "verdict": "out",
+   "label": null,
+   "price": 114.41,
+   "gc": 0,
+   "bracket": {
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "mass_land_denial"
+    ]
+   },
+   "profile": {
+    "manabase": {
+     "lands": 34,
+     "basics": 12,
+     "tapped": 5,
+     "fetches": 1,
+     "colors": [
+      {
+       "color": "U",
+       "pips": 22,
+       "share": 0.3013698630136986,
+       "sources": 20,
+       "target": 13,
+       "cover": 1.5598290598290598
+      },
+      {
+       "color": "B",
+       "pips": 16,
+       "share": 0.2191780821917808,
+       "sources": 19,
+       "target": 12,
+       "cover": 1.6511904761904763
+      },
+      {
+       "color": "G",
+       "pips": 35,
+       "share": 0.4794520547945205,
+       "sources": 25,
+       "target": 16,
+       "cover": 1.5952797202797204
+      }
+     ],
+     "weakest": "U",
+     "fixing": 100,
+     "quality": 85,
+     "curve": 89,
+     "score": 91
+    },
+    "speed": {
+     "avgMv": 2.61,
+     "cheap": 36,
+     "high": 2,
+     "ramp": 13,
+     "rocks": 4,
+     "dorks": 2,
+     "rituals": 0,
+     "landRamp": 5,
+     "fastMana": 6
+    },
+    "consistency": {
+     "draw": 6,
+     "cheapDraw": 5,
+     "tutors": 0,
+     "recursion": 4
+    },
+    "interaction": {
+     "counters": 5,
+     "removal": 7,
+     "wipes": 3,
+     "protection": 12,
+     "graveHate": 2,
+     "stax": 4,
+     "free": 1,
+     "cheapAnswers": 8,
+     "instantShare": 53
+    },
+    "wins": {
+     "checked": true,
+     "combos": 0,
+     "infinite": 0,
+     "ending": 0,
+     "twoCard": 0,
+     "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
+     "fastest": null,
+     "lineCost": null,
+     "printed": 0,
+     "massPump": 0
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "voltron",
+       "share": 41
+      },
+      {
+       "key": "equipment",
+       "share": 31
+      },
+      {
+       "key": "control",
+       "share": 12
+      }
+     ],
+     "typal": {
+      "type": "Rogue",
+      "count": 3,
+      "share": 21
+     },
+     "creatures": 14,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 4
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.4,
+      3.5,
+      4.4,
+      5,
+      5.6,
+      6.2,
+      6.7,
+      7.1,
+      7.6,
+      8.1,
+      8.6
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
+    },
+    "upgrade": {
+     "pricey": 9,
+     "medianRank": 1159
+    }
+   },
+   "salt": {
+    "total": 28.1,
+    "average": 0.32,
+    "top": [
+     {
+      "name": "Worldslayer",
+      "salt": 1.49
+     },
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Lethal Vapors",
+      "salt": 1.35
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 89,
+    "average": 22,
+    "offPlan": 6
+   },
+   "power": {
+    "score": 3.4,
+    "raw": 16.8,
+    "pillars": {
+     "wins": 0,
+     "interaction": 55,
+     "salt": 20,
+     "synergy": 0
+    }
+   }
+  },
+  {
    "id": "cedh:TnT cEDH 2026 | Tymna Thrasios v4.24 | cEDH Midrange | Thrasios Tymna Primer | Infinite Mana Self-Mill (No Proxies)",
    "name": "TnT cEDH 2026 | Tymna Thrasios v4.24 | cEDH Midrange | Thrasios Tymna Primer | Infinite Mana Self-Mill (No Proxies)",
    "group": "cedh",
@@ -11460,6 +11876,20 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "5",
+   "powerBracket": "5",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Basalt Monolith + Kinnan, Bonder Prodigy",
+     "Basalt Monolith + Power Artifact",
+     "Demonic Consultation + Thassa's Oracle",
+     "Devoted Druid + Hazel's Brewmaster",
+     "Devoted Druid + Swift Reconfiguration",
+     "Grim Monolith + Power Artifact",
+     "Tainted Pact + Thassa's Oracle"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Chrome Mox",
@@ -11583,6 +12013,7 @@
      "web": 8,
      "throughCommander": 0,
      "fastest": 2,
+     "lineCost": 2,
      "printed": 1,
      "massPump": 0
     },
@@ -11668,9 +12099,9 @@
    },
    "power": {
     "score": 9.7,
-    "raw": 76,
+    "raw": 76.8,
     "pillars": {
-     "wins": 90,
+     "wins": 92,
      "interaction": 100,
      "salt": 100,
      "synergy": 0
@@ -11690,6 +12121,15 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "4*",
+   "powerBracket": "4*",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Demonic Consultation + Thassa's Oracle",
+     "Tainted Pact + Thassa's Oracle"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Chrome Mox",
@@ -11812,6 +12252,7 @@
      "web": 2,
      "throughCommander": 0,
      "fastest": 4,
+     "lineCost": 2,
      "printed": 1,
      "massPump": 0
     },
@@ -11896,10 +12337,10 @@
     "offPlan": 4
    },
    "power": {
-    "score": 9.3,
-    "raw": 68.5,
+    "score": 9.5,
+    "raw": 70.1,
     "pillars": {
-     "wins": 75,
+     "wins": 79,
      "interaction": 94,
      "salt": 100,
      "synergy": 0
@@ -11918,6 +12359,17 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "4*",
+   "powerBracket": "4*",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Demonic Consultation + Thassa's Oracle",
+     "Derevi, Empyrial Tactician + Najeela, the Blade-Blossom",
+     "Grim Hireling + Najeela, the Blade-Blossom",
+     "Tainted Pact + Thassa's Oracle"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12055,6 +12507,7 @@
      "web": 3,
      "throughCommander": 2,
      "fastest": 4,
+     "lineCost": 2,
      "printed": 1,
      "massPump": 0
     },
@@ -12139,10 +12592,10 @@
     "offPlan": 1
    },
    "power": {
-    "score": 9.2,
-    "raw": 67.7,
+    "score": 9.3,
+    "raw": 68.9,
     "pillars": {
-     "wins": 78,
+     "wins": 81,
      "interaction": 86,
      "salt": 100,
      "synergy": 0
@@ -12161,6 +12614,15 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "4*",
+   "powerBracket": "4*",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Demonic Consultation + Thassa's Oracle",
+     "Tainted Pact + Thassa's Oracle"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12299,6 +12761,7 @@
      "web": 3,
      "throughCommander": 0,
      "fastest": 4,
+     "lineCost": 2,
      "printed": 1,
      "massPump": 0
     },
@@ -12383,10 +12846,10 @@
     "offPlan": 20
    },
    "power": {
-    "score": 9.4,
-    "raw": 69.5,
+    "score": 9.5,
+    "raw": 70.7,
     "pillars": {
-     "wins": 78,
+     "wins": 81,
      "interaction": 93,
      "salt": 100,
      "synergy": 0
@@ -12405,6 +12868,14 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "5",
+   "powerBracket": "5",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Basalt Monolith + Kinnan, Bonder Prodigy"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12518,6 +12989,7 @@
      "web": 13.5,
      "throughCommander": 1,
      "fastest": 5,
+     "lineCost": 3,
      "printed": 0,
      "massPump": 0
     },
@@ -12624,6 +13096,8 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12727,6 +13201,7 @@
      "web": 0,
      "throughCommander": 0,
      "fastest": null,
+     "lineCost": null,
      "printed": 0,
      "massPump": 0
     },
@@ -12827,7 +13302,17 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "2*",
+   "practicalBracket": "4",
+   "powerBracket": "3",
+   "floor": {
+    "reason": "mld",
+    "mld": [
+     "Magus of the Moon"
+    ],
+    "combos": [
+     "Combat Celebrant + Rionya, Fire Dancer"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -12937,6 +13422,7 @@
      "web": 1,
      "throughCommander": 0,
      "fastest": 8,
+     "lineCost": 5,
      "printed": 0,
      "massPump": 3
     },
@@ -13021,10 +13507,10 @@
     "offPlan": 12
    },
    "power": {
-    "score": 5.5,
-    "raw": 34.3,
+    "score": 5.7,
+    "raw": 37.9,
     "pillars": {
-     "wins": 28,
+     "wins": 37,
      "interaction": 49,
      "salt": 72,
      "synergy": 0
@@ -13044,6 +13530,14 @@
    "missing": 0,
    "tier": "above",
    "practicalBracket": "5",
+   "powerBracket": "5",
+   "floor": {
+    "reason": "combo",
+    "mld": [],
+    "combos": [
+     "Food Chain + Squee, the Immortal"
+    ]
+   },
    "pointsTier": "above",
    "banned": [
     "Ancient Tomb",
@@ -13174,6 +13668,7 @@
      "web": 7,
      "throughCommander": 0,
      "fastest": 4,
+     "lineCost": 2,
      "printed": 0,
      "massPump": 0
     },
@@ -13259,9 +13754,9 @@
    },
    "power": {
     "score": 9.6,
-    "raw": 72.7,
+    "raw": 73.5,
     "pillars": {
-     "wins": 88,
+     "wins": 90,
      "interaction": 90,
      "salt": 100,
      "synergy": 0

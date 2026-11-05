@@ -6,7 +6,7 @@
 
 // [low, high] per scored metric: nothing at low, full marks at high.
 export const METRIC_RANGE = {
-  ending: [0, 4], web: [0, 12], lines: [0, 2], winBy8: [0, 60], finishers: [1, 8],
+  ending: [0, 4], web: [0, 12], lines: [0, 2], winBy8: [0, 60], lineCost: [10, 3], finishers: [1, 8],
   cheapAnswers: [2, 8], counters: [0, 10], stax: [0, 8], free: [0, 4], answersTotal: [8, 22],
   salt: [15, 80], engine: [8, 28],
 };
@@ -16,10 +16,10 @@ const INFO_RANGE = {
   draw: [6, 20], protection: [1, 8], recursion: [1, 6],
 };
 const PILLAR_WEIGHT = { wins: 0.4, interaction: 0.25, salt: 0.15, synergy: 0.2 };
-// How many game-ending lines and loops a deck holds matters most. Reliability counts
-// least, because the simulation sees 3 and 4-card lines assemble rarely even when a deck
+// How many game-ending lines and loops a deck holds matters most, then the mana its
+// cheapest line needs in one turn. Reliability counts least, because the simulation sees 3 and 4-card lines assemble rarely even when a deck
 // is built around them. Teysha's web of 20 combos is exactly that case.
-const COMBO_WEIGHT = { ending: 0.4, web: 0.3, lines: 0.2, winBy8: 0.1 };
+const COMBO_WEIGHT = { ending: 0.3, web: 0.25, lines: 0.15, lineCost: 0.2, winBy8: 0.1 };
 // A deck also wins through printed win conditions and overruns, more slowly and more
 // easily answered than a combo, hence the ceiling.
 const FINISHER_CEILING = 0.3;
@@ -30,7 +30,7 @@ const THEME_SUPPORT = [25, 50];
 // The score broken into questions a player asks. Every scored metric belongs to one, so
 // these explain the number without changing it.
 const BENCHMARKS = [
-  ["backups", "wins", ["ending", "web", "lines"]], ["winSpeed", "wins", ["winBy8"]], ["finishers", "wins", ["finishers"]],
+  ["backups", "wins", ["ending", "web", "lines"]], ["winSpeed", "wins", ["lineCost", "winBy8"]], ["finishers", "wins", ["finishers"]],
   ["answers", "interaction", ["cheapAnswers", "counters", "answersTotal"]], ["denial", "interaction", ["stax"]], ["freeSpells", "interaction", ["free"]],
   ["saltiness", "salt", ["salt"]], ["engine", "synergy", ["engine"]],
 ];
@@ -72,7 +72,7 @@ const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 export function computePower(profile, stats, salt = null) {
   const { speed, consistency, interaction, wins, manabase, goldfish, shape, ledger } = profile;
   const metrics = {
-    ending: wins.ending, web: wins.web, lines: wins.lines, winBy8: goldfish.winBy ? goldfish.winBy[8] : null,
+    ending: wins.ending, web: wins.web, lines: wins.lines, winBy8: goldfish.winBy ? goldfish.winBy[8] : null, lineCost: wins.lineCost,
     finishers: wins.printed + wins.massPump,
     cheapAnswers: interaction.cheapAnswers, counters: interaction.counters, stax: interaction.stax, free: interaction.free,
     answersTotal: interaction.removal + interaction.wipes + interaction.counters,

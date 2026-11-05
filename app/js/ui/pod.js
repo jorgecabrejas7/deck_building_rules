@@ -21,7 +21,8 @@ const displayName = (n) => NAME_FIX.reduce((name, [bad, good]) => name.replace(b
 function rowFor(d, s, t) {
   const num = (v) => '<td class="mono num">' + v + '</td>';
   const tier = !s ? '—' : '<span class="tier-pill ' + tierTone(s.tier) + '">' + esc(t['short_' + s.tier]) + '</span>' +
-    (s.banned && s.banned.length ? '<span class="pod-why">' + esc(t.podBanned) + '</span>' : '');
+    (s.banned && s.banned.length ? '<span class="pod-why">' + esc(t.podBanned) + '</span>' : '') +
+    (s.floor ? '<span class="pod-why">' + esc(t['podFloor_' + s.floor.reason]) + '</span>' : '');
   return '<tr><th scope="row"><span class="pod-name">' + esc(displayName(d.name)) + '</span>' +
     (d.url ? ' <a class="pod-link" href="' + esc(d.url) + '" target="_blank" rel="noopener noreferrer">Archidekt ↗</a>' : '') + '</th>' +
     '<td>' + tier + '</td>' +

@@ -71,6 +71,7 @@ function slotState() {
 function cutPlanHtml(r, t) {
   const plan = r.cutPlan, banned = bannedCards(r);
   const steps = plan ? plan.steps.filter(st => !st.banned && st.card !== 'undefined') : [];
+  const stepTail = (st) => st.reason ? esc(t['planFloor_' + st.reason]) : '<span class="mono">→ ' + st.power + '</span>';
   const row = (card, tail) => {
     const c = cardCache[card] || Object.values(cardCache).find(x => x && String(x.name).split(' // ')[0] === card) || { name: card };
     return '<li class="plan-step">' + sugChip({ name: card, price: c.price, img_art: c.img_art, img_normal: c.img_normal }) +
@@ -78,7 +79,7 @@ function cutPlanHtml(r, t) {
   };
   return '<ol class="plan-list">' +
     banned.map(n => row(n, esc(t.planBanned))).join('') +
-    steps.map(st => row(st.card, '<span class="mono">→ ' + st.power + '</span>')).join('') + '</ol>' +
+    steps.map(st => row(st.card, stepTail(st))).join('') + '</ol>' +
     (plan ? '<p class="note-sm">' + esc(plan.reaches ? fill(t.planReaches, { v: plan.final, m: r.verdict.limits.tier2_max }) : fill(t.planShort, { v: plan.final, m: r.verdict.limits.tier2_max })) + '</p>' : '');
 }
 

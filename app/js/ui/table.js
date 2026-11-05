@@ -180,7 +180,7 @@ export async function runTableMode() {
       const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders, cardTags });
       const salt = saltDb ? PodEngine.saltScore(resolved.map(e => e.name), saltDb) : null;
       const power = PodEngine.computePower(profile, stats, salt);
-      const verdict = PodEngine.podVerdict({ power, evalRes: ev, rules: RULES, checked: !!comboList && !!salt });
+      const verdict = PodEngine.podVerdict({ power, evalRes: ev, rules: RULES, checked: !!comboList && !!salt, floor: comboList ? bracket.floor : null });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
         tier: verdict.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,

@@ -11,7 +11,8 @@ function reason(r, t) {
   const v = r.verdict, banned = bannedCards(r);
   if (v.pending) return t.vPending;
   const power = fill(t['vWhy_' + v.byPower], { v: v.score, a: v.limits.tier1_max, b: v.limits.tier2_max });
-  return banned.length ? fill(t.vWhyBanned, { c: banned.join(', ') }) + ' ' + power : power;
+  const floor = !v.floor ? '' : fill(t['vWhyFloor_' + v.floor.reason], { c: (v.floor.reason === 'mld' ? v.floor.mld : v.floor.combos).join(', ') }) + ' ';
+  return (banned.length ? fill(t.vWhyBanned, { c: banned.join(', ') }) + ' ' : '') + floor + (v.floor ? fill(t.vPowerOnly, { v: v.score }) : power);
 }
 
 function bracketLine(r, t) {

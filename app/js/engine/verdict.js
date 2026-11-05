@@ -11,12 +11,14 @@ const tierFor = (score, limits) => score <= limits.tier1_max ? "tier1" : score <
 
 // checked: false until the combos and salt ratings have loaded. Power cannot see them
 // yet, so the tier is provisional: it can only rise once they land.
-export function podVerdict({ power, evalRes, rules, checked }) {
+// floor: bracket.floor from evaluateBrackets, when a card or combo sets a minimum bracket.
+export function podVerdict({ power, evalRes, rules, checked, floor = null }) {
   const limits = rules.power_tiers;
-  const bracket = limits.brackets.find(([top]) => power.score <= top)[1];
+  const powerBracket = limits.brackets.find(([top]) => power.score <= top)[1];
+  const bracket = floor && parseFloat(powerBracket) < floor.bracket ? String(floor.bracket) : powerBracket;
   const banned = evalRes.violations.filter(v => v.id === "banned").flatMap(v => v.cards);
-  return { tier: banned.length ? "above" : tierFor(power.score, limits), byPower: tierFor(power.score, limits),
-    score: power.score, bracket, banned, limits, pending: !checked };
+  return { tier: banned.length || floor ? "above" : tierFor(power.score, limits), byPower: tierFor(power.score, limits),
+    score: power.score, bracket, powerBracket, floor, banned, limits, pending: !checked };
 }
 
 // The cuts that bring a deck into the pod, tracking power after each one. Greedy on the
@@ -25,7 +27,7 @@ export function podVerdict({ power, evalRes, rules, checked }) {
 const CUT_SEARCH_GAMES = 100;
 const MAX_CUTS = 8;
 
-export function powerCutPlan({ entries, db, combos, commanders, cardTags, saltDb, classify, rules, banned = [] }) {
+export function powerCutPlan({ entries, db, combos, commanders, cardTags, saltDb, classify, rules, banned = [], floorCuts = [] }) {
   const zone = new Set((commanders || []).map(n => String(n).split(" // ")[0]));
   const front = (n) => String(n).split(" // ")[0];
   const limit = rules.power_tiers.tier2_max;
@@ -37,11 +39,12 @@ export function powerCutPlan({ entries, db, combos, commanders, cardTags, saltDb
     const profile = computeProfile({ cardsInfo, stats, combos: live, commanders, cardTags, games: CUT_SEARCH_GAMES });
     return computePower(profile, stats, saltScore(list.map(e => e.name), saltDb));
   };
-  let rest = entries.filter(e => !banned.some(b => front(b) === front(e.name)));
-  const steps = banned.map(card => ({ card: front(card), banned: true }));
+  const required = [...banned.map(card => ({ card: front(card), banned: true })), ...floorCuts.filter(c => !banned.some(b => front(b) === c.card))];
+  let rest = entries.filter(e => !required.some(r => r.card === front(e.name)));
+  const steps = required.map(s => ({ ...s }));
   let power = measure(rest);
   if (steps.length) steps[steps.length - 1].power = power.score;
-  while (power.score > limit && steps.filter(s => !s.banned).length < MAX_CUTS) {
+  while (power.score > limit && steps.filter(s => !s.banned && !s.reason).length < MAX_CUTS) {
     let best = null;
     for (const { name } of power.keyCards) {
       if (zone.has(name)) continue;

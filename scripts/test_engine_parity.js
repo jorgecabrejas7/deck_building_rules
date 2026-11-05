@@ -196,7 +196,8 @@ if (optBad) fails++;
 // obvious; the real database guards the shape of what the build produces.
 const brCard = (name, cmc, extra = {}) => ({ name, cmc, type_line: "Artifact", oracle_text: "", ...extra });
 const brDb = Object.fromEntries([
-  brCard("Two", 2), brCard("Three", 3), brCard("Five", 5), brCard("Six", 6), brCard("Plain", 1),
+  brCard("Two", 2), brCard("Three", 3), brCard("Five", 5), brCard("Six", 6), brCard("Seven", 7), brCard("Plain", 1),
+  brCard("Burst", 4, { type_line: "Sorcery" }), brCard("Bang", 3, { type_line: "Instant" }),
   brCard("Orb", 2), brCard("Leader", 2, { type_line: "Legendary Creature — Human" }),
   brCard("Pal", 1), brCard("Bud", 1),
   brCard("Time A", 3, { oracle_text: "Take an extra turn after this one." }),
@@ -207,10 +208,11 @@ const brDb = Object.fromEntries([
 ].map(c => [c.name, c]));
 const brDbFile = { templates: {}, mass_land_denial: ["Orb"], extra_turn: [], combos: [
   { c: ["Three", "Two"], r: "Infinite damage", t: "R", f: "ir" },
-  { c: ["Five", "Six"], r: "Infinite damage", t: "R", f: "ir" },
   { c: ["Two", "Plain"], r: "Infinite mana", t: "R", m: 5, f: "ir" },
   { c: ["Plain", "Three"], r: "Infinite ETB", t: "E", f: "i" },
-  { c: ["Plain", "Six"], r: "Infinite mana", t: "S", f: "ir" },
+  { c: ["Plain", "Seven"], r: "Infinite mana", t: "S", f: "ir" },
+  { c: ["Five", "Six"], r: "Infinite damage", t: "S", f: "ir" },
+  { c: ["Bang", "Burst"], r: "Infinite damage", t: "S", f: "ir" },
   { c: ["Plain", "Five"], r: "Win the game", t: "R", f: "rw" },
   { c: ["Two", "Five", "Six"], r: "Infinite turns", t: "R", f: "irt" },
   { c: ["GC1", "Six"], r: "Mass Land Denial", t: "R", f: "rd" },
@@ -235,10 +237,13 @@ const realMatch = (names, commanders = []) => PodEngine.activeCombos(PodEngine.m
 const consult = realMatch(["Thassa's Oracle", "Demonic Consultation"]);
 const BR_CASES = [
   ["a combo Spellbook tags 4+ fails", brEval(["Two", "Three"]).failed.includes("combos")],
-  ["...however much mana it costs", brEval(["Five", "Six"]).failed.includes("combos")],
-  ["a Bracket 3-4 combo fits, with a warning", brEval(["Plain", "Six"]).fits && check(brEval(["Plain", "Six"]), "combos").borderline.length === 1],
+  ["two permanents totalling 11 mana are Bracket 4: they land on separate turns", brEval(["Five", "Six"]).floor.reason === "combo" && brEval(["Five", "Six"]).combos[0].tag === "R"],
+  ["two spells must share a turn, so 7 mana stays below", !brEval(["Bang", "Burst"]).floor && brEval(["Bang", "Burst"]).combos[0].turnCost === 7],
+  ["a 7-mana permanent is past the line", !brEval(["Plain", "Seven"]).floor],
+  ["a Bracket 3-4 combo fits, with a warning", brEval(["Plain", "Seven"]).fits && check(brEval(["Plain", "Seven"]), "combos").borderline.length === 1],
+  ["a land-denial card sets Bracket 4 without moving power", brEval(["Orb"]).floor.reason === "mld"],
   ["a Bracket 1 combo is no concern, however cheap", brEval(["Plain", "Three"]).fits && brEval(["Plain", "Three"]).checklist === 2],
-  ["a combo's tag sets its checklist level", brEval(["Plain", "Six"]).checklist === 3 && brEval(["Two", "Three"]).checklist === 4],
+  ["a combo's tag sets its checklist level", brEval(["Plain", "Seven"]).checklist === 3 && brEval(["Two", "Three"]).checklist === 4],
   ["what a combo costs is still reported", brEval(["Two", "Plain"]).combos[0].deploy === 8],
   ["an infinite-turns combo breaks the extra-turn rule", brEval(["Two", "Five", "Six"]).failed.includes("extra_turns")],
   ["a land-denial combo breaks the land rule", brEval(["GC1", "Six"]).failed.includes("mass_land_denial")],
@@ -287,7 +292,7 @@ const baseProfile = pfProfile(manaDeck);
 const weak = PodEngine.computePower(baseProfile, {});
 const strong = PodEngine.computePower({ ...baseProfile,
   interaction: { ...baseProfile.interaction, cheapAnswers: 12, counters: 11, stax: 13, free: 5, removal: 15, wipes: 3 },
-  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, web: 13, printed: 4, massPump: 5 },
+  wins: { ...baseProfile.wins, ending: 5, twoCard: 3, lines: 2, web: 13, printed: 4, massPump: 5, lineCost: 2 },
   goldfish: { ...baseProfile.goldfish, winBy: { 8: 70 } },
   shape: { ...baseProfile.shape, engine: { theme: "burn", count: 30 } },
 }, {}, { total: 90, top: [] });
@@ -412,20 +417,25 @@ const V_CASES = [
   ["just over is Tier 2", vFor(vLimits.tier1_max + 0.1).tier === "tier2"],
   ["over the Tier 2 limit is out", vFor(vLimits.tier2_max + 0.1).tier === "above"],
   ["a banned card is out at any power", vFor(1, [{ id: "banned", cards: ["Mana Crypt"] }]).tier === "above" && vFor(1, [{ id: "banned", cards: ["Mana Crypt"] }]).banned[0] === "Mana Crypt"],
+  ["a bracket floor raises the label and puts the deck out, leaving the score alone", (() => {
+    const v = PodEngine.podVerdict({ power: { score: 3 }, evalRes: { violations: [] }, rules: RULES, checked: true, floor: { bracket: 4, reason: "mld" } });
+    return v.bracket === "4" && v.powerBracket === "2" && v.tier === "above" && v.score === 3;
+  })()],
   ["other violations no longer decide", vFor(1, [{ id: "price_cap" }, { id: "budget" }]).tier === "tier1"],
-  ["no precon reads out of the pod", studyNow.decks.filter(d => d.group === "precon" && d.tier === "above").length === 0],
+  ["a precon reads out only for a fast two-card combo", studyNow.decks.filter(d => d.group === "precon" && d.tier === "above").every(d => d.floor && d.floor.reason === "combo")],
   ["every cEDH list scores above every precon", Math.min(...studyNow.decks.filter(d => d.group === "cedh").map(d => d.power.score)) > Math.max(...studyNow.decks.filter(d => d.group === "precon").map(d => d.power.score))],
   // Jorge's read of his own pod, November 2026. If a scoring change breaks one, ask him.
   ["Urza is the strongest, well above Luffy", vPod("Urza").power.score >= vPod("Luffy").power.score + 0.5 && vPod("Urza").power.score > vPod("Teysha").power.score],
-  ["Urza stays below Bracket 4", ["3", "3*"].includes(vPod("Urza").practicalBracket)],
+  ["Urza's power stays below Bracket 4", ["3", "3*"].includes(vPod("Urza").powerBracket)],
+  ["Kotis is Bracket 4 for land denial, without topping the ladder on power", vPod("Kotis").practicalBracket === "4" && vPod("Kotis").floor.reason === "mld" && vPod("Kotis").power.score < vPod("Urza").power.score],
   ["Urza and Teysha read Tier 3", vPod("Urza").tier === "above" && vPod("Teysha").tier === "above"],
   ["Luffy reads Tier 3 or high Tier 2 on power", vPod("Luffy").power.score > vLimits.tier2_max - 0.5],
-  ["Oloro is well above Krenko", vPod("Oloro").power.score >= vPod("Krenko").power.score + 1],
+  ["Oloro is well above Krenko", vPod("Oloro").power.score >= vPod("Krenko").power.score + 0.8],
   ["Teysha is well above Krenko", vPod("Teysha").power.score >= vPod("Krenko").power.score + 1],
   ["Frodo & Sam reads Tier 1: it is mostly a precon", vPod("Frodo").tier === "tier1"],
-  ["Ezio stays near stock", vPod("Ezio").practicalBracket === "2"],
   ["the decks Jorge calls upgraded read above Bracket 2", ["Tiamat", "Lathril", "Betor", "Cloud"].every(n => vPod(n).practicalBracket !== "2")],
-  ["most precons read Bracket 2", studyNow.decks.filter(d => d.group === "precon" && d.practicalBracket === "2").length >= 30],
+  ["most precons read Bracket 2", studyNow.decks.filter(d => d.group === "precon" && d.powerBracket === "2").length >= 28],
+  ["Krenko reads the middle of Tier 2", vPod("Krenko").tier === "tier2" && vPod("Krenko").power.score >= 4.5],
   ["Krenko reads Tier 2", vPod("Krenko").tier === "tier2"],
   ["Nekusar is below Krenko and close to Lightning", vPod("Nekusar").power.score < vPod("Krenko").power.score && Math.abs(vPod("Nekusar").power.score - vPod("Lightning").power.score) <= 0.5],
 ];

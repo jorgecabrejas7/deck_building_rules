@@ -175,6 +175,7 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
     web: list.filter(c => c.infinite).reduce((sum, c) => sum + (runsThroughCommander(c) ? 0.5 : 1), 0),
     throughCommander: ending.filter(runsThroughCommander).length,
     fastest: priced.length ? Math.min(...priced.map(c => c.deploy)) : null,
+    lineCost: priced.length ? Math.min(...priced.map(c => c.turnCost ?? c.deploy)) : null,
     printed: count(x => read(x).printedWin),
     massPump: count(x => read(x).massPump),
   };
@@ -218,6 +219,7 @@ export function computeProfile({ cardsInfo, stats, combos, commanders, cardTags 
     draw: names(x => read(x).draw), protection: names(x => read(x).protection), recursion: names(x => read(x).recursion),
     ending: [...new Set(ending.flatMap(c => c.cards))], twoCard: [...new Set(ending.filter(c => c.cardsToFind <= 2).flatMap(c => c.cards))],
     winBy8: cheapest ? cheapest.cards : [],
+    lineCost: priced.length ? priced.reduce((a, b) => ((b.turnCost ?? b.deploy) < (a.turnCost ?? a.deploy) ? b : a)).cards : [],
     web: [...new Set(list.filter(c => c.infinite).flatMap(c => c.cards))],
     engine: engineCards,
     answersTotal: answers.map(x => front(x.card.name)),
