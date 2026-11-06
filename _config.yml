@@ -1,0 +1,8 @@
+# Only what the site serves: the app, its rules and its data. The rest made deployments time out.
+exclude:
+  - cache
+  - out
+  - scripts
+  - decks
+  - docs
+  - data/pod_decks.sqlite
