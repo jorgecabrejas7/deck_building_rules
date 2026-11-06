@@ -9,7 +9,7 @@ export { isLegalCommander, isBackground, canPair, pairKinds, commanderCandidates
   commanderOptions, normalizeCommanders, pickCommanders } from "./commander.js";
 export { evaluateBrackets, BRACKET3, COMBO_TAGS, tagRank } from "./bracket.js";
 export { manaProduced, isLandRamp } from "./ramp.js";
-export { matchCombos, activeCombos } from "./combos.js";
+export { matchCombos, activeCombos, nearCombos, groupNear, nearPlayable } from "./combos.js";
 export { classifyCard, detectArchetype } from "./classify.js";
 export { runSelfTest } from "./selftest.js";
 export { computeProfile, pipCounts, readCard, indexCardTags } from "./profile.js";
