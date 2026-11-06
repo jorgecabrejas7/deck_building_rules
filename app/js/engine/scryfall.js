@@ -1,5 +1,6 @@
 // ---- Scryfall card fetching ----
 import { classifyCard } from "./classify.js";
+import { needsCheapest } from "./budget.js";
 
 function cardFromScryfall(c) {
   const faces = c.card_faces && c.card_faces.length ? c.card_faces : null;
@@ -75,10 +76,11 @@ export async function fetchCards(names, cache, onProgress) {
 }
 
 export async function fetchCheapest(names, cache, onProgress, isCancelled) {
-  const targets = names.filter(n => cache[n] && cache[n].price !== null && cache[n].price >= 1 && !cache[n].cheapest);
+  const targets = names.filter(n => cache[n] && needsCheapest(cache[n]));
   for (let i = 0; i < targets.length; i++) {
     if (isCancelled && isCancelled()) return { done: i, total: targets.length, cancelled: true };
     const n = targets[i];
+    cache[n].price_default ??= cache[n].price;
     if (onProgress) onProgress({ done: i, total: targets.length, card: n });
     try {
       const q = '!"' + n.replace(/"/g, '') + '"';

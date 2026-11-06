@@ -188,7 +188,7 @@ export function setCommanders(names) {
 
 let fetchCancelled = false;
 export async function startCheapest() {
-  if (state.fetchSt !== 'idle' || !state.result) return;
+  if (state.fetchSt === 'fetching' || !state.result) return;
   state.fetchSt = 'fetching'; fetchCancelled = false; renderBanner();
   const names = [...new Set(state.deck.entries.map(e => e.name))];
   await PodEngine.fetchCheapest(names, cardCache, p => {
