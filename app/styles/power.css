@@ -492,3 +492,14 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .hero-notice{margin:0;max-width:46ch;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-md);background:oklch(0.3 0.08 40 / .85);color:oklch(0.95 0.02 60);font-size:var(--fs-caption);line-height:1.4}
 .sum-share{align-self:flex-start;min-height:44px;padding:0 var(--sp-5);border:1.5px solid var(--ink);border-radius:var(--r-pill);background:none;color:var(--ink);font:inherit;font-weight:500;cursor:pointer}
 .sum-share:disabled{opacity:.6;cursor:progress}
+/* one card away from a combo: a small card beside what it would open */
+#comboNear{margin-block:var(--sp-6)}
+.cb.nr{grid-template-columns:minmax(0,120px) minmax(0,1fr);gap:var(--sp-4);padding-block:var(--sp-4)}
+.nr .cb-arts{padding-right:0}
+.nr .cb-body>h5{margin:0;font-size:var(--fs-lead);font-weight:600;line-height:1.25;color:var(--ink)}
+.nr-combo{display:flex;flex-direction:column;gap:var(--sp-1);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);background:var(--wash)}
+.nr .rd-more{display:flex;flex-direction:column;gap:var(--sp-2)}
+@media (max-width:760px){
+  .cb.nr{grid-template-columns:minmax(0,88px) minmax(0,1fr);gap:var(--sp-3)}
+  .nr .cb-arts{max-width:none;margin-inline:0}
+}

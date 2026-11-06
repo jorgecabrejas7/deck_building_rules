@@ -58,6 +58,7 @@ export const state = {
   podSort: { key: 'power', dir: -1 },
   cmdOpen: false,   // the commander picker stays folded until asked for
   comboFilter: 'all', comboAll: false, // bracket report: combo list filter + show-all
+  near: null,        // {key, status, groups, all}: combos one card away, for this deck and commander
   cmpView: 'all',    // side-by-side card comparison: 'all' | 'diff'
 };
 export const TAB_KEYS = ['load', 'informe', 'pod', 'guide'];

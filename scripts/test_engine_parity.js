@@ -617,5 +617,48 @@ const fitBad = FIT_CASES.filter(([, ok]) => !ok);
 for (const [label] of fitBad) console.log(`TEXT FIT FAIL: ${label}`);
 console.log(`Text fit: ${FIT_CASES.length - fitBad.length}/${FIT_CASES.length} correct`);
 if (fitBad.length) fails++;
+// (m) one card away from a combo.
+const nearDb = { templates: { 7: ["Slotty", "Other Slot"] }, combos: [
+  { c: ["A", "B"], r: "win", t: "E" },            // one missing: B
+  { c: ["A", "C"], r: "win", t: "R" },            // one missing: C
+  { c: ["A", "Have"], r: "win", t: "C" },         // complete: not near
+  { c: ["X", "Y"], r: "win", t: "R" },            // two missing
+  { c: ["A", "B", "Y"], r: "win", t: "R" },       // two missing, one of them late
+  { c: ["Have", "D"], r: "win", t: "P", q: [[1, "Slot", 7]] },     // slot filled from the deck
+  { c: ["Have", "E"], r: "win", t: "P", q: [[1, "Slot", 7], [1, "Slot", 7]] }, // deck holds only one slot card
+  { c: ["Have", "F"], r: "win", t: "P", q: [[1, "Slot", 99]] },    // unknown template
+  { c: ["Boss", "G"], r: "win", t: "S", mc: ["Boss"] },            // needs Boss in the zone
+  { c: ["Have", "H"], r: "win", t: "S", mc: ["H"] },               // the missing card would have to lead
+  { c: ["A", "B"], r: "win", t: "E", q: [[1, "Slot", 7]] },        // same pieces as row 1: dropped
+  { c: ["Have", "Split"], r: "win", t: "E" },
+] };
+const nearDeck = ["A", "Have", "Boss", "Slotty // Back"];
+const nearOf = (cmds) => PodEngine.nearCombos(nearDeck, nearDb, cmds);
+const nearKeys = (list) => list.map(c => c.missing).sort().join(",");
+const nearGroups = PodEngine.groupNear(["P", "R"].map(tag => ({ missing: "Two", tag, cards: [] })).concat(
+  [{ missing: "OneE", tag: "E", cards: [] }, { missing: "OneR", tag: "R", cards: [] }]));
+const nearCards = { Boss: { color_identity: ["U"] }, Mate: { color_identity: ["B"] },
+  Blue: { color_identity: ["U"], legal_commander: "legal" }, Dimir: { color_identity: ["U", "B"], legal_commander: "legal" },
+  Red: { color_identity: ["R"], legal_commander: "legal" }, Grey: { color_identity: [], legal_commander: "legal" },
+  Ban: { color_identity: ["U"], legal_commander: "banned" }, Odd: { color_identity: ["U"], legal_commander: "not_legal" } };
+const nearFit = (cmds) => PodEngine.nearPlayable(["Blue", "Dimir", "Red", "Grey", "Ban", "Odd", "Unfound"].map(card => ({ card })), nearCards, cmds).map(g => g.card).join(",");
+const realDeck = ["Heliod, Sun-Crowned", "Sol Ring"];
+const realNear = PodEngine.nearCombos(realDeck, combos, ["Heliod, Sun-Crowned"]);
+const NEAR_CASES = [
+  ["finds the one missing card, and only that", nearKeys(nearOf([])) === "B,C,D,Split"],
+  ["a commander in the zone opens its must-command combo", nearKeys(nearOf(["Boss"])) === "B,C,D,G,Split"],
+  ["a template slot is filled from the deck, front face included", nearOf([]).find(c => c.missing === "D").filled[0] === "Slotty"],
+  ["repeated pieces count once", nearOf([]).filter(c => c.missing === "B").length === 1],
+  ["a complete combo is not near, and stays matched", PodEngine.matchCombos(nearDeck, nearDb).map(c => c.cards.join("+")).join() === "A+Have"],
+  ["most combos first, then Spellbook's tag", nearGroups.map(g => g.card).join() === "Two,OneR,OneE"],
+  ["inside a card, combos run in tag order", nearGroups[0].combos.map(c => c.tag).join() === "R,P"],
+  ["drops off-colour, banned, not-legal and unfound cards", nearFit(["Boss"]) === "Blue,Grey"],
+  ["partners share their colours", nearFit(["Boss", "Mate"]) === "Blue,Dimir,Grey"],
+  ["the real database: every row misses one card the deck lacks", realNear.length > 0 && realNear.every(c => !realDeck.includes(c.missing) && c.cards.includes(c.missing))],
+];
+const nearBad = NEAR_CASES.filter(([, ok]) => !ok);
+for (const [label] of nearBad) console.log(`NEAR COMBO FAIL: ${label}`);
+console.log(`Near combos: ${NEAR_CASES.length - nearBad.length}/${NEAR_CASES.length} correct`);
+if (nearBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

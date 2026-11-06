@@ -1,10 +1,10 @@
 import { state, cardCache } from '../state.js';
 import { T } from '../i18n.js';
-import { COMBO_TAGS } from '../engine/index.js';
+import { COMBO_TAGS, deckFingerprint, fetchCards, groupNear, nearCombos, nearPlayable } from '../engine/index.js';
 import { comboFeatureText } from './constants.js';
 import { $, esc, fill } from './helpers.js';
-import { checkCombos } from '../pipeline.js';
-import { ICON, answer, cardName, fold, paint } from './reading.js';
+import { checkCombos, getComboDb } from '../pipeline.js';
+import { ICON, answer, cardName, fold, more, paint } from './reading.js';
 
 // Every combo says which bracket it belongs to. The tag is Commander Spellbook's
 // own classification, so what the page calls "Bracket 4+" is what its editors do.
@@ -116,6 +116,67 @@ function why(list, t) {
     anchor && anchor[1] > 1 ? fill(t.comboWhyAnchor, { c: anchor[0], v: anchor[1] }) : ''].filter(Boolean).join(' ');
 }
 
+// ---- one card away: fills its own box once Scryfall answers, so the page never waits ----
+const NEAR_LOOKUP = 75; // one /cards/collection call
+const NEAR_IN_CARD = 3;
+
+function nearLine(c, t) {
+  return '<div class="nr-combo" data-key="' + esc(c.cards.join('|')) + '">' + comboLine(c) +
+    more(t.comboSteps, '<div class="cb-steps"><p class="rd-q">' + esc(t.cbLoading) + '</p></div>' +
+      '<a class="rd-link" href="' + spellbookUrl(c) + '" target="_blank" rel="noopener noreferrer">' + esc(t.cbOpen) + ICON.open + '</a>') + '</div>';
+}
+
+function nearCard({ card, combos }, t) {
+  const rest = combos.slice(NEAR_IN_CARD);
+  return '<li class="cb nr"><div class="cb-arts" data-n="1">' + cardImage(card) + '</div><div class="cb-body">' +
+    '<h5>' + esc(card) + '</h5><p class="cb-tag">' + esc(fill(combos.length === 1 ? t.nearOne : t.nearMany, { v: combos.length })) + '</p>' +
+    combos.slice(0, NEAR_IN_CARD).map(c => nearLine(c, t)).join('') +
+    (rest.length ? more(fill(t.sugMore, { v: rest.length }), rest.map(c => nearLine(c, t)).join('')) : '') + '</div></li>';
+}
+
+function paintNear() {
+  const el = $('comboNear'), near = state.near, t = T();
+  if (!el || !near) return;
+  const groups = near.groups || [];
+  const body = near.status === 'loading' ? '<p class="rd-q">' + esc(t.nearLoading) + '</p>'
+    : near.status === 'error' ? '<p class="rd-q">' + esc(t.nearErr) + '</p>'
+    : !groups.length ? '<p class="rd-q">' + esc(t.nearNone) + '</p>'
+    : '<ul class="cb-list" id="nearList" tabindex="-1">' + (near.all ? groups : groups.slice(0, PAGE)).map(g => nearCard(g, t)).join('') + '</ul>' +
+      (groups.length > PAGE && !near.all ? '<button type="button" id="nearMore" class="rd-btn">' + esc(fill(t.nearMore, { v: groups.length })) + '</button>' : '');
+  paint(el, '<section class="rd-section"><h4>' + esc(t.nearT) + '</h4><p class="rd-q">' + esc(t.nearX) + '</p>' + body + '</section>');
+  // a shard weighs some 350 KB and this list can run long: steps wait until opened
+  for (const row of el.querySelectorAll('.nr-combo')) row.querySelector('details').addEventListener('toggle', () => {
+    const key = row.dataset.key;
+    loadShard(shardOf(key)).then(rows => { if (row.isConnected) row.querySelector('.cb-steps').innerHTML = stepsHtml(rows[key], t); });
+  }, { once: true });
+  const moreBtn = $('nearMore');
+  if (moreBtn) moreBtn.onclick = () => { near.all = true; paintNear(); $('nearList').focus({ preventScroll: true }); };
+}
+
+async function loadNear(key, names, commanders) {
+  let found = { key, status: 'error' };
+  try {
+    const groups = groupNear(nearCombos(names, await getComboDb(), commanders)).slice(0, NEAR_LOOKUP);
+    await fetchCards(groups.map(g => g.card), cardCache);
+    found = { key, status: 'done', groups: nearPlayable(groups, cardCache, commanders) };
+  } catch (e) { console.error(e); }
+  if (state.near.key !== key) return;
+  state.near = found;
+  paintNear();
+}
+
+function renderNear() {
+  const { commanders } = state.result;
+  if (!commanders.length) return; // with no commander there are no colours to read candidates against
+  const key = deckFingerprint(state.deck.entries) + '|' + commanders.join('|');
+  // a failed lookup is not remembered: coming back to the view tries again
+  if (!state.near || state.near.key !== key || state.near.status === 'error') {
+    state.near = { key, status: 'loading' };
+    loadNear(key, state.deck.entries.map(e => e.name), commanders);
+  }
+  paintNear();
+}
+
 function tagLegend(t) {
   return fold('tags', t.tagLegendT, '', '<ul class="rd-tag-legend">' + Object.keys(COMBO_TAGS).map(k =>
     '<li>' + tagChip(k, t) + '<span class="rd-q">' + esc(t['tag_' + k]) + '</span></li>').join('') + '</ul>' +
@@ -136,7 +197,11 @@ export function renderCombos() {
   if (cd.status === 'checking') return paint(root, shell('…', esc(t.comboChecking), ''));
   const dbDate = cd.updated ? '<p class="rd-foot">' + esc(t.comboDbDate) + ' ' + esc(cd.updated.slice(0, 10)) + '</p>' : '';
   const all = state.result.bracket.combos;
-  if (!all.length) return paint(root, shell('0', esc(t.comboNoneAny), '<div class="rd-folds">' + tagLegend(t) + '</div>' + dbDate));
+  const nearBox = '<div id="comboNear"></div>';
+  if (!all.length) {
+    paint(root, shell('0', esc(t.comboNoneAny), nearBox + '<div class="rd-folds">' + tagLegend(t) + '</div>' + dbDate));
+    return renderNear();
+  }
 
   const pressed = (k) => state.comboFilter === k;
   const btn = (k, label, n) => '<button type="button" class="rd-filter" data-combof="' + k + '" aria-pressed="' + pressed(k) + '">' + label + ' <b>' + n + '</b></button>';
@@ -160,10 +225,11 @@ export function renderCombos() {
       '<li class="rd-q">' + esc(t.comboNoMatch) + '</li>') + '</ul>' +
     (shown.length > PAGE && !state.comboAll
       ? '<button type="button" id="comboMore" class="rd-btn">' + esc(t.comboMore.replace('%v', shown.length)) + '</button>' : '') +
-    '<div class="rd-folds">' + tagLegend(t) + '</div>' + dbDate,
+    nearBox + '<div class="rd-folds">' + tagLegend(t) + '</div>' + dbDate,
     why(all, t) ? '<p class="rd-why">' + esc(why(all, t)) + '</p>' : ''));
 
   fillSteps(root, t);
+  renderNear();
   for (const b of root.querySelectorAll('[data-combof]')) b.onclick = () => {
     const k = b.dataset.combof;
     state.comboFilter = state.comboFilter === k ? 'all' : k;
