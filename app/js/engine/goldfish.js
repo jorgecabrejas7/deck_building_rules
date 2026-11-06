@@ -19,7 +19,7 @@ function rng(seed) {
   };
 }
 
-function shuffled(cards, random) {
+export function shuffled(cards, random) {
   const out = [...cards];
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
