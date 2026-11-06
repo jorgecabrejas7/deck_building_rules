@@ -530,3 +530,7 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .tc-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:var(--sp-2);max-width:var(--measure);font-size:var(--fs-body);line-height:1.45;overflow-wrap:anywhere}
 .tc-list ul{margin:var(--sp-1) 0 0;padding-left:var(--sp-5)}
 .tc-none{margin:0;font-size:var(--fs-caption);color:var(--muted)}
+/* the pod's rank and its change since the last snapshot */
+.pod-move,.pod-new{margin-left:var(--sp-2);font-size:var(--fs-micro)}
+.pod-move{color:var(--ink2)}
+.pod-new{padding:1px var(--sp-1);border-radius:4px;background:var(--wash);color:var(--ink)}

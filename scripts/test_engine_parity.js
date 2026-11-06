@@ -786,5 +786,31 @@ const tcBad = TC_CASES.filter(([, ok]) => !ok);
 for (const [label] of tcBad) console.log(`TABLE CHECK FAIL: ${label}`);
 console.log(`Table check: ${TC_CASES.length - tcBad.length}/${TC_CASES.length} correct`);
 if (tcBad.length) fails++;
+// (m) the pod's ranking over time.
+const snap = (date, powers) => ({ date, decks: Object.fromEntries(Object.entries(powers).map(([id, power]) => [id, { power, points: 0 }])) });
+const rk = (snaps, ids) => PodEngine.podRankings(snaps, ids);
+const rkOne = rk([snap("2026-01-01", { 1: 5, 2: 3, 3: 3, 4: 1 })], [1, 2, 3, 4, 9]);
+const rkTwo = rk([snap("2026-01-01", { 1: 5, 2: 4, 3: 3 }), snap("2026-02-01", { 1: 3, 2: 4, 3: 5 })], [1, 2, 3]);
+const rkNew = rk([snap("2026-01-01", { 1: 5, 2: 4 }), snap("2026-02-01", { 1: 5, 2: 4, 7: 9 })], [1, 2, 7]);
+const rkGone = rk([snap("2026-01-01", { 8: 9, 1: 5, 2: 4 }), snap("2026-02-01", { 1: 5, 2: 4 })], [1, 2]);
+const rkSeed = PodEngine.podSnapshot("2026-03-01", [{ podId: 4, points: 7, power: { score: 3.2 } }]);
+const rkReplaced = PodEngine.addSnapshot(PodEngine.addSnapshot([snap("2026-02-01", { 1: 1 })], snap("2026-01-01", { 1: 2 })), snap("2026-02-01", { 1: 3 }));
+const RK_CASES = [
+  ["a snapshot records power and points under the deck id", rkSeed.date === "2026-03-01" && rkSeed.decks[4].power === 3.2 && rkSeed.decks[4].points === 7],
+  ["the same date replaces its snapshot, and dates stay in order", rkReplaced.length === 2 && rkReplaced[0].date === "2026-01-01" && rkReplaced[1].decks[1].power === 3],
+  ["no snapshot ranks nobody", rk([], [1]).size === 0],
+  ["equal power shares a rank and the next rank skips", [1, 2, 3, 4].map(i => rkOne.get(i).rank).join() === "1,2,2,4"],
+  ["one snapshot has a rank but no change, and nothing is new", rkOne.get(1).change === null && !rkOne.get(1).isNew],
+  ["a deck added after the only snapshot reads new with no rank", rkOne.get(9).isNew && rkOne.get(9).rank === null && rkOne.get(9).change === null],
+  ["places gained and lost are signed, and staying put is zero", rkTwo.get(3).change === 2 && rkTwo.get(1).change === -2 && rkTwo.get(2).change === 0],
+  ["a deck new in the last snapshot has a rank and reads new, not a jump", rkNew.get(7).rank === 1 && rkNew.get(7).isNew && rkNew.get(7).change === null],
+  ["a new deck moves nobody else", rkNew.get(1).rank === 2 && rkNew.get(1).change === 0 && rkNew.get(2).change === 0],
+  ["a deck that left the registry moves nobody else", rkGone.get(1).rank === 1 && rkGone.get(1).change === 0 && !rkGone.has(8)],
+  ["a deck gone from the registry takes no rank from the others", rk([snap("2026-01-01", { 8: 9, 1: 5 })], [1]).get(1).rank === 1],
+];
+const rkBad = RK_CASES.filter(([, ok]) => !ok);
+for (const [label] of rkBad) console.log(`RANKINGS FAIL: ${label}`);
+console.log(`Rankings: ${RK_CASES.length - rkBad.length}/${RK_CASES.length} correct`);
+if (rkBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);
