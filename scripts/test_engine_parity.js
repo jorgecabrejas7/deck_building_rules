@@ -17,6 +17,7 @@
  *   (n) what-if edits to the analyzed deck.
  *   (m) the share link's encode and decode.
  *   (m) the deck beside its commander's average list, and cards unusual for the commander.
+ *   (n) where a deck's salt comes from.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -893,5 +894,45 @@ const ggBad = GG_CASES.filter(([, ok]) => !ok);
 for (const [label] of ggBad) console.log(`GOLDFISH HANDS FAIL: ${label}`);
 console.log(`Goldfish hands: ${GG_CASES.length - ggBad.length}/${GG_CASES.length} correct`);
 if (ggBad.length) fails++;
+// (n) the salt breakdown. Every card below is rated, and each sits where its strongest trait puts it.
+const sbCard = (name, oracle = "", extra = {}) => ({ name, qty: 1, card: { name, oracle_text: oracle, ...extra } });
+const sbDeck = [sbCard("Orb"), sbCard("Maybe Walker"), sbCard("Turn", "", { game_changer: true }), sbCard("Bear"), sbCard("Thief"), sbCard("Toll"),
+  sbCard("Quake", "Quake deals X damage to each creature without flying and each player."), sbCard("Drain", "Each opponent loses 2 life."),
+  sbCard("Punisher", "Whenever an opponent draws a card, Punisher deals 1 damage to that player."),
+  sbCard("Hold", "Players skip their untap steps."), sbCard("Prison", "Creatures can't attack you unless their controller pays {2} for each of those creatures."),
+  sbCard("Bolt", "Bolt deals 3 damage to any target."), sbCard("Extort", "Extort (Whenever you cast a spell, each opponent loses 1 life.)"),
+  sbCard("Piece // Back", "", { game_changer: true }), sbCard("Mox", "", { game_changer: true }), sbCard("Island"), sbCard("Unrated")];
+const sbNames = sbDeck.map(x => x.name);
+const sbDb = { salt: { Hold: 0.25, Prison: 0.5, Orb: 3, "Maybe Walker": 1.1, Turn: 2, Bear: 1.5, Thief: 1.25, Toll: 1, Quake: 0.7, Drain: 0.3, Punisher: 0.2, Bolt: 0.15, Extort: 0.05, Piece: 0.6, Mox: 2.5, Island: 0.9 } };
+const sbTags = PodEngine.indexCardTags({ tags: { "extra-turn": ["Turn"], hatebear: ["Bear", "Orb"], theft: ["Thief", "Bear", "Turn"], tax: ["Toll", "Thief"], burn: ["Bolt"] } });
+const sbOf = (over = {}) => PodEngine.saltBreakdown({ cardsInfo: sbDeck, saltDb: sbDb, cardTags: sbTags, landDenial: { mass: ["Orb"], maybe: ["Maybe Walker"] }, combos: [{ cards: ["Piece", "Unrated"] }], ...over });
+const sbParts = sbOf();
+const sbIn = (key, parts = sbParts) => (parts.find(p => p.key === key) || { cards: [] }).cards.map(c => c.name).join();
+const sbScore = PodEngine.saltScore(sbNames, sbDb);
+// the total is rounded to a tenth, the parts are not
+const sbSums = (parts) => Math.abs(parts.reduce((s, p) => s + p.salt, 0) - sbScore.total) <= 0.05 + 1e-9;
+const sbEvery = sbParts.flatMap(p => p.cards.map(c => c.name));
+const sbSalt = sbParts.reduce((s, p) => s + p.salt, 0);
+const SB_CASES = [
+  ["the categories sum to the deck's salt total", sbSums(sbParts)],
+  ["they still sum with nothing but ratings loaded", sbSums(sbOf({ cardTags: null, landDenial: null, combos: null }))],
+  ["a card counts once", sbEvery.length === new Set(sbEvery).size],
+  ["every rated card is placed, basics and unrated cards are not", sbEvery.length === sbScore.rated && !sbEvery.includes("Island") && !sbEvery.includes("Unrated")],
+  ["land denial outranks a stax tag, and takes maybes too", sbIn("land_denial") === "Orb,Maybe Walker"],
+  ["an extra turn outranks theft and game changer", sbIn("extra_turns") === "Turn"],
+  ["stax outranks theft, theft outranks taxes", sbIn("stax").startsWith("Bear") && sbIn("theft") === "Thief" && sbIn("taxes").startsWith("Toll")],
+  ["text fills in what the tags miss: stops are stax, charges are taxes", sbIn("stax") === "Bear,Hold" && sbIn("taxes") === "Toll,Prison"],
+  ["group damage reads the text: each player, life loss, punishers", sbIn("group_damage") === "Quake,Drain,Punisher"],
+  ["a burn tag on one target, or reminder text, is not group damage", sbIn("other") === "Bolt,Extort"],
+  ["a combo piece outranks game changer, matched by front face", sbIn("combos") === "Piece" && sbIn("game_changers") === "Mox"],
+  ["without combos the same card is a game changer", sbIn("game_changers", sbOf({ combos: null })) === "Mox,Piece"],
+  ["shares are of the total, biggest first, other last", sbParts[0].key === "land_denial" && sbParts[0].share === Math.round(4.1 / sbSalt * 100) && sbParts[sbParts.length - 1].key === "other"],
+  ["cards run saltiest first", sbParts.every(p => p.cards.every((c, i) => !i || p.cards[i - 1].salt >= c.salt))],
+  ["a deck with no rated cards has no parts", PodEngine.saltBreakdown({ cardsInfo: [sbCard("Unrated")], saltDb: sbDb, cardTags: null, landDenial: null, combos: null }).length === 0],
+];
+const sbBad = SB_CASES.filter(([, ok]) => !ok);
+for (const [label] of sbBad) console.log(`SALT BREAKDOWN FAIL: ${label}`);
+console.log(`Salt breakdown: ${SB_CASES.length - sbBad.length}/${SB_CASES.length} correct`);
+if (sbBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

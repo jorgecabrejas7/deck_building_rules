@@ -121,7 +121,8 @@ export async function checkCombos() {
 
 function recordVersion() {
   const r = state.result;
-  if (r.level.pending || !r.commanders.length) return;
+  // a shared deck isn't the visitor's, and a what-if isn't a version until it is analyzed as one
+  if (r.level.pending || !r.commanders.length || state.shared || state.edits) return;
   saveVersion(r.commanders, { date: new Date().toISOString(), points: r.evalRes.points, power: r.level.score,
     bracket: r.level.bracket, cards: state.deck.entries.map(e => [e.name, e.quantity]) });
 }
@@ -159,6 +160,8 @@ export function recompute(notFound) {
   });
   const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders, cardTags: state.cardTags });
   const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
+  const saltParts = state.saltDb ? PodEngine.saltBreakdown({ cardsInfo, saltDb: state.saltDb, cardTags: state.cardTags,
+    landDenial: state.landDenial, combos: combos ? bracket.combos : null }) : null;
   const power = PodEngine.computePower(profile, stats, salt);
   const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!combos && !!salt, floor: combos ? bracket.floor : null,
     precon: state.precons ? PodEngine.matchPrecon(resolved, state.precons) : null,
@@ -176,7 +179,7 @@ export function recompute(notFound) {
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
   state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, options,
-    bracket, profile, power, level, salt, synergy, whatIf, notFound: missing, validation };
+    bracket, profile, power, level, salt, saltParts, synergy, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;
   if (!state.edits.undo.length) state.edits.base = PodEngine.editFigures(state.result);

@@ -561,3 +561,10 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .gf-field img,.gf-card img{display:block;width:100%;border-radius:var(--r-md);background:var(--track)}
 .gf-card{display:block;width:100%;padding:0;border:none;background:none;border-radius:var(--r-md);text-align:start;transition:transform var(--dur) var(--ease)}
 .gf-card:hover{transform:translateY(-3px)}
+/* where the deck's salt comes from */
+.sb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:var(--sp-3)}
+.sb-list>li{display:grid;grid-template-columns:minmax(0,10rem) minmax(0,1fr) 2.75rem;align-items:center;gap:var(--sp-1) var(--sp-3);font-size:var(--fs-caption)}
+.sb-l{font-weight:600;color:var(--text)}
+.sb-n{text-align:right;font-variant-numeric:tabular-nums}
+.sb-list .rd-bar-track i{background:linear-gradient(90deg,var(--ink),var(--ink2))}
+.sb-list .rd-cards,.sb-list .rd-more{grid-column:1/-1}

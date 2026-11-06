@@ -59,7 +59,7 @@ export const state = {
   deck: null,        // {entries, commanders, deckName}
   cmdPick: null,     // user-chosen commander name(s); null = auto-detect
   edits: null,       // {undo: [{deck, cmdPick}], base: figures before the first edit, text: paste box before it}, new per analysis
-  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, commanders, options, bracket, profile, power, level, salt, synergy, whatIf}
+  result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, commanders, options, bracket, profile, power, level, salt, saltParts, synergy, whatIf}
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
