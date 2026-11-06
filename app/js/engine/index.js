@@ -20,3 +20,4 @@ export { simulateGoldfish, drawOdds, atLeastOdds } from "./goldfish.js";
 export { powerLevel } from "./powerLevel.js";
 export { cardValues } from "./cardValue.js";
 export { matchPrecon } from "./precon.js";
+export { tableCheck, TABLE_CHECK } from "./tableCheck.js";

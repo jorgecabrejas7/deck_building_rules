@@ -3,11 +3,12 @@ import { state, cardCache, persistCache, saveSession } from '../state.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { ARCH, DIAL_META, CATS } from './constants.js';
-import { $, esc, eur, tierTone } from './helpers.js';
-import { analyze, getCardTags, getComboDb, getSaltDb } from '../pipeline.js';
+import { $, esc, eur, fill, tierTone } from './helpers.js';
+import { analyze, getCardTags, getComboDb, getLandDenial, getPrecons, getSaltDb } from '../pipeline.js';
 import { renderInput } from './input.js';
 import { slotsFor } from './comp.js';
 import { bindSugPopovers } from './popover.js';
+import { watchLine } from './verdict.js';
 
 export function renderTableMode() {
   const t = T();
@@ -24,6 +25,7 @@ export function renderTableMode() {
     (state.tableBusy ? t.tmRunning + '…' : t.tmRun) + '</button></div>';
   const res = state.tableResults;
   if (res) {
+    if (res.length >= 2) html += tableCheckHtml(res);
     html += '<div class="table-scroll"><table class="tm-table">' +
       '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.brTile + '</th><th>' + t.pfPractical + '</th><th>' + t.pfSalt + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
       res.map((d, i) => {
@@ -33,7 +35,7 @@ export function renderTableMode() {
           '<td><span class="tier-pill ' + (!d.bracket.fits ? 'tone-bad' : d.bracket.pending ? 'tone-warn' : 'tone-ok') +
             '" title="' + (d.bracket.pending ? esc(t.brPending) : '') + '">' +
             (!d.bracket.fits ? '✕ ' + t.brNo : d.bracket.pending ? t.brChecking : '✓ ' + t.brYes) + '</span></td>' +
-          '<td class="mono">' + (d.power === null ? '—' : d.power) + '</td><td class="mono">' + (d.salt === null ? '—' : d.salt) + '</td>' +
+          '<td class="mono">' + (d.level.pending ? '—' : d.level.bracket + ' · ' + d.level.score) + '</td><td class="mono">' + (d.salt === null ? '—' : d.salt) + '</td>' +
           '<td class="mono">€' + Math.round(d.price) + '</td><td>' + esc(d.arch) + '</td>' +
           '<td><button data-tmload="' + i + '" class="btn-ghost-sm">' + t.tmLoad + '</button></td></tr>';
       }).join('') + '</table></div>';
@@ -49,6 +51,27 @@ export function renderTableMode() {
   for (const b of el.querySelectorAll('[data-cmpview]'))
     b.onclick = () => { state.cmpView = b.dataset.cmpview; renderTableMode(); };
   bindSugPopovers(el);
+}
+
+// ---- the table at a glance: how it reads, who stands out, what to mention ----
+function tableCheckHtml(res) {
+  const t = T(), c = PodEngine.tableCheck(res);
+  const list = (keys) => new Intl.ListFormat(state.lang).format(keys.map(k => t['tcM_' + k]));
+  const reading = c.pending
+    ? '<p class="tc-lead">' + esc(t.tcPending) + '</p>'
+    : '<p class="tc-lead">' + esc(fill(t['tcBal_' + c.balance], { a: c.low.toFixed(1), b: c.high.toFixed(1) })) + '</p>' +
+      '<ol class="tc-ladder">' + [...res].sort((a, b) => b.level.score - a.level.score)
+        .map(d => '<li>' + esc(d.name) + ' <b class="mono">' + d.level.score.toFixed(1) + '</b></li>').join('') + '</ol>';
+  const standouts = c.pending ? '' : '<h4 class="tc-sub">' + esc(t.tcStandsT) + '</h4>' + (c.standouts.length
+    ? '<ul class="tc-list">' + c.standouts.map(s => '<li><b>' + esc(s.name) + '.</b> ' +
+        (s.more.length ? esc(fill(t.tcMore, { c: list(s.more) })) + ' ' : '') + (s.less ? esc(t.tcLess) : '') + '</li>').join('') + '</ul>'
+    : '<p class="tc-none">' + esc(t.tcNoStands) + '</p>');
+  const mention = '<h4 class="tc-sub">' + esc(t.tcMentionT) + '</h4>' + (c.mention.length
+    ? '<ul class="tc-list">' + c.mention.map(m => '<li><b>' + esc(m.name) + '.</b><ul>' +
+        m.watch.map(w => '<li>' + esc(watchLine(w, t)) + '</li>').join('') + '</ul></li>').join('') + '</ul>'
+    : '<p class="tc-none">' + esc(t.tcNoMention) + '</p>');
+  return '<div class="cmp-section"><h3 class="secT">' + esc(t.tcT) + '</h3>' + reading + standouts + mention +
+    '<p class="tc-none">' + esc(t.pfApart) + '</p></div>';
 }
 
 // ---- side-by-side comparison matrices ----
@@ -151,6 +174,8 @@ export async function runTableMode() {
     try { comboDb = await getComboDb(); } catch (e) { /* combos stay unchecked */ }
     const saltDb = await getSaltDb().catch(() => null);
     const cardTags = await getCardTags().catch(() => null);
+    const landDenial = await getLandDenial().catch(() => null);
+    const precons = await getPrecons().catch(() => null);
     for (const text of texts) {
       const parsed = PodEngine.parseDecklist(text);
       const names = [...new Set(parsed.entries.map(e => e.name))];
@@ -173,19 +198,21 @@ export async function runTableMode() {
       const bracket = PodEngine.evaluateBrackets({
         stats, flagged, db: cardCache, validation, commanders,
         deckNames: resolved.map(e => e.name),
-        combos: comboList, comboDb,
+        combos: comboList, comboDb, landDenial,
         loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
         unresolved: notFound.length,
       });
       const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders, cardTags });
       const salt = saltDb ? PodEngine.saltScore(resolved.map(e => e.name), saltDb) : null;
       const power = PodEngine.computePower(profile, stats, salt);
-      const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!comboList && !!salt, floor: comboList ? bracket.floor : null, combos: comboList ? bracket.combos : [] });
+      const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!comboList && !!salt, floor: comboList ? bracket.floor : null,
+        precon: precons ? PodEngine.matchPrecon(resolved, precons) : null,
+        combos: comboList ? bracket.combos : [], landMaybe: bracket.landMaybe, gameChangers: bracket.checks.find(c => c.id === 'game_changers').cards });
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
         tier: ev.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,
         arch: a.name[state.lang], archKey: det.key, commander: cmd, bracket,
-        power: comboList ? level.bracket + ' · ' + power.score : null,
+        power, level,
         salt: salt ? salt.total : null,
         stats, ev, cardsInfo });
     }
