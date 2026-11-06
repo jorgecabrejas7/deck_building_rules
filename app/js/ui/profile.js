@@ -119,7 +119,17 @@ function saltExtra(r, t) {
   if (!salt) return '';
   const pod = state.study ? state.study.decks.filter(d => d.group === 'pod').map(d => d.salt.total) : [];
   const rank = pod.length ? fill(t.pfSaltRank, { v: Math.round(pod.filter(x => x < salt.total).length / pod.length * 100) }) + '. ' : '';
-  return '<p class="rd-text">' + esc(rank + fill(t.pfSaltX, { a: salt.average })) + '</p>';
+  return '<p class="rd-text">' + esc(rank + fill(t.pfSaltX, { a: salt.average })) + '</p>' + saltSources(r, t);
+}
+
+// Where the salt comes from: each category's share and the cards behind it.
+function saltSources(r, t) {
+  if (!r.saltParts.length) return '';
+  return '<section class="rd-bm"><h5>' + esc(t.pfSaltParts) + '</h5><p class="rd-q">' + esc(t.pfSaltPartsX) + '</p><ul class="sb-list">' +
+    r.saltParts.map(p => '<li style="--v:' + p.share + '"><span class="sb-l">' + esc(t['salt_' + p.key]) + '</span>' +
+      '<span class="rd-bar-track" aria-hidden="true"><i></i></span><span class="sb-n">' + p.share + '%</span>' +
+      cardList(p.cards.map(c => c.name), { cap: 3, note: (n) => String(p.cards.find(c => c.name === n).salt) }) + '</li>').join('') +
+    '</ul></section>';
 }
 
 function synergyExtra(r, t) {

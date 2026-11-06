@@ -13,7 +13,7 @@ export { matchCombos, activeCombos } from "./combos.js";
 export { classifyCard, detectArchetype } from "./classify.js";
 export { runSelfTest } from "./selftest.js";
 export { computeProfile, pipCounts, readCard, indexCardTags } from "./profile.js";
-export { saltScore } from "./salt.js";
+export { saltScore, saltBreakdown } from "./salt.js";
 export { synergyScore } from "./synergyScore.js";
 export { computePower, METRIC_RANGE } from "./power.js";
 export { simulateGoldfish, drawOdds, atLeastOdds } from "./goldfish.js";

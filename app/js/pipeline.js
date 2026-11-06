@@ -134,6 +134,8 @@ export function recompute(notFound) {
   });
   const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders, cardTags: state.cardTags });
   const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
+  const saltParts = state.saltDb ? PodEngine.saltBreakdown({ cardsInfo, saltDb: state.saltDb, cardTags: state.cardTags,
+    landDenial: state.landDenial, combos: combos ? bracket.combos : null }) : null;
   const power = PodEngine.computePower(profile, stats, salt);
   const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!combos && !!salt, floor: combos ? bracket.floor : null,
     precon: state.precons ? PodEngine.matchPrecon(resolved, state.precons) : null,
@@ -150,7 +152,7 @@ export function recompute(notFound) {
       fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
   }
   state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, options,
-    bracket, profile, power, level, salt, synergy, whatIf, notFound: missing, validation };
+    bracket, profile, power, level, salt, saltParts, synergy, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;
 }

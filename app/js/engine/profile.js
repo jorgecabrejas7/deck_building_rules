@@ -10,7 +10,7 @@ import { FAST_MANA_RE, KEYWORD_PATTERNS, REMINDER_TEXT_RE } from "./stats.js";
 
 const COLORS = ["W", "U", "B", "R", "G"];
 const front = (n) => String(n).split(" // ")[0];
-const oracleOf = (card) => (card.oracle_text || "").replace(REMINDER_TEXT_RE, "");
+export const oracleOf = (card) => (card.oracle_text || "").replace(REMINDER_TEXT_RE, "");
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
 // A land that always comes in tapped: "unless" and pay-to-untap lands are not it.

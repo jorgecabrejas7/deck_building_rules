@@ -462,3 +462,10 @@ a.rd-link,.combo-link,.sum-note a{color:var(--ink)}
   .cb{grid-template-columns:minmax(0,1fr);gap:var(--sp-4)}
   .cb-arts{max-width:240px;margin-inline:auto}
 }
+/* where the deck's salt comes from */
+.sb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:var(--sp-3)}
+.sb-list>li{display:grid;grid-template-columns:minmax(0,10rem) minmax(0,1fr) 2.75rem;align-items:center;gap:var(--sp-1) var(--sp-3);font-size:var(--fs-caption)}
+.sb-l{font-weight:600;color:var(--text)}
+.sb-n{text-align:right;font-variant-numeric:tabular-nums}
+.sb-list .rd-bar-track i{background:linear-gradient(90deg,var(--ink),var(--ink2))}
+.sb-list .rd-cards,.sb-list .rd-more{grid-column:1/-1}
