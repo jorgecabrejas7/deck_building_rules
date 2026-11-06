@@ -77,9 +77,9 @@ export async function getSaltDb() {
   return saltDb;
 }
 let landDenial = null;
-const getLandDenial = async () => (landDenial ||= await (await fetch('../data/land_denial.json')).json());
+export const getLandDenial = async () => (landDenial ||= await (await fetch('../data/land_denial.json')).json());
 let precons = null;
-const getPrecons = async () => (precons ||= (await (await fetch('../data/precons.json')).json()).decks);
+export const getPrecons = async () => (precons ||= (await (await fetch('../data/precons.json')).json()).decks);
 let cardTags = null;
 export async function getCardTags() {
   if (!cardTags) cardTags = PodEngine.indexCardTags(await (await fetch('../data/card_tags.json')).json());

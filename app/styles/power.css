@@ -521,3 +521,12 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .dk-b-price{font-variant-numeric:tabular-nums}
 .dk-b-price s{color:var(--muted)}
 .dk-b-list a .rd-ic,.dk-facts a .rd-ic{width:.9em;height:.9em;vertical-align:-.1em}
+/* table check: the summary above table mode's results */
+.tc-lead{margin:0;max-width:var(--measure);font-size:var(--fs-lead);font-weight:600;line-height:1.35;color:var(--ink)}
+.tc-ladder{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.tc-ladder li{padding:2px var(--sp-3);border-radius:var(--r-pill);background:var(--wash);font-size:var(--fs-caption)}
+.tc-ladder b{color:var(--ink)}
+.tc-sub{margin:var(--sp-2) 0 0;font-size:var(--fs-body);font-weight:600;color:var(--ink2)}
+.tc-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:var(--sp-2);max-width:var(--measure);font-size:var(--fs-body);line-height:1.45;overflow-wrap:anywhere}
+.tc-list ul{margin:var(--sp-1) 0 0;padding-left:var(--sp-5)}
+.tc-none{margin:0;font-size:var(--fs-caption);color:var(--muted)}

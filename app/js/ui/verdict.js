@@ -23,14 +23,15 @@ function violationLines(r, lang) {
     v.id === 'conditional' ? (MSG.conditional[v.condId] ? MSG.conditional[v.condId][lang](v) : v.condId) : MSG[v.id][lang](v));
 }
 
+export const watchLine = (w, t) => fill(t['watch_' + (w.kind === 'combo' ? w.tag : w.kind)], { c: moreList(w.items, 3) });
+
 // Why it reads where it does, and what a table may want to look at: shared with Poder.
 export function readingHtml(r, t) {
   const l = r.level;
   const lead = l.floor ? fill(t.readFloor, { b: l.powerBracket }) : l.watch.length ? t.readWatch : fill(t.readFits, { b: l.bracket });
-  const item = (w) => fill(t['watch_' + (w.kind === 'combo' ? w.tag : w.kind)], { c: moreList(w.items, 3) });
   return (l.precon ? '<p class="sum-note">' + esc(fill(t.readPrecon, { c: l.precon.name })) + '</p>' : '') +
     '<p class="sum-read">' + esc(lead) + '</p>' +
-    (l.watch.length ? '<ul class="sum-watch">' + l.watch.map(w => '<li>' + esc(item(w)) + '</li>').join('') + '</ul>' : '') +
+    (l.watch.length ? '<ul class="sum-watch">' + l.watch.map(w => '<li>' + esc(watchLine(w, t)) + '</li>').join('') + '</ul>' : '') +
     (l.tips.length ? '<p class="sum-note"><b>' + esc(t.readTipT) + '.</b> ' + esc(fill(t.tipOnCurve, { c: l.tips.slice(0, 3).join(' · ') })) + '</p>' : '');
 }
 

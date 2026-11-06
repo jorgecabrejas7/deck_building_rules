@@ -729,5 +729,62 @@ const bgBad = BUDGET_CASES.filter(([, ok]) => !ok);
 for (const [label] of bgBad) console.log(`BUDGET FAIL: ${label}`);
 console.log(`Budget: ${BUDGET_CASES.length - bgBad.length}/${BUDGET_CASES.length} correct`);
 if (bgBad.length) fails++;
+// (t) the table check: a description of the table, from the power level.
+const tcDeck = (name, score, { wins = 20, interaction = 30, salt = 20, gc = 0, ...level } = {}) =>
+  ({ name, gc, power: { pillars: { wins, interaction, salt } }, level: { score, watch: [], floor: null, pending: false, ...level } });
+const tcOf = (...decks) => PodEngine.tableCheck(decks);
+const tcOut = (c, name) => c.standouts.find(s => s.name === name);
+const tcM = PodEngine.TABLE_CHECK;
+const TC_CASES = [
+  ["a gap of exactly the even limit reads even, despite float noise", tcOf(tcDeck("A", 5.6), tcDeck("B", 4.6)).balance === "even"],
+  ["just past the even limit reads close", tcOf(tcDeck("A", 4.1 + tcM.evenUpTo), tcDeck("B", 4)).balance === "close"],
+  ["the close limit is still close, past it reads wide", tcOf(tcDeck("A", 4 + tcM.closeUpTo), tcDeck("B", 4)).balance === "close" && tcOf(tcDeck("A", 4.1 + tcM.closeUpTo), tcDeck("B", 4)).balance === "wide"],
+  ["the spread runs from lowest to highest across four decks", (() => {
+    const c = tcOf(tcDeck("A", 4), tcDeck("B", 6.5), tcDeck("C", 3.3), tcDeck("D", 5));
+    return c.low === 3.3 && c.high === 6.5 && c.spread === 3.2 && c.balance === "wide";
+  })()],
+  ["an even table has no standouts", tcOf(tcDeck("A", 5), tcDeck("B", 5.2), tcDeck("C", 4.9)).standouts.length === 0],
+  ["a deck above the others stands out on power and says why", (() => {
+    const s = tcOut(tcOf(tcDeck("Top", 7, { wins: 80, interaction: 60, salt: 50, gc: 3 }), tcDeck("B", 4.5), tcDeck("C", 4.6), tcDeck("D", 4.4)), "Top");
+    return ["score", "wins", "interaction", "salt", "gc"].every(k => s.more.includes(k)) && !s.less;
+  })()],
+  ["one deck below an even table reads below, and the rest do not stand out", (() => {
+    const c = tcOf(tcDeck("A", 6), tcDeck("B", 6), tcDeck("C", 6), tcDeck("Low", 3));
+    return c.standouts.length === 1 && c.standouts[0].name === "Low" && c.standouts[0].less && !c.standouts[0].more.length;
+  })()],
+  ["a deck can stand out on one measure without standing out on power", (() => {
+    const s = tcOut(tcOf(tcDeck("Salty", 5, { salt: 20 + tcM.margin.salt }), tcDeck("B", 5), tcDeck("C", 5)), "Salty");
+    return s.more.join() === "salt" && !s.less;
+  })()],
+  ["just under a margin does not stand out", tcOf(tcDeck("A", 5, { gc: tcM.margin.gc - 1 }), tcDeck("B", 5)).standouts.length === 0],
+  ["two decks: the lower one reads less on power only", (() => {
+    const c = tcOf(tcDeck("A", 7, { wins: 90 }), tcDeck("B", 4));
+    return tcOut(c, "A").more.join() === "score,wins" && tcOut(c, "B").less && !tcOut(c, "B").more.length;
+  })()],
+  ["two decks under one name stay two decks", tcOf(tcDeck("Same", 7), tcDeck("Same", 4)).spread === 3],
+  ["pending power compares nothing, and still lists what is known", (() => {
+    const c = tcOf(tcDeck("A", 7, { watch: [{ kind: "gc", items: ["X"] }] }), tcDeck("B", 4, { pending: true }));
+    return c.pending && c.balance === undefined && !c.standouts && c.mention.length === 1 && c.mention[0].name === "A";
+  })()],
+  ["mention carries level.watch through the real powerLevel, combos and game changers", (() => {
+    const level = PodEngine.powerLevel({ power: { score: 3 }, rules: RULES, checked: true, combos: [{ tag: "R", cards: ["A", "B"] }], gameChangers: ["Rhystic Study"] });
+    const m = tcOf({ name: "W", gc: 1, power: { pillars: { wins: 20, interaction: 30, salt: 20 } }, level }, tcDeck("Quiet", 3)).mention;
+    return m.length === 1 && m[0].name === "W" && m[0].watch.some(w => w.tag === "R") && m[0].watch.some(w => w.kind === "gc");
+  })()],
+  ["a land denial floor is mentioned though level.watch leaves it out", (() => {
+    const level = PodEngine.powerLevel({ power: { score: 3 }, rules: RULES, checked: true, floor: { bracket: 4, reason: "mld", mld: ["Armageddon"] } });
+    const m = tcOf({ name: "L", gc: 0, power: { pillars: { wins: 20, interaction: 30, salt: 20 } }, level }, tcDeck("B", 3)).mention;
+    return level.watch.length === 0 && m[0].watch[0].kind === "land" && m[0].watch[0].items[0] === "Armageddon";
+  })()],
+  ["a precon's land denial is mentioned once", (() => {
+    const level = PodEngine.powerLevel({ power: { score: 3, base: 3 }, rules: RULES, checked: true, precon: { name: "P" }, floor: { bracket: 4, reason: "mld", mld: ["Armageddon"] } });
+    const m = tcOf({ name: "P", gc: 0, power: { pillars: { wins: 20, interaction: 30, salt: 20 } }, level }, tcDeck("B", 3)).mention;
+    return m[0].watch.filter(w => w.kind === "land").length === 1;
+  })()],
+];
+const tcBad = TC_CASES.filter(([, ok]) => !ok);
+for (const [label] of tcBad) console.log(`TABLE CHECK FAIL: ${label}`);
+console.log(`Table check: ${TC_CASES.length - tcBad.length}/${TC_CASES.length} correct`);
+if (tcBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

@@ -26,3 +26,4 @@ export { matchPrecon } from "./precon.js";
 export { removeCards, addCard, stacksInDeck, deckDiff, carryPick, editFigures } from "./deckEdit.js";
 export { wrapLines, moreList, fitList } from "./fitText.js";
 export { budgetTotals, cardmarketUrl, cardmarketWants } from "./budget.js";
+export { tableCheck, TABLE_CHECK } from "./tableCheck.js";
