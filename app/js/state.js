@@ -55,7 +55,7 @@ export const state = {
   shared: false,     // showing a deck from a #d= link: nothing saves until the visitor analyzes their own
   shareBad: false,   // the #d= link could not be read
   linkCopied: false,
-  deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false, add: '', hits: null },
+  deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false, add: '', hits: null, locked: new Set() },
   deck: null,        // {entries, commanders, deckName}
   cmdPick: null,     // user-chosen commander name(s); null = auto-detect
   edits: null,       // {undo: [{deck, cmdPick}], base: figures before the first edit, text: paste box before it}, new per analysis

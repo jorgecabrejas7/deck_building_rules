@@ -21,7 +21,7 @@ export { computePower, METRIC_RANGE } from "./power.js";
 export { simulateGoldfish, drawOdds, atLeastOdds } from "./goldfish.js";
 export * as Goldfish from "./goldfishGame.js";
 export { powerLevel } from "./powerLevel.js";
-export { cardValues } from "./cardValue.js";
+export { cardValues, trimPlan } from "./cardValue.js";
 export { parseAverage, compareToAverage } from "./average.js";
 export { matchPrecon } from "./precon.js";
 export { removeCards, addCard, stacksInDeck, deckDiff, carryPick, editFigures } from "./deckEdit.js";

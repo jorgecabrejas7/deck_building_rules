@@ -49,7 +49,7 @@ export async function analyze(fromLink = false) {
     recompute(notFound);
     state.fetchSt = 'idle';
     if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; }
-    Object.assign(state.deckView, { level: null, q: '', card: null, open: false, add: '', hits: null });
+    Object.assign(state.deckView, { level: null, q: '', card: null, open: false, add: '', hits: null, locked: new Set() });
   } catch (e) {
     console.error(e);
     if (run !== latestRun) return;

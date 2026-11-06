@@ -74,3 +74,16 @@ export function cardValues({ cardsInfo, commanders, ledger, combos, table, whatI
       points: wi && (wi.dPts > 0 || wi.fixes) ? { saves: Math.max(wi.dPts, 0), fixes: !!wi.fixes } : null };
   }).sort((a, b) => b.commander - a.commander || b.score - a.score || a.name.localeCompare(b.name));
 }
+
+// The cuts that bring a deck over 100 back to a legal list, weakest first. Commanders and locked
+// cards never go. Copies go one at a time, the biggest stack first among equals, so a tie between
+// basics thins them evenly instead of emptying one colour. `short` is what locks leave uncut.
+export function trimPlan(values, excess, locked) {
+  const want = Math.max(excess, 0);
+  const names = values.filter(c => !c.commander && !locked.has(c.name))
+    .flatMap(c => Array.from({ length: c.x.qty }, (_, i) => ({ c, left: c.x.qty - i })))
+    .sort((a, b) => a.c.score - b.c.score || b.left - a.left || a.c.name.localeCompare(b.c.name))
+    .slice(0, want).map(o => o.c.name);
+  const cuts = [...new Set(names)].map(name => ({ ...values.find(c => c.name === name), copies: names.filter(n => n === name).length }));
+  return { names, cuts, short: want - names.length };
+}
