@@ -8,7 +8,7 @@ import { answer, cardList, cardName, paint } from './reading.js';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const TICKS = 300, TICKS_PER_FRAME = 3; // about two seconds of settling, then it stops for good
 const LABEL_ROOM = 70; // hub names hang past their dot, and the view box must not cut them off
-const radius = (n) => 4 + Math.sqrt(n.degree) * 2;
+const radius = (n) => 3 + Math.sqrt(n.degree) * 0.9;
 
 // One per analysis: a re-render (a language switch, a view change) keeps the settled layout.
 let graph = null;
@@ -38,10 +38,10 @@ function place(g) {
 function simulate(g, d3) {
   if (g.sim) return;
   g.sim = d3.forceSimulation(g.nodes)
-    .force('link', d3.forceLink(g.links).id(n => n.name).distance(46))
-    .force('charge', d3.forceManyBody().strength(-70))
-    .force('x', d3.forceX().strength(0.06))
-    .force('y', d3.forceY().strength(0.06))
+    .force('link', d3.forceLink(g.links).id(n => n.name).distance(110).strength(0.12))
+    .force('charge', d3.forceManyBody().strength(-420))
+    .force('x', d3.forceX().strength(0.05))
+    .force('y', d3.forceY().strength(0.08))
     .force('collide', d3.forceCollide(n => radius(n) + 2))
     .stop();
   if (matchMedia('(prefers-reduced-motion:reduce)').matches) { g.sim.tick(TICKS); return; }
