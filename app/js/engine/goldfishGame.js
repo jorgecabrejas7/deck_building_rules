@@ -21,7 +21,7 @@ export function gameCards({ cardsInfo, commanders, read }) {
   const out = { library: [], command: [] };
   for (const x of cardsInfo) {
     const land = x.cls.type === "L";
-    const mana = land || read(x).rock ? sourceMana(x.card) : 0;
+    const mana = land || read(x).rock || read(x).dork ? sourceMana(x.card) : 0;
     for (let i = 0; i < x.qty; i++) {
       const commander = i === 0 && zone.has(front(x.name));
       (commander ? out.command : out.library).push({ name: x.name, mana, commander });

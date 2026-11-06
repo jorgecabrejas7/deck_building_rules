@@ -27,14 +27,14 @@ export function renderTableMode() {
   if (res) {
     if (res.length >= 2) html += tableCheckHtml(res);
     html += '<div class="table-scroll"><table class="tm-table">' +
-      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.brTile + '</th><th>' + t.pfPractical + '</th><th>' + t.pfSalt + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
+      '<tr><th>' + t.tmDeck + '</th><th>' + t.tierWord + '</th><th>' + t.pts + '</th><th>' + t.sumWizards + '</th><th>' + t.pfPractical + '</th><th>' + t.pfSalt + '</th><th>' + t.price + '</th><th>' + t.archetype + '</th><th></th></tr>' +
       res.map((d, i) => {
         return '<tr><td>' + esc(d.name) + '</td>' +
           '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + t[d.tier] + '</span></td>' +
           '<td class="mono">' + d.pts + '</td>' +
           '<td><span class="tier-pill ' + (!d.bracket.fits ? 'tone-bad' : d.bracket.pending ? 'tone-warn' : 'tone-ok') +
             '" title="' + (d.bracket.pending ? esc(t.brPending) : '') + '">' +
-            (!d.bracket.fits ? '✕ ' + t.brNo : d.bracket.pending ? t.brChecking : '✓ ' + t.brYes) + '</span></td>' +
+            (d.bracket.pending ? t.brChecking : d.bracket.checklist) + '</span></td>' +
           '<td class="mono">' + (d.level.pending ? '—' : d.level.bracket + ' · ' + d.level.score) + '</td><td class="mono">' + (d.salt === null ? '—' : d.salt) + '</td>' +
           '<td class="mono">€' + Math.round(d.price) + '</td><td>' + esc(d.arch) + '</td>' +
           '<td><button data-tmload="' + i + '" class="btn-ghost-sm">' + t.tmLoad + '</button></td></tr>';

@@ -163,7 +163,7 @@ const select = (id, label, options, value) => '<label class="arch-field dk-selec
 
 // Re-rendering the whole view on a control change would drop the search box's focus and caret.
 function morph(fn) {
-  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches) document.startViewTransition(fn);
+  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches) document.startViewTransition(fn).ready.catch(() => {}); // a newer transition skips this one
   else fn();
 }
 

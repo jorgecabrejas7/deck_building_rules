@@ -52,7 +52,7 @@ export function setView(view) {
   };
   // the views sit side by side in the nav, so the page slides the way you moved
   document.documentElement.dataset.slide = step < 0 ? 'back' : 'forward';
-  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches) document.startViewTransition(go);
+  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches) document.startViewTransition(go).ready.catch(() => {}); // a newer transition skips this one
   else go();
 }
 
