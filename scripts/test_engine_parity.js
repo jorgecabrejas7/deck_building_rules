@@ -14,6 +14,7 @@
  *   (j) the goldfish simulation and draw odds.
  *   (k) the power level, kept apart from the pod verdict, and Jorge's read of his decks.
  *   (l) how much each card does for its deck.
+ *   (m) the share link's encode and decode.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -500,5 +501,30 @@ const cvBad = CV_CASES.filter(([, ok]) => !ok);
 for (const [label] of cvBad) console.log(`CARD VALUE FAIL: ${label}`);
 console.log(`Card values: ${CV_CASES.length - cvBad.length}/${CV_CASES.length} correct`);
 if (cvBad.length) fails++;
+
+// (m) the share link: the list and pick survive the trip, and a bad link reads as nothing
+const shareDeck = "Commander: Atraxa, Praetors' Voice\n1x Sol Ring\n3x Forêt";
+const shareCode = await PodEngine.encodeShare({ text: shareDeck, commanders: ["Atraxa, Praetors' Voice"] });
+const shareBack = await PodEngine.decodeShare(shareCode);
+const deflated = async (s) => new Uint8Array(await new Response(new Blob([s]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer());
+const b64url = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const bomb = b64url(await deflated(JSON.stringify({ t: "x".repeat(300_000), c: null })));
+const SHARE_CASES = [
+  ["the list comes back whole, accents included", shareBack && shareBack.text === shareDeck],
+  ["the commander pick comes back", shareBack && shareBack.commanders.length === 1 && shareBack.commanders[0] === "Atraxa, Praetors' Voice"],
+  ["no pick stays no pick", (await PodEngine.decodeShare(await PodEngine.encodeShare({ text: "1x Sol Ring", commanders: null }))).commanders === null],
+  ["the code fits a URL fragment untouched", /^[A-Za-z0-9_-]+$/.test(shareCode)],
+  ["a garbled link reads as nothing", await PodEngine.decodeShare("not*base64!") === null],
+  ["base64 that is not deflate reads as nothing", await PodEngine.decodeShare("aGVsbG8gd29ybGQ") === null],
+  ["a cut-off link reads as nothing", await PodEngine.decodeShare(shareCode.slice(0, shareCode.length >> 1)) === null],
+  ["an empty link reads as nothing", await PodEngine.decodeShare("") === null],
+  ["deflated JSON that is no deck reads as nothing", await PodEngine.decodeShare(b64url(await deflated('{"t":5,"c":null}'))) === null],
+  ["commanders that are not names read as nothing", await PodEngine.decodeShare(b64url(await deflated('{"t":"1x Sol Ring","c":[1]}'))) === null],
+  ["a link that inflates past the limit reads as nothing", await PodEngine.decodeShare(bomb) === null],
+];
+const shareBad = SHARE_CASES.filter(([, ok]) => !ok);
+for (const [label] of shareBad) console.log(`SHARE FAIL: ${label}`);
+console.log(`Share link: ${SHARE_CASES.length - shareBad.length}/${SHARE_CASES.length} correct`);
+if (shareBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);
