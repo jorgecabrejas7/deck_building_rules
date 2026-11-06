@@ -18,6 +18,7 @@
  *   (m) the share link's encode and decode.
  *   (m) the deck beside its commander's average list, and cards unusual for the commander.
  *   (n) where a deck's salt comes from.
+ *   (n) the precon upgrade guide stopping at the pod's budget.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -934,5 +935,46 @@ const sbBad = SB_CASES.filter(([, ok]) => !ok);
 for (const [label] of sbBad) console.log(`SALT BREAKDOWN FAIL: ${label}`);
 console.log(`Salt breakdown: ${SB_CASES.length - sbBad.length}/${SB_CASES.length} correct`);
 if (sbBad.length) fails++;
+// (n) precon upgrade guide. Costs walk the real dial steps; each card names its dials.
+const upUnit = (dial, v) => {
+  const spec = RULES.dials[dial], at = n => n > spec.baseline_max ? PodEngine.dialPoints(n, spec, RULES.overflow_per_unit ?? 1) : 0;
+  return at(v + 1) - at(v);
+};
+const upCost = (card, s) => {
+  if (card.forbidden) return null;
+  const now = { ...s };
+  return card.dials.reduce((sum, d) => { const c = upUnit(d, now[d] || 0); now[d] = (now[d] || 0) + 1; return sum + c; }, 0);
+};
+const upOf = (swaps, points, stats = {}) => PodEngine.upgradePlan(swaps.map(([card, cutCard = null]) => ({ card, cutCard })),
+  { points, limit: RULES.tiers.tier2.max_points, stats, addCost: upCost, dials: c => c.dials });
+const upTutor = { name: "Tutor", dials: ["tutors"] }, upPlain = { name: "Plain", dials: [] };
+const UP_CASES = [
+  ["each swap is costed on the running stats: a second tutor costs what a second one costs", (() => {
+    const p = upOf([[upTutor], [upTutor]], 0);
+    return p.steps.map(s => s.effect).join() === "2,3" && p.steps[1].total === 5 && p.total === 5 && p.next === null;
+  })()],
+  ["landing exactly on the budget still fits", upOf([[upTutor]], 5).total === 7],
+  ["the guide stops at the first swap past the budget and names it", (() => {
+    const p = upOf([[upPlain], [upTutor], [upPlain]], 6);
+    return p.steps.length === 1 && p.next.card === upTutor && p.next.total === 8 && p.total === 6;
+  })()],
+  ["cutting a card frees its own points", (() => {
+    const p = upOf([[upPlain, upTutor]], 2, { tutors: 1 });
+    return p.steps[0].effect === -2 && p.total === 0;
+  })()],
+  ["a swap on the same dial as its cut costs nothing", upOf([[upTutor, upTutor]], 2, { tutors: 1 }).steps[0].effect === 0],
+  ["a swap a rule forbids is passed over, and the next one still counts", (() => {
+    const p = upOf([[{ name: "Forbidden", dials: [], forbidden: true }], [upTutor]], 0);
+    return p.steps.length === 1 && p.steps[0].card === upTutor && p.next === null;
+  })()],
+  ["on a deck over budget, free swaps fit and paid ones stop", (() => {
+    const p = upOf([[upPlain], [upTutor]], 9);
+    return p.steps.length === 1 && p.total === 9 && p.next.card === upTutor;
+  })()],
+];
+const upBad = UP_CASES.filter(([, ok]) => !ok);
+for (const [label] of upBad) console.log(`UPGRADE PLAN FAIL: ${label}`);
+console.log(`Upgrade plan: ${UP_CASES.length - upBad.length}/${UP_CASES.length} correct`);
+if (upBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);
