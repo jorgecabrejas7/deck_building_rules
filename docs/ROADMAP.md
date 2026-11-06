@@ -27,14 +27,14 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Pips vs production per colour | DC, CS | ✅ |
 | Manabase depth: score parts, colours, land drop odds, mana by turn, medians | CS | ✅ Curva y maná; utility lands still M4 |
 | Salt score with top cards | CS | ✅ |
-| Salt breakdown: stax, theft, taxes, group slug, price, combos | CS | ⬜ M4 |
+| Salt breakdown by category | CS | ✅ Poder |
 | Report card grades | CS | ⬜ M4 |
 | Combo profile: strengths, risks, redundancy, anchor piece, friction | CS | 🟡 M4 |
 | Win-condition profile, alternate wins, wincon types | CS | 🟡 M4 |
 | Archetype mix with reasons and sub-themes | CS | 🟡 M4 |
 | Typal and commander reliance | CS | 🟡 M4 |
 | Synergy against EDHREC | new | ✅ |
-| Card-to-card synergy web and hubs | CS | ⬜ M6, after M1 |
+| Card-to-card synergy web and hubs | CS | ✅ Sinergias; reads tags and combos, not full rules text |
 | Timing and speed: instant share, curve shape | CS | 🟡 M4 |
 | Compare two decks: matches, adds, cuts, curve, cost | DC | ✅ table mode |
 | Rescan stability (Omni-Score) | DC | ⛔ exists to tame AI variance; ours is deterministic |
@@ -43,14 +43,14 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Feature | Source | Status |
 |---|---|---|
 | Synergy-first suggestions and cuts | DC, ours | ✅ |
-| One card away from a combo | DC | ⬜ M5 |
-| Rule-based trim: over 100 to 100, with reasons and locked cards | DC | ⬜ M5 |
+| One card away from a combo | DC | ✅ Combos view |
+| Rule-based trim: over 100 to 100, with reasons and locked cards | DC | ✅ Mazo |
 | Tune to a target tier or bracket under a budget | DC | 🟡 M5 rule-based |
 | Land and ramp tuning | DC | ⬜ M5 |
 | Mana staples by colour and price cap | DC | ⬜ M5 |
-| Accept or skip suggestions, with undo | DC | ⬜ M5 |
-| Printings switch: cheapest, priciest, newest | DC | 🟡 M5 cheapest exists |
-| Upgrade guide for a precon | DC, CS | ⬜ M5 |
+| What-if editing: add and cut cards, compare, undo | DC | ✅ Mazo |
+| Budget: default against cheapest printings, priciest cards, Cardmarket links | DC | ✅ Mazo |
+| Upgrade guide for a precon | DC, CS | ✅ Puntos, stops at the pod's budget |
 | Writing about why, via AI (DeckTrim, PowerTune reasons) | DC | 🅿️ |
 
 ### Data and browsing
@@ -61,7 +61,9 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | MTGGoldfish, TappedOut, ManaBox text formats | DC | ⬜ M5 |
 | Precon browser with tier, bracket, power | DC | ⬜ M5 |
 | All precons, from MTGJSON (198, weekly) | DC | ✅ fit and recognition; browser still M5 |
-| Pod table and study | new | ✅ |
+| Pod table and study, with rankings over time | new | ✅ snapshot per study |
+| Table check: balance, who stands out, what to mention | new | ✅ table mode |
+| Your deck against the commander's average list | new | ✅ Curva y maná, from EDHREC |
 | Commander page: how your deck compares among pod and precons | CS | ⬜ M6 |
 | Card search in plain English | DC | 🅿️ |
 | Tokens list | DC | ⬜ M5 |
@@ -69,15 +71,15 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 ### Sharing and tools
 | Feature | Source | Status |
 |---|---|---|
-| Share link holding the deck | DC, CS | ⬜ M5 |
-| Rule-zero card to save as an image | CS | ⬜ M5 |
-| Buy links | DC | ⬜ M5 |
+| Share link holding the deck | DC, CS | ✅ |
+| Rule-zero card to save as an image | CS | ✅ Resumen |
+| Buy links | DC | ✅ Cardmarket search |
 | Export and copy list | CS, DC | 🟡 M5 |
 | QR card | DC | ⬜ M6 |
 | Install and offline | DC | 🟡 M6 service worker exists |
-| Goldfish playtester | DC, CS | ⬜ M7, large |
+| Goldfish playtester | DC, CS | ✅ Curva y maná, no rules enforced |
 | Rulebook search | DC | ⬜ M7 |
-| Saved deck versions in the browser, score history | DC | ⬜ M6 |
+| Saved deck versions in the browser, score history | DC | ✅ Resumen |
 
 ### Parked until server/AI is decided
 Written synopsis and mulligan guide · chat assistant with memory · roast · rules Q&A · new-set impact report · plain-English card search.
@@ -91,13 +93,13 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 - Commander quiz, sleeves, flavour extras (nutrition label, field reports): decoration.
 
 ## How the app is laid out
-The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Cargar page, where every visit starts. Each report takes its colours from the commander's identity (`--h1`, `--h2`). The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
+The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Cargar page, where every visit starts. Each report takes its colours from the commander's identity (`--h1`, `--h2`). The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná, Sinergias (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
 
 ## Where it runs
 https://169-58-71-242.sslip.io/pod/ is the site. The server publishes `origin/main` by itself within 5 minutes of a push (`deploy/publish.sh`, from cron). The Caddy routes are in `deploy/pod.caddy`; changing them needs Jorge's sudo. The old GitHub Pages address forwards there. The server's services and how to add one are in `/srv/README.md`.
 
 ## Where to pick up
-The next milestone is M4. Read the standing decisions above first, and check the open questions below before changing any score.
+What's left is marked ⬜ below (mostly M4 depth and smaller M5 items). Read the standing decisions above first, and check the open questions below before changing any score.
 
 ## Milestones
 - **M1, card reader:** done.
@@ -114,6 +116,7 @@ The next milestone is M4. Read the standing decisions above first, and check the
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing
 
 ## Open questions for Jorge
+- `manaProduced` counts "Add {G} or {U}" as 2 mana, which inflates the Rampeo panel and the goldfish simulation. Fixing it can move power scores.
 - Which of the 13 decks Jorge has not placed read wrongly? Eight sit at 4.1, the weakest part of the scale.
 - Does Korvold (7.9) or Winota (7.0) belong among the cEDH lists? Both score below the rest.
 - Do the card values read right on the pod's decks? Massacre Wurm reads Marginal in Teysha, for example. Weights are in `engine/cardValue.js`.

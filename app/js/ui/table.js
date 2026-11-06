@@ -32,8 +32,7 @@ export function renderTableMode() {
         return '<tr><td>' + esc(d.name) + '</td>' +
           '<td><span class="tier-pill ' + tierTone(d.tier) + '">' + t[d.tier] + '</span></td>' +
           '<td class="mono">' + d.pts + '</td>' +
-          '<td><span class="tier-pill ' + (!d.bracket.fits ? 'tone-bad' : d.bracket.pending ? 'tone-warn' : 'tone-ok') +
-            '" title="' + (d.bracket.pending ? esc(t.brPending) : '') + '">' +
+          '<td><span class="tier-pill tone-neutral" title="' + (d.bracket.pending ? esc(t.brPending) : '') + '">' +
             (d.bracket.pending ? t.brChecking : d.bracket.checklist) + '</span></td>' +
           '<td class="mono">' + (d.level.pending ? '—' : d.level.bracket + ' · ' + d.level.score) + '</td><td class="mono">' + (d.salt === null ? '—' : d.salt) + '</td>' +
           '<td class="mono">€' + Math.round(d.price) + '</td><td>' + esc(d.arch) + '</td>' +

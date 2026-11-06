@@ -101,16 +101,9 @@ card tiles and "?" icons where there is no mouse hover). Rules are fetched from
 rules/pod_rules.json (single source of truth) and infinite combos are matched
 client-side against data/combos.json, a compact index distilled from Commander
 Spellbook's bulk export by scripts/build_combo_db.py and refreshed weekly by a
-GitHub Action — same-origin, no CORS, no proxies. Archidekt/Moxfield still
-block direct browser reads. Archidekt URLs therefore load through a chain of
-public CORS proxies (r.jina.ai, allorigins, codetabs) tried in order: each
-attempt is time-boxed and a response only counts once it parses as a real
-Archidekt deck, so a proxy answering 200 with an error body of its own falls
-through instead of silently loading an empty deck. Public proxies keep
-disappearing or growing API keys — to depend on nobody, deploy
-tools/cors-worker.js to your own Cloudflare account and put it first in the
-PROXIES list of app/js/engine/archidekt.js (instructions are in the file).
-Pasting the text export always works and never touches a third party.
+GitHub Action. Archidekt and Moxfield refuse browsers, so links to them load
+through the server (deploy/pod.caddy), one public deck at a time. Pasting the
+text export always works.
 
 Dev checks (users never need these):
   node scripts/test_engine_parity.js   # JS engine == Python rules on all 36 precons
