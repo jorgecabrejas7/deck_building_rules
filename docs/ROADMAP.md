@@ -2,7 +2,7 @@
 
 Every feature worth considering for the checker, from commandersalt.com (CS), deckcheck.co (DC) and our own ideas. Update the status in the same commit that changes it.
 
-**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Mass land denial or a two-card combo playable on curve sets power-level Bracket 4 regardless of the score. Jorge's read of his decks is locked in the parity test: if a scoring change breaks one, ask him.
+**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Mass land denial or a two-card combo playable on curve sets power-level Bracket 4 regardless of the score. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
 
@@ -110,10 +110,10 @@ The next milestone is M4. Read the standing decisions above first, and check the
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing
 
 ## Open questions for Jorge
-- Which of the 13 decks he has not placed read wrongly? Nine sit at 4.1, the weakest part of the scale.
+- Which of the 13 decks Jorge has not placed read wrongly? Nine sit at 4.1, the weakest part of the scale.
 - Should Family Matters, World Shaper and Riders of Rohan read Bracket 4 on power level, through the floor rule?
 - Should Liliana count as mass land denial? It sets Teysha's Bracket 4 floor.
 - Is 6 mana per turn the right limit for the two-card combo floor?
-- Do the card values read right on his decks? Massacre Wurm reads Marginal in Teysha, for example. Weights are in `engine/cardValue.js`.
-- The deck study's four rule proposals, and his in/out marks, are still unanswered (`data/deck_study.json`, `docs/`).
+- Do the card values read right on the pod's decks? Massacre Wurm reads Marginal in Teysha, for example. Weights are in `engine/cardValue.js`.
+- The deck study's four rule proposals, and Jorge's in/out marks, are still unanswered (`data/deck_study.json`, `docs/`).
 - Are the Lightning and Luffy commander tags right?
