@@ -122,7 +122,7 @@ export async function checkCombos() {
 function recordVersion() {
   const r = state.result;
   // a shared deck isn't the visitor's, and a what-if isn't a version until it is analyzed as one
-  if (r.level.pending || !r.commanders.length || state.shared || state.edits) return;
+  if (r.level.pending || !r.commanders.length || state.shared || (state.edits && state.edits.undo.length)) return;
   saveVersion(r.commanders, { date: new Date().toISOString(), points: r.evalRes.points, power: r.level.score,
     bracket: r.level.bracket, cards: state.deck.entries.map(e => [e.name, e.quantity]) });
 }

@@ -79,4 +79,4 @@ export const state = {
   cmpView: 'all',    // side-by-side card comparison: 'all' | 'diff'
 };
 export const TAB_KEYS = ['load', 'informe', 'pod', 'guide'];
-export const VIEW_KEYS = ['summary', 'deck', 'points', 'bracket', 'combos', 'power', 'mana'];
+export const VIEW_KEYS = ['summary', 'deck', 'points', 'bracket', 'combos', 'power', 'mana', 'web'];

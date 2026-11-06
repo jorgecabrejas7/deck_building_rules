@@ -22,6 +22,7 @@ import { renderProfile } from './ui/profile.js';
 import { renderDeck } from './ui/deck.js';
 import { renderEditBar } from './ui/edits.js';
 import { renderMana } from './ui/mana.js';
+import { renderWeb } from './ui/web.js';
 import { renderTips } from './ui/tips.js';
 import { renderRamp } from './ui/ramp.js';
 import { renderHand } from './ui/hand.js';
@@ -80,6 +81,7 @@ const VIEW_RENDER = {
   combos: renderCombos,
   power: renderProfile,
   mana: () => { renderMana(); renderCurve(); renderRamp(); renderComp(); renderHand(); },
+  web: renderWeb,
 };
 
 export function renderAll() {

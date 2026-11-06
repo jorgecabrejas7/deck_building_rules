@@ -19,6 +19,7 @@
  *   (m) the deck beside its commander's average list, and cards unusual for the commander.
  *   (n) where a deck's salt comes from.
  *   (n) the precon upgrade guide stopping at the pod's budget.
+ *   (n) the synergy web.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -29,6 +30,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import * as PodEngine from "../app/js/engine/index.js";
+import { forceSimulation, forceLink, forceManyBody } from "../app/vendor/d3-force-3.0.0.min.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RULES = JSON.parse(fs.readFileSync(path.join(ROOT, "rules", "pod_rules.json"), "utf8"));
@@ -976,5 +978,43 @@ const upBad = UP_CASES.filter(([, ok]) => !ok);
 for (const [label] of upBad) console.log(`UPGRADE PLAN FAIL: ${label}`);
 console.log(`Upgrade plan: ${UP_CASES.length - upBad.length}/${UP_CASES.length} correct`);
 if (upBad.length) fails++;
+// (n) the synergy web, on synthetic cards.
+const swCard = (name, land = false) => ({ name, qty: 1, cls: { type: land ? "L" : "C" }, card: { name } });
+const swInfo = ["Outlet", "Grave // Back", "Karmic", "Lone", "Reducer", "Rock", "Hunter", "Finisher"].map(n => swCard(n))
+  .concat(["Fetch", "Gate", "Cave"].map(n => swCard(n, true)));
+const swTags = new Map(Object.entries({
+  Outlet: ["sacrifice-outlet"], Grave: ["recursion", "reanimate"], Karmic: ["recursion"], Lone: ["draw"], Reducer: ["cost-reducer"], Rock: ["mana-rock"],
+  Hunter: ["tutor", "land-ramp"], Finisher: ["win-condition"], Fetch: ["recursion"], Gate: ["recursion"], Cave: ["sacrifice-outlet"],
+}).map(([k, v]) => [k, new Set(v)]));
+const swWeb = PodEngine.synergyWeb({ cardsInfo: swInfo, cardTags: swTags, combos: [{ cards: ["Outlet", "Grave"], filled: ["Gate"] }, { cards: ["Reducer", "Not In Deck"] }] });
+const swEdge = (a, b) => swWeb.edges.find(e => (e.a === a && e.b === b) || (e.a === b && e.b === a));
+const swI18n = fs.readFileSync(path.join(ROOT, "app", "js", "i18n.js"), "utf8");
+const swLayout = (() => {
+  const sim = forceSimulation([{ id: "a" }, { id: "b" }, { id: "c" }]).force("link", forceLink([{ source: "a", target: "b" }]).id(n => n.id)).force("charge", forceManyBody()).stop();
+  sim.tick(300);
+  return sim.nodes().every(n => Number.isFinite(n.x) && Number.isFinite(n.y)) && sim.alpha() < sim.alphaMin();
+})();
+const SW_CASES = [
+  ["tags that feed each other make an edge with its reason", swEdge("Outlet", "Karmic")?.reasons.join() === "sacBack"],
+  ["a double-faced card goes by its front name", swWeb.nodes.some(n => n.name === "Grave")],
+  ["one edge per pair, with both its reasons", swEdge("Grave", "Outlet")?.reasons.join() === "combo,sacBack" && swWeb.edges.filter(e => [e.a, e.b].includes("Outlet") && [e.a, e.b].includes("Grave")).length === 1],
+  ["every piece of a combo connects, slot fillers included", swEdge("Gate", "Grave")?.reasons.includes("combo") && swEdge("Gate", "Outlet")?.reasons.includes("combo")],
+  ["a combo piece outside the deck makes no node", !swWeb.nodes.some(n => n.name === "Not In Deck")],
+  ["a land is in only as a piece of a combo", swWeb.nodes.some(n => n.name === "Gate") && !swWeb.nodes.some(n => n.name === "Fetch" || n.name === "Cave")],
+  ["no land counts as unconnected", !["Fetch", "Gate", "Cave"].some(n => swWeb.unconnected.includes(n))],
+  ["a mana rock feeds a cost reducer", swEdge("Reducer", "Rock")?.reasons.join() === "reduceMana"],
+  ["cards with no partner are listed, sorted", swWeb.unconnected.join() === "Finisher,Hunter,Lone"],
+  ["a tutor for lands finds no finisher", !swEdge("Finisher", "Hunter")],
+  ["degree counts partners", swWeb.nodes.find(n => n.name === "Outlet").degree === 3 && swWeb.nodes.find(n => n.name === "Rock").degree === 1],
+  ["hubs lead with the most connected, combos first in the reasons", swWeb.hubs[0].name === "Outlet" && swWeb.hubs[0].groups[0].reason === "combo" && swWeb.hubs[0].groups[0].cards.join() === "Gate,Grave"],
+  ["a card with one partner is no hub", !swWeb.hubs.some(h => h.name === "Rock")],
+  ["without tags only combos connect", PodEngine.synergyWeb({ cardsInfo: swInfo, cardTags: null, combos: [] }).edges.length === 0],
+  ["every reason is written in both languages", PodEngine.WEB_REASONS.every(r => swI18n.split("webR_" + r + ":").length === 3)],
+  ["the vendored d3-force settles in a fixed number of ticks", swLayout],
+];
+const swBad = SW_CASES.filter(([, ok]) => !ok);
+for (const [label] of swBad) console.log(`SYNERGY WEB FAIL: ${label}`);
+console.log(`Synergy web: ${SW_CASES.length - swBad.length}/${SW_CASES.length} correct`);
+if (swBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);
