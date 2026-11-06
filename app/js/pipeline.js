@@ -35,7 +35,7 @@ export async function analyze() {
     state.fetchSt = 'idle';
     state.tab = 'informe';
     state.view = 'summary';
-    state.deckView = { level: null, q: '', group: 'value', card: null, open: false };
+    Object.assign(state.deckView, { level: null, q: '', card: null, open: false });
   } catch (e) {
     console.error(e); state.error = 'netErr';
   }
@@ -60,6 +60,10 @@ export async function getSaltDb() {
   if (!saltDb) saltDb = await (await fetch('../data/salt.json')).json();
   return saltDb;
 }
+let landDenial = null;
+const getLandDenial = async () => (landDenial ||= await (await fetch('../data/land_denial.json')).json());
+let precons = null;
+const getPrecons = async () => (precons ||= (await (await fetch('../data/precons.json')).json()).decks);
 let cardTags = null;
 export async function getCardTags() {
   if (!cardTags) cardTags = PodEngine.indexCardTags(await (await fetch('../data/card_tags.json')).json());
@@ -75,6 +79,9 @@ export async function checkCombos() {
     state.saltDb = await getSaltDb().catch(() => null);
     // without tags the profile reads card text, so a failed fetch only costs accuracy
     state.cardTags = await getCardTags().catch(() => null);
+    state.landDenial = await getLandDenial();
+    // only the Bracket 2 label depends on it, so a failed fetch costs no more than that
+    state.precons = await getPrecons().catch(() => null);
     state.combosData = { status: 'done', list, cardLists: comboDb, updated: comboDb.updated };
     recompute();
     const inf = state.result.bracket.combos.filter(c => c.infinite).length;
@@ -114,14 +121,15 @@ export function recompute(notFound) {
   const bracket = PodEngine.evaluateBrackets({
     stats, flagged, db: cardCache, validation, commanders,
     deckNames: resolved.map(e => e.name),
-    combos, comboDb: _cd ? _cd.cardLists : null,
+    combos, comboDb: _cd ? _cd.cardLists : null, landDenial: state.landDenial,
     loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
     unresolved: missing.length,
   });
   const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders, cardTags: state.cardTags });
   const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
   const power = PodEngine.computePower(profile, stats, salt);
-  const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!combos && !!salt, floor: combos ? bracket.floor : null });
+  const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!combos && !!salt, floor: combos ? bracket.floor : null,
+    precon: state.precons ? PodEngine.matchPrecon(resolved, state.precons) : null });
   const synergy = synergyFor(cardsInfo, commanders);
   // what-if cut deltas for every card that drives a points dial or violation
   const drivingNames = new Set();

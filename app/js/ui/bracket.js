@@ -25,6 +25,9 @@ function combosOf(list, t) {
 }
 
 // What the row says about this deck: the state on one line, then the evidence.
+const preconNote = (r, t) => (r.level.precon ? '<p class="rd-apart">' + esc(fill(t.brPrecon, { c: r.level.precon.name })) + '</p>' : '');
+const landNote = (b, t) => (b.landMaybe.length ? '<p class="rd-flag">' + ICON.wait + '<span>' + esc(fill(t.landMaybe, { c: names(b.landMaybe) })) + '</span></p>' : '');
+
 function detail(c, t, lang) {
   switch (c.id) {
     case 'game_changers':
@@ -124,7 +127,7 @@ export function renderBracket() {
   paint($('bracket'), '<div class="panel rd">' +
     answer({ label: t.brReadLabel, value: b.pending ? '…' : String(b.checklist),
       sub: (b.pending ? '' : esc(t['brName' + b.checklist]) + ' ') + verdict,
-      body: '<p class="rd-why">' + esc(summary) + '</p>' + sb }) +
+      body: '<p class="rd-why">' + esc(summary) + '</p>' + sb + preconNote(state.result, t) + landNote(b, t) }) +
     rows(b, t, lang) + cutsBlock(b, t) +
     '<div class="rd-folds">' + ruleZero(b, t) + legend(t) + '</div></div>');
 }

@@ -1,6 +1,8 @@
 export const store = {
   get lang(){ return localStorage.getItem('pdc_lang') || 'es'; },
   set lang(v){ localStorage.setItem('pdc_lang', v); },
+  get deckMode(){ return localStorage.getItem('pdc_deck_mode') || 'list'; },
+  set deckMode(v){ localStorage.setItem('pdc_deck_mode', v); },
   get theme(){ return localStorage.getItem('pdc_theme') || ''; },
   set theme(v){ localStorage.setItem('pdc_theme', v); },
 };
@@ -33,7 +35,8 @@ export function loadSession(){
 export const state = {
   lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
   arch: 'auto', cf: 'all', curveBin: null, hl: null, openArch: null, tab: 'load', view: 'summary',
-  deckView: { level: null, q: '', group: 'value', card: null, open: false },
+  restoring: false, // reopening a saved deck: straight to the report, past the landing
+  deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false },
   deck: null,        // {entries, commanders, deckName}
   cmdPick: null,     // user-chosen commander name(s); null = auto-detect
   result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, commanders, options, bracket, profile, power, level, salt, synergy, whatIf}
@@ -41,6 +44,8 @@ export const state = {
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
   podDecks: null,    // {status, decks} — lazy-loaded from data/pod_decks.json
+  landDenial: null,  // data/land_denial.json, which of Spellbook's flags really are mass land denial
+  precons: null,     // data/precons.json, to recognise a stock precon
   saltDb: null,      // data/salt.json, loaded with the combo database
   cardTags: null,    // data/card_tags.json as name -> tags, loaded alongside it
   synergyData: null, // {key, table} for the current commander(s)

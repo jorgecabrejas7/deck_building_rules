@@ -44,9 +44,16 @@ export function renderTabbar() {
 
 // The report is one view at a time, so a change of view starts at the top of the page.
 export function setView(view) {
-  state.tab = 'informe'; state.view = view;
-  renderAll();
-  $('stickySentinel').scrollIntoView();
+  const step = VIEW_KEYS.indexOf(view) - VIEW_KEYS.indexOf(state.view);
+  const go = () => {
+    state.tab = 'informe'; state.view = view;
+    renderAll();
+    $('stickySentinel').scrollIntoView({ behavior: 'instant' });
+  };
+  // the views sit side by side in the nav, so the page slides the way you moved
+  document.documentElement.dataset.slide = step < 0 ? 'back' : 'forward';
+  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches) document.startViewTransition(go);
+  else go();
 }
 
 export function renderSectionNav() {

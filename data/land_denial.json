@@ -1,0 +1,18 @@
+{
+  "_": "Hand-sorted from Commander Spellbook's flags and Scryfall oracle searches ordered by EDHREC popularity. mass: the card itself denies every opponent's lands, and sets Bracket 4. maybe: it can, depending on the board or a loyalty ability, so the app only warns. A card Spellbook flags that is not listed here reads as maybe.",
+  "mass": [
+    "Apocalypse", "Armageddon", "Back to Basics", "Boom", "Cataclysm", "Catastrophe", "Contamination", "Decree of Annihilation",
+    "Destructive Flow", "Devastating Dreams", "Devastation", "Dimensional Breach", "Fall of the Thran", "Global Ruin",
+    "Hokori, Dust Drinker", "Impending Disaster", "Jokulhaups", "Keldon Firebombers", "Limited Resources", "Mana Vortex",
+    "Myojin of Infinite Rage", "Obliterate", "Ravages of War", "Razia's Purification", "Realm Razer", "Restore Balance",
+    "Rising Waters", "Ritual of Subdual", "Ruination", "Soulscour", "Stasis", "Static Orb", "Sunder", "Tectonic Break",
+    "Temporal Distortion", "Thoughts of Ruin", "Upheaval", "Wildfire", "Winter Orb", "Worldfire", "Worldpurge", "Worldslayer"
+  ],
+  "maybe": [
+    "Acid Rain", "Ajani Vengeant", "Balance", "Balancing Act", "Blood Moon", "Boil", "Boiling Seas", "Choke", "Death Cloud",
+    "Dovin Baan", "Epicenter", "Equipoise", "Flashfires", "From the Ashes", "Gideon, Champion of Justice", "Gilt-Leaf Archdruid",
+    "Harbinger of the Seas", "Land Equilibrium", "Liliana of the Veil", "Liliana, Dreadhorde General", "Magus of the Balance",
+    "Magus of the Moon", "Mana Short", "Naked Singularity", "Nature's Wrath", "Overburden", "Price of Glory", "Sundering Titan",
+    "Terastodon", "Thieves' Auction", "Tsunami", "Vorinclex, Voice of Hunger", "Wave of Vitriol", "Zhao, the Moon Slayer"
+  ]
+}

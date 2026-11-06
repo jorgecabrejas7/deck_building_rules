@@ -31,6 +31,7 @@ import { openHow, closeHow } from './ui/how.js';
 import { copyReport } from './ui/report.js';
 import { initHelpPopovers } from './ui/popover.js';
 import { analyze } from './pipeline.js';
+import { initHero } from './ui/hero.js';
 
 // renderAll re-innerHTMLs whole sections, which destroys keyboard focus.
 // Remember the focused element's identity (id or first data-* key) and restore
@@ -80,6 +81,7 @@ export function renderAll() {
   document.body.dataset.tab = state.tab;
   document.body.dataset.view = state.view;
   // the summary belongs to the report: Pod and Guide are about other things
+  $('hero').hidden = state.tab !== 'load' || has || state.restoring;
   $('summary').style.display = has && state.tab === 'informe' ? '' : 'none';
   renderSectionNav();
   document.documentElement.lang = state.lang;
@@ -145,6 +147,7 @@ const __boot = () => {
     renderAll();
   };
   initHelpPopovers();
+  initHero();
   // collapse the sticky summary+tabbar once the page top scrolls away
   new IntersectionObserver(([e]) => {
     $('stickyWrap').classList.toggle('stuck', !e.isIntersecting);
@@ -161,9 +164,11 @@ const __boot = () => {
     if (Array.isArray(sess.tableTexts))
       state.tableTexts = [0, 1, 2, 3].map(i => typeof sess.tableTexts[i] === 'string' ? sess.tableTexts[i] : '');
   }
+  state.restoring = !!(sess && typeof sess.deckText === 'string' && sess.deckText.trim());
   renderAll();
-  if (sess && typeof sess.deckText === 'string' && sess.deckText.trim()) {
+  if (state.restoring) {
     analyze().then(() => {
+      state.restoring = false;
       // land on the saved tab unless the user already navigated meanwhile
       if (state.result && state.tab === 'informe' && TAB_KEYS.includes(sess.tab)) {
         state.tab = sess.tab;

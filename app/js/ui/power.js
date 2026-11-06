@@ -77,7 +77,7 @@ export function renderPower() {
     const chips = (!isCombo && value > spec.baseline_max ? (r.flagged[m.k] || []) : []).slice(0, 10);
     const detail = (chips.length ? '<div class="chip-row">' + chips.map(([n]) => {
       const c = cardCache[n] || {};
-      return '<span class="card-chip">' +
+      return '<span class="sugTile card-chip" data-img="' + esc(c.img_normal || '') + '">' +
         '<span class="chip-art"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
         esc(n) + ' <span class="mono chip-price">' + (c.price != null ? eur(c.price) : '—') + '</span></span>';
     }).join('') + '</div>' : '') + (isCombo ? comboBlock() : '');

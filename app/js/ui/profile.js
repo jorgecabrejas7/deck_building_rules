@@ -64,9 +64,10 @@ function floorNote(r, t) {
 function head(r, t) {
   const { level, power } = r;
   const sub = level.pending ? esc(t.vPending)
-    : esc(fill(t.pfScore, { v: power.score })) + ' · ' + esc(t['band_' + powerBand(power.score)]);
+    : esc(fill(t.pfScore, { v: level.score })) + ' · ' + esc(t['band_' + powerBand(power.score)]);
   return answer({ label: t.pfPracticalLabel, value: level.pending ? '…' : level.bracket, sub,
-    body: floorNote(r, t) +
+    body: (level.precon ? '<div class="rd-floor"><p class="rd-floor-t">' + esc(fill(t.pfPrecon, { c: level.precon.name })) + '</p></div>' : '') + floorNote(r, t) +
+      (r.bracket.landMaybe.length ? '<p class="rd-flag">' + esc(fill(t.landMaybe, { c: r.bracket.landMaybe.map(n => n.split(' // ')[0]).join(', ') })) + '</p>' : '') +
       (level.pending ? '' : '<p class="rd-why">' + esc(why(r, t)) + '</p>') +
       '<p class="rd-apart">' + esc(t.pfApart) + '</p>' });
 }

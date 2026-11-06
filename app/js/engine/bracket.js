@@ -210,18 +210,22 @@ function cutsToFit({ combos, mld, turnCards, looped, gcCards, commanders }) {
 // combos: active combos for this deck, or null while the combo check has not run
 // — the criteria that depend on them then report as pending instead of passing.
 // comboDb: the DB's card lists (mass_land_denial, extra_turn), null until loaded.
+// landDenial: data/land_denial.json, our sorted read of which of those really are mass land denial.
 // loopCards: card names known to chain extra turns (the pod rules already keep
 // this list; passing it in keeps this module free of the pod's rules shape).
 // unresolved: how many cards Scryfall could not identify — a deck missing a
 // card only because of a typo is not an illegal deck.
-export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, commanders, db, validation, loopCards, unresolved = 0 }) {
+export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, landDenial, commanders, db, validation, loopCards, unresolved = 0 }) {
   const loopList = new Set(loopCards || []);
   const pendingCombos = !combos;
   const list = combos || [];
   const idx = frontFaceIndex(db);
 
   const zone = new Set((commanders || []).map(front));
-  const mldSet = new Set((comboDb && comboDb.mass_land_denial) || []);
+  const mldSet = new Set((landDenial && landDenial.mass) || []);
+  // Spellbook flags cards that only sometimes deny lands (a loyalty ability, a colour hoser):
+  // those are worth a warning, and a card we haven't sorted yet gets the same benefit of the doubt.
+  const mldMaybe = new Set([...((comboDb && comboDb.mass_land_denial) || []), ...((landDenial && landDenial.maybe) || [])].filter(n => !mldSet.has(n)));
   const turnSet = new Set((comboDb && comboDb.extra_turn) || []);
 
   const rated = list.map(c => {
@@ -249,9 +253,10 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, c
   checks.push({ id: "game_changers", ok: gc <= BRACKET3.game_changers_max, value: gc,
     max: BRACKET3.game_changers_max, cards: gcCards, level: gc > BRACKET3.game_changers_max ? 4 : gc ? 3 : 2 });
 
-  // ---- mass land denial: Spellbook's card flags catch what oracle text alone
-  // cannot (Winter Orb, Blood Moon, Upheaval), and combos can do it too ----
-  const mldCards = (flagged.mass_land_denial || []).map(([n]) => n);
+  // ---- mass land denial: the sorted list catches what oracle text alone
+  // cannot (Winter Orb, Upheaval), and combos can do it too ----
+  const mldCards = (flagged.mass_land_denial || []).map(([n]) => n).filter(n => !mldMaybe.has(front(n)));
+  const landMaybe = deckNames.filter(n => mldMaybe.has(front(n)));
   for (const n of deckNames) if (mldSet.has(front(n)) && !mldCards.includes(n)) mldCards.push(n);
   const mldCombos = rated.filter(c => c.landDenial);
   checks.push({ id: "mass_land_denial", ok: !mldCards.length && !mldCombos.length, value: mldCards.length + mldCombos.length,
@@ -305,7 +310,7 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, c
     cuts: floorCuts.map(c => ({ card: front(c.card), reason: c.reasons.includes("mass_land_denial") ? "mld" : "combo" })) } : null;
 
   return {
-    floor, checks, failed: failed.map(c => c.id), pending,
+    floor, landMaybe, checks, failed: failed.map(c => c.id), pending,
     fits: !failed.length,
     checklist,                    // Wizards' read: 2..4
     estimate,                     // Spellbook's read: a COMBO_TAGS key

@@ -58,7 +58,7 @@ export function cardValues({ cardsInfo, commanders, ledger, combos, table, whatI
       score += landScore(x, colours, reasons);
       // a utility land its commander's players pick is doing more than making mana
       if (row && row.s >= 0.1) { score += 15; reasons.push({ k: "synergy", s: Math.round(row.s * 100), seenIn: Math.round((row.pd ? row.nd / row.pd : 0) * 100) }); }
-    } else {
+    } else if (!zone.has(name)) {
       score += table ? fit(row, reasons) : staple(x.card.edhrec_rank, reasons);
       if (jobs.length && (x.card.cmc || 0) <= 2) { score += 5; reasons.push({ k: "cheap" }); }
       if ((x.card.cmc || 0) >= 6 && !pieces.length && !jobs.includes("finishers")) { score -= 10; reasons.push({ k: "heavy", n: x.card.cmc }); }

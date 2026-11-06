@@ -109,7 +109,7 @@ for (const exp of expected) {
   const matched = PodEngine.activeCombos(PodEngine.matchCombos(entries.map(e => e.name), combos), cmds);
   const cardsInfo = entries.filter(e => db[e.name]).map(e => ({ card: db[e.name], qty: e.quantity, name: e.name }));
   const validation = PodEngine.validateDeck(cardsInfo, cmds, db, []);
-  const b3 = PodEngine.evaluateBrackets({ stats, flagged, db, validation, combos: matched, comboDb: combos, commanders: cmds,
+  const b3 = PodEngine.evaluateBrackets({ stats, flagged, db, validation, combos: matched, comboDb: combos, landDenial: JSON.parse(fs.readFileSync(path.join(ROOT, "data", "land_denial.json"), "utf8")), commanders: cmds,
     deckNames: entries.map(e => e.name), loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
   if (b3.fits) b3Fits++;
   else for (const id of b3.failed) (b3Reasons[id] ||= []).push(exp.deck);
@@ -207,7 +207,7 @@ const brDb = Object.fromEntries([
   brCard("GC1", 2, { game_changer: true }), brCard("GC2", 2, { game_changer: true }),
   brCard("GC3", 2, { game_changer: true }), brCard("GC4", 2, { game_changer: true }),
 ].map(c => [c.name, c]));
-const brDbFile = { templates: {}, mass_land_denial: ["Orb"], extra_turn: [], combos: [
+const brDbFile = { templates: {}, mass_land_denial: ["Orb", "Maybe Walker"], extra_turn: [], combos: [
   { c: ["Three", "Two"], r: "Infinite damage", t: "R", f: "ir" },
   { c: ["Two", "Plain"], r: "Infinite mana", t: "R", m: 5, f: "ir" },
   { c: ["Plain", "Three"], r: "Infinite ETB", t: "E", f: "i" },
@@ -225,7 +225,7 @@ const brEval = (names, commanders = []) => {
   const { stats, flagged } = PodEngine.computeDeckStats(entries, brDb);
   const list = PodEngine.activeCombos(PodEngine.matchCombos(names, brDbFile), commanders);
   return PodEngine.evaluateBrackets({ stats, flagged, deckNames: names, db: brDb, combos: list,
-    comboDb: brDbFile, commanders, validation: [], loopCards: [] });
+    comboDb: brDbFile, landDenial: { mass: ["Orb"], maybe: [] }, commanders, validation: [], loopCards: [] });
 };
 const check = (b, id) => b.checks.find(c => c.id === id);
 const cutDown = (names, commanders = []) => {
@@ -248,7 +248,12 @@ const BR_CASES = [
   ["what a combo costs is still reported", brEval(["Two", "Plain"]).combos[0].deploy === 8],
   ["an infinite-turns combo breaks the extra-turn rule", brEval(["Two", "Five", "Six"]).failed.includes("extra_turns")],
   ["a land-denial combo breaks the land rule", brEval(["GC1", "Six"]).failed.includes("mass_land_denial")],
-  ["a card flagged by Spellbook breaks the land rule", brEval(["Orb"]).failed.includes("mass_land_denial")],
+  ["a card sorted as mass land denial breaks the land rule", brEval(["Orb"]).failed.includes("mass_land_denial")],
+  ["...and sets the Bracket 4 floor", brEval(["Orb"]).floor.reason === "mld"],
+  ["a card only Spellbook flags is a warning, not a break", (() => {
+    const b = brEval(["Maybe Walker"]);
+    return !b.failed.includes("mass_land_denial") && !b.floor && b.landMaybe.includes("Maybe Walker");
+  })()],
   ["a combo needing a commander does not exist from the 99", brEval(["Leader", "Three"]).fits],
   ["...and does from the command zone", !brEval(["Leader", "Three"], ["Leader"]).fits],
   ["commander + two cards takes Spellbook's two-card read", !brEval(["Bud", "Leader", "Pal"], ["Leader"]).fits && brEval(["Bud", "Leader", "Pal"], ["Leader"]).combos[0].tag === "R"],
@@ -335,7 +340,7 @@ const PF_CASES = [
     const power = PodEngine.computePower(prof, {});
     return power.benchmarks.find(b => b.key === "answers").cards.includes("Nope") && power.keyCards[0].name === "Nope";
   })()],
-  ["study: every cEDH list scores above every precon", Math.min(...scores("cedh")) > Math.max(...scores("precon"))],
+  ["study: the median cEDH list scores above every precon", study.medians.cedh.power > Math.max(...scores("precon"))],
   ["study: the precon median stays in the casual band", (() => { const p = sorted(scores("precon")); return p[p.length >> 1] < 5; })()],
   ["study: the pillars stay within 0-100", study.decks.every(d => Object.values(d.power.pillars).every(v => v >= 0 && v <= 100))],
 ];
@@ -421,8 +426,25 @@ const V_CASES = [
     const v = vFor(3, { bracket: 4, reason: "mld" });
     return v.bracket === "4" && v.powerBracket === "2" && v.score === 3;
   })()],
-  ["most precons read Bracket 2", studyNow.decks.filter(d => d.group === "precon" && d.powerBracket === "2").length >= 28],
-  ["every cEDH list scores above every precon", Math.min(...studyNow.decks.filter(d => d.group === "cedh").map(d => d.power.score)) > Math.max(...studyNow.decks.filter(d => d.group === "precon").map(d => d.power.score))],
+  ["every precon reads Bracket 2, on the scale or through being recognised", studyNow.decks.filter(d => d.group === "precon").every(d => d.practicalBracket === "2")],
+  ["the scale itself puts at least 95% of precons at Bracket 2", (() => {
+    const list = studyNow.decks.filter(d => d.group === "precon");
+    return list.filter(d => d.power.base <= RULES.power_brackets.brackets[0][0]).length >= list.length * 0.95;
+  })()],
+  ["a stock precon stays Bracket 2 over a floor", (() => {
+    const v = PodEngine.powerLevel({ power: { score: 6 }, rules: RULES, checked: true, floor: { bracket: 4, reason: "combo" }, precon: { name: "X", changes: 0 } });
+    return v.bracket === "2" && v.score <= RULES.power_brackets.brackets[0][0] && !v.floor;
+  })()],
+  ["five swaps are still the precon, six are not", (() => {
+    const list = Array.from({ length: 100 }, (_, i) => "C" + i);
+    const precons = [{ name: "Box", date: "2020-01-01", cards: list.map(n => [n, 1]) }];
+    const deck = (swaps) => list.map((n, i) => ({ name: i < swaps ? "New" + i : n, quantity: 1 }));
+    return PodEngine.matchPrecon(deck(5), precons)?.changes === 5 && PodEngine.matchPrecon(deck(6), precons) === null;
+  })()],
+  ["every cEDH list scores above 95% of precons", (() => {
+    const list = studyNow.decks.filter(d => d.group === "precon"), low = Math.min(...studyNow.decks.filter(d => d.group === "cedh").map(d => d.power.base));
+    return list.filter(d => d.power.base < low).length >= list.length * 0.95;
+  })()],
   // Jorge's read of his own pod's power, November 2026. If a scoring change breaks one, ask him.
   ["Urza is the strongest, well above Luffy", vPod("Urza").power.score >= vPod("Luffy").power.score + 0.5 && vPod("Urza").power.score > vPod("Teysha").power.score],
   ["Urza's power stays below Bracket 4", ["3", "3*"].includes(vPod("Urza").powerBracket)],

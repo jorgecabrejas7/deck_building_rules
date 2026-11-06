@@ -7,6 +7,10 @@ import { $, esc } from './helpers.js';
 export function renderInput() {
   const t = T();
   $('inputTitle').textContent = t.inputTitle;
+  $('loadT').textContent = t.loadT;
+  $('heroX').textContent = t.heroX;
+  $('heroCta').textContent = t.heroCta;
+  $('heroScroll').textContent = t.heroScroll;
   $('deckText').placeholder = t.inputPh;
   $('deckText').setAttribute('aria-label', t.inputAria);
   $('tryLabel').textContent = t.tryLabel;

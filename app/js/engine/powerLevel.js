@@ -5,8 +5,10 @@
 
 // checked: false until the combos and salt ratings have loaded.
 // floor: from evaluateBrackets, when a card or combo sets a minimum bracket regardless of power.
-export function powerLevel({ power, rules, checked, floor = null }) {
+// precon: from matchPrecon, when the deck is a stock precon: Bracket 2, whatever else it holds.
+export function powerLevel({ power, rules, checked, floor = null, precon = null }) {
+  if (precon) return { score: Math.min(power.score, rules.power_brackets.brackets[0][0]), bracket: "2", powerBracket: "2", floor: null, precon, pending: !checked };
   const powerBracket = rules.power_brackets.brackets.find(([top]) => power.score <= top)[1];
   const bracket = floor && parseFloat(powerBracket) < floor.bracket ? String(floor.bracket) : powerBracket;
-  return { score: power.score, bracket, powerBracket, floor, pending: !checked };
+  return { score: power.score, bracket, powerBracket, floor, precon: null, pending: !checked };
 }

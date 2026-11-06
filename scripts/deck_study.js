@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * The deck study: runs the app's own engine over the 36 precons, the pod's decks
+ * The deck study: runs the app's own engine over every precon, the pod's decks
  * and the cEDH anchors, and writes data/deck_study.json for the app and the report.
  * It answers "what puts a deck inside or outside the pod?" by showing which
  * measures separate the groups (rank AUC: 0.5 = no separation, 1 = perfect).
@@ -34,21 +34,13 @@ const RULES = read("rules/pod_rules.json");
 const comboDb = read("data/combos.json");
 const saltDb = read("data/salt.json");
 const cardTags = E.indexCardTags(read("data/card_tags.json"));
+const landDenial = read("data/land_denial.json");
+const precons = read("data/precons.json").decks;
 const labels = fs.existsSync(path.join(ROOT, "data/pod_labels.json")) ? read("data/pod_labels.json") : {};
 
 // ---- the decks ----
-// Wizards' lists tag the reprinted staples by product ("Sol Ring Lorwyn") and use curly apostrophes.
-const stapleName = (n) => n.replace(/^(Sol Ring|Arcane Signet|Command Tower) .+$/, "$1").replace(/’/g, "'");
-function preconDecks() {
-  const dir = path.join(ROOT, "out", "precon_decks");
-  const out = [];
-  for (const f of fs.readdirSync(dir).filter(x => x.endsWith(".report.json")).sort()) {
-    for (const d of JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")).decks || [])
-      out.push({ id: "precon:" + d.deck_title, name: d.deck_title, group: "precon",
-        parsed: { entries: d.cards.map(c => ({ name: stapleName(c.name), quantity: c.quantity })), commanders: [] } });
-  }
-  return out;
-}
+const preconDecks = () => precons.map(d => ({ id: "precon:" + d.set + ":" + d.name, name: d.name, group: "precon",
+  parsed: { entries: d.cards.map(([name, quantity]) => ({ name, quantity })), commanders: d.commanders } }));
 const fromText = (d, group) => ({ id: group + ":" + (d.id ?? d.name), name: d.name, group, url: d.url,
   podId: d.id, parsed: E.parseDecklist(d.decklist) });
 const decks = [
@@ -73,7 +65,10 @@ if (missing.length) {
   fs.writeFileSync(NOT_FOUND_PATH, JSON.stringify([...notFound].sort(), null, 0));
 }
 if (notFound.size) console.log(`not on Scryfall: ${[...notFound].join("; ")}`);
-const unpriced = allNames.filter(n => cards[n] && cards[n].price >= 1 && !cards[n].cheapest);
+// Only the pod's rules read the cheapest printing, and 198 precons would take Scryfall's rate limit
+// over an hour. shortcut: precon prices here are default printings, so their price medians run a little high.
+const pricedNames = [...new Set(decks.filter(d => d.group !== "precon").flatMap(d => d.parsed.entries.map(e => e.name)))];
+const unpriced = pricedNames.filter(n => cards[n] && cards[n].price >= 1 && !cards[n].cheapest);
 if (unpriced.length) {
   console.log(`finding cheapest printing of ${unpriced.length} cards ...`);
   let tick = 0;
@@ -123,12 +118,12 @@ async function study(d) {
   const cardsInfo = resolved.map(e => ({ card: cards[e.name], qty: e.quantity, name: e.name, cls: E.classifyCard(cards[e.name]) }));
   const validation = E.validateDeck(cardsInfo, commanders, cards, []);
   const bracket = E.evaluateBrackets({ stats, flagged, db: cards, validation, commanders, deckNames: names,
-    combos, comboDb, loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
+    combos, comboDb, landDenial, loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
   const profile = E.computeProfile({ cardsInfo, stats, combos: bracket.combos, commanders, cardTags });
   const salt = E.saltScore(names, saltDb);
   const synergy = E.synergyScore({ cardsInfo, commanders, table: await synergyTable(commanders) });
   const power = E.computePower(profile, stats, salt);
-  const level = E.powerLevel({ power, rules: RULES, checked: true, floor: bracket.floor });
+  const level = E.powerLevel({ power, rules: RULES, checked: true, floor: bracket.floor, precon: E.matchPrecon(d.parsed.entries, precons) });
   const verdict = ev.tier === "above" ? "out" : "in";
   return { id: d.id, name: d.name, group: d.group, url: d.url, podId: d.podId, commanders,
     cards: stats.total_cards, missing: d.parsed.entries.length - resolved.length,
@@ -137,7 +132,7 @@ async function study(d) {
     bracket: { fits: bracket.fits, checklist: bracket.checklist, estimate: bracket.estimate, failed: bracket.failed },
     profile: { ...profile, ledger: undefined }, salt: { total: salt.total, average: salt.average, top: salt.top.slice(0, 3) },
     synergy: synergy.status === "done" ? { coverage: synergy.coverage, average: synergy.average, offPlan: synergy.offPlan } : null,
-    power: { score: power.score, raw: power.raw, pillars: power.pillars }, metrics: power.metrics };
+    power: { score: power.score, base: power.base, raw: power.raw, pillars: power.pillars }, metrics: power.metrics };
 }
 
 const results = [];
@@ -197,21 +192,22 @@ const MEASURES = {
   points: d => d.points,
 };
 const group = (fn) => results.filter(fn);
-const precons = group(d => d.group === "precon");
+const preconResults = group(d => d.group === "precon");
 const pod = group(d => d.group === "pod");
 const cedh = group(d => d.group === "cedh");
 const podOut = pod.filter(d => (d.label || d.verdict) === "out");
 const podIn = pod.filter(d => (d.label || d.verdict) === "in");
 const comparisons = Object.entries(MEASURES).map(([key, fn]) => ({ key,
-  medians: { precon: median(precons.map(fn)), podIn: median(podIn.map(fn)), podOut: median(podOut.map(fn)), cedh: median(cedh.map(fn)) },
-  precon_vs_pod: auc(precons.map(fn), pod.map(fn)),
+  medians: { precon: median(preconResults.map(fn)), podIn: median(podIn.map(fn)), podOut: median(podOut.map(fn)), cedh: median(cedh.map(fn)) },
+  precon_vs_pod: auc(preconResults.map(fn), pod.map(fn)),
   podIn_vs_podOut: auc(podIn.map(fn), podOut.map(fn)),
   pod_vs_cedh: auc(pod.map(fn), cedh.map(fn)),
 }));
 
-const trimmed = results.map(({ metrics, ...d }) => d);
+// The app only reads the groups' medians, computed above, so a precon keeps just its reading.
+const trimmed = results.map(({ metrics, profile, bracket, ...d }) => (d.group === "precon" ? d : { ...d, profile, bracket }));
 const out = { salt_updated: saltDb.updated, combos_updated: comboDb.updated, labelled: Object.keys(labels).length,
-  groups: { precon: precons.length, podIn: podIn.length, podOut: podOut.length, cedh: cedh.length },
+  groups: { precon: preconResults.length, podIn: podIn.length, podOut: podOut.length, cedh: cedh.length },
   medians: Object.fromEntries(["precon", "pod", "cedh"].map(g => [g, Object.fromEntries(Object.entries(MEASURES).map(([k, fn]) => [k, median(group(d => d.group === g).map(fn))]))])),
   comparisons, decks: trimmed };
 fs.writeFileSync(path.join(ROOT, "data", "deck_study.json"), JSON.stringify(out, null, 1));
@@ -220,7 +216,7 @@ if (process.argv.includes("--metrics")) {
   const quant = (xs, q) => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(q * (s.length - 1))]; };
   for (const k of Object.keys(results[0].metrics)) {
     const of = (l) => l.map(d => d.metrics[k]).filter(x => typeof x === "number");
-    console.log(k.padEnd(16), "precon p10", String(quant(of(precons), 0.1)).padEnd(6), "med", String(median(of(precons))).padEnd(6),
+    console.log(k.padEnd(16), "precon p10", String(quant(of(preconResults), 0.1)).padEnd(6), "med", String(median(of(preconResults))).padEnd(6),
       "pod med", String(median(of(pod))).padEnd(6), "cedh med", median(of(cedh)));
   }
 }
@@ -229,6 +225,6 @@ console.log("\n-- pod --");
 for (const d of [...pod].sort((a, b) => b.power.score - a.power.score)) console.log(line(d));
 console.log("\n-- cEDH anchors --");
 for (const d of cedh) console.log(line(d));
-const pw = precons.map(d => d.power.score);
+const pw = preconResults.map(d => d.power.score);
 console.log(`\nprecons: power min ${Math.min(...pw)} median ${median(pw)} max ${Math.max(...pw)} | cEDH min ${Math.min(...cedh.map(d => d.power.score))}`);
 console.log("wrote data/deck_study.json");

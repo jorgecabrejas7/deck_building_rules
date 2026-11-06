@@ -44,7 +44,7 @@ function table(decks, t) {
       (on ? ' <span aria-hidden="true">' + (dir < 0 ? '▼' : '▲') + '</span>' : '') + '</button></th>';
   };
   const ref = (label, m) => '<tr class="pod-ref"><th scope="row">' + esc(label) + '</th><td></td>' +
-    ['power', 'points', null, 'salt_total', 'synergy_coverage', 'price'].map(k => {
+    ['points', 'power', null, 'salt_total', 'synergy_coverage', 'price'].map(k => {
       const v = k && m[k];
       return '<td class="mono num">' + (typeof v !== 'number' ? '' : k === 'price' ? '€' + Math.round(v) : k === 'synergy_coverage' ? Math.round(v) + '%' : k === 'points' ? v : v.toFixed(1)) + '</td>';
     }).join('') + '<td></td></tr>';

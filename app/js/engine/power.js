@@ -50,8 +50,9 @@ const UPGRADED = { pricey: 10, medianRank: 5000, bonus: 0.5, floor: 4.1, onlyBel
 const isUpgraded = ({ upgrade }) => !!upgrade && upgrade.pricey >= UPGRADED.pricey &&
   upgrade.medianRank !== null && upgrade.medianRank <= UPGRADED.medianRank;
 
-// raw score -> 1-10. Set from the study: stock precons low, cEDH lists at the top.
-const CURVE = [[0, 1.5], [10, 2.6], [20, 3.8], [30, 4.8], [40, 5.9], [55, 7.4], [70, 9.5], [85, 10], [100, 10]];
+// raw score -> 1-10, fitted on the 198 precons: precons are Bracket 2, so the top of that
+// bracket (4.0) sits at their 97th percentile, raw 24. cEDH lists sit at the top.
+const CURVE = [[0, 1.5], [10, 2.6], [24, 4], [30, 4.8], [40, 5.9], [55, 7.4], [70, 9.5], [85, 10], [100, 10]];
 
 function toScale(raw) {
   for (let i = 1; i < CURVE.length; i++) {
@@ -111,7 +112,7 @@ export function computePower(profile, stats, salt = null) {
   const base = toScale(raw);
   const score = isUpgraded(profile) && base < UPGRADED.onlyBelow
     ? Math.min(Math.max(base + UPGRADED.bonus, UPGRADED.floor), UPGRADED.onlyBelow) : base;
-  return { score: Math.round(score * 10) / 10, upgraded: isUpgraded(profile), raw: Math.round(raw * 10) / 10, pillars,
+  return { score: Math.round(score * 10) / 10, base: Math.round(base * 10) / 10, upgraded: isUpgraded(profile), raw: Math.round(raw * 10) / 10, pillars,
     metrics, benchmarks, keyCards, fingerprint: fingerprint(profile, metrics, placed, placedInfo, info) };
 }
 

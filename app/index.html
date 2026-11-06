@@ -75,10 +75,23 @@ window.addEventListener('error', function (e) {
 
   <div id="banner" aria-live="polite"></div>
 
+  <section id="hero" class="hero-stage" hidden aria-labelledby="inputTitle">
+    <div class="hero-pin">
+      <div class="hero-tint" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <h1 id="inputTitle" class="hero-title"></h1>
+        <p id="heroX" class="hero-sub"></p>
+        <button id="heroCta" type="button" class="hero-cta"></button>
+      </div>
+      <div class="hero-scene" aria-hidden="true"><div id="heroRing" class="hero-ring"></div></div>
+      <p id="heroScroll" class="hero-scroll" aria-hidden="true"></p>
+    </div>
+  </section>
+
   <div id="tab-load" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-load">
     <div class="load">
       <div class="load-head">
-        <h2 id="inputTitle" class="load-title"></h2>
+        <h2 id="loadT" class="load-title"></h2>
         <p id="loadSub" class="load-sub"></p>
       </div>
       <div class="input-panel">
