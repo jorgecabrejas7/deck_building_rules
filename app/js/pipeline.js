@@ -14,8 +14,11 @@ import { getSynergy } from './synergy.js';
 // loads gets their own deck, whichever one Scryfall answers first.
 let latestRun = 0;
 
-export async function analyze() {
+// fromLink: the opening of a #d= link. Any other analysis is the visitor's own, so saving resumes.
+export async function analyze(fromLink = false) {
   const run = ++latestRun;
+  if (!fromLink && state.shared) { state.shared = false; history.replaceState(null, '', location.pathname + location.search); }
+  if (!state.restoring) state.shareBad = false;
   const text = $('deckText').value;
   const det = PodEngine.detectInput(text);
   state.busy = true; state.error = null; renderInput();

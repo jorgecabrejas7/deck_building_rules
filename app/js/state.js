@@ -18,6 +18,7 @@ export function persistCache(){ try { localStorage.setItem('pdc_cards_v3', JSON.
 // tab, table-mode lists); results are re-derived by re-running the analysis.
 const SESSION_KEY = 'pdc_session_v1';
 export function saveSession(){
+  if (state.shared) return; // a deck opened from a link never replaces the visitor's own
   const ta = document.getElementById('deckText');
   try { localStorage.setItem(SESSION_KEY, JSON.stringify({
     deckText: ta ? ta.value : '', arch: state.arch, tab: state.tab, view: state.view,
@@ -36,6 +37,9 @@ export const state = {
   lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
   arch: 'auto', cf: 'all', curveBin: null, hl: null, openArch: null, tab: 'load', view: 'summary',
   restoring: false, // analyzing the saved deck behind the landing, without leaving it
+  shared: false,     // showing a deck from a #d= link: nothing saves until the visitor analyzes their own
+  shareBad: false,   // the #d= link could not be read
+  linkCopied: false,
   deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false, add: '', hits: null },
   deck: null,        // {entries, commanders, deckName}
   cmdPick: null,     // user-chosen commander name(s); null = auto-detect

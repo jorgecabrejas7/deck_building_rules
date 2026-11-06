@@ -1,6 +1,7 @@
 import { RULES } from '../rules.js';
 import { state } from '../state.js';
-import { COMBO_TAGS } from '../engine/index.js';
+import { COMBO_TAGS, deckFingerprint, encodeShare } from '../engine/index.js';
+import { deckToText } from '../advice.js';
 import { T } from '../i18n.js';
 import { MSG, EXTRA_PTS, dialName } from './constants.js';
 import { archName } from './helpers.js';
@@ -33,4 +34,18 @@ export function copyReport() {
   try { navigator.clipboard.writeText(lines.join('\n')); } catch (e) {}
   state.copied = true; renderHeader();
   setTimeout(() => { state.copied = false; renderHeader(); }, 1600);
+}
+
+export async function copyShareLink() {
+  if (!state.result) return;
+  // a pick left over from another deck must not travel with this one
+  const pick = state.cmdPick && state.cmdPick.key === deckFingerprint(state.deck.entries) ? state.cmdPick.names : null;
+  const link = encodeShare({ text: deckToText(state.deck), commanders: pick })
+    .then(code => new Blob([location.origin + location.pathname + location.search + '#d=' + code], { type: 'text/plain' }));
+  try {
+    // handing the clipboard a promise keeps Safari's user-gesture check happy across the async compress
+    await navigator.clipboard.write([new ClipboardItem({ 'text/plain': link })]);
+  } catch (e) { console.error(e); return; }
+  state.linkCopied = true; renderHeader();
+  setTimeout(() => { state.linkCopied = false; renderHeader(); }, 1600);
 }

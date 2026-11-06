@@ -30,7 +30,7 @@ import { renderCurve } from './ui/curve.js';
 import { renderGuide } from './ui/guide.js';
 import { renderPod } from './ui/pod.js';
 import { openHow, closeHow } from './ui/how.js';
-import { copyReport } from './ui/report.js';
+import { copyReport, copyShareLink } from './ui/report.js';
 import { initHelpPopovers } from './ui/popover.js';
 import { analyze } from './pipeline.js';
 import { initHero } from './ui/hero.js';
@@ -135,6 +135,9 @@ const __boot = () => {
   $('esBtn').onclick = () => { state.lang = 'es'; store.lang = 'es'; renderAll(); };
   $('enBtn').onclick = () => { state.lang = 'en'; store.lang = 'en'; renderAll(); };
   $('copyBtn').onclick = copyReport;
+  $('shareBtn').onclick = copyShareLink;
+  // a link pasted into an open tab only changes the hash, so boot again to read it
+  addEventListener('hashchange', () => { if (location.hash.startsWith('#d=')) location.reload(); });
   $('howBtn').onclick = openHow;
   $('howModal').onclick = (e) => { if (e.target === $('howModal')) closeHow(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHow(); });
@@ -183,13 +186,31 @@ const __boot = () => {
       state.tableTexts = [0, 1, 2, 3].map(i => typeof sess.tableTexts[i] === 'string' ? sess.tableTexts[i] : '');
   }
   history.scrollRestoration = 'manual';
+  // raised before the first render, which saves the session
+  state.shared = location.hash.startsWith('#d=');
   renderAll();
   // the saved deck is analyzed behind the landing, so Informe is ready and opens where it was left
-  if (sess && typeof sess.deckText === 'string' && sess.deckText.trim()) {
+  const restoreSaved = () => {
+    if (!sess || typeof sess.deckText !== 'string' || !sess.deckText.trim()) return;
     state.restoring = true;
     if (VIEW_KEYS.includes(sess.view)) state.view = sess.view;
     analyze().finally(() => { state.restoring = false; });
-  }
+  };
+  if (!state.shared) { restoreSaved(); return; }
+  PodEngine.decodeShare(location.hash.slice(3)).then(deck => {
+    if (!deck) {
+      state.shared = false; state.shareBad = true;
+      history.replaceState(null, '', location.pathname + location.search);
+      restoreSaved();
+      renderAll();
+      return;
+    }
+    $('deckText').value = deck.text;
+    state.arch = 'auto';
+    // the key ties the pick to this deck, and only the list travels
+    state.cmdPick = deck.commanders && { key: PodEngine.deckFingerprint(PodEngine.parseDecklist(deck.text).entries), names: deck.commanders };
+    analyze(true);
+  });
 };
 if (document.readyState !== 'loading') __boot();
 else window.addEventListener('DOMContentLoaded', __boot);

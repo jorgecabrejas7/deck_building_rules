@@ -8,6 +8,8 @@ export function renderInput() {
   $('inputTitle').textContent = t.inputTitle;
   $('loadT').textContent = t.loadT;
   $('heroX').textContent = t.heroX;
+  $('heroNotice').hidden = !state.shareBad;
+  $('heroNotice').textContent = t.shareBad;
   $('heroCta').textContent = t.heroCta;
   $('heroScroll').textContent = t.heroScroll;
   $('deckText').placeholder = t.inputPh;
