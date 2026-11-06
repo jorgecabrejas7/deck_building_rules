@@ -13,7 +13,8 @@ git archive HEAD app rules data | tar -x -C "$TMP"
 rm -f "$TMP/data/pod_decks.sqlite"
 
 REL=$(date +%Y%m%d-%H%M%S)
-rsync -a --chmod=D755,F644 --link-dest=/srv/pod-checker/site/ "$TMP/" "$HOST:/srv/pod-checker/releases/$REL/"
+# compared by content: git archive stamps every file with the commit time, which would defeat the hard links
+rsync -rlc --chmod=D755,F644 --link-dest=/srv/pod-checker/site/ "$TMP/" "$HOST:/srv/pod-checker/releases/$REL/"
 ssh "$HOST" bash -s -- "$REL" <<'REMOTE'
 set -euo pipefail
 cd /srv/pod-checker
