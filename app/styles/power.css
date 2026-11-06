@@ -490,3 +490,5 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 }
 /* the landing's word on a deck link that could not be read: the stage is dark in both themes */
 .hero-notice{margin:0;max-width:46ch;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-md);background:oklch(0.3 0.08 40 / .85);color:oklch(0.95 0.02 60);font-size:var(--fs-caption);line-height:1.4}
+.sum-share{align-self:flex-start;min-height:44px;padding:0 var(--sp-5);border:1.5px solid var(--ink);border-radius:var(--r-pill);background:none;color:var(--ink);font:inherit;font-weight:500;cursor:pointer}
+.sum-share:disabled{opacity:.6;cursor:progress}
