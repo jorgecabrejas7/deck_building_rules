@@ -14,6 +14,7 @@
  *   (j) the goldfish simulation and draw odds.
  *   (k) the power level, kept apart from the pod verdict, and Jorge's read of his decks.
  *   (l) how much each card does for its deck.
+ *   (n) what-if edits to the analyzed deck.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -512,5 +513,66 @@ const cvBad = CV_CASES.filter(([, ok]) => !ok);
 for (const [label] of cvBad) console.log(`CARD VALUE FAIL: ${label}`);
 console.log(`Card values: ${CV_CASES.length - cvBad.length}/${CV_CASES.length} correct`);
 if (cvBad.length) fails++;
+
+// (n) what-if edits, on small decks.
+const edDeck = () => ({ deckName: "T", commanders: ["Boss", "Pal"], entries: [{ name: "Boss", quantity: 1 }, { name: "Pal", quantity: 1 }, { name: "Forest", quantity: 3 }, { name: "Rock", quantity: 1 }] });
+const edQty = (d, n) => (d.entries.find(e => e.name === n) || { quantity: 0 }).quantity;
+const edStart = edDeck();
+const edFig = { evalRes: { points: 4 }, stats: { total_price_eur: 9.5 }, level: { pending: false, bracket: "2*", score: 4.5 }, bracket: { pending: false, combos: [{}, {}] } };
+const ED_CASES = [
+  ["a basic with copies to spare loses one copy", edQty(PodEngine.removeCards(edStart, ["Forest"]), "Forest") === 2],
+  ["naming a card twice in a batch takes two copies", edQty(PodEngine.removeCards(edStart, ["Forest", "Forest"]), "Forest") === 1],
+  ["a batch can never take a card below zero", edQty(PodEngine.removeCards(edStart, ["Rock", "Rock"]), "Rock") === 0 && PodEngine.removeCards(edStart, ["Rock", "Rock"]).entries.length === 3],
+  ["the last copy leaves the list", !PodEngine.removeCards(edStart, ["Rock"]).entries.some(e => e.name === "Rock")],
+  ["a removed commander leaves the command zone, its partner stays", PodEngine.removeCards(edStart, ["Boss"]).commanders.join() === "Pal"],
+  ["removing and adding never touch the deck they were given", (PodEngine.removeCards(edStart, ["Forest", "Boss"]), PodEngine.addCard(edStart, "Forest"), JSON.stringify(edStart) === JSON.stringify(edDeck()))],
+  ["adding a new card appends one copy", edQty(PodEngine.addCard(edStart, "Mox"), "Mox") === 1],
+  ["adding a basic stacks it", edQty(PodEngine.addCard(edStart, "Forest"), "Forest") === 4 && PodEngine.addCard(edStart, "Forest").entries.length === 4],
+  ["basics and 'any number' cards stack, others do not", PodEngine.stacksInDeck({ type_line: "Basic Snow Land — Forest" }) && PodEngine.stacksInDeck({ type_line: "Creature — Rat", oracle_text: "A deck can have any number of cards named Relentless Rats." }) && !PodEngine.stacksInDeck({ type_line: "Artifact", oracle_text: "" })],
+  ["the diff counts copies, both ways", (() => {
+    const d = PodEngine.deckDiff(edStart, PodEngine.addCard(PodEngine.removeCards(edStart, ["Forest", "Forest", "Rock"]), "Mox"));
+    return d.added.length === 1 && d.added[0].name === "Mox" && d.removed.length === 2 && d.removed[0].name === "Forest" && d.removed[0].qty === 2;
+  })()],
+  ["remove then add again reads as no change", (() => {
+    const d = PodEngine.deckDiff(edStart, PodEngine.addCard(PodEngine.removeCards(edStart, ["Rock"]), "Rock"));
+    return !d.added.length && !d.removed.length;
+  })()],
+  ["a commander pick follows the edit, so it still matches the new list", (() => {
+    const next = PodEngine.removeCards(edStart, ["Rock"]);
+    const pick = PodEngine.carryPick({ key: PodEngine.deckFingerprint(edStart.entries), names: ["Pal"] }, edStart, next);
+    return pick.names.join() === "Pal" && pick.key === PodEngine.deckFingerprint(next.entries);
+  })()],
+  ["a pick loses a cut card, and goes back to detection when no one is left", (() => {
+    const key = PodEngine.deckFingerprint(edStart.entries), next = PodEngine.removeCards(edStart, ["Boss"]);
+    return PodEngine.carryPick({ key, names: ["Boss", "Pal"] }, edStart, next).names.join() === "Pal" && PodEngine.carryPick({ key, names: ["Boss"] }, edStart, next) === null;
+  })()],
+  ["a pick for another deck is left alone", (() => {
+    const stale = { key: "other", names: ["Boss"] };
+    return PodEngine.carryPick(stale, edStart, PodEngine.removeCards(edStart, ["Rock"])) === stale;
+  })()],
+  ["the bar's figures wait for the combo check", (() => {
+    const done = PodEngine.editFigures(edFig);
+    const wait = PodEngine.editFigures({ ...edFig, level: { ...edFig.level, pending: true }, bracket: { pending: true, combos: [] } });
+    return done.points === 4 && done.bracket === "2*" && done.power === 4.5 && done.combos === 2 && done.price === 9.5 && wait.points === 4 && wait.bracket === null && wait.power === null && wait.combos === null;
+  })()],
+  ["with its commander cut and no one to replace it, a real deck still reads end to end", (() => {
+    const entries = expected[0].cards.map(c => ({ name: c.name, quantity: c.quantity }));
+    const cmds = PodEngine.pickCommanders({ entries, commanders: [] }, db);
+    const cut = PodEngine.removeCards({ entries, commanders: cmds }, cmds);
+    const resolved = cut.entries.filter(e => db[e.name]);
+    const { stats, flagged } = PodEngine.computeDeckStats(resolved, db);
+    const cardsInfo = resolved.map(e => ({ card: db[e.name], qty: e.quantity, name: e.name, cls: PodEngine.classifyCard(db[e.name]) }));
+    const bracket = PodEngine.evaluateBrackets({ stats, flagged, db, validation: PodEngine.validateDeck(cardsInfo, [], db, []), commanders: [], deckNames: resolved.map(e => e.name),
+      combos: [], comboDb: combos, loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion, unresolved: 0 });
+    const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: bracket.combos, commanders: [] });
+    const level = PodEngine.powerLevel({ power: PodEngine.computePower(profile, stats, null), rules: RULES, checked: true, floor: bracket.floor, combos: bracket.combos, landMaybe: bracket.landMaybe, gameChangers: [] });
+    const values = PodEngine.cardValues({ cardsInfo, commanders: [], ledger: profile.ledger, combos: bracket.combos, table: null, whatIf: {} });
+    return !cut.commanders.length && stats.total_cards === 100 - cmds.length && !!level.bracket && values.length === cardsInfo.length;
+  })()],
+];
+const edBad = ED_CASES.filter(([, ok]) => !ok);
+for (const [label] of edBad) console.log(`EDIT FAIL: ${label}`);
+console.log(`What-if edits: ${ED_CASES.length - edBad.length}/${ED_CASES.length} correct`);
+if (edBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

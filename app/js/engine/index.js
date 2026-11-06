@@ -21,3 +21,4 @@ export { simulateGoldfish, drawOdds, atLeastOdds } from "./goldfish.js";
 export { powerLevel } from "./powerLevel.js";
 export { cardValues } from "./cardValue.js";
 export { matchPrecon } from "./precon.js";
+export { removeCards, addCard, stacksInDeck, deckDiff, carryPick, editFigures } from "./deckEdit.js";

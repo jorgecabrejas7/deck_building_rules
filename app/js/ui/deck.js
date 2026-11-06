@@ -4,6 +4,8 @@ import { T } from '../i18n.js';
 import { TYPES, TYPE_ORDER } from './constants.js';
 import { $, esc, eur, fill } from './helpers.js';
 import { ICON } from './reading.js';
+import { canEdit, removeFromDeck } from '../edits.js';
+import { addBoxHtml, bindAddBox } from './edits.js';
 
 // The whole deck, three ways of looking at it. The list stays put and the card you pick
 // opens beside it (on a phone, in a sheet), so reading one never loses your place.
@@ -88,6 +90,7 @@ function inspector(c, t) {
     (card.img_normal ? '<img class="dk-art" src="' + esc(card.img_normal) + '" alt="' + esc(short(c.name)) + '">' : '') +
     '<h3 class="dk-i-name">' + esc(short(c.name)) + '</h3>' +
     '<p class="dk-i-level">' + pips(c.level) + ' ' + esc(c.commander ? t.dkCommander : t['dkLevel_' + c.level]) + '</p>' +
+    '<button type="button" id="dkRemove" class="btn-outline dk-remove"' + (canEdit() ? '' : ' disabled') + '>' + esc(c.x.qty > 1 ? t.dkRemoveCopy : t.dkRemove) + '</button>' +
     (c.jobs.length ? '<h4>' + esc(t.dkDoes) + '</h4><ul class="dk-jobs">' + c.jobs.map(j => '<li>' + esc(t['dkJob_' + j]) + '</li>').join('') + '</ul>' : '') +
     (reasons.length ? '<h4>' + esc(t.dkWhy) + '</h4><ul class="dk-why">' + reasons.map(x => '<li>' + esc(reasonText(x, t)) + '</li>').join('') + '</ul>' : '') +
     '<dl class="dk-facts">' + fact(t.dkPtsCost, esc(pts)) +
@@ -124,6 +127,7 @@ export function renderDeck() {
       select('dkGroup', t.dkGroup, GROUPS.map(([k, l]) => [k, t[l]]), dv.group) +
       select('dkSort', t.dkSort, Object.entries(SORTS).map(([k, s]) => [k, t[s.label]]), dv.sort) +
       '<div class="seg-toggle-sm" role="group" aria-label="' + esc(t.dkView) + '">' + MODES.map(([k, l]) => seg(k, l)).join('') + '</div></div>' +
+      addBoxHtml(t) +
       (hint ? '<p class="dk-note">' + esc(hint) + '</p>' : '') + '</div>' +
     '<div class="dk-body"><div id="dkList" class="dk-list dk-mode-' + dv.mode + '"></div><aside id="dkInspect" class="dk-inspect panel" aria-live="polite"></aside></div>';
 
@@ -135,6 +139,11 @@ export function renderDeck() {
     el.innerHTML = inspector(c, t);
     el.classList.toggle('open', opened);
     for (const b of $('dkList').querySelectorAll('[data-card]')) b.setAttribute('aria-pressed', String(b.dataset.card === name));
+    el.querySelector('#dkRemove').onclick = () => {
+      // the last copy takes its sheet with it, rather than opening another card in its place
+      if (c.x.qty === 1) dv.open = false;
+      removeFromDeck([c.name]);
+    };
     const close = el.querySelector('.dk-close');
     close.onclick = () => {
       dv.open = false; el.classList.remove('open');
@@ -161,6 +170,7 @@ export function renderDeck() {
     if (shown.length) inspect(shown.some(c => c.name === dv.card) ? dv.card : shown[0].name, dv.open);
   };
   paintList();
+  bindAddBox();
 
   $('dkSearch').oninput = (e) => { dv.q = e.target.value; paintList(); };
   for (const b of $('view-deck').querySelectorAll('[data-level]')) b.onclick = () => { dv.level = +b.dataset.level || null; morph(renderDeck); };
