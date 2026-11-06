@@ -690,5 +690,44 @@ const avgBad = AVG_CASES.filter(([, ok]) => !ok);
 for (const [label] of avgBad) console.log(`AVERAGE FAIL: ${label}`);
 console.log(`Average deck: ${AVG_CASES.length - avgBad.length}/${AVG_CASES.length} correct`);
 if (avgBad.length) fails++;
+// budget: totals, honesty before the lookup, and what fetchCheapest keeps. Network stubbed.
+const bgCard = (name, price, extra = {}) => ({ name, price, cmc: 2, type_line: "Creature", oracle_text: "", ...extra });
+const bgInfo = (db) => Object.values(db).map(card => ({ name: card.name, qty: card.name === "Dear" ? 2 : 1, card }));
+const bgDb = Object.fromEntries([["Dear", 10], ["Flat", 3], ["Penny", 0.5], ["Dead", 2], ["None", null]].map(([n, p]) => [n, bgCard(n, p)]));
+const bgBefore = PodEngine.budgetTotals(bgInfo(bgDb));
+const bgFetch = globalThis.fetch;
+globalThis.fetch = async (url) => {
+  if (url.includes("Dead")) throw new Error("offline");
+  const eur = url.includes("Dear") ? ["2.00", "9.00"] : ["3.50"];
+  return { ok: true, status: 200, json: async () => ({ data: eur.map(e => ({ prices: { eur: e } })) }) };
+};
+await PodEngine.fetchCheapest(Object.keys(bgDb), bgDb);
+globalThis.fetch = bgFetch;
+const bgPartial = PodEngine.budgetTotals(bgInfo(bgDb));
+const bgDeadFailed = bgDb.Dead.cheapest === undefined;
+bgDb.Dead.cheapest = true;
+const bgAfter = PodEngine.budgetTotals(bgInfo(bgDb));
+const bgStats = PodEngine.computeDeckStats(Object.keys(bgDb).map(name => ({ name, quantity: name === "Dear" ? 2 : 1 })), bgDb).stats;
+const bgLegacy = PodEngine.budgetTotals(bgInfo({ Old: bgCard("Old", 4, { cheapest: true }) }));
+const BUDGET_CASES = [
+  ["before the lookup there is a default total and no saving", bgBefore.atDefault === 25.5 && bgBefore.atCheapest === null && bgBefore.saving === null && bgBefore.pending === 3],
+  ["fetchCheapest keeps the default and lowers the price", bgDb.Dear.price === 2 && bgDb.Dear.price_default === 10 && bgDb.Dear.cheapest === true],
+  ["no cheaper printing leaves the price and still records the default", bgDb.Flat.price === 3 && bgDb.Flat.price_default === 3],
+  ["a card under €1 is not looked up", bgDb.Penny.cheapest === undefined && bgDb.Penny.price_default === undefined],
+  ["a failed lookup keeps the saving hidden", bgDeadFailed && bgPartial.pending === 1 && bgPartial.saving === null],
+  ["the default total does not move with the lookup", bgPartial.atDefault === 25.5 && bgAfter.atDefault === 25.5],
+  ["totals and saving count copies", bgAfter.atCheapest === 9.5 && bgAfter.saving === 16],
+  ["pod points read the same cheapest price as the budget total", bgStats.total_price_eur === bgAfter.atCheapest],
+  ["unpriced cards stay out and are counted", bgAfter.unpriced === 1 && bgAfter.priciest.every(c => c.name !== "None")],
+  ["the priciest list sorts by current price and keeps the default", bgAfter.priciest[0].name === "Flat" && bgAfter.priciest.find(c => c.name === "Dear").priceDefault === 10],
+  ["a cached card without the field is flagged", bgLegacy.defaultUnknown === 1 && bgLegacy.atDefault === 4 && bgLegacy.saving === 0],
+  ["a card not looked up yet is pending, not flagged", bgBefore.defaultUnknown === 0],
+  ["the buy link searches the front face, encoded", PodEngine.cardmarketUrl("Fire & Ice's // Back").endsWith("searchString=Fire%20%26%20Ice's")],
+  ["the wants list has quantity and full name per line", PodEngine.cardmarketWants([{ qty: 2, card: { name: "A // B" } }, { qty: 1, card: { name: "C" } }]) === "2 A // B\n1 C"],
+];
+const bgBad = BUDGET_CASES.filter(([, ok]) => !ok);
+for (const [label] of bgBad) console.log(`BUDGET FAIL: ${label}`);
+console.log(`Budget: ${BUDGET_CASES.length - bgBad.length}/${BUDGET_CASES.length} correct`);
+if (bgBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

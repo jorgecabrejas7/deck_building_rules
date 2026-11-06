@@ -1,9 +1,10 @@
-import { cardValues } from '../engine/index.js';
+import { budgetTotals, cardValues, cardmarketUrl, cardmarketWants } from '../engine/index.js';
 import { state, store } from '../state.js';
 import { T } from '../i18n.js';
 import { TYPES, TYPE_ORDER } from './constants.js';
-import { $, esc, eur, fill } from './helpers.js';
-import { ICON } from './reading.js';
+import { $, announce, esc, eur, fill } from './helpers.js';
+import { ICON, fold, paint } from './reading.js';
+import { startCheapest } from '../pipeline.js';
 import { canEdit, removeFromDeck } from '../edits.js';
 import { addBoxHtml, bindAddBox } from './edits.js';
 
@@ -83,6 +84,9 @@ function face(c, t) {
 
 const reasonText = (r, t) => fill(t['dkR_' + r.k], { n: r.n, s: r.s, i: r.seenIn });
 
+const buyLink = (name, t) => '<a href="' + esc(cardmarketUrl(name)) + '" target="_blank" rel="noopener noreferrer" aria-label="' +
+  esc(fill(t.bgBuyCard, { c: short(name) })) + '">Cardmarket ' + ICON.open + '</a>';
+
 function inspector(c, t) {
   const { card } = c.x, r = state.result, salt = saltOf(c);
   const reasons = (c.commander ? [{ k: 'commander' }] : []).concat(c.reasons);
@@ -98,6 +102,7 @@ function inspector(c, t) {
     (reasons.length ? '<h4>' + esc(t.dkWhy) + '</h4><ul class="dk-why">' + reasons.map(x => '<li>' + esc(reasonText(x, t)) + '</li>').join('') + '</ul>' : '') +
     '<dl class="dk-facts">' + fact(t.dkPtsCost, esc(pts)) +
       fact(t.dkPrice, card.price != null ? eur(card.price) : '—') +
+      fact(t.bgBuy, buyLink(card.name, t)) +
       (salt ? fact(t.dkSalt, salt.toFixed(1)) : '') +
       (c.combos.length ? fact(t.dkCombos, '<a href="#combos" data-go="combos">' + c.combos.length + ' · ' + esc(t.dkSeeCombos) + ' →</a>') : '') + '</dl>' +
     (r.bracket.pending ? '<p class="dk-note">' + esc(t.dkCheckingCombos) + '</p>' : '');
@@ -106,6 +111,22 @@ function inspector(c, t) {
 function note(t) {
   const sd = state.synergyData;
   return sd && sd.loading ? t.dkLoading : sd && !sd.table ? t.dkNoData : '';
+}
+
+function budget(t) {
+  const b = budgetTotals(state.result.cardsInfo), fetching = state.fetchSt === 'fetching';
+  const total = (label, v) => '<div><dt>' + esc(label) + '</dt><dd>' + (v == null ? '—' : eur(v)) + '</dd></div>';
+  const line = (text) => '<p class="dk-note">' + esc(text) + '</p>';
+  const body = '<dl class="dk-b-totals">' + total(t.bgDefault, b.atDefault) + total(t.bgCheapest, b.atCheapest) + total(t.bgSaving, b.saving) + '</dl>' +
+    (b.pending ? '<div class="dk-b-action">' + line(fill(t.bgPending, { n: b.pending })) +
+      '<button type="button" id="bgFetch" class="btn-accent-sm"' + (fetching ? ' disabled' : '') + '>' + esc(t.fetchBtn + (fetching ? '…' : '')) + '</button></div>' : '') +
+    (b.defaultUnknown ? line(fill(t.bgUnknown, { n: b.defaultUnknown })) : '') +
+    (b.unpriced ? line(fill(t.bgUnpriced, { n: b.unpriced })) : '') + line(t.bgUnder) +
+    '<div><h3 class="dk-b-title">' + esc(t.bgPriciest) + '</h3><ol class="dk-b-list">' + b.priciest.map(c => '<li><span class="dk-b-name">' + esc(short(c.name)) +
+      (c.qty > 1 ? ' <small>×' + c.qty + '</small>' : '') + '</span><span class="dk-b-price">' +
+      (c.priceDefault > c.price ? '<s>' + eur(c.priceDefault) + '</s> ' : '') + eur(c.price) + '</span>' + buyLink(c.name, t) + '</li>').join('') + '</ol></div>' +
+    '<div class="dk-b-action">' + line(t.bgCopyX) + '<button type="button" id="bgCopy" class="btn-ghost-sm">' + esc(t.bgCopy) + '</button></div>';
+  return '<div class="rd-folds dk-budget">' + fold('budget', t.bgT, eur(b.atCheapest ?? b.atDefault), body) + '</div>';
 }
 
 const select = (id, label, options, value) => '<label class="arch-field dk-select"><span>' + esc(label) + '</span><select id="' + id + '" class="arch-select">' +
@@ -124,7 +145,7 @@ export function renderDeck() {
   const levelBtn = (l, label, n) => '<button type="button" class="rd-filter" data-lv="' + l + '" data-level="' + l + '" aria-pressed="' + ((dv.level || 0) === l) + '">' + esc(label) + ' <b>' + n + '</b></button>';
   const seg = (k, label) => '<button type="button" data-mode="' + k + '" class="' + (dv.mode === k ? 'active' : '') + '" aria-pressed="' + (dv.mode === k) + '">' + esc(t[label]) + '</button>';
   const hint = note(t);
-  $('view-deck').innerHTML = '<div class="part-head"><div><h2 class="part-title">' + esc(t.dkT) + '</h2><p class="part-sub">' + esc(t.dkX) + '</p></div></div>' +
+  paint($('view-deck'), '<div class="part-head"><div><h2 class="part-title">' + esc(t.dkT) + '</h2><p class="part-sub">' + esc(t.dkX) + '</p></div></div>' + budget(t) +
     '<div class="dk-controls"><div class="rd-filter-bar">' + levelBtn(0, t.dkAll, all.reduce((s, c) => s + c.x.qty, 0)) + LEVELS.map(l => levelBtn(l, t['dkLevel_' + l], count(l))).join('') + '</div>' +
       '<div class="dk-tools"><input id="dkSearch" type="search" class="cmd-search" placeholder="' + esc(t.dkSearch) + '" aria-label="' + esc(t.dkSearch) + '" value="' + esc(dv.q) + '">' +
       select('dkGroup', t.dkGroup, GROUPS.map(([k, l]) => [k, t[l]]), dv.group) +
@@ -132,7 +153,7 @@ export function renderDeck() {
       '<div class="seg-toggle-sm" role="group" aria-label="' + esc(t.dkView) + '">' + MODES.map(([k, l]) => seg(k, l)).join('') + '</div></div>' +
       addBoxHtml(t) +
       (hint ? '<p class="dk-note">' + esc(hint) + '</p>' : '') + '</div>' +
-    '<div class="dk-body"><div id="dkList" class="dk-list dk-mode-' + dv.mode + '"></div><aside id="dkInspect" class="dk-inspect panel" aria-live="polite"></aside></div>';
+    '<div class="dk-body"><div id="dkList" class="dk-list dk-mode-' + dv.mode + '"></div><aside id="dkInspect" class="dk-inspect panel" aria-live="polite"></aside></div>');
 
   const inspect = (name, opened) => {
     const c = all.find(x => x.name === name);
@@ -174,6 +195,17 @@ export function renderDeck() {
   };
   paintList();
   bindAddBox();
+
+  const fetchBtn = $('bgFetch');
+  // startCheapest flips to 'fetching' before its first await, so this repaint disables the button
+  if (fetchBtn) fetchBtn.onclick = () => { startCheapest(); renderDeck(); };
+  $('bgCopy').onclick = async (e) => {
+    const btn = e.currentTarget;
+    let msg = t.copied;
+    try { await navigator.clipboard.writeText(cardmarketWants(state.result.cardsInfo)); } catch (err) { msg = t.bgCopyFail; }
+    btn.textContent = msg; announce(msg);
+    setTimeout(() => { btn.textContent = t.bgCopy; }, 1600);
+  };
 
   $('dkSearch').oninput = (e) => { dv.q = e.target.value; paintList(); };
   for (const b of $('view-deck').querySelectorAll('[data-level]')) b.onclick = () => { dv.level = +b.dataset.level || null; morph(renderDeck); };
