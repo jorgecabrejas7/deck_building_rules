@@ -228,12 +228,6 @@ const brEval = (names, commanders = []) => {
     comboDb: brDbFile, landDenial: { mass: ["Orb"], maybe: [] }, commanders, validation: [], loopCards: [] });
 };
 const check = (b, id) => b.checks.find(c => c.id === id);
-const cutDown = (names, commanders = []) => {
-  const b = brEval(names, commanders);
-  const out = new Set(b.cuts.cards.map(c => c.card));
-  for (const c of b.cuts.choices) for (const n of c.from.slice(0, c.count)) out.add(n);
-  return brEval(names.filter(n => !out.has(n)), commanders);
-};
 const realMatch = (names, commanders = []) => PodEngine.activeCombos(PodEngine.matchCombos(names, combos), commanders);
 const consult = realMatch(["Thassa's Oracle", "Demonic Consultation"]);
 const BR_CASES = [
@@ -267,11 +261,6 @@ const BR_CASES = [
   ["nothing notable reads Bracket 2", brEval(["Plain"]).checklist === 2],
   ["Spellbook's read takes the strongest tag", brEval(["Two", "Three"]).estimate === "R" && brEval(["Plain"]).estimate === "E"],
   ["waiting on combos is pending, not a pass", PodEngine.evaluateBrackets({ stats: { game_changers: 0 }, flagged: {}, deckNames: [], db: {}, combos: null, comboDb: null, validation: [] }).pending],
-  ["the cut list always lands inside Bracket 3", [
-    ["Two", "Three"], ["Two", "Three", "Plain", "Five"], ["GC1", "GC2", "GC3", "GC4", "Six"],
-    ["Time A", "Time B", "Time C", "Orb"], ["Two", "Five", "Six", "Three", "GC1"],
-  ].every(names => cutDown(names).fits)],
-  ["the commander is the last card it cuts", brEval(["Leader", "Three"], ["Leader"]).cuts.cards.map(c => c.card).join() === "Three"],
   ["real DB: every combo has a known tag", combos.combos.every(c => PodEngine.COMBO_TAGS[c.t])],
   ["real DB: Oracle + Consultation is there, as a Ruthless win", consult.length === 1 && consult[0].win && consult[0].tag === "R" && !consult[0].infinite],
   ["real DB: flags Winter Orb as land denial and Time Warp as a turn", combos.mass_land_denial.includes("Winter Orb") && combos.extra_turn.includes("Time Warp")],

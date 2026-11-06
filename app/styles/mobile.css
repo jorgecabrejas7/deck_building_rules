@@ -32,10 +32,6 @@
   .adv-fold>summary{padding-inline:20px}
 
   /* the verdict stacks: sentence, then the number */
-  .verdict-hero{padding:var(--sp-6) var(--sp-5);border-radius:var(--r-lg)}
-  .vh-top{grid-template-columns:1fr;gap:var(--sp-4)}
-  .vh-power{justify-self:start}
-  .vh-action{width:100%;box-sizing:border-box;justify-content:center}
 
   /* dial rows: label, value and points on top, full-width meter below */
   .dial-row{grid-template-columns:1fr auto auto;gap:var(--sp-2) var(--sp-3)}
@@ -66,8 +62,8 @@
   .adv-disclosure summary,.adv-fold>summary,.cmd-chip,.cmd-search,.combo-link,.pod-sort,.tab-btn,.btn-primary,.btn-accent,.btn-accent-sm,.btn-outline,
   .btn-outline-accent,.btn-ghost-sm,.chip-dashed,.cf-btn,.link-btn,
   .comp-clear,.pill-clear,.btn-build,.seg-toggle button,.seg-toggle-sm button,
-  .modal-close,.price-pill,.valid-jump,.vh-action,.vh-bracket,.arch-field{min-height:44px}
-  .vh-bracket{display:flex;align-items:center}
+  .modal-close,.price-pill,.arch-field{min-height:44px}
+
   .icon-btn{width:44px;height:44px}
   .catHelp{width:22px;height:22px;font-size:var(--fs-caption);position:relative}
   .catHelp::after{content:"";position:absolute;inset:-11px}

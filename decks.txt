@@ -2,7 +2,7 @@ https://archidekt.com/decks/24946373/tidus_yunas_guardian - Tidus, Yuna's Guardi
 https://archidekt.com/decks/23950829/lightning_lone_commando_final_version - Lightning, Lone Commando
 https://archidekt.com/decks/23304171/sauron_updated_yeah - Sauron, the Dark Lord
 https://archidekt.com/decks/23501282/nekusar_mindrazer - Nekusar, the Mindrazer
-https://archidekt.com/decks/23734831/luffy - Luffy, the Man who'll necome Pirate King
+https://archidekt.com/decks/23734831/luffy - Luffy, the Man who'll Become Pirate King
 https://archidekt.com/decks/23590689/betor_wincon_tribal - Betor, Ancestor's Voice
 https://archidekt.com/decks/23614002/teysha_karlov_yosh - Teysha Karlov
 https://archidekt.com/decks/23213049/oloro_paquiitooo - Oloro, Ageless Acetic
@@ -18,3 +18,6 @@ https://archidekt.com/decks/13763502/dragonessss_xulos - Tiamat
 https://archidekt.com/decks/25059265/ulalek_fused_atrocity - Ulalek, Fused Atrocity
 https://archidekt.com/decks/21542017/prismary_artistry_precon - Rootha, Mastering the Moment
 https://archidekt.com/decks/25058617/frodo_sam - Frodo & Sam
+https://archidekt.com/decks/24773365/helga - Helga, Skittish Seer
+https://archidekt.com/decks/26870973/el_modofokin_kwain - Kwain, Itinerant Meddler
+https://archidekt.com/decks/25122050/bria_the_nutria_2 - Bria, Riptide Rogue

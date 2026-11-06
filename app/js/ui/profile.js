@@ -56,7 +56,7 @@ function ladder(r, t) {
   const x = (v) => ((v - 1) / 9 * 100).toFixed(1) + '%';
   const seg = steps.map(([top, label], i) => {
     const from = i ? steps[i - 1][0] : 1;
-    return '<li style="left:' + x(from) + ';width:calc(' + x(top) + ' - ' + x(from) + ')"' + (label === r.level.powerBracket ? ' class="on"' : '') + '><span>' + esc(label) + '</span></li>';
+    return '<li data-step="' + i + '" style="left:' + x(from) + ';width:calc(' + x(top) + ' - ' + x(from) + ')"' + (label === r.level.powerBracket ? ' class="on"' : '') + '><span>' + esc(label) + '</span></li>';
   }).join('');
   const refs = GROUPS.map(g => [t['pfRef_' + g], med(g, 'power')]).filter(([, m]) => m !== null)
     .map(([l, m]) => '<span class="pw-ref" style="left:' + x(m) + '"><i></i>' + esc(l) + ' ' + m + '</span>').join('');
@@ -145,7 +145,7 @@ function value(k, r, t) {
   // no combo check or salt ratings yet: the 0 behind this value isn't a reading
   const none = (k === 'wins' && !r.profile.wins.checked) || (k === 'salt' && !r.salt);
   const refs = GROUPS.map(g => [t['pfRef_' + g], med(g, 'pillar_' + k)]).filter(([, m]) => m !== null);
-  return '<article class="rd-value"><div class="rd-value-read"><h4>' + esc(t['pf_' + k]) + '</h4>' +
+  return '<article class="rd-value" data-pillar="' + k + '"><div class="rd-value-read"><h4>' + esc(t['pf_' + k]) + '</h4>' +
     '<p class="rd-value-n">' + (none ? '—' : v) + '</p>' +
     '<p class="rd-value-stand">' + esc(none ? t.lvlNone : standing(v, k, t)) + '</p></div>' +
     '<ul class="rd-bars">' + bar(t.pfThisDeck, none ? 0 : v, true) + refs.map(([l, m]) => bar(l, m, false)).join('') + '</ul>' +

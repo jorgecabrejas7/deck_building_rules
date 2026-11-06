@@ -167,46 +167,6 @@ function spellbookEstimate({ gc, mldCards, extraTurnCards, combos, banned }) {
   return best;
 }
 
-// What it takes to fit Bracket 3. Named cuts for what has no alternative (land
-// denial, looping turns) and a greedy pass over the breaking combos: cut the card
-// that breaks the most, preferring anything but the commander. Greedy can miss the
-// true minimum on tangled combo webs, but every list it returns does fit. Counted
-// limits stay a choice for the player: "cut 2 of these", after the named cuts.
-function cutsToFit({ combos, mld, turnCards, looped, gcCards, commanders }) {
-  const zone = new Set((commanders || []).map(front));
-  const cuts = [];
-  const cut = (card, reason, combosBroken = 0) => {
-    const found = cuts.find(x => x.card === card);
-    if (found) { found.reasons.push(reason); found.combos += combosBroken; return; }
-    cuts.push({ card, reasons: [reason], combos: combosBroken });
-  };
-  const gone = (n) => cuts.some(x => x.card === n);
-
-  for (const n of mld) cut(n, "mass_land_denial");
-  for (const n of looped) cut(n, "extra_turns");
-
-  let open = combos.filter(c => !c.cards.some(n => cuts.some(x => front(x.card) === n)));
-  while (open.length) {
-    const score = new Map();
-    for (const c of open) for (const n of c.cards) {
-      // a commander is what the deck is built around: the last card to give up
-      const weight = (zone.has(n) ? 0.001 : 1) + (gcCards.some(g => front(g) === n) ? 0.1 : 0);
-      score.set(n, (score.get(n) || 0) + weight);
-    }
-    const [best] = [...score].sort((a, b) => b[1] - a[1])[0];
-    const broken = open.filter(c => c.cards.includes(best));
-    cut(best, "combos", broken.length);
-    open = open.filter(c => !c.cards.includes(best));
-  }
-
-  const left = (list) => list.filter(n => !gone(n) && !gone(front(n)));
-  const over = (id, list, max) => list.length > max ? [{ id, count: list.length - max, from: list }] : [];
-  return { cards: cuts, choices: [
-    ...over("game_changers", left(gcCards), BRACKET3.game_changers_max),
-    ...over("extra_turns", left(turnCards), BRACKET3.extra_turns_max),
-  ] };
-}
-
 // combos: active combos for this deck, or null while the combo check has not run
 // — the criteria that depend on them then report as pending instead of passing.
 // comboDb: the DB's card lists (mass_land_denial, extra_turn), null until loaded.
@@ -297,14 +257,10 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, l
   const estimate = spellbookEstimate({ gc, mldCards: mldCards.length, extraTurnCards: turns, combos: rated, banned });
 
   // Only what breaks Bracket 3 goes on the cut list.
-  const breaking = [...tooStrong, ...mldCombos, ...turnCombos];
-  const cuts = cutsToFit({ combos: [...new Set(breaking)], mld: mldCards, turnCards, looped, gcCards, commanders });
 
   // Land denial puts a deck in Bracket 4 whatever its power says. A deck can be Bracket 4 without being strong.
-  const floorCuts = cutsToFit({ combos: mldCombos, mld: mldCards, turnCards: [], looped: [], gcCards: [], commanders }).cards;
   const floor = mldCards.length || mldCombos.length ? { bracket: 4, reason: "mld",
-    mld: [...mldCards, ...mldCombos.map(c => c.cards.join(" + "))],
-    cuts: floorCuts.map(c => ({ card: front(c.card), reason: "mld" })) } : null;
+    mld: [...mldCards, ...mldCombos.map(c => c.cards.join(" + "))] } : null;
 
   return {
     floor, landMaybe, checks, failed: failed.map(c => c.id), pending,
@@ -314,6 +270,5 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, l
     legal: !issues.length,
     combos: rated.sort((a, b) => tagRank(a.tag) - tagRank(b.tag) || a.n - b.n || (a.deploy ?? 99) - (b.deploy ?? 99)),
     locks,
-    cuts,
   };
 }

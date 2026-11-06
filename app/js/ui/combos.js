@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state, cardCache } from '../state.js';
 import { T } from '../i18n.js';
 import { COMBO_TAGS } from '../engine/index.js';
 import { comboFeatureText } from './constants.js';
@@ -8,8 +8,7 @@ import { ICON, answer, cardName, fold, paint } from './reading.js';
 
 // Every combo says which bracket it belongs to. The tag is Commander Spellbook's
 // own classification, so what the page calls "Bracket 4+" is what its editors do.
-// Green stays reserved for the verdict: only tags that bear on Bracket 3 get a colour.
-const TAG_TONE = { B: 'tone-bad', R: 'tone-bad', S: 'tone-warn', P: 'tone-neutral', O: 'tone-neutral', C: 'tone-neutral', E: 'tone-neutral' };
+const TAG_TONE = { B: 'tag-b', R: 'tag-r', S: 'tag-s', P: 'tag-p', O: 'tag-o', C: 'tag-c', E: 'tag-e' };
 const PAGE = 5;
 
 export function tagChip(tag, t) {
@@ -48,19 +47,63 @@ const FILTERS = [
   ['lock', isLock],
 ];
 
+// Spellbook's text writes mana as {U}{2}: draw those as the symbols everyone knows.
+const withSymbols = (text) => esc(text).replace(/\{([^}]+)\}/g, (_, sym) =>
+  '<img class="cb-sym" src="https://svgs.scryfall.io/card-symbols/' + encodeURIComponent(sym.replace('/', '')) + '.svg" alt="' + esc(sym) + '">');
+const lines = (text) => (text || '').split('\n').map(l => l.trim()).filter(Boolean);
+
+// A combo laid out like a recipe: both cards, what you need, the steps, what you get.
 function comboRow(c, t) {
-  const traits = [
-    c.win && t.cfWin,
-    c.cardsToFind <= 2 && (c.n > 2 ? t.cfTwoCmd : t.cfTwo),
-    c.infinite && t.cfInf,
-    isLock(c) && t.cfLock,
-    c.prereq && t.cfBoard,
-    c.mustCommand.length && t.cfCommander,
-    c.fastPair && t.cfFastTip,
+  const pieces = [...c.cards, ...(c.filled || [])];
+  const facts = [
+    c.win && t.cfWin, c.cardsToFind <= 2 && (c.n > 2 ? t.cfTwoCmd : t.cfTwo), c.infinite && t.cfInf, isLock(c) && t.cfLock,
+    c.prereq && t.cfBoard, c.mustCommand.length && t.cfCommander,
   ].filter(Boolean);
-  return '<li>' + comboLine(c) + '<div class="rd-line-foot">' +
-    '<span class="rd-traits">' + esc(traits.join(' · ')) + '</span>' +
-    '<a class="rd-link" href="' + spellbookUrl(c) + '" target="_blank" rel="noopener noreferrer">' + esc(t.comboSteps) + ICON.open + '</a></div></li>';
+  return '<li class="cb" data-steps="' + esc(c.cards.join('|')) + '">' +
+    '<div class="cb-arts" data-n="' + Math.min(pieces.length, 4) + '">' + pieces.slice(0, 4).map(n => cardImage(n)).join('') + '</div>' +
+    '<div class="cb-body"><div class="cb-head"><h4>' + pieces.map(esc).join(' <span class="rd-plus" aria-hidden="true">+</span> ') + '</h4>' + tagChip(c.tag, t) + '</div>' +
+      '<p class="cb-tag">' + esc(t['tag_' + c.tag]) + '</p>' +
+      '<p class="cb-line">' + esc(comboFeatureText(c.features[0] || '', state.lang)) + (manaText(c, t) ? ' · ' + esc(manaText(c, t)) : '') + '</p>' +
+      (facts.length ? '<ul class="cb-facts">' + facts.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul>' : '') +
+      (c.fastPair ? '<p class="cb-tip">' + esc(t.cfFastTip) + '</p>' : '') +
+      '<div class="cb-steps"><p class="rd-q">' + esc(t.cbLoading) + '</p></div>' +
+      '<a class="rd-link" href="' + spellbookUrl(c) + '" target="_blank" rel="noopener noreferrer">' + esc(t.cbOpen) + ICON.open + '</a>' +
+    '</div></li>';
+}
+
+function cardImage(name) {
+  const card = state.result.cardsInfo.map(x => x.card).find(k => String(k.name).split(' // ')[0] === name) || cardCache[name] || {};
+  return card.img_normal ? '<img src="' + esc(card.img_normal) + '" alt="' + esc(name) + '" loading="lazy" decoding="async">'
+    : '<span class="cb-noart">' + esc(name) + '</span>';
+}
+
+// Same value as steps_shard in scripts/build_combo_db.py.
+const shardOf = (key) => { let h = 0; for (const ch of key) h = (h * 31 + ch.codePointAt(0)) & 255; return h.toString(16).padStart(2, '0'); };
+const shards = new Map();
+const loadShard = (id) => {
+  if (!shards.has(id)) shards.set(id, fetch('../data/combo_steps/' + id + '.json').then(r => (r.ok ? r.json() : {})).catch(() => ({})));
+  return shards.get(id);
+};
+
+function stepsHtml(s, t) {
+  if (!s) return '<p class="rd-q">' + esc(t.cbNoSteps) + '</p>';
+  const need = [...lines(s.e), ...lines(s.p)];
+  const zones = (s.z || []).map(z => t['zone_' + z]).filter(Boolean);
+  return (need.length || s.x ? '<section><h5>' + esc(t.cbNeed) + '</h5><ul>' + (s.x ? '<li>' + esc(t.cbMana) + ': ' + withSymbols(s.x) + '</li>' : '') +
+      (zones.length ? '<li>' + esc(t.cbZones) + ': ' + esc(zones.join(', ')) + '</li>' : '') + need.map(l => '<li>' + withSymbols(l) + '</li>').join('') + '</ul></section>' : '') +
+    (s.d ? '<section><h5>' + esc(t.cbSteps) + '</h5><ol>' + lines(s.d).map(l => '<li>' + withSymbols(l) + '</li>').join('') + '</ol></section>' : '') +
+    (s.o ? '<section><h5>' + esc(t.cbResult) + '</h5><ul class="cb-facts">' + s.o.map(o => '<li>' + esc(comboFeatureText(o, state.lang)) + '</li>').join('') + '</ul></section>' : '') +
+    (s.n ? '<section><h5>' + esc(t.cbNotes) + '</h5>' + lines(s.n).map(l => '<p>' + withSymbols(l) + '</p>').join('') + '</section>' : '');
+}
+
+// The steps live in small files, fetched for what is on screen.
+function fillSteps(root, t) {
+  for (const el of root.querySelectorAll('[data-steps]')) {
+    const key = el.dataset.steps;
+    loadShard(shardOf(key)).then(rows => {
+      if (el.isConnected) el.querySelector('.cb-steps').innerHTML = stepsHtml(rows[key], t);
+    });
+  }
 }
 
 // The two facts worth a sentence: the cheapest line, and the card most lines lean on.
@@ -113,13 +156,14 @@ export function renderCombos() {
     esc(fill(t.comboSub, { i: count(c => c.infinite), w: count(c => c.win), d: count(c => c.cardsToFind <= 2) })),
     '<div class="rd-filter-bars"><div class="rd-filter-bar" role="group" aria-label="' + esc(t.comboFilterAria) + '">' + catBar + '</div>' +
     '<div class="rd-filter-bar" role="group" aria-label="' + esc(t.comboFilterTagAria) + '">' + tagBar + '</div></div>' +
-    '<ul class="rd-lines rd-combo-list" id="comboList" tabindex="-1">' + (visible.map(c => comboRow(c, t)).join('') ||
+    '<ul class="cb-list" id="comboList" tabindex="-1">' + (visible.map(c => comboRow(c, t)).join('') ||
       '<li class="rd-q">' + esc(t.comboNoMatch) + '</li>') + '</ul>' +
     (shown.length > PAGE && !state.comboAll
       ? '<button type="button" id="comboMore" class="rd-btn">' + esc(t.comboMore.replace('%v', shown.length)) + '</button>' : '') +
     '<div class="rd-folds">' + tagLegend(t) + '</div>' + dbDate,
     why(all, t) ? '<p class="rd-why">' + esc(why(all, t)) + '</p>' : ''));
 
+  fillSteps(root, t);
   for (const b of root.querySelectorAll('[data-combof]')) b.onclick = () => {
     const k = b.dataset.combof;
     state.comboFilter = state.comboFilter === k ? 'all' : k;

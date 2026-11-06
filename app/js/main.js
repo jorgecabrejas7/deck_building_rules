@@ -61,6 +61,15 @@ function restoreFocus(f) {
   if (el) el.focus({ preventScroll: true });
 }
 
+// The report takes its colours from the commander's identity, so each deck has its own look.
+const HUE = { W: 85, U: 240, B: 305, R: 28, G: 150 };
+function paintDeckColours(commanders) {
+  const ci = [...new Set(commanders.flatMap(n => (cardCache[n] || {}).color_identity || []))];
+  const hues = 'WUBRG'.split('').filter(c => ci.includes(c)).map(c => HUE[c]);
+  document.body.style.setProperty('--h1', hues[0] ?? 265);
+  document.body.style.setProperty('--h2', hues[hues.length - 1] ?? 200);
+}
+
 // Only the view on screen is drawn, so the suggestions and other late data wait until asked for.
 const VIEW_RENDER = {
   summary: () => { renderVerdict(); renderCommander(); },
@@ -99,6 +108,7 @@ export function renderAll() {
       // out of the pod, the way back in is what the player came for
       $('view-points').classList.toggle('out', state.result.evalRes.tier === 'above');
       // the commander's art lights every view of the report from behind
+      paintDeckColours(state.result.commanders);
       const art = r0 => (cardCache[r0] || {}).img_art;
       $('reportStage').style.backgroundImage = state.result.commanders[0] && art(state.result.commanders[0]) ? 'url("' + art(state.result.commanders[0]) + '")' : 'none';
       VIEW_RENDER[state.view]();

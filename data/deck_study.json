@@ -1,11 +1,11 @@
 {
  "salt_updated": "2026-11-05",
- "combos_updated": "2026-11-05T10:38:38.381900+00:00",
+ "combos_updated": "2026-11-06T14:12:37.194384+00:00",
  "labelled": 0,
  "groups": {
   "precon": 198,
-  "podIn": 8,
-  "podOut": 13,
+  "podIn": 10,
+  "podOut": 14,
   "cedh": 9
  },
  "medians": {
@@ -48,27 +48,27 @@
   },
   "pod": {
    "power": 4.1,
-   "pillar_salt": 19,
+   "pillar_salt": 19.5,
    "pillar_synergy": 0,
-   "pillar_interaction": 36,
-   "pillar_wins": 9,
-   "salt_total": 27.1,
-   "salt_average": 0.33,
-   "synergy_coverage": 77,
+   "pillar_interaction": 36.5,
+   "pillar_wins": 6.5,
+   "salt_total": 27.6,
+   "salt_average": 0.34,
+   "synergy_coverage": 79,
    "synergy_average": 21,
    "manabase_score": 86,
    "manabase_fixing": 100,
-   "manabase_quality": 82,
+   "manabase_quality": 84.5,
    "fetches": 1,
    "lands": 36,
-   "avg_mv": 3,
-   "cheap_plays": 25,
-   "ramp": 14,
+   "avg_mv": 2.99,
+   "cheap_plays": 26,
+   "ramp": 13.5,
    "fast_mana": 6,
-   "draw": 13,
+   "draw": 13.5,
    "tutors": 1,
-   "recursion": 4,
-   "counters": 1,
+   "recursion": 3,
+   "counters": 2,
    "removal": 8,
    "wipes": 3,
    "cheap_answers": 5,
@@ -77,11 +77,11 @@
    "ending_combos": 0,
    "win_turn": null,
    "commander_turn": 4,
-   "mana_turn_4": 4.5,
+   "mana_turn_4": 4.45,
    "two_card_ending": 0,
    "game_changers": 0,
-   "price": 176.13,
-   "points": 6
+   "price": 177.66,
+   "points": 5.5
   },
   "cedh": {
    "power": 9.5,
@@ -130,8 +130,8 @@
     "podOut": 4.1,
     "cedh": 9.5
    },
-   "precon_vs_pod": 0.91,
-   "podIn_vs_podOut": 0.87,
+   "precon_vs_pod": 0.92,
+   "podIn_vs_podOut": 0.84,
    "pod_vs_cedh": 0.99
   },
   {
@@ -139,10 +139,10 @@
    "medians": {
     "precon": 12,
     "podIn": 14,
-    "podOut": 22,
+    "podOut": 22.5,
     "cedh": 100
    },
-   "precon_vs_pod": 0.75,
+   "precon_vs_pod": 0.76,
    "podIn_vs_podOut": 0.75,
    "pod_vs_cedh": 1
   },
@@ -154,44 +154,44 @@
     "podOut": 0,
     "cedh": 0
    },
-   "precon_vs_pod": 0.54,
-   "podIn_vs_podOut": 0.41,
-   "pod_vs_cedh": 0.41
+   "precon_vs_pod": 0.52,
+   "podIn_vs_podOut": 0.45,
+   "pod_vs_cedh": 0.43
   },
   {
    "key": "pillar_interaction",
    "medians": {
     "precon": 24,
-    "podIn": 40,
-    "podOut": 33,
+    "podIn": 42,
+    "podOut": 34.5,
     "cedh": 90
    },
-   "precon_vs_pod": 0.69,
+   "precon_vs_pod": 0.72,
    "podIn_vs_podOut": 0.42,
-   "pod_vs_cedh": 0.9
+   "pod_vs_cedh": 0.89
   },
   {
    "key": "pillar_wins",
    "medians": {
     "precon": 4,
     "podIn": 0,
-    "podOut": 9,
+    "podOut": 17.5,
     "cedh": 87
    },
-   "precon_vs_pod": 0.59,
-   "podIn_vs_podOut": 0.66,
-   "pod_vs_cedh": 0.95
+   "precon_vs_pod": 0.58,
+   "podIn_vs_podOut": 0.72,
+   "pod_vs_cedh": 0.96
   },
   {
    "key": "salt_total",
    "medians": {
     "precon": 22.75,
     "podIn": 24.1,
-    "podOut": 29,
+    "podOut": 29.6,
     "cedh": 87.4
    },
-   "precon_vs_pod": 0.75,
-   "podIn_vs_podOut": 0.73,
+   "precon_vs_pod": 0.76,
+   "podIn_vs_podOut": 0.74,
    "pod_vs_cedh": 1
   },
   {
@@ -199,10 +199,10 @@
    "medians": {
     "precon": 0.3,
     "podIn": 0.32,
-    "podOut": 0.34,
+    "podOut": 0.36,
     "cedh": 0.9
    },
-   "precon_vs_pod": 0.72,
+   "precon_vs_pod": 0.74,
    "podIn_vs_podOut": 0.71,
    "pod_vs_cedh": 1
   },
@@ -211,35 +211,35 @@
    "medians": {
     "precon": 97,
     "podIn": 93,
-    "podOut": 71,
+    "podOut": 72.5,
     "cedh": 78
    },
-   "precon_vs_pod": 0.33,
+   "precon_vs_pod": 0.34,
    "podIn_vs_podOut": 0.21,
-   "pod_vs_cedh": 0.52
+   "pod_vs_cedh": 0.5
   },
   {
    "key": "synergy_average",
    "medians": {
     "precon": 32,
-    "podIn": 37.5,
-    "podOut": 18,
+    "podIn": 30.5,
+    "podOut": 18.5,
     "cedh": 18
    },
-   "precon_vs_pod": 0.4,
-   "podIn_vs_podOut": 0.25,
-   "pod_vs_cedh": 0.44
+   "precon_vs_pod": 0.38,
+   "podIn_vs_podOut": 0.27,
+   "pod_vs_cedh": 0.45
   },
   {
    "key": "manabase_score",
    "medians": {
     "precon": 71,
     "podIn": 86.5,
-    "podOut": 82,
+    "podOut": 84,
     "cedh": 100
    },
-   "precon_vs_pod": 0.8,
-   "podIn_vs_podOut": 0.47,
+   "precon_vs_pod": 0.82,
+   "podIn_vs_podOut": 0.46,
    "pod_vs_cedh": 0.96
   },
   {
@@ -258,24 +258,24 @@
    "key": "manabase_quality",
    "medians": {
     "precon": 83,
-    "podIn": 83,
-    "podOut": 82,
+    "podIn": 84.5,
+    "podOut": 84.5,
     "cedh": 100
    },
-   "precon_vs_pod": 0.58,
-   "podIn_vs_podOut": 0.54,
-   "pod_vs_cedh": 0.93
+   "precon_vs_pod": 0.62,
+   "podIn_vs_podOut": 0.51,
+   "pod_vs_cedh": 0.94
   },
   {
    "key": "fetches",
    "medians": {
     "precon": 2,
-    "podIn": 1.5,
-    "podOut": 1,
+    "podIn": 1,
+    "podOut": 1.5,
     "cedh": 6
    },
-   "precon_vs_pod": 0.39,
-   "podIn_vs_podOut": 0.49,
+   "precon_vs_pod": 0.38,
+   "podIn_vs_podOut": 0.54,
    "pod_vs_cedh": 0.84
   },
   {
@@ -286,8 +286,8 @@
     "podOut": 36,
     "cedh": 27
    },
-   "precon_vs_pod": 0.18,
-   "podIn_vs_podOut": 0.43,
+   "precon_vs_pod": 0.17,
+   "podIn_vs_podOut": 0.44,
    "pod_vs_cedh": 0.04
   },
   {
@@ -295,10 +295,10 @@
    "medians": {
     "precon": 3.69,
     "podIn": 2.78,
-    "podOut": 3.03,
+    "podOut": 3.01,
     "cedh": 1.96
    },
-   "precon_vs_pod": 0.2,
+   "precon_vs_pod": 0.19,
    "podIn_vs_podOut": 0.58,
    "pod_vs_cedh": 0.04
   },
@@ -306,12 +306,12 @@
    "key": "cheap_plays",
    "medians": {
     "precon": 17,
-    "podIn": 28.5,
-    "podOut": 24,
+    "podIn": 29.5,
+    "podOut": 24.5,
     "cedh": 52
    },
-   "precon_vs_pod": 0.79,
-   "podIn_vs_podOut": 0.42,
+   "precon_vs_pod": 0.81,
+   "podIn_vs_podOut": 0.39,
    "pod_vs_cedh": 0.97
   },
   {
@@ -319,11 +319,11 @@
    "medians": {
     "precon": 12,
     "podIn": 13.5,
-    "podOut": 14,
+    "podOut": 13.5,
     "cedh": 20
    },
-   "precon_vs_pod": 0.67,
-   "podIn_vs_podOut": 0.54,
+   "precon_vs_pod": 0.64,
+   "podIn_vs_podOut": 0.5,
    "pod_vs_cedh": 0.73
   },
   {
@@ -334,21 +334,21 @@
     "podOut": 6,
     "cedh": 12
    },
-   "precon_vs_pod": 0.64,
-   "podIn_vs_podOut": 0.73,
-   "pod_vs_cedh": 0.87
+   "precon_vs_pod": 0.65,
+   "podIn_vs_podOut": 0.63,
+   "pod_vs_cedh": 0.86
   },
   {
    "key": "draw",
    "medians": {
     "precon": 13,
-    "podIn": 12.5,
-    "podOut": 13,
+    "podIn": 13.5,
+    "podOut": 13.5,
     "cedh": 11
    },
-   "precon_vs_pod": 0.46,
-   "podIn_vs_podOut": 0.63,
-   "pod_vs_cedh": 0.33
+   "precon_vs_pod": 0.51,
+   "podIn_vs_podOut": 0.58,
+   "pod_vs_cedh": 0.29
   },
   {
    "key": "tutors",
@@ -358,8 +358,8 @@
     "podOut": 1,
     "cedh": 19
    },
-   "precon_vs_pod": 0.63,
-   "podIn_vs_podOut": 0.68,
+   "precon_vs_pod": 0.62,
+   "podIn_vs_podOut": 0.74,
    "pod_vs_cedh": 0.99
   },
   {
@@ -367,72 +367,72 @@
    "medians": {
     "precon": 5,
     "podIn": 3,
-    "podOut": 5,
+    "podOut": 4.5,
     "cedh": 4
    },
-   "precon_vs_pod": 0.43,
-   "podIn_vs_podOut": 0.63,
-   "pod_vs_cedh": 0.51
+   "precon_vs_pod": 0.39,
+   "podIn_vs_podOut": 0.64,
+   "pod_vs_cedh": 0.55
   },
   {
    "key": "counters",
    "medians": {
     "precon": 0,
-    "podIn": 1,
+    "podIn": 1.5,
     "podOut": 2,
     "cedh": 10
    },
-   "precon_vs_pod": 0.66,
-   "podIn_vs_podOut": 0.53,
-   "pod_vs_cedh": 0.91
+   "precon_vs_pod": 0.71,
+   "podIn_vs_podOut": 0.49,
+   "pod_vs_cedh": 0.89
   },
   {
    "key": "removal",
    "medians": {
     "precon": 9,
-    "podIn": 10.5,
-    "podOut": 8,
+    "podIn": 9,
+    "podOut": 7.5,
     "cedh": 7
    },
-   "precon_vs_pod": 0.41,
-   "podIn_vs_podOut": 0.24,
-   "pod_vs_cedh": 0.29
+   "precon_vs_pod": 0.38,
+   "podIn_vs_podOut": 0.32,
+   "pod_vs_cedh": 0.33
   },
   {
    "key": "wipes",
    "medians": {
     "precon": 3,
-    "podIn": 3,
+    "podIn": 2.5,
     "podOut": 3,
     "cedh": 0
    },
-   "precon_vs_pod": 0.34,
-   "podIn_vs_podOut": 0.57,
+   "precon_vs_pod": 0.32,
+   "podIn_vs_podOut": 0.61,
    "pod_vs_cedh": 0.13
   },
   {
    "key": "cheap_answers",
    "medians": {
     "precon": 3,
-    "podIn": 5,
+    "podIn": 5.5,
     "podOut": 4,
     "cedh": 10
    },
-   "precon_vs_pod": 0.7,
-   "podIn_vs_podOut": 0.38,
-   "pod_vs_cedh": 0.88
+   "precon_vs_pod": 0.73,
+   "podIn_vs_podOut": 0.39,
+   "pod_vs_cedh": 0.84
   },
   {
    "key": "stax",
    "medians": {
     "precon": 1,
     "podIn": 1,
-    "podOut": 1,
+    "podOut": 1.5,
     "cedh": 12
    },
-   "precon_vs_pod": 0.54,
-   "podIn_vs_podOut": 0.47,
-   "pod_vs_cedh": 0.96
+   "precon_vs_pod": 0.53,
+   "podIn_vs_podOut": 0.56,
+   "pod_vs_cedh": 0.95
   },
   {
    "key": "combos",
@@ -443,8 +443,8 @@
     "cedh": 6
    },
    "precon_vs_pod": 0.56,
-   "podIn_vs_podOut": 0.59,
-   "pod_vs_cedh": 0.9
+   "podIn_vs_podOut": 0.63,
+   "pod_vs_cedh": 0.88
   },
   {
    "key": "ending_combos",
@@ -454,9 +454,9 @@
     "podOut": 0,
     "cedh": 6
    },
-   "precon_vs_pod": 0.57,
-   "podIn_vs_podOut": 0.6,
-   "pod_vs_cedh": 0.93
+   "precon_vs_pod": 0.58,
+   "podIn_vs_podOut": 0.64,
+   "pod_vs_cedh": 0.91
   },
   {
    "key": "win_turn",
@@ -475,24 +475,24 @@
    "medians": {
     "precon": 4,
     "podIn": 4,
-    "podOut": 5,
+    "podOut": 4.5,
     "cedh": 3
    },
-   "precon_vs_pod": 0.54,
-   "podIn_vs_podOut": 0.72,
-   "pod_vs_cedh": 0.28
+   "precon_vs_pod": 0.5,
+   "podIn_vs_podOut": 0.69,
+   "pod_vs_cedh": 0.31
   },
   {
    "key": "mana_turn_4",
    "medians": {
     "precon": 4.6,
-    "podIn": 4.3,
+    "podIn": 4.4,
     "podOut": 4.5,
     "cedh": 4.2
    },
-   "precon_vs_pod": 0.35,
-   "podIn_vs_podOut": 0.74,
-   "pod_vs_cedh": 0.25
+   "precon_vs_pod": 0.36,
+   "podIn_vs_podOut": 0.64,
+   "pod_vs_cedh": 0.24
   },
   {
    "key": "two_card_ending",
@@ -502,45 +502,45 @@
     "podOut": 0,
     "cedh": 2
    },
-   "precon_vs_pod": 0.55,
-   "podIn_vs_podOut": 0.51,
-   "pod_vs_cedh": 0.92
+   "precon_vs_pod": 0.56,
+   "podIn_vs_podOut": 0.56,
+   "pod_vs_cedh": 0.91
   },
   {
    "key": "game_changers",
    "medians": {
     "precon": 0,
     "podIn": 0,
-    "podOut": 0,
+    "podOut": 0.5,
     "cedh": 19
    },
-   "precon_vs_pod": 0.59,
-   "podIn_vs_podOut": 0.73,
+   "precon_vs_pod": 0.6,
+   "podIn_vs_podOut": 0.75,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "price",
    "medians": {
     "precon": 71.31,
-    "podIn": 92.28,
-    "podOut": 206.79,
+    "podIn": 108.05,
+    "podOut": 214.6,
     "cedh": 1788.39
    },
-   "precon_vs_pod": 0.82,
-   "podIn_vs_podOut": 0.97,
+   "precon_vs_pod": 0.84,
+   "podIn_vs_podOut": 0.95,
    "pod_vs_cedh": 0.99
   },
   {
    "key": "points",
    "medians": {
     "precon": 0,
-    "podIn": 1.5,
-    "podOut": 10,
+    "podIn": 2.5,
+    "podOut": 10.5,
     "cedh": 74
    },
-   "precon_vs_pod": 0.79,
+   "precon_vs_pod": 0.8,
    "podIn_vs_podOut": 0.94,
-   "pod_vs_cedh": 0.99
+   "pod_vs_cedh": 1
   }
  ],
  "decks": [
@@ -2928,7 +2928,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 63.72,
+   "price": 63.22,
    "gc": 0,
    "salt": {
     "total": 21.6,
@@ -3332,7 +3332,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 107.28,
+   "price": 106.54,
    "gc": 1,
    "salt": {
     "total": 22.4,
@@ -4111,7 +4111,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 89.84,
+   "price": 89.34,
    "gc": 0,
    "salt": {
     "total": 22.4,
@@ -4223,7 +4223,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 39.35,
+   "price": 38.96,
    "gc": 0,
    "salt": {
     "total": 20,
@@ -4567,7 +4567,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 228.43,
+   "price": 228.15,
    "gc": 1,
    "salt": {
     "total": 32.6,
@@ -5128,7 +5128,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 122.78,
+   "price": 122.28,
    "gc": 0,
    "salt": {
     "total": 20.8,
@@ -6046,7 +6046,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 30.38,
+   "price": 29.99,
    "gc": 0,
    "salt": {
     "total": 19.2,
@@ -6779,7 +6779,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 211.07,
+   "price": 210.57,
    "gc": 0,
    "salt": {
     "total": 31.3,
@@ -7183,7 +7183,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 42.59,
+   "price": 42.29,
    "gc": 0,
    "salt": {
     "total": 30.3,
@@ -7358,7 +7358,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 94.72,
+   "price": 94.42,
    "gc": 1,
    "salt": {
     "total": 33.6,
@@ -7417,7 +7417,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 64.67,
+   "price": 64.17,
    "gc": 0,
    "salt": {
     "total": 22.3,
@@ -7762,7 +7762,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 108.46,
+   "price": 106.84,
    "gc": 2,
    "salt": {
     "total": 24.8,
@@ -7819,7 +7819,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 78.35,
+   "price": 77.82,
    "gc": 1,
    "salt": {
     "total": 26.3,
@@ -8727,7 +8727,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 90.72,
+   "price": 89.71,
    "gc": 0,
    "salt": {
     "total": 28.5,
@@ -8782,7 +8782,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 90.72,
+   "price": 89.71,
    "gc": 0,
    "salt": {
     "total": 28.5,
@@ -11311,9 +11311,9 @@
    "practicalBracket": "2",
    "powerBracket": "2",
    "floor": null,
-   "points": 5,
+   "points": 4,
    "breakdown": {
-    "price_1_5": 2,
+    "price_1_5": 1,
     "price_20_30": 3
    },
    "violations": [
@@ -11321,7 +11321,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 234.13,
+   "price": 233.74,
    "gc": 0,
    "salt": {
     "total": 27.6,
@@ -11581,11 +11581,11 @@
     "offPlan": 0
    },
    "power": {
-    "score": 3.6,
-    "base": 3.6,
-    "raw": 19.5,
+    "score": 2.9,
+    "base": 2.9,
+    "raw": 12.7,
     "pillars": {
-     "wins": 17,
+     "wins": 0,
      "interaction": 44,
      "salt": 6,
      "synergy": 4
@@ -11669,7 +11669,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 110.77,
+   "price": 105.71,
    "gc": 0,
    "salt": {
     "total": 19,
@@ -11726,7 +11726,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 96.7,
+   "price": 96.2,
    "gc": 0,
    "salt": {
     "total": 16,
@@ -12578,7 +12578,7 @@
   },
   {
    "id": "pod:5",
-   "name": "Luffy, the Man who'll necome Pirate King",
+   "name": "Luffy, the Man who'll Become Pirate King",
    "group": "pod",
    "url": "https://archidekt.com/decks/23734831/luffy",
    "podId": 5,
@@ -16006,6 +16006,597 @@
     "failed": [
      "mass_land_denial"
     ]
+   }
+  },
+  {
+   "id": "pod:23",
+   "name": "Helga, Skittish Seer",
+   "group": "pod",
+   "url": "https://archidekt.com/decks/24773365/helga",
+   "podId": 23,
+   "commanders": [
+    "Helga, Skittish Seer"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
+   "points": 4,
+   "breakdown": {
+    "fast_mana": 2,
+    "price_1_5": 2
+   },
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 179.18,
+   "gc": 0,
+   "salt": {
+    "total": 29.6,
+    "average": 0.37,
+    "top": [
+     {
+      "name": "Hullbreaker Horror",
+      "salt": 1.74
+     },
+     {
+      "name": "Koma, Cosmos Serpent",
+      "salt": 1.52
+     },
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 79,
+    "average": 17,
+    "offPlan": 1
+   },
+   "power": {
+    "score": 4.1,
+    "base": 3,
+    "raw": 13.6,
+    "pillars": {
+     "wins": 0,
+     "interaction": 41,
+     "salt": 22,
+     "synergy": 0
+    }
+   },
+   "profile": {
+    "manabase": {
+     "lands": 37,
+     "basics": 19,
+     "tapped": 2,
+     "fetches": 1,
+     "colors": [
+      {
+       "color": "W",
+       "pips": 10,
+       "share": 0.1111111111111111,
+       "sources": 27,
+       "target": 10,
+       "cover": 2.7613636363636362
+      },
+      {
+       "color": "U",
+       "pips": 23,
+       "share": 0.25555555555555554,
+       "sources": 26,
+       "target": 12,
+       "cover": 2.150735294117647
+      },
+      {
+       "color": "G",
+       "pips": 57,
+       "share": 0.6333333333333333,
+       "sources": 30,
+       "target": 18,
+       "cover": 1.6544117647058825
+      }
+     ],
+     "weakest": "G",
+     "fixing": 100,
+     "quality": 95,
+     "curve": 47,
+     "score": 81
+    },
+    "speed": {
+     "avgMv": 3.35,
+     "cheap": 28,
+     "high": 8,
+     "ramp": 24,
+     "rocks": 7,
+     "dorks": 8,
+     "rituals": 0,
+     "landRamp": 7,
+     "fastMana": 10
+    },
+    "consistency": {
+     "draw": 16,
+     "cheapDraw": 4,
+     "tutors": 0,
+     "recursion": 0
+    },
+    "interaction": {
+     "counters": 6,
+     "removal": 3,
+     "wipes": 1,
+     "protection": 5,
+     "graveHate": 0,
+     "stax": 1,
+     "free": 2,
+     "cheapAnswers": 6,
+     "instantShare": 89
+    },
+    "wins": {
+     "checked": true,
+     "combos": 0,
+     "infinite": 0,
+     "ending": 0,
+     "twoCard": 0,
+     "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
+     "fastest": null,
+     "lineCost": null,
+     "printed": 0,
+     "massPump": 1
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "control",
+       "share": 33
+      },
+      {
+       "key": "counters",
+       "share": 32
+      },
+      {
+       "key": "tokens",
+       "share": 14
+      }
+     ],
+     "typal": {
+      "type": "Druid",
+      "count": 7,
+      "share": 21
+     },
+     "creatures": 34,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 5
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.9,
+      4.4,
+      5.5,
+      6.5,
+      7.3,
+      8,
+      8.6,
+      9.2,
+      9.9,
+      10.5,
+      11.1
+     ],
+     "commanderTurn": 3,
+     "winTurn": null,
+     "winBy": null
+    },
+    "upgrade": {
+     "pricey": 22,
+     "medianRank": 453
+    }
+   },
+   "bracket": {
+    "fits": true,
+    "checklist": 2,
+    "estimate": "E",
+    "failed": []
+   }
+  },
+  {
+   "id": "pod:24",
+   "name": "Kwain, Itinerant Meddler",
+   "group": "pod",
+   "url": "https://archidekt.com/decks/26870973/el_modofokin_kwain",
+   "podId": 24,
+   "commanders": [
+    "Kwain, Itinerant Meddler"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "above",
+   "practicalBracket": "3",
+   "powerBracket": "3",
+   "floor": null,
+   "points": 21,
+   "breakdown": {
+    "game_changers": 4,
+    "stax_effects": 3,
+    "counterspells": 2,
+    "price_1_5": 4,
+    "price_10_20": 1,
+    "price_20_30": 3,
+    "combos": 4
+   },
+   "violations": [
+    "price_cap",
+    "gc_locks_price",
+    "gc_locks_price"
+   ],
+   "verdict": "out",
+   "label": null,
+   "price": 412.85,
+   "gc": 3,
+   "salt": {
+    "total": 41.3,
+    "average": 0.53,
+    "top": [
+     {
+      "name": "Smothering Tithe",
+      "salt": 2.58
+     },
+     {
+      "name": "Mana Drain",
+      "salt": 1.89
+     },
+     {
+      "name": "Teferi, Time Raveler",
+      "salt": 1.68
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 83,
+    "average": 19,
+    "offPlan": 5
+   },
+   "power": {
+    "score": 7,
+    "base": 7,
+    "raw": 50.7,
+    "pillars": {
+     "wins": 71,
+     "interaction": 65,
+     "salt": 40,
+     "synergy": 0
+    }
+   },
+   "profile": {
+    "manabase": {
+     "lands": 36,
+     "basics": 18,
+     "tapped": 3,
+     "fetches": 2,
+     "colors": [
+      {
+       "color": "W",
+       "pips": 22,
+       "share": 0.275,
+       "sources": 23,
+       "target": 12,
+       "cover": 1.8548387096774193
+      },
+      {
+       "color": "U",
+       "pips": 58,
+       "share": 0.725,
+       "sources": 30,
+       "target": 20,
+       "cover": 1.530612244897959
+      }
+     ],
+     "weakest": "U",
+     "fixing": 100,
+     "quality": 92,
+     "curve": 75,
+     "score": 89
+    },
+    "speed": {
+     "avgMv": 2.84,
+     "cheap": 32,
+     "high": 5,
+     "ramp": 9,
+     "rocks": 6,
+     "dorks": 0,
+     "rituals": 1,
+     "landRamp": 1,
+     "fastMana": 5
+    },
+    "consistency": {
+     "draw": 34,
+     "cheapDraw": 14,
+     "tutors": 3,
+     "recursion": 1
+    },
+    "interaction": {
+     "counters": 8,
+     "removal": 5,
+     "wipes": 3,
+     "protection": 1,
+     "graveHate": 0,
+     "stax": 7,
+     "free": 0,
+     "cheapAnswers": 10,
+     "instantShare": 75
+    },
+    "wins": {
+     "checked": true,
+     "combos": 8,
+     "infinite": 5,
+     "ending": 8,
+     "twoCard": 4,
+     "lines": 5,
+     "web": 5,
+     "throughCommander": 0,
+     "fastest": 9,
+     "lineCost": 5,
+     "printed": 5,
+     "massPump": 0
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "control",
+       "share": 33
+      },
+      {
+       "key": "spellslinger",
+       "share": 24
+      },
+      {
+       "key": "tokens",
+       "share": 15
+      }
+     ],
+     "typal": {
+      "type": "Human",
+      "count": 6,
+      "share": 33
+     },
+     "creatures": 18,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 6
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.5,
+      3.5,
+      4.3,
+      5.1,
+      5.7,
+      6.2,
+      6.7,
+      7.2,
+      7.7,
+      8.2,
+      8.7
+     ],
+     "commanderTurn": 2,
+     "winTurn": null,
+     "winBy": {
+      "4": 0,
+      "6": 2,
+      "8": 7,
+      "10": 13
+     }
+    },
+    "upgrade": {
+     "pricey": 25,
+     "medianRank": 575
+    }
+   },
+   "bracket": {
+    "fits": true,
+    "checklist": 3,
+    "estimate": "S",
+    "failed": []
+   }
+  },
+  {
+   "id": "pod:25",
+   "name": "Bria, Riptide Rogue",
+   "group": "pod",
+   "url": "https://archidekt.com/decks/25122050/bria_the_nutria_2",
+   "podId": 25,
+   "commanders": [
+    "Bria, Riptide Rogue"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
+   "points": 3,
+   "breakdown": {
+    "price_1_5": 3
+   },
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 132.97,
+   "gc": 0,
+   "salt": {
+    "total": 23.4,
+    "average": 0.31,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Veyran, Voice of Duality",
+      "salt": 0.73
+     },
+     {
+      "name": "Counterspell",
+      "salt": 0.7
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 97,
+    "average": 25,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 4.1,
+    "base": 2.9,
+    "raw": 13.2,
+    "pillars": {
+     "wins": 0,
+     "interaction": 45,
+     "salt": 13,
+     "synergy": 0
+    }
+   },
+   "profile": {
+    "manabase": {
+     "lands": 34,
+     "basics": 21,
+     "tapped": 3,
+     "fetches": 0,
+     "colors": [
+      {
+       "color": "U",
+       "pips": 46,
+       "share": 0.5679012345679012,
+       "sources": 28,
+       "target": 17,
+       "cover": 1.6387283236994221
+      },
+      {
+       "color": "R",
+       "pips": 35,
+       "share": 0.43209876543209874,
+       "sources": 25,
+       "target": 15,
+       "cover": 1.6763245033112584
+      }
+     ],
+     "weakest": "U",
+     "fixing": 100,
+     "quality": 91,
+     "curve": 100,
+     "score": 97
+    },
+    "speed": {
+     "avgMv": 2.36,
+     "cheap": 43,
+     "high": 2,
+     "ramp": 9,
+     "rocks": 5,
+     "dorks": 0,
+     "rituals": 1,
+     "landRamp": 0,
+     "fastMana": 6
+    },
+    "consistency": {
+     "draw": 24,
+     "cheapDraw": 16,
+     "tutors": 0,
+     "recursion": 3
+    },
+    "interaction": {
+     "counters": 5,
+     "removal": 8,
+     "wipes": 2,
+     "protection": 2,
+     "graveHate": 0,
+     "stax": 0,
+     "free": 1,
+     "cheapAnswers": 11,
+     "instantShare": 79
+    },
+    "wins": {
+     "checked": true,
+     "combos": 0,
+     "infinite": 0,
+     "ending": 0,
+     "twoCard": 0,
+     "lines": 0,
+     "web": 0,
+     "throughCommander": 0,
+     "fastest": null,
+     "lineCost": null,
+     "printed": 0,
+     "massPump": 1
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "spellslinger",
+       "share": 54
+      },
+      {
+       "key": "tokens",
+       "share": 13
+      },
+      {
+       "key": "aggro",
+       "share": 12
+      }
+     ],
+     "typal": {
+      "type": "Wizard",
+      "count": 15,
+      "share": 68
+     },
+     "creatures": 22,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "burn",
+      "count": 8
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.1,
+      2.5,
+      3.5,
+      4.4,
+      5.1,
+      5.8,
+      6.4,
+      6.9,
+      7.5,
+      8,
+      8.4,
+      8.9
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": null
+    },
+    "upgrade": {
+     "pricey": 16,
+     "medianRank": 736
+    }
+   },
+   "bracket": {
+    "fits": true,
+    "checklist": 2,
+    "estimate": "E",
+    "failed": []
    }
   },
   {

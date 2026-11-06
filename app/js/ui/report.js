@@ -20,9 +20,7 @@ export function copyReport() {
     t.cardsN + ': ' + state.result.stats.total_cards,
     t.archetype + ': ' + archName()];
   const b = state.result.bracket;
-  lines.push(t.brTile + ': ' + (!b.fits ? t.brNo : b.pending ? t.brPending : t.brYes));
   if (!b.pending) lines.push(t.brReadWotc + ': ' + b.checklist + ' · ' + t.brReadSb + ': ' + COMBO_TAGS[b.estimate].name + ' (' + COMBO_TAGS[b.estimate].bracket + ')');
-  for (const c of b.checks) if (!c.ok) lines.push('  ✕ ' + t['br_' + c.id]);
   for (const c of b.combos) lines.push('  ' + [...c.cards, ...c.filled].join(' + ') + ' [B' + COMBO_TAGS[c.tag].bracket + ' ' + COMBO_TAGS[c.tag].name + ']');
   const pf = state.result;
   if (pf.profile.wins.checked) lines.push(t.pfPower + ': ' + pf.power.score + '/10 · ' + PILLARS.map(k => t['pf_' + k] + ' ' + pf.power.pillars[k]).join(' · '));

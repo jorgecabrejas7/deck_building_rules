@@ -60,6 +60,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = REPO_ROOT / "data" / "combos.json"
+STEPS_DIR = OUT_PATH.parent / "combo_steps"
 SOURCE_URL = "https://json.commanderspellbook.com/variants.json"
 CARDS_URL = "https://backend.commanderspellbook.com/cards/?limit=100"
 MAX_CARDS = 5
@@ -214,6 +215,27 @@ def iter_variants(path):
             pos += 1
 
 
+def steps_shard(names):
+    """Which file holds a combo's steps. app/js/ui/combos.js computes the same value."""
+    h = 0
+    for ch in "|".join(names):
+        h = (h * 31 + ord(ch)) & 255
+    return f"{h:02x}"
+
+
+def write_steps(kept):
+    """One small file per shard, so a deck only downloads what its own combos need."""
+    shards = {}
+    for row, steps in kept:
+        # the same named pieces explain the same line, whatever fills a template slot
+        shards.setdefault(steps_shard(row["c"]), {}).setdefault("|".join(row["c"]), {k: v for k, v in steps.items() if v})
+    STEPS_DIR.mkdir(parents=True, exist_ok=True)
+    for shard, rows in shards.items():
+        (STEPS_DIR / f"{shard}.json").write_text(json.dumps(rows, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    size = sum(f.stat().st_size for f in STEPS_DIR.glob("*.json"))
+    print(f"steps: {sum(len(r) for r in shards.values())} combos in {len(shards)} files ({size / 1e6:.1f} MB)")
+
+
 def build(src_path):
     with open(src_path, encoding="utf-8") as f:
         head = f.read(300)
@@ -254,6 +276,10 @@ def build(src_path):
         must = sorted(u["card"]["name"].split(" // ")[0] for u in uses
                       if u.get("card") and u.get("mustBeCommander"))
         row = {"c": list(names), "r": result, "t": tag}
+        # how to play it goes to data/combo_steps/: the matcher never needs the text
+        steps = {"d": v.get("description") or "", "p": v.get("notablePrerequisites") or "",
+                 "e": v.get("easyPrerequisites") or "", "n": v.get("notes") or "", "x": v.get("manaNeeded") or "",
+                 "o": [f["name"] for f in feats], "z": sorted({z for u in uses for z in (u.get("zoneLocations") or [])})}
         if v.get("manaValueNeeded"):
             row["m"] = v["manaValueNeeded"]
         if flags:
@@ -268,12 +294,12 @@ def build(src_path):
         rank = (len(must), -TAG_RANK.get(tag, 0))
         prev = seen.get(key)
         if prev is None or rank < prev[1]:
-            seen[key] = (row, rank)
+            seen[key] = (row, rank, steps)
 
     # a combo that works with the named cards alone makes its template versions redundant
     seen = {k: v for k, v in seen.items() if not k[1] or (k[0], ()) not in seen}
 
-    used_tids = {tid for row, _ in seen.values() for _, _, tid in row.get("q", [])}
+    used_tids = {tid for row, _, _ in seen.values() for _, _, tid in row.get("q", [])}
     resolved, dropped_tids = {}, set()
     print(f"resolving {len(used_tids)} templates via Scryfall ...")
     for tid in sorted(used_tids):
@@ -284,8 +310,9 @@ def build(src_path):
         else:
             resolved[str(tid)] = cards
 
-    combos = [row for row, _ in seen.values()
-              if not any(tid in dropped_tids for _, _, tid in row.get("q", []))]
+    kept = [(row, steps) for row, _, steps in seen.values()
+            if not any(tid in dropped_tids for _, _, tid in row.get("q", []))]
+    combos = [row for row, _ in kept]
     if len(combos) < len(seen):
         print(f"dropped {len(seen) - len(combos)} combos whose templates could not be resolved")
     # fewest pieces first: the matcher keeps the first hit for each set of named cards
@@ -299,6 +326,7 @@ def build(src_path):
     OUT_PATH.parent.mkdir(exist_ok=True)
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")),
                         encoding="utf-8")
+    write_steps(kept)
     print(f"scanned {total} variants -> {len(combos)} unique combos "
           f"({OUT_PATH.stat().st_size / 1e6:.1f} MB) -> {OUT_PATH}")
 

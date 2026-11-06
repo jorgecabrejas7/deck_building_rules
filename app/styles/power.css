@@ -269,7 +269,7 @@ html[data-slide=back]{--slide:-1}
 /* the landing: planeswalkers shuffled into a deck by scrolling. Dark in both themes, a table at night. */
 .main>#hero{width:100%;margin:calc(var(--sp-5)*-1 - var(--sp-2)) 0 0;height:320vh;color:#f5f4f0}
 .main>#hero[hidden]{display:none}
-.hero-pin{position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;background:oklch(0.12 0.008 260);display:flex;flex-direction:column;align-items:center;perspective:1500px;opacity:calc(1 - var(--leave,0));contain:strict}
+.hero-pin{position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;background:oklch(0.12 0.008 260);display:flex;flex-direction:column;align-items:center;opacity:calc(1 - var(--leave,0));contain:strict}
 .hero-tint{position:absolute;inset:0;pointer-events:none}
 .hero-tint i{position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 62%,oklch(0.52 0.16 var(--tint) / .55),transparent 72%);opacity:0;transition:opacity 1.1s ease;will-change:opacity}
 .hero-tint i.on{opacity:1}
@@ -279,8 +279,8 @@ html[data-slide=back]{--slide:-1}
 .hero-cta{margin-top:var(--sp-2);min-height:48px;padding:0 var(--sp-6);border:0;border-radius:var(--r-pill);background:#f5f4f0;color:#14141a;font-size:var(--fs-ui);font-weight:600;cursor:pointer;transition:transform var(--dur) var(--ease),background var(--dur) var(--ease)}
 .hero-cta:hover{background:#fff;transform:translateY(-1px)}
 .hero-cta:active{transform:scale(.98)}
-.hero-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:20vh;transform-style:preserve-3d;pointer-events:none}
-.hero-ring{position:relative;width:min(14vw,25vh,210px);aspect-ratio:488/680;transform-style:preserve-3d;will-change:transform}
+.hero-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:20vh;pointer-events:none}
+.hero-ring{position:relative;width:min(14vw,25vh,210px);aspect-ratio:488/680}
 .hw-card{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
 .hw-card img,.hw-back,.hw-glare{position:absolute;inset:0;width:100%;height:100%;border-radius:4.75%/3.4%;backface-visibility:hidden}
 .hw-card img{box-shadow:0 24px 40px -18px oklch(0 0 0 / .7)}
@@ -376,3 +376,89 @@ body.dark .section-nav a[aria-current]{background:var(--fill-hover);box-shadow:n
 body[data-tab=informe] .sticky-wrap:not(.stuck){background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .pw .rd-cols{display:flex;gap:var(--sp-2);width:100%}
 .pw .rd-cols li{flex:1}
+
+/* colour: every deck wears its commander's identity; every reading keeps its own hue */
+body{--h1:265;--h2:200;--ink:oklch(.5 .16 var(--h1));--ink2:oklch(.5 .16 var(--h2));--wash:oklch(.955 .03 var(--h1));--on-ink:#fff;--s:.5;--c:.16}
+body.dark{--ink:oklch(.8 .14 var(--h1));--ink2:oklch(.8 .14 var(--h2));--wash:oklch(.27 .05 var(--h1));--on-ink:oklch(.16 .02 var(--h1));--s:.8;--c:.14}
+.report-stage{opacity:.55;filter:blur(64px) saturate(1.7)}
+.report-stage::after{content:"";position:absolute;inset:0;background:radial-gradient(50% 80% at 18% 30%,oklch(.6 .2 var(--h1)),transparent 70%),radial-gradient(50% 80% at 82% 30%,oklch(.6 .2 var(--h2)),transparent 70%)}
+.panel{background:color-mix(in oklab,var(--panel) 95%,oklch(.6 .16 var(--h1)))}
+.tab-btn.active{color:var(--ink)}
+.section-nav a[aria-current],body.dark .section-nav a[aria-current]{background:var(--ink);color:var(--on-ink);box-shadow:none}
+.rd-filter[aria-pressed=true]{background:var(--ink);color:var(--on-ink)}
+.seg-toggle-sm button.active,body.dark .seg-toggle-sm button.active{background:var(--ink);color:var(--on-ink)}
+.sum-bracket,.part-title{color:var(--ink)}
+.sum-bracket small{color:var(--muted)}
+.sum-cta{background:var(--ink);color:var(--on-ink)}
+.sum-watch li{background:var(--wash)}
+.pw-sec h4,.rd-section h4{color:var(--ink2)}
+a.rd-link,.combo-link,.sum-note a{color:var(--ink)}
+.rd-col{background:linear-gradient(var(--ink),var(--ink2))}
+.rd-bar.own .rd-bar-track i{background:linear-gradient(90deg,var(--ink),var(--ink2))}
+.mn-part .rd-bar-track i,.mn-odds .rd-bar-track i{background:linear-gradient(90deg,var(--ink),var(--ink2))}
+.gauge-fill{background:var(--ink)}
+/* the five tiles of the summary */
+.sum-tile{--t:var(--h1);border-top:3px solid oklch(var(--s) var(--c) var(--t))}
+.sum-tile:nth-child(1){--t:150}.sum-tile:nth-child(2){--t:28}.sum-tile:nth-child(3){--t:305}.sum-tile:nth-child(4){--t:75}.sum-tile:nth-child(5){--t:240}
+.sum-tile-v{color:oklch(var(--s) var(--c) var(--t))}
+.sum-tiles{border-block:0;gap:var(--sp-2)}
+.sum-tile:hover{background:oklch(var(--s) var(--c) var(--t) / .12)}
+/* the scale runs from calm to hot */
+.pw-steps li{background:oklch(var(--s) var(--c) var(--st) / .22);color:var(--text)}
+.pw-steps li[data-step="0"]{--st:150}.pw-steps li[data-step="1"]{--st:125}.pw-steps li[data-step="2"]{--st:95}.pw-steps li[data-step="3"]{--st:70}.pw-steps li[data-step="4"]{--st:45}.pw-steps li[data-step="5"]{--st:25}.pw-steps li[data-step="6"]{--st:350}
+.pw-steps li.on{background:oklch(var(--s) var(--c) var(--st));color:var(--on-ink)}
+/* each of the four values */
+[data-pillar]{--p:25}[data-pillar=interaction]{--p:240}[data-pillar=salt]{--p:75}[data-pillar=synergy]{--p:150}
+[data-pillar] .rd-value-n,[data-pillar] h4{color:oklch(var(--s) var(--c) var(--p))}
+[data-pillar] .rd-bar.own .rd-bar-track i{background:oklch(var(--s) var(--c) var(--p))}
+[data-pillar] .rd-pips i.on{background:oklch(var(--s) var(--c) var(--p))}
+/* card value: gold for what carries the deck, down to red */
+[data-lv="5"]{--lv:85}[data-lv="4"]{--lv:150}[data-lv="3"]{--lv:220}[data-lv="2"]{--lv:55}[data-lv="1"]{--lv:25}
+.rd-pips[data-lv] i.on{background:oklch(var(--s) var(--c) var(--lv))}
+.dk-face .rd-pips[data-lv] i.on{background:oklch(.8 .14 var(--lv))}
+.rd-filter[data-lv]:not([data-lv="0"])[aria-pressed=true]{background:oklch(var(--s) var(--c) var(--lv))}
+.rd-filter[data-lv]:not([data-lv="0"]) b{color:oklch(var(--s) var(--c) var(--lv))}
+.rd-filter[aria-pressed=true] b{color:inherit!important}
+.dk-group h3{color:var(--ink)}
+/* Spellbook's tags, each its own colour */
+.rd-tag{--toneBg:oklch(var(--s) var(--c) var(--tg) / .16);--toneFg:oklch(var(--s) var(--c) var(--tg));--toneBd:transparent;--tg:260}
+.tag-r{--tg:25}.tag-s{--tg:65}.tag-p{--tg:305}.tag-o{--tg:190}.tag-c{--tg:240}.tag-e{--tg:150}.tag-b{--tg:0}
+/* bracket rows: the number says what each criterion sets */
+.rd-check{grid-template-columns:32px minmax(0,1fr);align-items:start}
+.rd-badge{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:var(--fs-caption);font-weight:700;background:oklch(var(--s) var(--c) var(--bh) / .2);color:oklch(var(--s) var(--c) var(--bh));--bh:150}
+.rd-check.b3 .rd-badge{--bh:75}.rd-check.b4 .rd-badge{--bh:25}.rd-check.fail .rd-badge{--bh:0}.rd-check.wait .rd-badge{--bh:260}
+.rd-check .rd-rule{font-weight:600}
+/* a combo, laid out like a recipe */
+.cb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.cb{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:var(--sp-6);padding-block:var(--sp-6);border-top:1px solid var(--border)}
+.cb-arts{display:flex;align-items:flex-start;padding-right:30px}
+.cb-arts img,.cb-noart{flex:1 1 0;min-width:0;width:100%;aspect-ratio:488/680;border-radius:4.75%/3.4%;box-shadow:var(--shadow-1);transition:transform var(--dur) var(--ease);transform-origin:50% 100%}
+.cb-arts img+img,.cb-noart+img,img+.cb-noart{margin-left:-28%}
+.cb-arts[data-n="1"]{max-width:160px}
+.cb-arts img:first-child{transform:rotate(-2deg)}
+.cb-arts img:last-child:not(:first-child){transform:rotate(2deg)}
+.cb-arts img:hover{transform:translateY(-6px) rotate(0);z-index:2;position:relative}
+.cb-noart{display:flex;align-items:center;justify-content:center;padding:var(--sp-2);background:var(--wash);font-size:var(--fs-caption);text-align:center}
+.cb-body{display:flex;flex-direction:column;gap:var(--sp-3);min-width:0}
+.cb-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4)}
+.cb-head h4{margin:0;flex:1 1 240px;font-size:var(--fs-lead);font-weight:600;line-height:1.25;letter-spacing:var(--track-snug)}
+.cb-tag{margin:0;font-size:var(--fs-caption);line-height:1.45;color:var(--muted)}
+.cb-line{margin:0;font-weight:500}
+.cb-tip{margin:0;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);background:var(--wash);font-size:var(--fs-caption)}
+.cb-facts{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+.cb-facts li{padding:2px var(--sp-2);border-radius:var(--r-pill);background:var(--wash);font-size:var(--fs-caption)}
+.cb-steps{display:flex;flex-direction:column;gap:var(--sp-3)}
+.cb-steps section{display:flex;flex-direction:column;gap:var(--sp-1)}
+.cb-steps h5{margin:0;font-size:var(--fs-caption);font-weight:600;color:var(--ink2)}
+.cb-steps ul:not(.cb-facts),.cb-steps ol{margin:0;padding-left:var(--sp-5);font-size:var(--fs-body);line-height:1.5}
+.cb-steps li+li{margin-top:var(--sp-1)}
+.cb-steps .cb-facts li+li{margin-top:0}
+.cb-steps p{margin:0;font-size:var(--fs-caption);color:var(--muted)}
+.cb-sym{width:1em;height:1em;vertical-align:-.12em;margin-inline:1px}
+/* the paste box below the landing */
+#tab-load .load{position:relative}
+#tab-load .load::before{content:"";position:absolute;z-index:-1;inset:0 -20% 0;background:radial-gradient(40% 50% at 25% 45%,oklch(.7 .15 240 / .2),transparent),radial-gradient(40% 50% at 75% 45%,oklch(.7 .15 28 / .18),transparent),radial-gradient(40% 40% at 50% 80%,oklch(.7 .15 150 / .16),transparent);pointer-events:none}
+@media (max-width:760px){
+  .cb{grid-template-columns:minmax(0,1fr);gap:var(--sp-4)}
+  .cb-arts{max-width:240px;margin-inline:auto}
+}

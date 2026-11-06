@@ -46,7 +46,7 @@ export function renderVerdict() {
     (l.pending ? '<p class="sum-read">' + esc(t.brPending) + '</p>' : readingHtml(r, t)) +
     '<div class="sum-tiles">' +
       tile('points', t.sumPod, t['short_' + ev.tier], ev.points + ' ' + fill(t.sumOfBudget, { b: budget })) +
-      tile('bracket', t.sumWizards, b.pending ? '…' : String(b.checklist), b.pending ? t.brChecking : b.fits ? t.sumFits : t.sumNoFit) +
+      tile('bracket', t.sumWizards, b.pending ? '…' : String(b.checklist), b.pending ? t.brChecking : t['brName' + b.checklist]) +
       tile('combos', t.sumCombos, b.pending ? '…' : String(b.combos.length), wins.checked ? fill(t.sumEnding, { v: Math.ceil(wins.ending) }) : t.brChecking) +
       tile('power', t.sumSalt, r.salt ? String(Math.round(r.salt.total)) : '…', r.power.pillars.salt + ' / 100') +
       tile('mana', t.mnScore, String(r.profile.manabase.score), fill(t.mnOf, { v: '' }).trim()) +

@@ -21,7 +21,7 @@ const SORTS = {
 const GROUPS = [['value', 'dkByValue'], ['type', 'dkByType'], ['job', 'dkByJob'], ['mv', 'dkByMv'], ['color', 'dkByColor'], ['price', 'dkByPrice'], ['points', 'dkByPoints']];
 const PRICE_BANDS = [[1, '< €1'], [5, '€1–5'], [10, '€5–10'], [20, '€10–20'], [30, '€20–30'], [Infinity, '> €30']];
 const short = (name) => String(name).split(' // ')[0];
-const pips = (n) => '<span class="rd-pips" aria-hidden="true">' + LEVELS.slice().reverse().map(i => '<i' + (i <= n ? ' class="on"' : '') + '></i>').join('') + '</span>';
+const pips = (n) => '<span class="rd-pips" data-lv="' + n + '" aria-hidden="true">' + LEVELS.slice().reverse().map(i => '<i' + (i <= n ? ' class="on"' : '') + '></i>').join('') + '</span>';
 const manaText = (card) => (card.mana_cost || '').replace(/[{}]/g, '');
 const isLand = (c) => c.x.cls.type === 'L';
 function saltOf(c) { return (state.saltDb && state.saltDb.salt && !isLand(c) && state.saltDb.salt[short(c.name)]) || 0; }
@@ -115,7 +115,7 @@ export function renderDeck() {
   const t = T(), dv = state.deckView, all = values();
   const match = (c) => (!dv.level || c.level === dv.level) && (!dv.q || short(c.name).toLowerCase().includes(dv.q.toLowerCase()));
   const count = (l) => all.filter(c => c.level === l).reduce((s, c) => s + c.x.qty, 0);
-  const levelBtn = (l, label, n) => '<button type="button" class="rd-filter" data-level="' + l + '" aria-pressed="' + ((dv.level || 0) === l) + '">' + esc(label) + ' <b>' + n + '</b></button>';
+  const levelBtn = (l, label, n) => '<button type="button" class="rd-filter" data-lv="' + l + '" data-level="' + l + '" aria-pressed="' + ((dv.level || 0) === l) + '">' + esc(label) + ' <b>' + n + '</b></button>';
   const seg = (k, label) => '<button type="button" data-mode="' + k + '" class="' + (dv.mode === k ? 'active' : '') + '" aria-pressed="' + (dv.mode === k) + '">' + esc(t[label]) + '</button>';
   const hint = note(t);
   $('view-deck').innerHTML = '<div class="part-head"><div><h2 class="part-title">' + esc(t.dkT) + '</h2><p class="part-sub">' + esc(t.dkX) + '</p></div></div>' +

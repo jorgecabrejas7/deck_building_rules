@@ -5,20 +5,7 @@ import { $, esc } from './helpers.js';
 
 export function renderValidation() {
   const t = T(), r = state.result, lang = state.lang, el = $('validation');
-  // compact echo next to the analyze button: the full panel renders below the
-  // fold on the Load tab and is easy to miss before analyzing
-  const jump = $('validJump');
-  if (!r.validation.length) {
-    el.innerHTML = ''; el.hidden = true;
-    if (jump) jump.hidden = true;
-    return;
-  }
-  if (jump) {
-    const n = r.validation.length;
-    jump.hidden = false;
-    jump.textContent = '⚠ ' + n + ' ' + (n === 1 ? t.validJump1 : t.validJumpN) + ' ↓';
-    jump.onclick = () => el.scrollIntoView();
-  }
+  if (!r.validation.length) { el.innerHTML = ''; el.hidden = true; return; }
   el.hidden = false;
   el.innerHTML = '<div class="valid-box">' +
     '<h2 class="mini-title">' + t.validT + '</h2>' +

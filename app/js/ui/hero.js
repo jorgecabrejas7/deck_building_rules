@@ -47,13 +47,17 @@ export function initHero() {
     const spin = idle + p * 200;
     const R = Math.min(innerWidth * 0.36, innerHeight * 0.34), step = 360 / cards.length;
     let nearest = 0, best = -2;
+    const gather = smooth(clamp01((p - 0.42) / 0.45));
+    const rx = -7 * (1 - gather) + tiltX;
     cards.forEach((card, i) => {
       const a = spin + i * step, rad = a * Math.PI / 180;
       // each card leaves the ring in turn and lands flat on the pile, one above the last
       const land = smooth(clamp01((p - 0.42 - i * 0.03) / 0.22));
       const facing = ((a % 360) + 540) % 360 - 180;
-      const x = Math.sin(rad) * R * (1 - land), z = Math.cos(rad) * R * (1 - land) + i * 3 * land;
-      card.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + (-land * i * 1.5).toFixed(1) + 'px,' + z.toFixed(1) + 'px) rotateY(' + (facing * (1 - land)).toFixed(1) + 'deg)';
+      const x = Math.sin(rad) * R * (1 - land), z = Math.cos(rad) * R * (1 - land);
+      // every card has its own perspective and a painted order, so two can never cut through each other
+      card.style.transform = 'perspective(1500px) translateY(' + (gather * 6).toFixed(2) + 'vh) rotateX(' + rx.toFixed(2) + 'deg) rotateZ(' + tiltY.toFixed(2) + 'deg) translate3d(' + x.toFixed(1) + 'px,' + (-land * i * 2).toFixed(1) + 'px,' + z.toFixed(1) + 'px) rotateY(' + (facing * (1 - land)).toFixed(1) + 'deg)';
+      card.style.zIndex = land > 0.5 ? 3000 + i : Math.round(z) + 1500;
       if (Math.cos(rad) > best) { best = Math.cos(rad); nearest = i; }
       glares[i].style.transform = 'translate3d(' + (facing * 0.6).toFixed(1) + '%,0,0)';
     });
@@ -61,8 +65,6 @@ export function initHero() {
       if (front >= 0) lights[front].classList.remove('on');
       front = nearest; lights[front].classList.add('on');
     }
-    const gather = smooth(clamp01((p - 0.42) / 0.45));
-    ring.style.transform = 'translateY(' + (gather * 6).toFixed(2) + 'vh) rotateX(' + (-7 * (1 - gather) + tiltX).toFixed(2) + 'deg) rotateZ(' + tiltY.toFixed(2) + 'deg)';
     stage.style.setProperty('--copy', (1 - smooth(clamp01(p / 0.3))).toFixed(3));
     stage.style.setProperty('--leave', smooth(clamp01((p - 0.9) / 0.1)).toFixed(3));
   };

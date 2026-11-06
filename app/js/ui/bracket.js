@@ -30,7 +30,7 @@ const landNote = (b, t) => (b.landMaybe.length ? '<p class="rd-flag">' + ICON.wa
 function detail(c, t, lang) {
   switch (c.id) {
     case 'game_changers':
-      return { state: fill(t.brGcState, { v: c.value, m: c.max }), why: cardList(c.cards) };
+      return { state: String(c.value), why: cardList(c.cards) };
     case 'mass_land_denial':
       return !c.ok
         ? { state: fill(t.brCountState, { v: c.value }), why: cardList(c.cards) + combosOf(c.combos, t) }
@@ -40,7 +40,7 @@ function detail(c, t, lang) {
       if (c.looped.length) parts.push(text(fill(t.brWhyNoTurnsLoop, { c: names(c.looped) })));
       if (c.value > c.max) parts.push(text(fill(t.brWhyNoTurnsMany, { v: c.value, m: c.max })));
       if (c.combos.length) parts.push(text(t.brWhyTurnsCombo) + combosOf(c.combos, t));
-      return { state: c.value || c.combos.length ? fill(t.brGcState, { v: c.value, m: c.max }) : t.brNone,
+      return { state: c.value || c.combos.length ? String(c.value) : t.brNone,
         why: parts.join('') + cardList(c.cards) };
     }
     case 'combos': {
@@ -58,33 +58,34 @@ function detail(c, t, lang) {
   }
 }
 
+const CHECK_STATE = (c, waiting) => (waiting ? 'wait' : !c.ok && c.level === 0 ? 'fail' : 'b' + (c.level || 2));
+
 function rows(b, t, lang) {
-  // what fails reads first
-  return '<ul class="rd-checks">' + [...ORDER].sort((x, y) => b.failed.includes(y) - b.failed.includes(x)).map(id => {
+  // what sets the bracket reads first
+  return '<ul class="rd-checks">' + [...ORDER].sort((x, y) => b.checks.find(c => c.id === y).level - b.checks.find(c => c.id === x).level || (x === 'legality') - (y === 'legality')).map(id => {
     const c = b.checks.find(x => x.id === id);
     const d = detail(c, t, lang);
     const waiting = c.pending && c.ok;
-    return '<li class="rd-check ' + (waiting ? 'wait' : c.ok ? 'ok' : 'fail') + '">' +
-      (waiting ? ICON.wait : c.ok ? ICON.check : ICON.cross) +
+    const badge = id === 'legality' ? (c.ok ? ICON.check : ICON.cross) : waiting ? ICON.wait : esc(String(c.level || 2));
+    return '<li class="rd-check ' + CHECK_STATE(c, waiting) + '"><span class="rd-badge" title="' + esc(fill(t.brLevelTag, { v: c.level || 2 })) + '">' + badge + '</span>' +
       '<div class="rd-check-body"><div class="rd-check-head">' +
-        '<span class="rd-rule">' + esc(t['br_' + id]) + '<span class="vh"> — ' + esc(waiting ? t.brPending : c.ok ? t.brOk : t.brFail) + '</span></span>' +
-        '<span class="rd-state">' + esc(waiting ? t.brChecking : d.state) +
-          // the bracket this criterion alone would put the deck in
-          (c.level >= 3 && !waiting ? '<span class="rd-alone">' + esc(fill(t.brLevelTag, { v: c.level })) + '</span>' : '') + '</span>' +
+        '<span class="rd-rule">' + esc(t['br_' + id]) + '</span>' +
+        '<span class="rd-state">' + esc(waiting ? t.brChecking : d.state) + '</span>' +
       '</div>' + (d.why && !waiting ? '<div class="rd-evidence">' + d.why + '</div>' : '') + '</div></li>';
   }).join('') + '</ul>';
 }
 
-// The shortest route back into Bracket 3, in the words a player acts on.
-function cutsBlock(b, t) {
-  const { cards, choices } = b.cuts;
-  if (b.fits || (!cards.length && !choices.length)) return '';
-  const why = (c) => c.reasons.map(r => r === 'combos'
-    ? fill(c.combos === 1 ? t.brCutCombo : t.brCutCombos, { v: c.combos })
-    : t['brCut_' + r]).join(' · ');
-  return '<section class="rd-section"><h4>' + esc(t.brCutsT) + '</h4>' +
-    (cards.length ? '<ul class="rd-cuts">' + cards.map(c => '<li>' + cardName(c.card, 'rd-card') + '<span class="rd-q">' + esc(why(c)) + '</span></li>').join('') + '</ul>' : '') +
-    choices.map(c => text(fill(t['brChoice_' + c.id], { v: c.count })) + cardList(c.from)).join('') + '</section>';
+// Why the deck sits where it does: the criteria that set its bracket, in one sentence.
+function because(b, t) {
+  const top = b.checks.filter(c => c.id !== 'legality' && c.level === b.checklist && c.level >= 3);
+  if (!top.length) return fill(t.brFitsPlain, { v: b.checklist });
+  const part = (c) => {
+    if (c.id === 'game_changers') return fill(t.brBc_gc, { v: c.value });
+    if (c.id === 'mass_land_denial') return fill(t.brBc_mld, { c: names([...c.cards, ...c.combos.map(x => x.cards[0])].slice(0, 3)) });
+    if (c.id === 'extra_turns') return t.brBc_turns;
+    return c.combos.length ? fill(t.brBc_comboR, { v: c.combos.length }) : fill(t.brBc_comboS, { v: c.borderline.length });
+  };
+  return fill(t.brFitsBecause, { v: b.checklist, w: new Intl.ListFormat(state.lang).format(top.map(part)) });
 }
 
 // Things a table deserves to hear before game one, even when no rule is broken.
@@ -114,20 +115,14 @@ function legend(t) {
 // about theme and metagame, and the legend says so. Spellbook's estimate stays a quiet aside.
 export function renderBracket() {
   const t = T(), lang = state.lang, b = state.result.bracket;
-  const legal = (b.checks.find(c => c.id === 'legality').issues || [])[0];
-  const summary = b.pending ? t.brPending
-    : b.fits ? t.brSumFits
-    : fill(t.brSumFails, { v: b.failed.map(id => id === 'legality' ? MSG['valid_' + legal.id][lang](legal) : t['brShort_' + id]).join(', ') });
-  const verdict = '<span class="rd-tag ' + (!b.fits ? 'tone-warn' : b.pending ? 'tone-neutral' : 'tone-ok') + '">' +
-    (!b.fits ? ICON.cross + esc(t.brFitsNo) : b.pending ? esc(t.brChecking) : ICON.check + esc(t.brFits)) + '</span>';
   const sb = b.pending ? '' : '<p class="rd-apart">' + esc(t.brReadSb) + ': ' +
     (b.estimate === 'B' ? esc(t.brIllegal) : tagChip(b.estimate, t)) + '</p>';
 
   paint($('bracket'), '<div class="panel rd">' +
     answer({ label: t.brReadLabel, value: b.pending ? '…' : String(b.checklist),
-      sub: (b.pending ? '' : esc(t['brName' + b.checklist]) + ' ') + verdict,
-      body: '<p class="rd-why">' + esc(summary) + '</p>' + sb + landNote(b, t) }) +
-    rows(b, t, lang) + cutsBlock(b, t) +
+      sub: b.pending ? '' : esc(t['brName' + b.checklist]),
+      body: '<p class="rd-why">' + esc(b.pending ? t.brPending : because(b, t)) + '</p>' + sb + landNote(b, t) }) +
+    rows(b, t, lang) +
     '<div class="rd-folds">' + ruleZero(b, t) + legend(t) + '</div></div>');
 }
 
@@ -136,10 +131,7 @@ export function renderBracket() {
 // (and stays neutral for good under file://, where the check never runs).
 export function bracketTile() {
   const t = T(), b = state.result.bracket;
-  const tone = !b.fits ? 'tone-warn' : b.pending ? '' : 'tone-ok';
-  const value = b.pending ? t.brChecking : (b.fits ? '✓ ' + t.brYes : t.brNo);
-  return '<div class="panel stat-tile' + (tone ? ' toned ' + tone : '') + '"' +
-    (b.pending ? ' title="' + esc(t.brPending) + '"' : '') + '>' +
-    '<div class="tile-label">' + t.brTile + '</div>' +
-    '<div class="mono stat-value">' + value + '</div></div>';
+  return '<div class="panel stat-tile"' + (b.pending ? ' title="' + esc(t.brPending) + '"' : '') + '>' +
+    '<div class="tile-label">' + t.sumWizards + '</div>' +
+    '<div class="mono stat-value">' + (b.pending ? t.brChecking : b.checklist) + '</div></div>';
 }
