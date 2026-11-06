@@ -50,6 +50,7 @@ export const state = {
   cardTags: null,    // data/card_tags.json as name -> tags, loaded alongside it
   synergyData: null, // {key, table} for the current commander(s)
   study: null,       // data/deck_study.json: reference medians and the pod table
+  podHistory: null,  // data/pod_history.json: dated snapshots behind the pod's ranking
   podSort: { key: 'power', dir: -1 },
   cmdOpen: false,   // the commander picker stays folded until asked for
   comboFilter: 'all', comboAll: false, // bracket report: combo list filter + show-all

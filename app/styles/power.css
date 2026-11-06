@@ -462,3 +462,7 @@ a.rd-link,.combo-link,.sum-note a{color:var(--ink)}
   .cb{grid-template-columns:minmax(0,1fr);gap:var(--sp-4)}
   .cb-arts{max-width:240px;margin-inline:auto}
 }
+/* the pod's rank and its change since the last snapshot */
+.pod-move,.pod-new{margin-left:var(--sp-2);font-size:var(--fs-micro)}
+.pod-move{color:var(--ink2)}
+.pod-new{padding:1px var(--sp-1);border-radius:4px;background:var(--wash);color:var(--ink)}
