@@ -5,17 +5,19 @@
 # rename; the last 3 are kept. Files unchanged since the live release are hard links, so a release costs what changed.
 set -euo pipefail
 
+tmp=""
+trap '[ -z "$tmp" ] || rm -rf "$tmp"' EXIT
+
 # all in a function: git replaces this very file below, and bash would otherwise keep reading the new one
 main() {
   cd /srv/pod-checker/repo
   git fetch -q origin main
-  local sha last tmp rel
+  local sha last rel
   sha=$(git rev-parse origin/main)
   last=$(cat ../published 2>/dev/null || true)
   [ "$sha" != "$last" ] || return 0
 
   tmp=$(mktemp -d)
-  trap 'rm -rf "$tmp"' EXIT
   git archive "$sha" app rules data | tar -x -C "$tmp"
   rm -f "$tmp/data/pod_decks.sqlite"
   rel=$(date +%Y%m%d-%H%M%S)

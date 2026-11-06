@@ -1,10 +1,12 @@
-# Only what the site serves: the app, its rules and its data. The rest made deployments time out.
+# GitHub Pages only forwards to the real site now (pages-redirect.html).
 exclude:
+  - app
+  - rules
+  - data
   - cache
   - out
   - scripts
   - decks
   - docs
-  - data/pod_decks.sqlite
   - deploy
   - notebooks
