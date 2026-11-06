@@ -20,6 +20,7 @@ import { renderBracket } from './ui/bracket.js';
 import { renderCombos } from './ui/combos.js';
 import { renderProfile } from './ui/profile.js';
 import { renderDeck } from './ui/deck.js';
+import { renderEditBar } from './ui/edits.js';
 import { renderMana } from './ui/mana.js';
 import { renderTips } from './ui/tips.js';
 import { renderRamp } from './ui/ramp.js';
@@ -112,6 +113,7 @@ export function renderAll() {
       const art = r0 => (cardCache[r0] || {}).img_art;
       $('reportStage').style.backgroundImage = state.result.commanders[0] && art(state.result.commanders[0]) ? 'url("' + art(state.result.commanders[0]) + '")' : 'none';
       VIEW_RENDER[state.view]();
+      renderEditBar();
     }
   }
   if (state.tab === 'pod') renderPod();

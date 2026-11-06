@@ -75,7 +75,9 @@ export function renderBanner() {
     .filter(([k]) => k.startsWith('price')).reduce((sum, [, v]) => sum + v, 0) : 0;
   // cheaper printings are about points: the offer waits on the two views that talk about them
   const offerHere = state.view === 'summary' || state.view === 'points';
-  if (!state.result || state.tab !== 'informe' || (state.fetchSt === 'idle' && (!pricePts || !offerHere))) { el.innerHTML = ''; return; }
+  // new prices would move the figures the edit bar compares, so the offer waits for an unedited deck
+  const edited = state.edits && state.edits.undo.length;
+  if (!state.result || state.tab !== 'informe' || (state.fetchSt === 'idle' && (!pricePts || !offerHere || edited))) { el.innerHTML = ''; return; }
   if (state.fetchSt === 'idle') {
     el.innerHTML = '<button id="fetchBtn" class="price-pill">' + t.pricePill + '</button>';
     $('fetchBtn').onclick = startCheapest;

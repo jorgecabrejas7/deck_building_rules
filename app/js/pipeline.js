@@ -36,11 +36,12 @@ export async function analyze() {
     persistCache();
     if (run !== latestRun) return;
     state.deck = parsed;
+    state.edits = { undo: [], base: null, text: '' };
     state.combosData = null;
     recompute(notFound);
     state.fetchSt = 'idle';
     if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; }
-    Object.assign(state.deckView, { level: null, q: '', card: null, open: false });
+    Object.assign(state.deckView, { level: null, q: '', card: null, open: false, add: '', hits: null });
   } catch (e) {
     console.error(e);
     if (run !== latestRun) return;
@@ -76,12 +77,16 @@ export async function getCardTags() {
   if (!cardTags) cardTags = PodEngine.indexCardTags(await (await fetch('../data/card_tags.json')).json());
   return cardTags;
 }
+// Only the latest check may publish: an edit made during one has already changed the deck it read.
+let latestCheck = 0;
 export async function checkCombos() {
-  if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
+  if (!state.result) return;
+  const run = ++latestCheck;
   state.combosData = { status: 'checking', list: [] };
   renderAll();
   try {
-    const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), await getComboDb());
+    const db = await getComboDb();
+    const list = PodEngine.matchCombos(state.deck.entries.map(e => e.name), db);
     // salt is a nicety: a failed fetch leaves its panel waiting, never the combo check
     state.saltDb = await getSaltDb().catch(() => null);
     // without tags the profile reads card text, so a failed fetch only costs accuracy
@@ -89,12 +94,14 @@ export async function checkCombos() {
     state.landDenial = await getLandDenial();
     // only the Bracket 2 label depends on it, so a failed fetch costs no more than that
     state.precons = await getPrecons().catch(() => null);
-    state.combosData = { status: 'done', list, cardLists: comboDb, updated: comboDb.updated };
+    if (run !== latestCheck) return;
+    state.combosData = { status: 'done', list, cardLists: db, updated: db.updated };
     recompute();
     const inf = state.result.bracket.combos.filter(c => c.infinite).length;
     announce(inf ? T().srCombos + ' ' + inf : T().comboNone);
   } catch (e) {
     console.error(e);
+    if (run !== latestCheck) return;
     state.combosData = { status: 'error', list: [] };
     announce(T().comboErr);
   }
@@ -153,6 +160,7 @@ export function recompute(notFound) {
     bracket, profile, power, level, salt, synergy, whatIf, notFound: missing, validation };
   state.hand = null;
   state.tipsCache = null;
+  if (!state.edits.undo.length) state.edits.base = PodEngine.editFigures(state.result);
 }
 
 // EDHREC's page depends only on the commanders, so it is fetched once per pick. Its
