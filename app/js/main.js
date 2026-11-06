@@ -145,7 +145,8 @@ const __boot = () => {
       e.preventDefault(); el.click();
     }
   });
-  $('analyzeBtn').onclick = analyze;
+  // the player's own press is never the quiet background load: it goes to the report
+  $('analyzeBtn').onclick = () => { state.restoring = false; analyze(); };
   $('emptyPod').onclick = () => { state.tab = 'pod'; renderAll(); };
   $('archSel').onchange = (e) => { state.arch = e.target.value; renderAll(); };
   $('deckText').oninput = () => { state.error = null; renderInput(); saveSession(); };

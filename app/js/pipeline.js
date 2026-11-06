@@ -10,7 +10,12 @@ import { renderProfile } from './ui/profile.js';
 import { renderDeck } from './ui/deck.js';
 import { getSynergy } from './synergy.js';
 
+// Only the latest analysis may publish: a player pressing Analizar while the saved deck
+// loads gets their own deck, whichever one Scryfall answers first.
+let latestRun = 0;
+
 export async function analyze() {
+  const run = ++latestRun;
   const text = $('deckText').value;
   const det = PodEngine.detectInput(text);
   if (det.kind === 'moxfield') { state.error = 'mox'; renderInput(); return; }
@@ -19,7 +24,7 @@ export async function analyze() {
     let parsed;
     if (det.kind === 'archidekt') {
       try { parsed = await PodEngine.fetchArchidekt(det.id); }
-      catch (e) { console.error(e); state.error = 'archErr'; state.busy = false; renderInput(); return; }
+      catch (e) { console.error(e); if (run !== latestRun) return; state.error = 'archErr'; state.busy = false; renderInput(); return; }
     } else {
       parsed = PodEngine.parseDecklist(text);
     }
@@ -29,6 +34,7 @@ export async function analyze() {
       state.fi = { done: p.done, total: p.total, card: '' }; renderInput();
     });
     persistCache();
+    if (run !== latestRun) return;
     state.deck = parsed;
     state.combosData = null;
     recompute(notFound);
@@ -36,7 +42,9 @@ export async function analyze() {
     if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; }
     Object.assign(state.deckView, { level: null, q: '', card: null, open: false });
   } catch (e) {
-    console.error(e); state.error = 'netErr';
+    console.error(e);
+    if (run !== latestRun) return;
+    state.error = 'netErr';
   }
   state.busy = false;
   renderAll();
