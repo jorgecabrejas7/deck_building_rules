@@ -18,13 +18,17 @@ export async function analyze() {
   const run = ++latestRun;
   const text = $('deckText').value;
   const det = PodEngine.detectInput(text);
-  if (det.kind === 'moxfield') { state.error = 'mox'; renderInput(); return; }
   state.busy = true; state.error = null; renderInput();
   try {
     let parsed;
-    if (det.kind === 'archidekt') {
-      try { parsed = await PodEngine.fetchArchidekt(det.id); }
-      catch (e) { console.error(e); if (run !== latestRun) return; state.error = 'archErr'; state.busy = false; renderInput(); return; }
+    if (det.kind === 'archidekt' || det.kind === 'moxfield') {
+      try { parsed = await (det.kind === 'archidekt' ? PodEngine.fetchArchidekt : PodEngine.fetchMoxfield)(det.id); }
+      catch (e) {
+        console.error(e);
+        if (run !== latestRun) return;
+        state.error = det.kind === 'archidekt' ? 'archErr' : 'moxErr';
+        state.busy = false; renderInput(); return;
+      }
     } else {
       parsed = PodEngine.parseDecklist(text);
     }

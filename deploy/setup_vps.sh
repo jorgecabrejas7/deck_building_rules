@@ -37,7 +37,7 @@ Everything is served by Caddy at https://169-58-71-242.sslip.io/
 | Path | Service | Files | Deployed by |
 |---|---|---|---|
 | /play/ | Battle Factory | /srv/battle-arcade | battle-arcade repo, deploy/deploy.sh |
-| /pod/ | Pod Deck Checker | /srv/pod-checker | deck_building_rules repo, deploy/deploy.sh |
+| /pod/ | Pod Deck Checker | /srv/pod-checker | pushes to main, deploy/publish.sh from cron |
 | / | Training dashboard, Google login | /srv/rl-dashboard | scripts/dashboard_export.py |
 
 ## Adding a service
@@ -45,4 +45,4 @@ Everything is served by Caddy at https://169-58-71-242.sslip.io/
 2. Its routes in /etc/caddy/services/<name>.caddy, kept in that service's repo under deploy/.
 3. `sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile && sudo systemctl reload caddy`
 DOC
-echo "ok: /pod/ is served from /srv/pod-checker/site. Now run deploy/deploy.sh"
+echo "ok: /pod/ is served from /srv/pod-checker/site. Pushes to main now publish by themselves"

@@ -1,4 +1,3 @@
-import * as PodEngine from '../engine/index.js';
 import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { ARCH, SAMPLES } from './constants.js';
@@ -30,6 +29,5 @@ export function renderInput() {
     b.onclick = () => { $('deckText').value = SAMPLES[b.dataset.sample]; state.error = null; renderInput(); };
   const notice = $('inputNotice');
   if (state.error) { notice.hidden = false; notice.textContent = t[state.error] || state.error; }
-  else if (PodEngine.detectInput($('deckText').value).kind === 'moxfield') { notice.hidden = false; notice.textContent = t.mox; }
   else notice.hidden = true;
 }

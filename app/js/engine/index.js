@@ -5,6 +5,7 @@ export { evaluateDeck, validateDeck, whatIfCut, dialPoints } from "./rules.js";
 export { detectInput, parseDecklist, deckFingerprint } from "./decks.js";
 export { fetchCards, fetchCheapest, suggestCards, searchScryfall } from "./scryfall.js";
 export { fetchArchidekt } from "./archidekt.js";
+export { fetchMoxfield, parseMoxfield } from "./moxfield.js";
 export { isLegalCommander, isBackground, canPair, pairKinds, commanderCandidates,
   commanderOptions, normalizeCommanders, pickCommanders } from "./commander.js";
 export { evaluateBrackets, BRACKET3, COMBO_TAGS, tagRank } from "./bracket.js";

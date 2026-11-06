@@ -1,4 +1,4 @@
-# Pod Deck Checker at /pod/ (deck_building_rules repo, deploy/deploy.sh). Public: everything runs in the player's browser.
+# Pod Deck Checker at /pod/ (deck_building_rules repo). Public: the checker runs in the player's browser.
 # Installed in /etc/caddy/services/, which the site block of /etc/caddy/Caddyfile imports.
 # The app reads ../data and ../rules, so a release keeps those folders side by side and the page lives at /pod/app/.
 
@@ -6,8 +6,43 @@ redir /pod /pod/app/ 308
 redir /pod/ /pod/app/ 308
 
 handle_path /pod/* {
-	root * /srv/pod-checker/site
-	# every file revalidates: a deploy must never mix old and new modules (the app's sw.js does the same)
-	header Cache-Control "no-cache"
-	file_server
+	# These sites refuse browsers, so the server asks for one public deck at a time. The patterns only accept
+	# a deck id: this can never reach anything else. The player's address and cookies stay here.
+	@moxfield {
+		method GET
+		path_regexp moxfield ^/api/moxfield/([A-Za-z0-9_-]{1,64})$
+	}
+	handle @moxfield {
+		rewrite * /v3/decks/all/{re.moxfield.1}
+		reverse_proxy https://api2.moxfield.com {
+			header_up Host {upstream_hostport}
+			header_up User-Agent pod-deck-checker
+			header_up -Cookie
+			header_up -Referer
+			header_up -X-Forwarded-For
+		}
+	}
+	@archidekt {
+		method GET
+		path_regexp archidekt ^/api/archidekt/([0-9]{1,12})$
+	}
+	handle @archidekt {
+		rewrite * /api/decks/{re.archidekt.1}/
+		reverse_proxy https://archidekt.com {
+			header_up Host {upstream_hostport}
+			header_up User-Agent pod-deck-checker
+			header_up -Cookie
+			header_up -Referer
+			header_up -X-Forwarded-For
+		}
+	}
+	handle /api/* {
+		respond 404
+	}
+	handle {
+		root * /srv/pod-checker/site
+		# every file revalidates: a deploy must never mix old and new modules (the app's sw.js does the same)
+		header Cache-Control "no-cache"
+		file_server
+	}
 }

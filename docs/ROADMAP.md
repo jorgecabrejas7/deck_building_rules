@@ -2,7 +2,7 @@
 
 Every feature worth considering for the checker, from commandersalt.com (CS), deckcheck.co (DC) and our own ideas. Update the status in the same commit that changes it.
 
-**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Commander Spellbook alone rates each combo, and a two-card line at 6 mana or less a turn is only a tip. The deck reads where its strength puts it, with anything above that bracket listed as worth a look (Spellbook's combo labels, cards that may deny lands, game changers) instead of raising it. Only mass land denial, as sorted by hand in `data/land_denial.json`, sets Bracket 4 on its own. Precons read on strength like any deck: the scale is fitted on all 198 (`data/precons.json`), so 193 land at Bracket 2, and the few above are real exceptions such as Creative Energy. Pages describe a deck rather than judge it: they say which bracket it fits and why, never what to cut to reach another bracket. The way back into the pod stays, in Puntos. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
+**Standing decisions:** a static app on Jorge's server, whose only server-side part is a route that fetches one public deck from sites that refuse browsers. No AI for now. Pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Commander Spellbook alone rates each combo, and a two-card line at 6 mana or less a turn is only a tip. The deck reads where its strength puts it, with anything above that bracket listed as worth a look (Spellbook's combo labels, cards that may deny lands, game changers) instead of raising it. Only mass land denial, as sorted by hand in `data/land_denial.json`, sets Bracket 4 on its own. Precons read on strength like any deck: the scale is fitted on all 198 (`data/precons.json`), so 193 land at Bracket 2, and the few above are real exceptions such as Creative Energy. Pages describe a deck rather than judge it: they say which bracket it fits and why, never what to cut to reach another bracket. The way back into the pod stays, in Puntos. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
 
@@ -57,7 +57,7 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Feature | Source | Status |
 |---|---|---|
 | Paste and Archidekt import | both | ✅ |
-| Moxfield URL | both | 🅿️ blocks browsers; paste works |
+| Moxfield URL | both | ✅ through the server; paste if Moxfield refuses (no official API) |
 | MTGGoldfish, TappedOut, ManaBox text formats | DC | ⬜ M5 |
 | Precon browser with tier, bracket, power | DC | ⬜ M5 |
 | All precons, from MTGJSON (198, weekly) | DC | ✅ fit and recognition; browser still M5 |
@@ -80,7 +80,7 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Saved deck versions in the browser, score history | DC | ⬜ M6 |
 
 ### Parked until server/AI is decided
-Written synopsis and mulligan guide · chat assistant with memory · roast · rules Q&A · new-set impact report · Moxfield import · plain-English card search.
+Written synopsis and mulligan guide · chat assistant with memory · roast · rules Q&A · new-set impact report · plain-English card search.
 
 ### Skip, with reason
 - Accounts, cloud decks, comments, public visibility, public API: pod-first.
@@ -94,7 +94,7 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Cargar page, where every visit starts. Each report takes its colours from the commander's identity (`--h1`, `--h2`). The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
 
 ## Where it runs
-Two copies, each published on its own: GitHub Pages on every push to main, and https://169-58-71-242.sslip.io/pod/ through `deploy/deploy.sh`, which publishes the last commit. The server's services and how to add one are in `/srv/README.md` there.
+https://169-58-71-242.sslip.io/pod/ is the site. The server publishes `origin/main` by itself within 5 minutes of a push (`deploy/publish.sh`, from cron). The Caddy routes are in `deploy/pod.caddy`; changing them needs Jorge's sudo. The old GitHub Pages address forwards there. The server's services and how to add one are in `/srv/README.md`.
 
 ## Where to pick up
 The next milestone is M4. Read the standing decisions above first, and check the open questions below before changing any score.

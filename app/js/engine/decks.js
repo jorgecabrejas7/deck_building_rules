@@ -20,7 +20,8 @@ export function detectInput(text) {
   const t = text.trim();
   let m = t.match(/archidekt\.com\/decks\/(\d+)/i);
   if (m) return { kind: "archidekt", id: m[1] };
-  if (/moxfield\.com/i.test(t)) return { kind: "moxfield" };
+  m = t.match(/moxfield\.com\/decks\/([A-Za-z0-9_-]+)/i);
+  if (m) return { kind: "moxfield", id: m[1] };
   return { kind: "list" };
 }
 

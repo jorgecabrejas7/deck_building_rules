@@ -13,9 +13,9 @@ Notes:
   - The script uses the public Scryfall API for price lookups (no API key required). It uses the 'named' endpoint with exact card name matching and prefers usd prices.
   - Archidekt rate limits may apply; the script adds a small delay between Scryfall requests.
 
-## Pod Deck Checker (app/ — hosted on GitHub Pages)
+## Pod Deck Checker (app/)
 
-Live at: https://jorgecabrejas7.github.io/deck_building_rules/app/
+Live at: https://169-58-71-242.sslip.io/pod/ (pushes to main publish there by themselves; see deploy/)
 
 Web app for the pod — native ES modules, no build step: app/index.html +
 app/styles/ (tokens/layout/components/mobile) + app/js/engine/ (pure,

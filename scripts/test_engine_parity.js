@@ -464,6 +464,18 @@ for (const [label] of vBad) console.log(`POWER LEVEL FAIL: ${label}`);
 console.log(`Power level: ${V_CASES.length - vBad.length}/${V_CASES.length} correct`);
 if (vBad.length) fails++;
 
+// (n) Moxfield links.
+const moxDeck = PodEngine.parseMoxfield({ name: "T", boards: {
+  commanders: { cards: { a: { quantity: 1, card: { name: "Boss" } } } },
+  mainboard: { cards: { b: { quantity: 2, card: { name: "Island" } } } },
+  sideboard: { cards: { c: { quantity: 1, card: { name: "Mana Crypt" } } } },
+  maybeboard: { cards: { d: { quantity: 1, card: { name: "Sol Ring" } } } } } });
+const moxOk = moxDeck.commanders.join() === "Boss" && moxDeck.entries.map(e => e.name + e.quantity).join() === "Boss1,Island2" &&
+  PodEngine.detectInput("https://www.moxfield.com/decks/Xgl5XCjm-hk_eXV").id === "Xgl5XCjm-hk_eXV" &&
+  PodEngine.detectInput("see moxfield.com for this").kind === "list";
+console.log(`Moxfield links: ${moxOk ? "correct" : "FAIL"}`);
+if (!moxOk) fails++;
+
 // (m) land drop odds.
 const oddsOk = Math.abs(PodEngine.atLeastOdds(10, 4, 1, 3) - PodEngine.drawOdds(10, 4, 3)) < 1e-9 && PodEngine.atLeastOdds(10, 4, 5, 8) === 0 && Math.abs(PodEngine.atLeastOdds(4, 2, 2, 2) - 1 / 6) < 1e-9;
 console.log(`Land odds: ${oddsOk ? "correct" : "FAIL"}`);
