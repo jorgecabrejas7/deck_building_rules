@@ -1,3 +1,5 @@
+import { addVersion } from './engine/history.js';
+
 export const store = {
   get lang(){ return localStorage.getItem('pdc_lang') || 'es'; },
   set lang(v){ localStorage.setItem('pdc_lang', v); },
@@ -30,6 +32,19 @@ export function loadSession(){
     if (!s || typeof s !== 'object') return null;
     return s;
   } catch (e) { return null; }
+}
+
+// ---- deck history: one list of versions per commander, card images never stored ----
+const historyKey = (commanders) => 'pdc_history_v1:' + [...commanders].sort().join('|');
+export function loadHistory(commanders){
+  try {
+    const v = JSON.parse(localStorage.getItem(historyKey(commanders)));
+    return Array.isArray(v) ? v.filter(x => x && Array.isArray(x.cards)) : [];
+  } catch (e) { return []; }
+}
+// A full or blocked store only costs this version: the analysis never depends on it.
+export function saveVersion(commanders, version){
+  try { localStorage.setItem(historyKey(commanders), JSON.stringify(addVersion(loadHistory(commanders), version))); } catch (e) {}
 }
 
 export const state = {

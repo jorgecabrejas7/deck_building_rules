@@ -1,6 +1,6 @@
 import * as PodEngine from './engine/index.js';
 import { RULES } from './rules.js';
-import { state, cardCache, persistCache } from './state.js';
+import { state, cardCache, persistCache, saveVersion } from './state.js';
 import { T } from './i18n.js';
 import { $, announce } from './ui/helpers.js';
 import { renderInput } from './ui/input.js';
@@ -78,6 +78,7 @@ export async function getCardTags() {
 }
 export async function checkCombos() {
   if (!state.result || (state.combosData && state.combosData.status === 'checking')) return;
+  const deck = state.deck;
   state.combosData = { status: 'checking', list: [] };
   renderAll();
   try {
@@ -91,6 +92,8 @@ export async function checkCombos() {
     state.precons = await getPrecons().catch(() => null);
     state.combosData = { status: 'done', list, cardLists: comboDb, updated: comboDb.updated };
     recompute();
+    // a check outlived by a newer analysis must not record that deck with these combos
+    if (state.deck === deck) recordVersion();
     const inf = state.result.bracket.combos.filter(c => c.infinite).length;
     announce(inf ? T().srCombos + ' ' + inf : T().comboNone);
   } catch (e) {
@@ -99,6 +102,13 @@ export async function checkCombos() {
     announce(T().comboErr);
   }
   renderAll();
+}
+
+function recordVersion() {
+  const r = state.result;
+  if (r.level.pending || !r.commanders.length) return;
+  saveVersion(r.commanders, { date: new Date().toISOString(), points: r.evalRes.points, power: r.level.score,
+    bracket: r.level.bracket, cards: state.deck.entries.map(e => [e.name, e.quantity]) });
 }
 
 export function recompute(notFound) {

@@ -1,4 +1,5 @@
-import { state } from '../state.js';
+import { state, loadHistory } from '../state.js';
+import { versionTimeline } from '../engine/history.js';
 import { T } from '../i18n.js';
 import { RULES } from '../rules.js';
 import { ARCH, CATS, EXTRA_PTS, MSG, dialName } from './constants.js';
@@ -35,6 +36,20 @@ export function readingHtml(r, t) {
 const tile = (go, label, value, sub) => '<a class="sum-tile" href="#' + go + '" data-go="' + go + '"><span class="sum-tile-l">' + esc(label) + '</span>' +
   '<span class="sum-tile-v">' + esc(value) + '</span><span class="sum-tile-s">' + esc(sub) + '</span></a>';
 
+// The deck's saved versions, newest first: numbers and what changed, with no judgement on either.
+function historyHtml(r, t) {
+  const versions = versionTimeline(loadHistory(r.commanders));
+  if (!versions.length) return '';
+  const cards = (label, list, cls) => list.length ? '<p class="hist-cards ' + cls + '"><b>' + esc(label) + '</b> ' +
+    esc(list.map(c => (c.n > 1 ? c.n + ' ' : '') + c.name).join(' · ')) + '</p>' : '';
+  return '<section class="hist"><h3 class="mini-title">' + esc(t.hsT) + '</h3><p class="sum-note">' + esc(t.hsX) + '</p><ol class="hist-list">' +
+    versions.map(v => '<li><p class="hist-head"><time datetime="' + esc(v.date) + '">' +
+      esc(new Date(v.date).toLocaleDateString(state.lang, { day: 'numeric', month: 'short', year: 'numeric' })) + '</time>' +
+      '<span>' + esc(fill(t.hsNums, { p: v.points, b: v.bracket, s: v.power })) + '</span></p>' +
+      (v.diff ? cards(t.hsAdded, v.diff.added, 'hist-add') + cards(t.hsCut, v.diff.cut, 'hist-cut') : '<p class="hist-cards">' + esc(t.hsOldest) + '</p>') +
+      '</li>').join('') + '</ol></section>';
+}
+
 export function renderVerdict() {
   const t = T(), r = state.result, ev = r.evalRes, l = r.level, b = r.bracket;
   const budget = RULES.tiers.tier2.max_points, out = ev.tier === 'above';
@@ -53,7 +68,7 @@ export function renderVerdict() {
     '</div>' +
     '<div class="sum-pod"><p>' + esc(reason(r, t)) + (lines.length ? ' ' + esc(lines[0]) + (lines.length > 1 ? ' +' + (lines.length - 1) : '') : '') + '</p>' +
       '<a class="sum-cta" href="#points" data-go="points">' + esc(out ? t.sumBack : t.sumImprove) + ' →</a></div>' +
-    '</section>';
+    '</section>' + historyHtml(r, t);
 }
 
 // The coach's read of the deck's parts against its archetype: quiet polish, never the
