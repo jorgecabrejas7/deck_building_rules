@@ -12,7 +12,7 @@ export const bannedCards = (r) => r.evalRes.violations.filter(v => v.id === 'ban
 export const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 export function tierTone(k) {
-  return { tier1: 'tone-ok', tier2: 'tone-warn', above: 'tone-bad' }[k];
+  return { tier1: 'tone-ok', tier2: 'tone-warn', above: 'tone-neutral' }[k];
 }
 export function archKey() {
   if (state.arch !== 'auto') return state.arch;

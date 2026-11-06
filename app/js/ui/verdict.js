@@ -21,35 +21,39 @@ function violationLines(r, lang) {
     v.id === 'conditional' ? (MSG.conditional[v.condId] ? MSG.conditional[v.condId][lang](v) : v.condId) : MSG[v.id][lang](v));
 }
 
-function spendLine(r, t, lang) {
-  const spends = Object.entries(r.evalRes.breakdown).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
-  return spends.length ? fill(t.vSpends, { c: spends.map(([k, v]) => (EXTRA_PTS[k] ? EXTRA_PTS[k][lang] : dialName(k, lang)) + ' +' + v).join(', ') }) : '';
-}
-
-function powerLine(r, t) {
+// Why it reads where it does, and what a table may want to look at: shared with Poder.
+export function readingHtml(r, t) {
   const l = r.level;
-  return l.pending ? t.brPending : fill(t.vPowerLine, { b: l.bracket, v: l.score });
+  const lead = l.floor ? fill(t.readFloor, { b: l.powerBracket }) : l.watch.length ? t.readWatch : fill(t.readFits, { b: l.bracket });
+  const item = (w) => fill(t['watch_' + (w.kind === 'combo' ? w.tag : w.kind)], { c: w.items.slice(0, 3).join(' · ') + (w.items.length > 3 ? ' +' + (w.items.length - 3) : '') });
+  return (l.precon ? '<p class="sum-note">' + esc(fill(t.readPrecon, { c: l.precon.name })) + '</p>' : '') +
+    '<p class="sum-read">' + esc(lead) + '</p>' +
+    (l.watch.length ? '<ul class="sum-watch">' + l.watch.map(w => '<li>' + esc(item(w)) + '</li>').join('') + '</ul>' : '') +
+    (l.tips.length ? '<p class="sum-note"><b>' + esc(t.readTipT) + '.</b> ' + esc(fill(t.tipOnCurve, { c: l.tips.slice(0, 3).join(' · ') })) + '</p>' : '');
 }
 
-function bracketLine(r, t) {
-  const b = r.bracket;
-  if (b.pending) return t.brPending;
-  return b.fits ? fill(t.vBracketOk, { v: b.checklist })
-    : fill(t.vBracketNo, { v: b.checklist, w: b.failed.map(id => t['brShort_' + id]).join(', ') });
-}
+const tile = (go, label, value, sub) => '<a class="sum-tile" href="#' + go + '" data-go="' + go + '"><span class="sum-tile-l">' + esc(label) + '</span>' +
+  '<span class="sum-tile-v">' + esc(value) + '</span><span class="sum-tile-s">' + esc(sub) + '</span></a>';
 
 export function renderVerdict() {
-  const t = T(), r = state.result, lang = state.lang, ev = r.evalRes;
-  const lines = violationLines(r, lang), spend = spendLine(r, t, lang);
-  const subs = lines.map(l => '<p class="vh-sub">✕ ' + esc(l) + '</p>').join('') + (spend ? '<p class="vh-sub">' + esc(spend) + '</p>' : '');
-  $('verdict').innerHTML = '<div class="verdict-hero ' + tierTone(ev.tier) + '">' +
-    '<div class="vh-top"><h2 class="vh-tier">' + esc(t[ev.tier]) + '</h2>' +
-    '<span class="vh-power mono">' + ev.points + ' <small>/ ' + RULES.tiers.tier2.max_points + ' ' + esc(t.pts.toLowerCase()) + '</small></span></div>' +
-    '<p class="vh-why">' + esc(reason(r, t)) + '</p>' +
-    (subs ? '<div class="vh-subs">' + subs + '</div>' : '') +
-    '<a class="vh-action" href="#points" data-go="points">' + esc(ev.tier === 'above' ? t.vActionOut : t.vActionIn) + ' →</a>' +
-    '<div class="vh-also"><a class="vh-bracket" href="#power" data-go="power">' + esc(powerLine(r, t)) + '</a>' +
-    '<a class="vh-bracket" href="#bracket" data-go="bracket">' + esc(bracketLine(r, t)) + '</a></div></div>';
+  const t = T(), r = state.result, ev = r.evalRes, l = r.level, b = r.bracket;
+  const budget = RULES.tiers.tier2.max_points, out = ev.tier === 'above';
+  const lines = violationLines(r, state.lang);
+  const wins = r.profile.wins;
+  $('verdict').innerHTML = '<section class="sum">' +
+    '<p class="sum-label">' + esc(t.pfPracticalLabel) + '</p>' +
+    '<h2 class="sum-bracket">' + (l.pending ? '…' : esc(l.bracket)) + '<small>' + esc(fill(t.pfScore, { v: l.score })) + '</small></h2>' +
+    (l.pending ? '<p class="sum-read">' + esc(t.brPending) + '</p>' : readingHtml(r, t)) +
+    '<div class="sum-tiles">' +
+      tile('points', t.sumPod, t['short_' + ev.tier], ev.points + ' ' + fill(t.sumOfBudget, { b: budget })) +
+      tile('bracket', t.sumWizards, b.pending ? '…' : String(b.checklist), b.pending ? t.brChecking : b.fits ? t.sumFits : t.sumNoFit) +
+      tile('combos', t.sumCombos, b.pending ? '…' : String(b.combos.length), wins.checked ? fill(t.sumEnding, { v: Math.ceil(wins.ending) }) : t.brChecking) +
+      tile('power', t.sumSalt, r.salt ? String(Math.round(r.salt.total)) : '…', r.power.pillars.salt + ' / 100') +
+      tile('mana', t.mnScore, String(r.profile.manabase.score), fill(t.mnOf, { v: '' }).trim()) +
+    '</div>' +
+    '<div class="sum-pod"><p>' + esc(reason(r, t)) + (lines.length ? ' ' + esc(lines[0]) + (lines.length > 1 ? ' +' + (lines.length - 1) : '') : '') + '</p>' +
+      '<a class="sum-cta" href="#points" data-go="points">' + esc(out ? t.sumBack : t.sumImprove) + ' →</a></div>' +
+    '</section>';
 }
 
 // The coach's read of the deck's parts against its archetype: quiet polish, never the

@@ -35,7 +35,6 @@ export function loadSession(){
 export const state = {
   lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
   arch: 'auto', cf: 'all', curveBin: null, hl: null, openArch: null, tab: 'load', view: 'summary',
-  landing: true,    // a fresh visit starts on the landing, even with a saved deck
   restoring: false, // analyzing the saved deck behind the landing, without leaving it
   deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false },
   deck: null,        // {entries, commanders, deckName}

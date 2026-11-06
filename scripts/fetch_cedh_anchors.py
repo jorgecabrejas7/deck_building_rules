@@ -12,8 +12,8 @@ from pathlib import Path
 from pod_decks import fetch_archidekt
 
 OUT_PATH = Path(__file__).resolve().parent.parent / "data" / "anchors_cedh.json"
-# Among Archidekt's most viewed lists with "cEDH" in the name, spread over strategies.
-DECK_IDS = [1727139, 3384924, 96159, 5662629, 6541122, 6541086, 6606120, 4763518]
+# Among Archidekt's most viewed lists with "cEDH" in the name, spread over strategies, with no banned card.
+DECK_IDS = [1727139, 3384924, 96159, 5662629, 4763518, 4383998, 7307169, 1624978, 2565352]
 
 
 def main():

@@ -33,7 +33,7 @@ export async function analyze() {
     state.combosData = null;
     recompute(notFound);
     state.fetchSt = 'idle';
-    if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; state.landing = false; }
+    if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; }
     Object.assign(state.deckView, { level: null, q: '', card: null, open: false });
   } catch (e) {
     console.error(e); state.error = 'netErr';
@@ -128,7 +128,8 @@ export function recompute(notFound) {
   const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
   const power = PodEngine.computePower(profile, stats, salt);
   const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!combos && !!salt, floor: combos ? bracket.floor : null,
-    precon: state.precons ? PodEngine.matchPrecon(resolved, state.precons) : null });
+    precon: state.precons ? PodEngine.matchPrecon(resolved, state.precons) : null,
+    combos: combos ? bracket.combos : [], landMaybe: bracket.landMaybe, gameChangers: bracket.checks.find(c => c.id === 'game_changers').cards });
   const synergy = synergyFor(cardsInfo, commanders);
   // what-if cut deltas for every card that drives a points dial or violation
   const drivingNames = new Set();

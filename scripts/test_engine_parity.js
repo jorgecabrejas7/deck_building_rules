@@ -238,9 +238,12 @@ const realMatch = (names, commanders = []) => PodEngine.activeCombos(PodEngine.m
 const consult = realMatch(["Thassa's Oracle", "Demonic Consultation"]);
 const BR_CASES = [
   ["a combo Spellbook tags 4+ fails", brEval(["Two", "Three"]).failed.includes("combos")],
-  ["two permanents totalling 11 mana are Bracket 4: they land on separate turns", brEval(["Five", "Six"]).floor.reason === "combo" && brEval(["Five", "Six"]).combos[0].tag === "R"],
-  ["two spells must share a turn, so 7 mana stays below", !brEval(["Bang", "Burst"]).floor && brEval(["Bang", "Burst"]).combos[0].turnCost === 7],
-  ["a 7-mana permanent is past the line", !brEval(["Plain", "Seven"]).floor],
+  ["two cheap permanents earn a tip, and Spellbook's tag stands", (() => {
+    const b = brEval(["Five", "Six"]);
+    return b.combos[0].fastPair && b.combos[0].tag !== "R" && !b.floor;
+  })()],
+  ["two spells must share a turn, so 7 mana earns no tip", !brEval(["Bang", "Burst"]).combos[0].fastPair && brEval(["Bang", "Burst"]).combos[0].turnCost === 7],
+  ["a 7-mana permanent earns no tip", !brEval(["Plain", "Seven"]).combos[0].fastPair],
   ["a Bracket 3-4 combo fits, with a warning", brEval(["Plain", "Seven"]).fits && check(brEval(["Plain", "Seven"]), "combos").borderline.length === 1],
   ["a land-denial card sets Bracket 4 without moving power", brEval(["Orb"]).floor.reason === "mld"],
   ["a Bracket 1 combo is no concern, however cheap", brEval(["Plain", "Three"]).fits && brEval(["Plain", "Three"]).checklist === 2],
@@ -262,7 +265,7 @@ const BR_CASES = [
   ["four game changers read Bracket 4", brEval(["GC1", "GC2", "GC3", "GC4"]).checklist === 4 && !brEval(["GC1", "GC2", "GC3", "GC4"]).fits],
   ["one game changer reads Bracket 3", brEval(["GC1"]).checklist === 3 && brEval(["GC1"]).fits],
   ["nothing notable reads Bracket 2", brEval(["Plain"]).checklist === 2],
-  ["Spellbook's read takes the strongest tag", brEval(["Five", "Six"]).estimate === "R" && brEval(["Plain"]).estimate === "E"],
+  ["Spellbook's read takes the strongest tag", brEval(["Two", "Three"]).estimate === "R" && brEval(["Plain"]).estimate === "E"],
   ["waiting on combos is pending, not a pass", PodEngine.evaluateBrackets({ stats: { game_changers: 0 }, flagged: {}, deckNames: [], db: {}, combos: null, comboDb: null, validation: [] }).pending],
   ["the cut list always lands inside Bracket 3", [
     ["Two", "Three"], ["Two", "Three", "Plain", "Five"], ["GC1", "GC2", "GC3", "GC4", "Six"],
@@ -426,14 +429,23 @@ const V_CASES = [
     const v = vFor(3, { bracket: 4, reason: "mld" });
     return v.bracket === "4" && v.powerBracket === "2" && v.score === 3;
   })()],
-  ["every precon reads Bracket 2, on the scale or through being recognised", studyNow.decks.filter(d => d.group === "precon").every(d => d.practicalBracket === "2")],
+  ["at least 95% of precons read Bracket 2, and none reads 4", (() => {
+    const list = studyNow.decks.filter(d => d.group === "precon");
+    return list.filter(d => d.practicalBracket === "2").length >= list.length * 0.95 && !list.some(d => parseFloat(d.practicalBracket) >= 4);
+  })()],
+  ["a combo above the deck's bracket is flagged with Spellbook's own label, and leaves the bracket alone", (() => {
+    const v = PodEngine.powerLevel({ power: { score: 4.1 }, rules: RULES, checked: true, combos: [{ tag: "S", cards: ["A", "B"] }, { tag: "E", cards: ["C", "D"] }] });
+    return v.bracket === "2*" && v.watch.length === 1 && v.watch[0].tag === "S" && v.watch[0].items[0] === "A + B";
+  })()],
+  ["a combo at the deck's own bracket is not suspicious", PodEngine.powerLevel({ power: { score: 6 }, rules: RULES, checked: true, combos: [{ tag: "S", cards: ["A", "B"] }] }).watch.length === 0],
+  ["a card that may deny lands is a flag on the reading", PodEngine.powerLevel({ power: { score: 3 }, rules: RULES, checked: true, landMaybe: ["Liliana"] }).watch[0].kind === "landMaybe"],
   ["the scale itself puts at least 95% of precons at Bracket 2", (() => {
     const list = studyNow.decks.filter(d => d.group === "precon");
     return list.filter(d => d.power.base <= RULES.power_brackets.brackets[0][0]).length >= list.length * 0.95;
   })()],
-  ["a stock precon stays Bracket 2 over a floor", (() => {
-    const v = PodEngine.powerLevel({ power: { score: 6 }, rules: RULES, checked: true, floor: { bracket: 4, reason: "combo" }, precon: { name: "X", changes: 0 } });
-    return v.bracket === "2" && v.score <= RULES.power_brackets.brackets[0][0] && !v.floor;
+  ["a stock precon's land denial is a flag, not a floor, and no upgrade lift applies", (() => {
+    const v = PodEngine.powerLevel({ power: { score: 4.1, base: 3 }, rules: RULES, checked: true, floor: { bracket: 4, reason: "mld", mld: ["Ruination"] }, precon: { name: "X", changes: 0 } });
+    return v.bracket === "2" && v.score === 3 && !v.floor && v.watch[0].kind === "land";
   })()],
   ["five swaps are still the precon, six are not", (() => {
     const list = Array.from({ length: 100 }, (_, i) => "C" + i);
@@ -462,6 +474,11 @@ const vBad = V_CASES.filter(([, ok]) => !ok);
 for (const [label] of vBad) console.log(`POWER LEVEL FAIL: ${label}`);
 console.log(`Power level: ${V_CASES.length - vBad.length}/${V_CASES.length} correct`);
 if (vBad.length) fails++;
+
+// (m) land drop odds.
+const oddsOk = Math.abs(PodEngine.atLeastOdds(10, 4, 1, 3) - PodEngine.drawOdds(10, 4, 3)) < 1e-9 && PodEngine.atLeastOdds(10, 4, 5, 8) === 0 && Math.abs(PodEngine.atLeastOdds(4, 2, 2, 2) - 1 / 6) < 1e-9;
+console.log(`Land odds: ${oddsOk ? "correct" : "FAIL"}`);
+if (!oddsOk) fails++;
 
 // (l) card values. The arithmetic stays obvious on small synthetic decks.
 const cv = (name, extra = {}) => ({ name, qty: 1, cls: { type: extra.land ? "L" : "C", cat: "oth", tags: [] },

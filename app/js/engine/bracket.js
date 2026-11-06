@@ -25,7 +25,7 @@ import { isLegalCommander } from "./commander.js";
 export const BRACKET3 = {
   // A two-card line playable on a mana curve up to this per turn is Bracket 4. Permanents
   // can land on separate turns, so the total does not protect a 7+ mana pair.
-  fast_pair_turn_mana: 6,
+  fast_pair_turn_mana: 6, // a tip only: at 7+ a turn the line stops being playable on curve
   game_changers_max: 3,
   // "Low quantities" — one or two one-shot extra turns read as a build-around,
   // three or more read as a turns deck.
@@ -240,9 +240,9 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, l
       mld: c.cards.some(n => mldSet.has(n)),
     });
     const turnCost = comboTurnCost(c, db, idx);
-    // Two cards, a real result and playable on curve is Bracket 4, whatever else it is.
+    // Spellbook alone rates a combo. Two cards playable on curve is a tip for the player, nothing more.
     const fastPair = c.n === 2 && c.relevant && (c.infinite || c.win) && turnCost !== null && turnCost <= BRACKET3.fast_pair_turn_mana;
-    return { ...c, tag: fastPair && c.tag !== "B" ? "R" : tag, cardsToFind, deploy: comboDeploy(c, db, idx), turnCost, fastPair };
+    return { ...c, tag, cardsToFind, deploy: comboDeploy(c, db, idx), turnCost, fastPair };
   });
 
   const checks = [];
@@ -300,14 +300,11 @@ export function evaluateBrackets({ stats, flagged, deckNames, combos, comboDb, l
   const breaking = [...tooStrong, ...mldCombos, ...turnCombos];
   const cuts = cutsToFit({ combos: [...new Set(breaking)], mld: mldCards, turnCards, looped, gcCards, commanders });
 
-  // These put a deck in Bracket 4 whatever its power says: land denial, by card or combo,
-  // and a fast two-card line. A deck can be Bracket 4 without being strong overall.
-  const fastPairs = rated.filter(c => c.fastPair);
-  const floorCuts = cutsToFit({ combos: [...mldCombos, ...fastPairs], mld: mldCards, turnCards: [], looped: [], gcCards: [], commanders }).cards;
-  const floor = mldCards.length || mldCombos.length || fastPairs.length ? { bracket: 4,
-    reason: mldCards.length || mldCombos.length ? "mld" : "combo",
-    mld: [...mldCards, ...mldCombos.map(c => c.cards.join(" + "))], combos: fastPairs.map(c => c.cards.join(" + ")),
-    cuts: floorCuts.map(c => ({ card: front(c.card), reason: c.reasons.includes("mass_land_denial") ? "mld" : "combo" })) } : null;
+  // Land denial puts a deck in Bracket 4 whatever its power says. A deck can be Bracket 4 without being strong.
+  const floorCuts = cutsToFit({ combos: mldCombos, mld: mldCards, turnCards: [], looped: [], gcCards: [], commanders }).cards;
+  const floor = mldCards.length || mldCombos.length ? { bracket: 4, reason: "mld",
+    mld: [...mldCards, ...mldCombos.map(c => c.cards.join(" + "))],
+    cuts: floorCuts.map(c => ({ card: front(c.card), reason: "mld" })) } : null;
 
   return {
     floor, landMaybe, checks, failed: failed.map(c => c.id), pending,

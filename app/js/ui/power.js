@@ -100,8 +100,8 @@ export function renderPower() {
   const flags = ev.flags.map(f => MSG['flag_' + f.dial] ? MSG['flag_' + f.dial][lang](f) : f.id);
   const nearCap = (r.flagged.price_20_30 || []).map(([n]) => n);
   if (nearCap.length) flags.push(MSG.flag_near_cap[lang]({ cards: nearCap }));
-  if (viols.length) html += '<div class="alert tone-bad">' +
-    '<span class="alert-title">✕ ' + t.viols + '</span>' +
+  if (viols.length) html += '<div class="alert tone-warn">' +
+    '<span class="alert-title">' + t.viols + '</span>' +
     viols.map(v => '<div class="alert-line">' + esc(v) + '</div>').join('') + '</div>';
   if (flags.length) html += '<div class="alert tone-warn">' +
     '<span class="alert-title">⚠ ' + t.flags + '</span>' +

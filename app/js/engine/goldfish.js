@@ -122,6 +122,15 @@ export function simulateGoldfish({ cardsInfo, commanders, combos = [], read, gam
 }
 
 // The chance of having seen at least one of `copies` cards after seeing `seen` of `deck`.
+// Chance of at least `need` of `copies` among `seen` cards from a `deck`: exact hypergeometric.
+export function atLeastOdds(deck, copies, need, seen) {
+  const logFact = (n) => { let s = 0; for (let i = 2; i <= n; i++) s += Math.log(i); return s; };
+  const choose = (n, k) => (k < 0 || k > n ? -Infinity : logFact(n) - logFact(k) - logFact(n - k));
+  let hit = 0;
+  for (let k = need; k <= Math.min(copies, seen); k++) hit += Math.exp(choose(copies, k) + choose(deck - copies, seen - k) - choose(deck, seen));
+  return Math.min(hit, 1);
+}
+
 export function drawOdds(deck, copies, seen) {
   if (copies <= 0) return 0;
   let miss = 1;

@@ -56,9 +56,9 @@ function comboRow(c, t) {
     isLock(c) && t.cfLock,
     c.prereq && t.cfBoard,
     c.mustCommand.length && t.cfCommander,
+    c.fastPair && t.cfFastTip,
   ].filter(Boolean);
   return '<li>' + comboLine(c) + '<div class="rd-line-foot">' +
-    (breaksB3(c) ? '<span class="rd-tag tone-bad">' + esc(t.cfBreaks) + '</span>' : '') +
     '<span class="rd-traits">' + esc(traits.join(' · ')) + '</span>' +
     '<a class="rd-link" href="' + spellbookUrl(c) + '" target="_blank" rel="noopener noreferrer">' + esc(t.comboSteps) + ICON.open + '</a></div></li>';
 }

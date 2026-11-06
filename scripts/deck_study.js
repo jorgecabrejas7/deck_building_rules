@@ -123,7 +123,8 @@ async function study(d) {
   const salt = E.saltScore(names, saltDb);
   const synergy = E.synergyScore({ cardsInfo, commanders, table: await synergyTable(commanders) });
   const power = E.computePower(profile, stats, salt);
-  const level = E.powerLevel({ power, rules: RULES, checked: true, floor: bracket.floor, precon: E.matchPrecon(d.parsed.entries, precons) });
+  const level = E.powerLevel({ power, rules: RULES, checked: true, floor: bracket.floor, precon: E.matchPrecon(d.parsed.entries, precons),
+    combos: bracket.combos, landMaybe: bracket.landMaybe, gameChangers: bracket.checks.find(c => c.id === "game_changers").cards });
   const verdict = ev.tier === "above" ? "out" : "in";
   return { id: d.id, name: d.name, group: d.group, url: d.url, podId: d.podId, commanders,
     cards: stats.total_cards, missing: d.parsed.entries.length - resolved.length,
@@ -132,7 +133,7 @@ async function study(d) {
     bracket: { fits: bracket.fits, checklist: bracket.checklist, estimate: bracket.estimate, failed: bracket.failed },
     profile: { ...profile, ledger: undefined }, salt: { total: salt.total, average: salt.average, top: salt.top.slice(0, 3) },
     synergy: synergy.status === "done" ? { coverage: synergy.coverage, average: synergy.average, offPlan: synergy.offPlan } : null,
-    power: { score: power.score, base: power.base, raw: power.raw, pillars: power.pillars }, metrics: power.metrics };
+    power: { score: level.score, base: power.base, raw: power.raw, pillars: power.pillars }, metrics: power.metrics };
 }
 
 const results = [];

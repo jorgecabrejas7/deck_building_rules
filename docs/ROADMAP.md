@@ -2,7 +2,7 @@
 
 Every feature worth considering for the checker, from commandersalt.com (CS), deckcheck.co (DC) and our own ideas. Update the status in the same commit that changes it.
 
-**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Mass land denial, as sorted by hand in `data/land_denial.json`, or a two-card combo playable with at most 6 mana a turn sets power-level Bracket 4 regardless of the score; cards listed as maybe, like Liliana, only raise a warning. Precons are Bracket 2 always: the scale is fitted on all of them, and a deck within 5 swaps of one (`data/precons.json`) is recognised as that precon. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
+**Standing decisions:** static first, with no server or AI for now, and pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Commander Spellbook alone rates each combo, and a two-card line at 6 mana or less a turn is only a tip. The deck reads where its strength puts it, with anything above that bracket listed as worth a look (Spellbook's combo labels, cards that may deny lands, game changers) instead of raising it. Only mass land denial, as sorted by hand in `data/land_denial.json`, sets Bracket 4 on its own. Precons read on strength like any deck: the scale is fitted on all 198 (`data/precons.json`), so 193 land at Bracket 2, and the few above are real exceptions such as Creative Energy. Pages describe a deck rather than judge it: the way back into the pod stays in Puntos. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
 
@@ -12,7 +12,7 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Bracket checklist with level per rule, two readings | CS | ✅ |
 | Combos with Spellbook bracket, filters, mana, steps link | CS, DC | ✅ |
 | Cut list to reach Bracket 3, rule-zero notes | CS | ✅ |
-| 1-10 power with pillars and drivers | CS | 🟡 fitted on few decks |
+| 1-10 power with pillars, arithmetic and scale in the open | CS | ✅ fitted on 198 precons and 9 cEDH lists |
 | Card reader accurate on real decks | CS | ✅ Scryfall tags, 89% precision and 94% recall on 196 labelled cards |
 | Benchmark breakdown: tier, question and the cards behind it | DC | ✅ 14 benchmarks |
 | Card ledger: which cards drive each score | CS, DC | ✅ |
@@ -25,7 +25,7 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Draw odds | DC | ✅ by role and turn |
 | Sample hand, curve, colour requirements | DC, CS | ✅ |
 | Pips vs production per colour | DC, CS | ✅ |
-| Manabase depth: untapped share, fetch and dual quality, utility lands, expected lands | CS | 🟡 M4 |
+| Manabase depth: score parts, colours, land drop odds, mana by turn, medians | CS | ✅ Curva y maná; utility lands still M4 |
 | Salt score with top cards | CS | ✅ |
 | Salt breakdown: stax, theft, taxes, group slug, price, combos | CS | ⬜ M4 |
 | Report card grades | CS | ⬜ M4 |
@@ -91,7 +91,7 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 - Commander quiz, sleeves, flavour extras (nutrition label, field reports): decoration.
 
 ## How the app is laid out
-The landing is a scroll-driven planeswalker scene (`ui/hero.js`) that only shows with no deck loaded. The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
+The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Cargar page, where every visit starts. The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
 
 ## Where to pick up
 The next milestone is M4. Read the standing decisions above first, and check the open questions below before changing any score.
@@ -111,7 +111,8 @@ The next milestone is M4. Read the standing decisions above first, and check the
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing
 
 ## Open questions for Jorge
-- Which of the 13 decks Jorge has not placed read wrongly? Nine sit at 4.1, the weakest part of the scale.
+- Which of the 13 decks Jorge has not placed read wrongly? Eight sit at 4.1, the weakest part of the scale.
+- Does Korvold (7.9) or Winota (7.0) belong among the cEDH lists? Both score below the rest.
 - Do the card values read right on the pod's decks? Massacre Wurm reads Marginal in Teysha, for example. Weights are in `engine/cardValue.js`.
 - The deck study's four rule proposals, and Jorge's in/out marks, are still unanswered (`data/deck_study.json`, `docs/`).
 - Are the Lightning and Luffy commander tags right?

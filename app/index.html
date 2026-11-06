@@ -122,6 +122,7 @@ window.addEventListener('error', function (e) {
   <!-- Informe: one view at a time. The point budget alone decides who is in the pod; Wizards'
        brackets, the power level and the card values are separate readings of the same deck. -->
   <div id="tab-informe" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-informe">
+    <div id="reportStage" class="report-stage" aria-hidden="true"></div>
     <div id="view-summary" class="view">
       <div id="verdict"></div>
       <div id="commanderPanel"></div>
@@ -157,9 +158,10 @@ window.addEventListener('error', function (e) {
       </section>
     </div>
     <div id="view-mana" class="view">
-      <div id="comp" class="comp-panel"></div>
+      <div id="manaReport"></div>
       <div id="curveWrap" class="curve-wrap"></div>
       <div id="rampPanel" class="panel panel-pad"></div>
+      <div id="comp" class="comp-panel"></div>
       <div id="handPanel" class="panel panel-pad-lg"></div>
     </div>
   </div>

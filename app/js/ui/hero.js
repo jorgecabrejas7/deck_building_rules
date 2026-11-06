@@ -15,43 +15,56 @@ const WALKERS = [
   ['340', 'd/a/da1a9643-34d6-4b4b-b896-2d4626eca40a.jpg'], // Sorin, Solemn Visitor
 ];
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
-const easeOut = (x) => 1 - (1 - x) ** 3;
+const smooth = (x) => x * x * (3 - 2 * x);
 
 export function initHero() {
   const stage = $('hero'), ring = $('heroRing');
   const still = matchMedia('(prefers-reduced-motion:reduce)').matches;
-  let built = false, cards = [], idle = 0, last = 0, frame = 0, front = -1, tiltX = 0, tiltY = 0;
+  let built = false, cards = [], lights = [], glares = [], idle = 0, last = 0, frame = 0, front = -1, eased = 0, tiltX = 0, tiltY = 0, aimX = 0, aimY = 0;
 
   const build = () => {
     built = true;
-    ring.innerHTML = WALKERS.map(([, file], i) => '<div class="hw-card" style="--i:' + i + '"><div class="hw-back"></div>' +
-      '<img src="https://cards.scryfall.io/normal/front/' + file + '" alt="" decoding="async" draggable="false"><div class="hw-glare"></div></div>').join('');
+    ring.innerHTML = WALKERS.map(([, file], i) => '<div class="hw-card" style="--i:' + i + ';--tint:' + WALKERS[i][0] + '"><div class="hw-back"></div>' +
+      '<img src="https://cards.scryfall.io/normal/front/' + file + '" alt="" decoding="async" draggable="false"><div class="hw-glare"><i></i></div></div>').join('');
     cards = [...ring.children];
+    glares = cards.map(c => c.querySelector('.hw-glare i'));
+    // one prepainted light per colour: fading between them repaints nothing
+    stage.querySelector('.hero-tint').innerHTML = WALKERS.map(([hue]) => '<i style="--tint:' + hue + '"></i>').join('');
+    lights = [...stage.querySelectorAll('.hero-tint i')];
   };
 
   const draw = (now) => {
     frame = requestAnimationFrame(draw);
+    const dt = Math.min(now - last, 50); last = now;
     const box = stage.getBoundingClientRect();
-    const p = clamp01(-box.top / Math.max(box.height - innerHeight, 1));
-    idle += Math.min(now - last, 50) * 0.008; last = now;
-    const spin = idle + p * 540;
-    const gather = easeOut(clamp01((p - 0.5) / 0.4));
-    const radius = Math.min(innerWidth * 0.36, innerHeight * 0.34) * (1 - gather);
-    const step = 360 / cards.length;
+    const target = clamp01(-box.top / Math.max(box.height - innerHeight, 1));
+    // the cards follow the scroll with a little weight, so a wheel's steps turn into one motion
+    eased += (target - eased) * (1 - Math.exp(-dt / 140));
+    tiltX += (aimX - tiltX) * (1 - Math.exp(-dt / 200));
+    tiltY += (aimY - tiltY) * (1 - Math.exp(-dt / 200));
+    const p = eased, calm = 1 - smooth(clamp01((p - 0.35) / 0.2));
+    idle += dt * 0.007 * calm;
+    const spin = idle + p * 200;
+    const R = Math.min(innerWidth * 0.36, innerHeight * 0.34), step = 360 / cards.length;
     let nearest = 0, best = -2;
     cards.forEach((card, i) => {
-      const a = (spin + i * step) * (1 - gather);
-      // cards end up a single square-ish deck, each a hair above the last
-      card.style.transform = 'rotateY(' + a + 'deg) translateZ(' + radius + 'px) translateY(' + (-i * 2 * gather) + 'px)';
-      const facing = Math.cos(a * Math.PI / 180);
-      if (facing > best) { best = facing; nearest = i; }
-      card.style.setProperty('--sheen', ((a % 360) / 3.6).toFixed(1) + '%');
+      const a = spin + i * step, rad = a * Math.PI / 180;
+      // each card leaves the ring in turn and lands flat on the pile, one above the last
+      const land = smooth(clamp01((p - 0.42 - i * 0.03) / 0.22));
+      const facing = ((a % 360) + 540) % 360 - 180;
+      const x = Math.sin(rad) * R * (1 - land), z = Math.cos(rad) * R * (1 - land) + i * 3 * land;
+      card.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + (-land * i * 1.5).toFixed(1) + 'px,' + z.toFixed(1) + 'px) rotateY(' + (facing * (1 - land)).toFixed(1) + 'deg)';
+      if (Math.cos(rad) > best) { best = Math.cos(rad); nearest = i; }
+      glares[i].style.transform = 'translate3d(' + (facing * 0.6).toFixed(1) + '%,0,0)';
     });
-    if (nearest !== front) { front = nearest; stage.style.setProperty('--tint', WALKERS[nearest][0]); }
-    const leave = clamp01((p - 0.86) / 0.14);
-    ring.style.transform = 'translateY(' + (gather * 8) + 'vh) scale(' + (1 - gather * 0.25) + ') rotateX(' + (-7 + tiltX) + 'deg) rotateZ(' + tiltY + 'deg)';
-    stage.style.setProperty('--copy', (1 - clamp01(p / 0.4)).toFixed(3));
-    stage.style.setProperty('--leave', leave.toFixed(3));
+    if (nearest !== front) {
+      if (front >= 0) lights[front].classList.remove('on');
+      front = nearest; lights[front].classList.add('on');
+    }
+    const gather = smooth(clamp01((p - 0.42) / 0.45));
+    ring.style.transform = 'translateY(' + (gather * 6).toFixed(2) + 'vh) rotateX(' + (-7 * (1 - gather) + tiltX).toFixed(2) + 'deg) rotateZ(' + tiltY.toFixed(2) + 'deg)';
+    stage.style.setProperty('--copy', (1 - smooth(clamp01(p / 0.3))).toFixed(3));
+    stage.style.setProperty('--leave', smooth(clamp01((p - 0.9) / 0.1)).toFixed(3));
   };
 
   new IntersectionObserver(([e]) => {
@@ -62,7 +75,7 @@ export function initHero() {
   }).observe(stage);
 
   if (matchMedia('(hover:hover)').matches && !still)
-    stage.addEventListener('pointermove', (e) => { tiltX = (0.5 - e.clientY / innerHeight) * 6; tiltY = (e.clientX / innerWidth - 0.5) * 3; });
+    stage.addEventListener('pointermove', (e) => { aimX = (0.5 - e.clientY / innerHeight) * 5; aimY = (e.clientX / innerWidth - 0.5) * 2.5; });
 
   $('heroCta').onclick = () => {
     $('deckText').scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });

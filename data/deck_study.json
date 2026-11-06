@@ -6,7 +6,7 @@
   "precon": 198,
   "podIn": 8,
   "podOut": 13,
-  "cedh": 8
+  "cedh": 9
  },
  "medians": {
   "precon": {
@@ -87,38 +87,38 @@
    "power": 9.5,
    "pillar_salt": 100,
    "pillar_synergy": 0,
-   "pillar_interaction": 91.5,
-   "pillar_wins": 81,
-   "salt_total": 86.3,
+   "pillar_interaction": 90,
+   "pillar_wins": 87,
+   "salt_total": 87.4,
    "salt_average": 0.9,
-   "synergy_coverage": 89,
-   "synergy_average": 33,
+   "synergy_coverage": 78,
+   "synergy_average": 18,
    "manabase_score": 100,
    "manabase_fixing": 100,
    "manabase_quality": 100,
-   "fetches": 7,
-   "lands": 27.5,
-   "avg_mv": 1.97,
-   "cheap_plays": 50.5,
-   "ramp": 23.5,
-   "fast_mana": 13.5,
-   "draw": 10,
-   "tutors": 14.5,
-   "recursion": 3.5,
+   "fetches": 6,
+   "lands": 27,
+   "avg_mv": 1.96,
+   "cheap_plays": 52,
+   "ramp": 20,
+   "fast_mana": 12,
+   "draw": 11,
+   "tutors": 19,
+   "recursion": 4,
    "counters": 10,
-   "removal": 9,
-   "wipes": 1,
-   "cheap_answers": 11,
+   "removal": 7,
+   "wipes": 0,
+   "cheap_answers": 10,
    "stax": 12,
-   "combos": 5.5,
-   "ending_combos": 5,
+   "combos": 6,
+   "ending_combos": 6,
    "win_turn": 4,
    "commander_turn": 3,
-   "mana_turn_4": 4.3,
+   "mana_turn_4": 4.2,
    "two_card_ending": 2,
    "game_changers": 19,
-   "price": 1907.81,
-   "points": 71
+   "price": 1788.39,
+   "points": 74
   }
  },
  "comparisons": [
@@ -130,9 +130,9 @@
     "podOut": 4.1,
     "cedh": 9.5
    },
-   "precon_vs_pod": 0.84,
+   "precon_vs_pod": 0.91,
    "podIn_vs_podOut": 0.87,
-   "pod_vs_cedh": 0.96
+   "pod_vs_cedh": 0.99
   },
   {
    "key": "pillar_salt",
@@ -144,7 +144,7 @@
    },
    "precon_vs_pod": 0.75,
    "podIn_vs_podOut": 0.75,
-   "pod_vs_cedh": 0.99
+   "pod_vs_cedh": 1
   },
   {
    "key": "pillar_synergy",
@@ -156,7 +156,7 @@
    },
    "precon_vs_pod": 0.54,
    "podIn_vs_podOut": 0.41,
-   "pod_vs_cedh": 0.43
+   "pod_vs_cedh": 0.41
   },
   {
    "key": "pillar_interaction",
@@ -164,11 +164,11 @@
     "precon": 24,
     "podIn": 40,
     "podOut": 33,
-    "cedh": 91.5
+    "cedh": 90
    },
    "precon_vs_pod": 0.69,
    "podIn_vs_podOut": 0.42,
-   "pod_vs_cedh": 0.98
+   "pod_vs_cedh": 0.9
   },
   {
    "key": "pillar_wins",
@@ -176,11 +176,11 @@
     "precon": 4,
     "podIn": 0,
     "podOut": 9,
-    "cedh": 81
+    "cedh": 87
    },
    "precon_vs_pod": 0.59,
    "podIn_vs_podOut": 0.66,
-   "pod_vs_cedh": 0.85
+   "pod_vs_cedh": 0.95
   },
   {
    "key": "salt_total",
@@ -188,11 +188,11 @@
     "precon": 22.75,
     "podIn": 24.1,
     "podOut": 29,
-    "cedh": 86.3
+    "cedh": 87.4
    },
    "precon_vs_pod": 0.75,
    "podIn_vs_podOut": 0.73,
-   "pod_vs_cedh": 0.99
+   "pod_vs_cedh": 1
   },
   {
    "key": "salt_average",
@@ -212,11 +212,11 @@
     "precon": 97,
     "podIn": 93,
     "podOut": 71,
-    "cedh": 89
+    "cedh": 78
    },
    "precon_vs_pod": 0.33,
    "podIn_vs_podOut": 0.21,
-   "pod_vs_cedh": 0.66
+   "pod_vs_cedh": 0.52
   },
   {
    "key": "synergy_average",
@@ -224,11 +224,11 @@
     "precon": 32,
     "podIn": 37.5,
     "podOut": 18,
-    "cedh": 33
+    "cedh": 18
    },
    "precon_vs_pod": 0.4,
    "podIn_vs_podOut": 0.25,
-   "pod_vs_cedh": 0.6
+   "pod_vs_cedh": 0.44
   },
   {
    "key": "manabase_score",
@@ -264,7 +264,7 @@
    },
    "precon_vs_pod": 0.58,
    "podIn_vs_podOut": 0.54,
-   "pod_vs_cedh": 0.95
+   "pod_vs_cedh": 0.93
   },
   {
    "key": "fetches",
@@ -272,11 +272,11 @@
     "precon": 2,
     "podIn": 1.5,
     "podOut": 1,
-    "cedh": 7
+    "cedh": 6
    },
    "precon_vs_pod": 0.39,
    "podIn_vs_podOut": 0.49,
-   "pod_vs_cedh": 0.99
+   "pod_vs_cedh": 0.84
   },
   {
    "key": "lands",
@@ -284,11 +284,11 @@
     "precon": 38,
     "podIn": 36.5,
     "podOut": 36,
-    "cedh": 27.5
+    "cedh": 27
    },
    "precon_vs_pod": 0.18,
    "podIn_vs_podOut": 0.43,
-   "pod_vs_cedh": 0.01
+   "pod_vs_cedh": 0.04
   },
   {
    "key": "avg_mv",
@@ -296,11 +296,11 @@
     "precon": 3.69,
     "podIn": 2.78,
     "podOut": 3.03,
-    "cedh": 1.97
+    "cedh": 1.96
    },
    "precon_vs_pod": 0.2,
    "podIn_vs_podOut": 0.58,
-   "pod_vs_cedh": 0.06
+   "pod_vs_cedh": 0.04
   },
   {
    "key": "cheap_plays",
@@ -308,11 +308,11 @@
     "precon": 17,
     "podIn": 28.5,
     "podOut": 24,
-    "cedh": 50.5
+    "cedh": 52
    },
    "precon_vs_pod": 0.79,
    "podIn_vs_podOut": 0.42,
-   "pod_vs_cedh": 0.99
+   "pod_vs_cedh": 0.97
   },
   {
    "key": "ramp",
@@ -320,11 +320,11 @@
     "precon": 12,
     "podIn": 13.5,
     "podOut": 14,
-    "cedh": 23.5
+    "cedh": 20
    },
    "precon_vs_pod": 0.67,
    "podIn_vs_podOut": 0.54,
-   "pod_vs_cedh": 0.85
+   "pod_vs_cedh": 0.73
   },
   {
    "key": "fast_mana",
@@ -332,11 +332,11 @@
     "precon": 5,
     "podIn": 5,
     "podOut": 6,
-    "cedh": 13.5
+    "cedh": 12
    },
    "precon_vs_pod": 0.64,
    "podIn_vs_podOut": 0.73,
-   "pod_vs_cedh": 0.96
+   "pod_vs_cedh": 0.87
   },
   {
    "key": "draw",
@@ -344,11 +344,11 @@
     "precon": 13,
     "podIn": 12.5,
     "podOut": 13,
-    "cedh": 10
+    "cedh": 11
    },
    "precon_vs_pod": 0.46,
    "podIn_vs_podOut": 0.63,
-   "pod_vs_cedh": 0.27
+   "pod_vs_cedh": 0.33
   },
   {
    "key": "tutors",
@@ -356,11 +356,11 @@
     "precon": 0,
     "podIn": 0,
     "podOut": 1,
-    "cedh": 14.5
+    "cedh": 19
    },
    "precon_vs_pod": 0.63,
    "podIn_vs_podOut": 0.68,
-   "pod_vs_cedh": 1
+   "pod_vs_cedh": 0.99
   },
   {
    "key": "recursion",
@@ -368,11 +368,11 @@
     "precon": 5,
     "podIn": 3,
     "podOut": 5,
-    "cedh": 3.5
+    "cedh": 4
    },
    "precon_vs_pod": 0.43,
    "podIn_vs_podOut": 0.63,
-   "pod_vs_cedh": 0.47
+   "pod_vs_cedh": 0.51
   },
   {
    "key": "counters",
@@ -384,7 +384,7 @@
    },
    "precon_vs_pod": 0.66,
    "podIn_vs_podOut": 0.53,
-   "pod_vs_cedh": 0.9
+   "pod_vs_cedh": 0.91
   },
   {
    "key": "removal",
@@ -392,11 +392,11 @@
     "precon": 9,
     "podIn": 10.5,
     "podOut": 8,
-    "cedh": 9
+    "cedh": 7
    },
    "precon_vs_pod": 0.41,
    "podIn_vs_podOut": 0.24,
-   "pod_vs_cedh": 0.54
+   "pod_vs_cedh": 0.29
   },
   {
    "key": "wipes",
@@ -404,11 +404,11 @@
     "precon": 3,
     "podIn": 3,
     "podOut": 3,
-    "cedh": 1
+    "cedh": 0
    },
    "precon_vs_pod": 0.34,
    "podIn_vs_podOut": 0.57,
-   "pod_vs_cedh": 0.2
+   "pod_vs_cedh": 0.13
   },
   {
    "key": "cheap_answers",
@@ -416,11 +416,11 @@
     "precon": 3,
     "podIn": 5,
     "podOut": 4,
-    "cedh": 11
+    "cedh": 10
    },
    "precon_vs_pod": 0.7,
    "podIn_vs_podOut": 0.38,
-   "pod_vs_cedh": 0.94
+   "pod_vs_cedh": 0.88
   },
   {
    "key": "stax",
@@ -432,7 +432,7 @@
    },
    "precon_vs_pod": 0.54,
    "podIn_vs_podOut": 0.47,
-   "pod_vs_cedh": 0.87
+   "pod_vs_cedh": 0.96
   },
   {
    "key": "combos",
@@ -440,11 +440,11 @@
     "precon": 0,
     "podIn": 0,
     "podOut": 0,
-    "cedh": 5.5
+    "cedh": 6
    },
    "precon_vs_pod": 0.56,
    "podIn_vs_podOut": 0.59,
-   "pod_vs_cedh": 0.82
+   "pod_vs_cedh": 0.9
   },
   {
    "key": "ending_combos",
@@ -452,11 +452,11 @@
     "precon": 0,
     "podIn": 0,
     "podOut": 0,
-    "cedh": 5
+    "cedh": 6
    },
    "precon_vs_pod": 0.57,
    "podIn_vs_podOut": 0.6,
-   "pod_vs_cedh": 0.85
+   "pod_vs_cedh": 0.93
   },
   {
    "key": "win_turn",
@@ -480,7 +480,7 @@
    },
    "precon_vs_pod": 0.54,
    "podIn_vs_podOut": 0.72,
-   "pod_vs_cedh": 0.21
+   "pod_vs_cedh": 0.28
   },
   {
    "key": "mana_turn_4",
@@ -488,11 +488,11 @@
     "precon": 4.6,
     "podIn": 4.3,
     "podOut": 4.5,
-    "cedh": 4.3
+    "cedh": 4.2
    },
    "precon_vs_pod": 0.35,
    "podIn_vs_podOut": 0.74,
-   "pod_vs_cedh": 0.36
+   "pod_vs_cedh": 0.25
   },
   {
    "key": "two_card_ending",
@@ -504,7 +504,7 @@
    },
    "precon_vs_pod": 0.55,
    "podIn_vs_podOut": 0.51,
-   "pod_vs_cedh": 0.86
+   "pod_vs_cedh": 0.92
   },
   {
    "key": "game_changers",
@@ -524,11 +524,11 @@
     "precon": 71.31,
     "podIn": 92.28,
     "podOut": 206.79,
-    "cedh": 1907.81
+    "cedh": 1788.39
    },
    "precon_vs_pod": 0.82,
    "podIn_vs_podOut": 0.97,
-   "pod_vs_cedh": 1
+   "pod_vs_cedh": 0.99
   },
   {
    "key": "points",
@@ -536,7 +536,7 @@
     "precon": 0,
     "podIn": 1.5,
     "podOut": 10,
-    "cedh": 71
+    "cedh": 74
    },
    "precon_vs_pod": 0.79,
    "podIn_vs_podOut": 0.94,
@@ -732,8 +732,7 @@
     "reason": "mld",
     "mld": [
      "Ruination"
-    ],
-    "combos": []
+    ]
    },
    "points": 0,
    "breakdown": {},
@@ -1265,7 +1264,7 @@
     "offPlan": 17
    },
    "power": {
-    "score": 4.1,
+    "score": 3.2,
     "base": 3.2,
     "raw": 16.3,
     "pillars": {
@@ -1845,8 +1844,8 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier2",
-   "practicalBracket": "2",
-   "powerBracket": "2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
    "floor": null,
    "points": 6,
    "breakdown": {
@@ -1882,7 +1881,7 @@
     "offPlan": 42
    },
    "power": {
-    "score": 4.6,
+    "score": 4.1,
     "base": 4.1,
     "raw": 24.6,
     "pillars": {
@@ -1940,7 +1939,7 @@
     "offPlan": 28
    },
    "power": {
-    "score": 4.1,
+    "score": 2.6,
     "base": 2.6,
     "raw": 10.3,
     "pillars": {
@@ -2050,7 +2049,7 @@
     "offPlan": 17
    },
    "power": {
-    "score": 4.1,
+    "score": 3.2,
     "base": 3.2,
     "raw": 16.3,
     "pillars": {
@@ -2277,7 +2276,7 @@
     "offPlan": 30
    },
    "power": {
-    "score": 4.1,
+    "score": 2.8,
     "base": 2.8,
     "raw": 11.6,
     "pillars": {
@@ -2334,7 +2333,7 @@
     "offPlan": 12
    },
    "power": {
-    "score": 4.1,
+    "score": 2.7,
     "base": 2.7,
     "raw": 11.5,
     "pillars": {
@@ -2395,7 +2394,7 @@
     "offPlan": 29
    },
    "power": {
-    "score": 4.1,
+    "score": 2.7,
     "base": 2.7,
     "raw": 11.3,
     "pillars": {
@@ -3639,7 +3638,7 @@
     "offPlan": 14
    },
    "power": {
-    "score": 4.1,
+    "score": 2.7,
     "base": 2.7,
     "raw": 11.4,
     "pillars": {
@@ -3723,7 +3722,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 60.59,
+   "price": 60.09,
    "gc": 0,
    "salt": {
     "total": 20.6,
@@ -4083,7 +4082,7 @@
     "offPlan": 2
    },
    "power": {
-    "score": 4.1,
+    "score": 3,
     "base": 3,
     "raw": 13.6,
     "pillars": {
@@ -4112,7 +4111,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 90.13,
+   "price": 89.84,
    "gc": 0,
    "salt": {
     "total": 22.4,
@@ -4195,7 +4194,7 @@
     "offPlan": 18
    },
    "power": {
-    "score": 4.1,
+    "score": 3.5,
     "base": 3.5,
     "raw": 19.2,
     "pillars": {
@@ -4568,7 +4567,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 229.25,
+   "price": 228.43,
    "gc": 1,
    "salt": {
     "total": 32.6,
@@ -4594,7 +4593,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 3.3,
     "base": 3.3,
     "raw": 16.7,
     "pillars": {
@@ -4926,7 +4925,7 @@
     "offPlan": 2
    },
    "power": {
-    "score": 4.1,
+    "score": 2.2,
     "base": 2.2,
     "raw": 6.6,
     "pillars": {
@@ -5042,7 +5041,7 @@
     "offPlan": 2
    },
    "power": {
-    "score": 4.3,
+    "score": 3.8,
     "base": 3.8,
     "raw": 21.8,
     "pillars": {
@@ -5365,7 +5364,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 215.18,
+   "price": 214.68,
    "gc": 0,
    "salt": {
     "total": 23.1,
@@ -5424,7 +5423,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 215.18,
+   "price": 214.68,
    "gc": 0,
    "salt": {
     "total": 23.1,
@@ -6379,7 +6378,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 55.96,
+   "price": 55.46,
    "gc": 0,
    "salt": {
     "total": 18.9,
@@ -6520,7 +6519,7 @@
     "offPlan": 47
    },
    "power": {
-    "score": 4.1,
+    "score": 3.5,
     "base": 3.5,
     "raw": 19.3,
     "pillars": {
@@ -6577,7 +6576,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 2.4,
     "base": 2.4,
     "raw": 8.4,
     "pillars": {
@@ -6656,13 +6655,7 @@
    "tier": "tier1",
    "practicalBracket": "2",
    "powerBracket": "2",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Gilraen, Dúnedain Protector + Village Bell-Ringer"
-    ]
-   },
+   "floor": null,
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -6751,7 +6744,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 3.1,
     "base": 3.1,
     "raw": 15.4,
     "pillars": {
@@ -6812,7 +6805,7 @@
     "offPlan": 9
    },
    "power": {
-    "score": 4.1,
+    "score": 3.1,
     "base": 3.1,
     "raw": 14.8,
     "pillars": {
@@ -6869,7 +6862,7 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4.1,
+    "score": 2.3,
     "base": 2.3,
     "raw": 7.4,
     "pillars": {
@@ -6930,7 +6923,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 2.4,
     "base": 2.4,
     "raw": 8.4,
     "pillars": {
@@ -6987,7 +6980,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 3.3,
     "base": 3.3,
     "raw": 16.8,
     "pillars": {
@@ -7048,7 +7041,7 @@
     "offPlan": 1
    },
    "power": {
-    "score": 4.1,
+    "score": 2.6,
     "base": 2.6,
     "raw": 10.2,
     "pillars": {
@@ -7069,8 +7062,8 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier1",
-   "practicalBracket": "2",
-   "powerBracket": "2",
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
    "floor": null,
    "points": 0,
    "breakdown": {},
@@ -7103,7 +7096,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.6,
+    "score": 4.1,
     "base": 4.1,
     "raw": 24.8,
     "pillars": {
@@ -7180,15 +7173,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "tier2",
-   "practicalBracket": "2",
-   "powerBracket": "2",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Adric, Mathematical Genius + The Fifth Doctor"
-    ]
-   },
+   "practicalBracket": "2*",
+   "powerBracket": "2*",
+   "floor": null,
    "points": 3,
    "breakdown": {
     "extra_turns": 3
@@ -7371,7 +7358,7 @@
    "violations": [],
    "verdict": "in",
    "label": null,
-   "price": 94.94,
+   "price": 94.72,
    "gc": 1,
    "salt": {
     "total": 33.6,
@@ -7682,7 +7669,7 @@
     "offPlan": 10
    },
    "power": {
-    "score": 4.1,
+    "score": 3.4,
     "base": 3.4,
     "raw": 18.4,
     "pillars": {
@@ -8255,7 +8242,7 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4.1,
+    "score": 3.3,
     "base": 3.3,
     "raw": 17.1,
     "pillars": {
@@ -8386,16 +8373,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "2",
-   "powerBracket": "2",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Lightning Runner + Satya, Aetherflux Genius",
-     "Lightning Runner + Stone Idol Generator"
-    ]
-   },
+   "practicalBracket": "3",
+   "powerBracket": "3",
+   "floor": null,
    "points": 19,
    "breakdown": {
     "game_changers": 2,
@@ -8454,16 +8434,9 @@
    "cards": 100,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "2",
-   "powerBracket": "2",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Lightning Runner + Satya, Aetherflux Genius",
-     "Lightning Runner + Stone Idol Generator"
-    ]
-   },
+   "practicalBracket": "3",
+   "powerBracket": "3",
+   "floor": null,
    "points": 19,
    "breakdown": {
     "game_changers": 2,
@@ -8917,13 +8890,7 @@
    "tier": "tier1",
    "practicalBracket": "2",
    "powerBracket": "2",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Combat Celebrant + Helm of the Host"
-    ]
-   },
+   "floor": null,
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -9182,7 +9149,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 3.6,
     "base": 3.6,
     "raw": 20.1,
     "pillars": {
@@ -9355,7 +9322,7 @@
     "offPlan": 41
    },
    "power": {
-    "score": 4.4,
+    "score": 3.9,
     "base": 3.9,
     "raw": 23,
     "pillars": {
@@ -9691,7 +9658,7 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4.1,
+    "score": 2.1,
     "base": 2.1,
     "raw": 5.8,
     "pillars": {
@@ -9806,7 +9773,7 @@
     "offPlan": 15
    },
    "power": {
-    "score": 4.1,
+    "score": 3.3,
     "base": 3.3,
     "raw": 16.9,
     "pillars": {
@@ -10340,13 +10307,7 @@
    "tier": "tier1",
    "practicalBracket": "2",
    "powerBracket": "2",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Dakmor Salvage + The Gitrog Monster"
-    ]
-   },
+   "floor": null,
    "points": 0,
    "breakdown": {},
    "violations": [],
@@ -10856,7 +10817,7 @@
    ],
    "verdict": "out",
    "label": null,
-   "price": 204.21,
+   "price": 203.79,
    "gc": 0,
    "salt": {
     "total": 24.7,
@@ -10882,7 +10843,7 @@
     "offPlan": 4
    },
    "power": {
-    "score": 4.1,
+    "score": 3.5,
     "base": 3.5,
     "raw": 19.3,
     "pillars": {
@@ -11386,7 +11347,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 2.9,
     "base": 2.9,
     "raw": 13.2,
     "pillars": {
@@ -11447,7 +11408,7 @@
     "offPlan": 5
    },
    "power": {
-    "score": 4.1,
+    "score": 3.4,
     "base": 3.4,
     "raw": 17.9,
     "pillars": {
@@ -11734,7 +11695,7 @@
     "offPlan": 7
    },
    "power": {
-    "score": 4.1,
+    "score": 2.8,
     "base": 2.8,
     "raw": 12,
     "pillars": {
@@ -11791,7 +11752,7 @@
     "offPlan": 0
    },
    "power": {
-    "score": 4.1,
+    "score": 2.9,
     "base": 2.9,
     "raw": 13.1,
     "pillars": {
@@ -12627,16 +12588,9 @@
    "cards": 101,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "4",
+   "practicalBracket": "3",
    "powerBracket": "3",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Glint-Horn Buccaneer + Malcolm, Keen-Eyed Navigator",
-     "Helm of the Host + Port Razer"
-    ]
-   },
+   "floor": null,
    "points": 31,
    "breakdown": {
     "game_changers": 8,
@@ -14288,15 +14242,9 @@
    "cards": 101,
    "missing": 0,
    "tier": "above",
-   "practicalBracket": "4",
+   "practicalBracket": "3*",
    "powerBracket": "3*",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Dramatic Reversal + Isochron Scepter"
-    ]
-   },
+   "floor": null,
    "points": 29,
    "breakdown": {
     "counterspells": 4,
@@ -14468,10 +14416,9 @@
    },
    "bracket": {
     "fits": false,
-    "checklist": 4,
-    "estimate": "R",
+    "checklist": 3,
+    "estimate": "S",
     "failed": [
-     "combos",
      "legality"
     ]
    }
@@ -15875,8 +15822,7 @@
     "reason": "mld",
     "mld": [
      "Worldslayer"
-    ],
-    "combos": []
+    ]
    },
    "points": 4,
    "breakdown": {
@@ -16076,19 +16022,7 @@
    "tier": "above",
    "practicalBracket": "5",
    "powerBracket": "5",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Basalt Monolith + Kinnan, Bonder Prodigy",
-     "Basalt Monolith + Power Artifact",
-     "Demonic Consultation + Thassa's Oracle",
-     "Devoted Druid + Hazel's Brewmaster",
-     "Devoted Druid + Swift Reconfiguration",
-     "Grim Monolith + Power Artifact",
-     "Tainted Pact + Thassa's Oracle"
-    ]
-   },
+   "floor": null,
    "points": 68,
    "breakdown": {
     "game_changers": 20,
@@ -16315,14 +16249,7 @@
    "tier": "above",
    "practicalBracket": "4*",
    "powerBracket": "4*",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Demonic Consultation + Thassa's Oracle",
-     "Tainted Pact + Thassa's Oracle"
-    ]
-   },
+   "floor": null,
    "points": 58,
    "breakdown": {
     "game_changers": 20,
@@ -16547,16 +16474,7 @@
    "tier": "above",
    "practicalBracket": "4*",
    "powerBracket": "4*",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Demonic Consultation + Thassa's Oracle",
-     "Derevi, Empyrial Tactician + Najeela, the Blade-Blossom",
-     "Grim Hireling + Najeela, the Blade-Blossom",
-     "Tainted Pact + Thassa's Oracle"
-    ]
-   },
+   "floor": null,
    "points": 80,
    "breakdown": {
     "game_changers": 21,
@@ -16794,14 +16712,7 @@
    "tier": "above",
    "practicalBracket": "4*",
    "powerBracket": "4*",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Demonic Consultation + Thassa's Oracle",
-     "Tainted Pact + Thassa's Oracle"
-    ]
-   },
+   "floor": null,
    "points": 81,
    "breakdown": {
     "game_changers": 21,
@@ -17026,628 +16937,6 @@
    }
   },
   {
-   "id": "cedh:Higher's cEDH Kinnan | Extra Turns #46",
-   "name": "Higher's cEDH Kinnan | Extra Turns #46",
-   "group": "cedh",
-   "url": "https://archidekt.com/decks/6541122",
-   "commanders": [
-    "Kinnan, Bonder Prodigy"
-   ],
-   "cards": 100,
-   "missing": 0,
-   "tier": "above",
-   "practicalBracket": "5",
-   "powerBracket": "5",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Basalt Monolith + Kinnan, Bonder Prodigy"
-    ]
-   },
-   "points": 89,
-   "breakdown": {
-    "game_changers": 16,
-    "stax_effects": 1,
-    "counterspells": 3,
-    "free_spells": 1,
-    "fast_mana": 12,
-    "price_10_20": 9,
-    "price_20_30": 13,
-    "combos": 32,
-    "mana_cheat_stacking": 2
-   },
-   "violations": [
-    "price_cap",
-    "banned",
-    "gc_locks_price",
-    "gc_locks_price"
-   ],
-   "verdict": "out",
-   "label": null,
-   "price": 3484.21,
-   "gc": 15,
-   "salt": {
-    "total": 83.1,
-    "average": 0.86,
-    "top": [
-     {
-      "name": "Rhystic Study",
-      "salt": 2.73
-     },
-     {
-      "name": "The One Ring",
-      "salt": 2.55
-     },
-     {
-      "name": "Cyclonic Rift",
-      "salt": 2.36
-     }
-    ]
-   },
-   "synergy": {
-    "coverage": 96,
-    "average": 39,
-    "offPlan": 3
-   },
-   "power": {
-    "score": 9.8,
-    "base": 9.8,
-    "raw": 79.5,
-    "pillars": {
-     "wins": 100,
-     "interaction": 98,
-     "salt": 100,
-     "synergy": 0
-    }
-   },
-   "profile": {
-    "manabase": {
-     "lands": 25,
-     "basics": 2,
-     "tapped": 0,
-     "fetches": 5,
-     "colors": [
-      {
-       "color": "U",
-       "pips": 47,
-       "share": 0.5465116279069767,
-       "sources": 26,
-       "target": 17,
-       "cover": 1.5527777777777776
-      },
-      {
-       "color": "G",
-       "pips": 39,
-       "share": 0.45348837209302323,
-       "sources": 29,
-       "target": 15,
-       "cover": 1.9009146341463417
-      }
-     ],
-     "weakest": "U",
-     "fixing": 100,
-     "quality": 100,
-     "curve": 72,
-     "score": 91
-    },
-    "speed": {
-     "avgMv": 2.91,
-     "cheap": 42,
-     "high": 12,
-     "ramp": 26,
-     "rocks": 14,
-     "dorks": 5,
-     "rituals": 1,
-     "landRamp": 1,
-     "fastMana": 20
-    },
-    "consistency": {
-     "draw": 9,
-     "cheapDraw": 4,
-     "tutors": 12,
-     "recursion": 5
-    },
-    "interaction": {
-     "counters": 10,
-     "removal": 13,
-     "wipes": 1,
-     "protection": 3,
-     "graveHate": 1,
-     "stax": 7,
-     "free": 5,
-     "cheapAnswers": 11,
-     "instantShare": 65
-    },
-    "wins": {
-     "checked": true,
-     "combos": 14,
-     "infinite": 14,
-     "ending": 10.5,
-     "twoCard": 7.5,
-     "lines": 3,
-     "web": 13.5,
-     "throughCommander": 1,
-     "fastest": 5,
-     "lineCost": 3,
-     "printed": 0,
-     "massPump": 0
-    },
-    "shape": {
-     "archetypes": [
-      {
-       "key": "control",
-       "share": 44
-      },
-      {
-       "key": "spellslinger",
-       "share": 25
-      },
-      {
-       "key": "tokens",
-       "share": 15
-      }
-     ],
-     "typal": {
-      "type": "Druid",
-      "count": 5,
-      "share": 17
-     },
-     "creatures": 29,
-     "throughCommander": 1,
-     "engine": {
-      "theme": "recursion",
-      "count": 5
-     }
-    },
-    "goldfish": {
-     "games": 500,
-     "mana": [
-      1.9,
-      3.5,
-      4.5,
-      5.2,
-      5.8,
-      6.4,
-      7,
-      7.6,
-      8,
-      8.5,
-      9.1,
-      9.7
-     ],
-     "commanderTurn": 2,
-     "winTurn": 3,
-     "winBy": {
-      "4": 62,
-      "6": 75,
-      "8": 79,
-      "10": 85
-     }
-    },
-    "upgrade": {
-     "pricey": 68,
-     "medianRank": 554
-    }
-   },
-   "bracket": {
-    "fits": false,
-    "checklist": 4,
-    "estimate": "B",
-    "failed": [
-     "game_changers",
-     "combos",
-     "legality"
-    ]
-   }
-  },
-  {
-   "id": "cedh:Jimmy's cEDH Slicer | Extra Turns #46",
-   "name": "Jimmy's cEDH Slicer | Extra Turns #46",
-   "group": "cedh",
-   "url": "https://archidekt.com/decks/6541086",
-   "commanders": [
-    "Slicer, Hired Muscle // Slicer, High-Speed Antagonist"
-   ],
-   "cards": 100,
-   "missing": 0,
-   "tier": "above",
-   "practicalBracket": "2*",
-   "powerBracket": "2*",
-   "floor": null,
-   "points": 36,
-   "breakdown": {
-    "game_changers": 10,
-    "tutors": 2,
-    "fast_mana": 5,
-    "price_1_5": 1,
-    "price_10_20": 7,
-    "price_20_30": 11
-   },
-   "violations": [
-    "price_cap",
-    "banned",
-    "gc_locks_price",
-    "gc_locks_price",
-    "tutors_gate_gc"
-   ],
-   "verdict": "out",
-   "label": null,
-   "price": 1339.54,
-   "gc": 9,
-   "salt": {
-    "total": 47.6,
-    "average": 0.62,
-    "top": [
-     {
-      "name": "The One Ring",
-      "salt": 2.55
-     },
-     {
-      "name": "Deflecting Swat",
-      "salt": 1.72
-     },
-     {
-      "name": "Mana Vault",
-      "salt": 1.63
-     }
-    ]
-   },
-   "synergy": {
-    "coverage": 74,
-    "average": 18,
-    "offPlan": 15
-   },
-   "power": {
-    "score": 5.3,
-    "base": 4.8,
-    "raw": 30,
-    "pillars": {
-     "wins": 0,
-     "interaction": 66,
-     "salt": 50,
-     "synergy": 30
-    }
-   },
-   "profile": {
-    "manabase": {
-     "lands": 30,
-     "basics": 15,
-     "tapped": 0,
-     "fetches": 5,
-     "colors": [
-      {
-       "color": "R",
-       "pips": 48,
-       "share": 1,
-       "sources": 34,
-       "target": 24,
-       "cover": 1.4166666666666667
-      }
-     ],
-     "weakest": "R",
-     "fixing": 100,
-     "quality": 100,
-     "curve": 100,
-     "score": 100
-    },
-    "speed": {
-     "avgMv": 2.04,
-     "cheap": 47,
-     "high": 2,
-     "ramp": 24,
-     "rocks": 9,
-     "dorks": 0,
-     "rituals": 5,
-     "landRamp": 1,
-     "fastMana": 13
-    },
-    "consistency": {
-     "draw": 8,
-     "cheapDraw": 5,
-     "tutors": 8,
-     "recursion": 3
-    },
-    "interaction": {
-     "counters": 3,
-     "removal": 17,
-     "wipes": 3,
-     "protection": 7,
-     "graveHate": 2,
-     "stax": 0,
-     "free": 4,
-     "cheapAnswers": 13,
-     "instantShare": 67
-    },
-    "wins": {
-     "checked": true,
-     "combos": 0,
-     "infinite": 0,
-     "ending": 0,
-     "twoCard": 0,
-     "lines": 0,
-     "web": 0,
-     "throughCommander": 0,
-     "fastest": null,
-     "lineCost": null,
-     "printed": 0,
-     "massPump": 0
-    },
-    "shape": {
-     "archetypes": [
-      {
-       "key": "equipment",
-       "share": 29
-      },
-      {
-       "key": "voltron",
-       "share": 21
-      },
-      {
-       "key": "spellslinger",
-       "share": 12
-      }
-     ],
-     "typal": {
-      "type": "Goblin",
-      "count": 3,
-      "share": 27
-     },
-     "creatures": 11,
-     "throughCommander": 0,
-     "engine": {
-      "theme": "burn",
-      "count": 14
-     }
-    },
-    "goldfish": {
-     "games": 500,
-     "mana": [
-      2,
-      3.2,
-      4,
-      4.6,
-      5.2,
-      5.7,
-      6.1,
-      6.6,
-      7.1,
-      7.5,
-      8,
-      8.5
-     ],
-     "commanderTurn": 5,
-     "winTurn": null,
-     "winBy": null
-    },
-    "upgrade": {
-     "pricey": 47,
-     "medianRank": 918
-    }
-   },
-   "bracket": {
-    "fits": false,
-    "checklist": 4,
-    "estimate": "B",
-    "failed": [
-     "game_changers",
-     "legality"
-    ]
-   }
-  },
-  {
-   "id": "cedh:DJ's cEDH Winota | Extra Turns #46",
-   "name": "DJ's cEDH Winota | Extra Turns #46",
-   "group": "cedh",
-   "url": "https://archidekt.com/decks/6606120",
-   "commanders": [
-    "Winota, Joiner of Forces"
-   ],
-   "cards": 100,
-   "missing": 0,
-   "tier": "above",
-   "practicalBracket": "4",
-   "powerBracket": "3",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Combat Celebrant + Rionya, Fire Dancer"
-    ]
-   },
-   "points": 31,
-   "breakdown": {
-    "game_changers": 7,
-    "stax_effects": 10,
-    "price_1_5": 1,
-    "price_10_20": 4,
-    "price_20_30": 9
-   },
-   "violations": [
-    "price_cap",
-    "banned",
-    "gc_locks_price",
-    "gc_locks_price"
-   ],
-   "verdict": "out",
-   "label": null,
-   "price": 1267.09,
-   "gc": 6,
-   "salt": {
-    "total": 62,
-    "average": 0.66,
-    "top": [
-     {
-      "name": "Drannith Magistrate",
-      "salt": 2.46
-     },
-     {
-      "name": "Winota, Joiner of Forces",
-      "salt": 1.85
-     },
-     {
-      "name": "Magus of the Moon",
-      "salt": 1.75
-     }
-    ]
-   },
-   "synergy": {
-    "coverage": 83,
-    "average": 32,
-    "offPlan": 12
-   },
-   "power": {
-    "score": 5.7,
-    "base": 5.7,
-    "raw": 37.9,
-    "pillars": {
-     "wins": 37,
-     "interaction": 49,
-     "salt": 72,
-     "synergy": 0
-    }
-   },
-   "profile": {
-    "manabase": {
-     "lands": 28,
-     "basics": 3,
-     "tapped": 0,
-     "fetches": 8,
-     "colors": [
-      {
-       "color": "W",
-       "pips": 48,
-       "share": 0.6233766233766234,
-       "sources": 19,
-       "target": 18,
-       "cover": 1.0570809248554913
-      },
-      {
-       "color": "R",
-       "pips": 29,
-       "share": 0.37662337662337664,
-       "sources": 19,
-       "target": 14,
-       "cover": 1.3546296296296296
-      }
-     ],
-     "weakest": "W",
-     "fixing": 100,
-     "quality": 100,
-     "curve": 100,
-     "score": 100
-    },
-    "speed": {
-     "avgMv": 2.33,
-     "cheap": 39,
-     "high": 2,
-     "ramp": 11,
-     "rocks": 6,
-     "dorks": 1,
-     "rituals": 0,
-     "landRamp": 0,
-     "fastMana": 8
-    },
-    "consistency": {
-     "draw": 4,
-     "cheapDraw": 3,
-     "tutors": 12,
-     "recursion": 0
-    },
-    "interaction": {
-     "counters": 1,
-     "removal": 10,
-     "wipes": 1,
-     "protection": 7,
-     "graveHate": 1,
-     "stax": 14,
-     "free": 1,
-     "cheapAnswers": 7,
-     "instantShare": 33
-    },
-    "wins": {
-     "checked": true,
-     "combos": 1,
-     "infinite": 1,
-     "ending": 1,
-     "twoCard": 1,
-     "lines": 1,
-     "web": 1,
-     "throughCommander": 0,
-     "fastest": 8,
-     "lineCost": 5,
-     "printed": 0,
-     "massPump": 3
-    },
-    "shape": {
-     "archetypes": [
-      {
-       "key": "aggro",
-       "share": 51
-      },
-      {
-       "key": "tokens",
-       "share": 28
-      },
-      {
-       "key": "lifegain",
-       "share": 12
-      }
-     ],
-     "typal": {
-      "type": "Human",
-      "count": 28,
-      "share": 50
-     },
-     "creatures": 56,
-     "throughCommander": 0,
-     "engine": {
-      "theme": "lifegain",
-      "count": 8
-     }
-    },
-    "goldfish": {
-     "games": 500,
-     "mana": [
-      1.8,
-      2.7,
-      3.4,
-      4,
-      4.4,
-      4.8,
-      5.3,
-      5.7,
-      6.1,
-      6.6,
-      7,
-      7.4
-     ],
-     "commanderTurn": 4,
-     "winTurn": null,
-     "winBy": {
-      "4": 10,
-      "6": 23,
-      "8": 33,
-      "10": 41
-     }
-    },
-    "upgrade": {
-     "pricey": 52,
-     "medianRank": 1697
-    }
-   },
-   "bracket": {
-    "fits": false,
-    "checklist": 4,
-    "estimate": "B",
-    "failed": [
-     "game_changers",
-     "combos",
-     "legality"
-    ]
-   }
-  },
-  {
    "id": "cedh:[cEDH] Doctor's Orders",
    "name": "[cEDH] Doctor's Orders",
    "group": "cedh",
@@ -17661,13 +16950,7 @@
    "tier": "above",
    "practicalBracket": "5",
    "powerBracket": "5",
-   "floor": {
-    "reason": "combo",
-    "mld": [],
-    "combos": [
-     "Food Chain + Squee, the Immortal"
-    ]
-   },
+   "floor": null,
    "points": 74,
    "breakdown": {
     "game_changers": 21,
@@ -17878,6 +17161,862 @@
     "estimate": "R",
     "failed": [
      "game_changers",
+     "combos"
+    ]
+   }
+  },
+  {
+   "id": "cedh:Breya Etherium Shaper Cedh",
+   "name": "Breya Etherium Shaper Cedh",
+   "group": "cedh",
+   "url": "https://archidekt.com/decks/4383998",
+   "commanders": [
+    "Breya, Etherium Shaper"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "above",
+   "practicalBracket": "5",
+   "powerBracket": "5",
+   "floor": null,
+   "points": 82,
+   "breakdown": {
+    "game_changers": 23,
+    "tutors": 9,
+    "stax_effects": 1,
+    "counterspells": 3,
+    "fast_mana": 4,
+    "price_10_20": 9,
+    "price_20_30": 12,
+    "combos": 21
+   },
+   "violations": [
+    "price_cap",
+    "banned",
+    "gc_locks_price",
+    "gc_locks_price",
+    "tutors_gate_gc",
+    "combos_gate_tutors"
+   ],
+   "verdict": "out",
+   "label": null,
+   "price": 2179.96,
+   "gc": 22,
+   "salt": {
+    "total": 90.3,
+    "average": 0.93,
+    "top": [
+     {
+      "name": "Rhystic Study",
+      "salt": 2.73
+     },
+     {
+      "name": "Smothering Tithe",
+      "salt": 2.58
+     },
+     {
+      "name": "The One Ring",
+      "salt": 2.55
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 10,
+    "average": -4,
+    "offPlan": 32
+   },
+   "power": {
+    "score": 9.8,
+    "base": 9.8,
+    "raw": 78.3,
+    "pillars": {
+     "wins": 100,
+     "interaction": 93,
+     "salt": 100,
+     "synergy": 0
+    }
+   },
+   "profile": {
+    "manabase": {
+     "lands": 27,
+     "basics": 1,
+     "tapped": 1,
+     "fetches": 6,
+     "colors": [
+      {
+       "color": "W",
+       "pips": 12,
+       "share": 0.18461538461538463,
+       "sources": 19,
+       "target": 11,
+       "cover": 1.7345505617977528
+      },
+      {
+       "color": "U",
+       "pips": 31,
+       "share": 0.47692307692307695,
+       "sources": 26,
+       "target": 16,
+       "cover": 1.6633858267716535
+      },
+      {
+       "color": "B",
+       "pips": 17,
+       "share": 0.26153846153846155,
+       "sources": 21,
+       "target": 12,
+       "cover": 1.7234848484848486
+      },
+      {
+       "color": "R",
+       "pips": 5,
+       "share": 0.07692307692307693,
+       "sources": 18,
+       "target": 9,
+       "cover": 1.9500000000000002
+      }
+     ],
+     "weakest": "U",
+     "fixing": 100,
+     "quality": 96,
+     "curve": 100,
+     "score": 99
+    },
+    "speed": {
+     "avgMv": 1.93,
+     "cheap": 52,
+     "high": 1,
+     "ramp": 15,
+     "rocks": 10,
+     "dorks": 0,
+     "rituals": 1,
+     "landRamp": 2,
+     "fastMana": 12
+    },
+    "consistency": {
+     "draw": 10,
+     "cheapDraw": 6,
+     "tutors": 20,
+     "recursion": 7
+    },
+    "interaction": {
+     "counters": 11,
+     "removal": 7,
+     "wipes": 1,
+     "protection": 3,
+     "graveHate": 1,
+     "stax": 7,
+     "free": 4,
+     "cheapAnswers": 11,
+     "instantShare": 78
+    },
+    "wins": {
+     "checked": true,
+     "combos": 14,
+     "infinite": 13,
+     "ending": 12,
+     "twoCard": 1,
+     "lines": 3,
+     "web": 13,
+     "throughCommander": 0,
+     "fastest": 4,
+     "lineCost": 2,
+     "printed": 0,
+     "massPump": 0
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "spellslinger",
+       "share": 30
+      },
+      {
+       "key": "control",
+       "share": 28
+      },
+      {
+       "key": "tokens",
+       "share": 15
+      }
+     ],
+     "typal": {
+      "type": "Human",
+      "count": 7,
+      "share": 64
+     },
+     "creatures": 11,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 7
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.5,
+      2.8,
+      3.5,
+      4.2,
+      4.7,
+      5.1,
+      5.6,
+      6.1,
+      6.5,
+      7,
+      7.4,
+      7.8
+     ],
+     "commanderTurn": 4,
+     "winTurn": 4,
+     "winBy": {
+      "4": 50,
+      "6": 67,
+      "8": 79,
+      "10": 86
+     }
+    },
+    "upgrade": {
+     "pricey": 59,
+     "medianRank": 342
+    }
+   },
+   "bracket": {
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "game_changers",
+     "combos"
+    ]
+   }
+  },
+  {
+   "id": "cedh:Cedh Korvold Reanimator",
+   "name": "Cedh Korvold Reanimator",
+   "group": "cedh",
+   "url": "https://archidekt.com/decks/7307169",
+   "commanders": [
+    "Korvold, Fae-Cursed King"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "above",
+   "practicalBracket": "3*",
+   "powerBracket": "3*",
+   "floor": null,
+   "points": 79,
+   "breakdown": {
+    "game_changers": 16,
+    "extra_turns": 4,
+    "tutors": 14,
+    "fast_mana": 15,
+    "price_1_5": 2,
+    "price_10_20": 8,
+    "price_20_30": 12,
+    "combos": 8
+   },
+   "violations": [
+    "price_cap",
+    "banned",
+    "gc_locks_price",
+    "gc_locks_price",
+    "tutors_gate_gc",
+    "combos_gate_tutors"
+   ],
+   "verdict": "out",
+   "label": null,
+   "price": 1573.68,
+   "gc": 15,
+   "salt": {
+    "total": 70.6,
+    "average": 0.72,
+    "top": [
+     {
+      "name": "Orcish Bowmasters",
+      "salt": 2.07
+     },
+     {
+      "name": "Underworld Breach",
+      "salt": 1.81
+     },
+     {
+      "name": "Necropotence",
+      "salt": 1.73
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 73,
+    "average": 8,
+    "offPlan": 19
+   },
+   "power": {
+    "score": 7.9,
+    "base": 7.9,
+    "raw": 58.9,
+    "pillars": {
+     "wins": 87,
+     "interaction": 36,
+     "salt": 86,
+     "synergy": 11
+    }
+   },
+   "profile": {
+    "manabase": {
+     "lands": 24,
+     "basics": 0,
+     "tapped": 0,
+     "fetches": 6,
+     "colors": [
+      {
+       "color": "B",
+       "pips": 41,
+       "share": 0.5189873417721519,
+       "sources": 31,
+       "target": 16,
+       "cover": 1.90139751552795
+      },
+      {
+       "color": "R",
+       "pips": 19,
+       "share": 0.24050632911392406,
+       "sources": 29,
+       "target": 12,
+       "cover": 2.447649572649573
+      },
+      {
+       "color": "G",
+       "pips": 19,
+       "share": 0.24050632911392406,
+       "sources": 28,
+       "target": 12,
+       "cover": 2.3632478632478633
+      }
+     ],
+     "weakest": "B",
+     "fixing": 100,
+     "quality": 100,
+     "curve": 100,
+     "score": 100
+    },
+    "speed": {
+     "avgMv": 1.91,
+     "cheap": 57,
+     "high": 2,
+     "ramp": 28,
+     "rocks": 8,
+     "dorks": 7,
+     "rituals": 6,
+     "landRamp": 0,
+     "fastMana": 23
+    },
+    "consistency": {
+     "draw": 8,
+     "cheapDraw": 5,
+     "tutors": 22,
+     "recursion": 13
+    },
+    "interaction": {
+     "counters": 2,
+     "removal": 7,
+     "wipes": 0,
+     "protection": 3,
+     "graveHate": 1,
+     "stax": 3,
+     "free": 2,
+     "cheapAnswers": 6,
+     "instantShare": 38
+    },
+    "wins": {
+     "checked": true,
+     "combos": 6,
+     "infinite": 6,
+     "ending": 5,
+     "twoCard": 2,
+     "lines": 3,
+     "web": 6,
+     "throughCommander": 0,
+     "fastest": 4,
+     "lineCost": 2,
+     "printed": 0,
+     "massPump": 0
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "spellslinger",
+       "share": 25
+      },
+      {
+       "key": "aristocrats",
+       "share": 22
+      },
+      {
+       "key": "aggro",
+       "share": 18
+      }
+     ],
+     "typal": {
+      "type": "Goblin",
+      "count": 5,
+      "share": 24
+     },
+     "creatures": 21,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "recursion",
+      "count": 13
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.4,
+      2.9,
+      3.7,
+      4.3,
+      4.8,
+      5.3,
+      5.7,
+      6.2,
+      6.7,
+      7.1,
+      7.5,
+      8
+     ],
+     "commanderTurn": 5,
+     "winTurn": 4,
+     "winBy": {
+      "4": 53,
+      "6": 73,
+      "8": 82,
+      "10": 91
+     }
+    },
+    "upgrade": {
+     "pricey": 65,
+     "medianRank": 537
+    }
+   },
+   "bracket": {
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "game_changers",
+     "combos"
+    ]
+   }
+  },
+  {
+   "id": "cedh:Turbo Combat Winota - CEDH",
+   "name": "Turbo Combat Winota - CEDH",
+   "group": "cedh",
+   "url": "https://archidekt.com/decks/1624978",
+   "commanders": [
+    "Winota, Joiner of Forces"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "above",
+   "practicalBracket": "3",
+   "powerBracket": "3",
+   "floor": null,
+   "points": 34,
+   "breakdown": {
+    "game_changers": 6,
+    "stax_effects": 7,
+    "fast_mana": 1,
+    "price_1_5": 2,
+    "price_20_30": 6,
+    "combos": 12
+   },
+   "violations": [
+    "price_cap",
+    "banned",
+    "gc_locks_price"
+   ],
+   "verdict": "out",
+   "label": null,
+   "price": 1130.05,
+   "gc": 5,
+   "salt": {
+    "total": 56.8,
+    "average": 0.65,
+    "top": [
+     {
+      "name": "Drannith Magistrate",
+      "salt": 2.46
+     },
+     {
+      "name": "Winota, Joiner of Forces",
+      "salt": 1.85
+     },
+     {
+      "name": "Magus of the Moon",
+      "salt": 1.75
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 78,
+    "average": 28,
+    "offPlan": 14
+   },
+   "power": {
+    "score": 7,
+    "base": 7,
+    "raw": 50.8,
+    "pillars": {
+     "wins": 78,
+     "interaction": 40,
+     "salt": 64,
+     "synergy": 0
+    }
+   },
+   "profile": {
+    "manabase": {
+     "lands": 26,
+     "basics": 6,
+     "tapped": 0,
+     "fetches": 1,
+     "colors": [
+      {
+       "color": "W",
+       "pips": 49,
+       "share": 0.5697674418604651,
+       "sources": 20,
+       "target": 17,
+       "cover": 1.1684782608695652
+      },
+      {
+       "color": "R",
+       "pips": 37,
+       "share": 0.43023255813953487,
+       "sources": 24,
+       "target": 15,
+       "cover": 1.6125
+      }
+     ],
+     "weakest": "W",
+     "fixing": 100,
+     "quality": 100,
+     "curve": 94,
+     "score": 98
+    },
+    "speed": {
+     "avgMv": 2.5,
+     "cheap": 43,
+     "high": 5,
+     "ramp": 12,
+     "rocks": 6,
+     "dorks": 2,
+     "rituals": 0,
+     "landRamp": 0,
+     "fastMana": 9
+    },
+    "consistency": {
+     "draw": 4,
+     "cheapDraw": 3,
+     "tutors": 4,
+     "recursion": 1
+    },
+    "interaction": {
+     "counters": 2,
+     "removal": 7,
+     "wipes": 0,
+     "protection": 10,
+     "graveHate": 0,
+     "stax": 14,
+     "free": 1,
+     "cheapAnswers": 5,
+     "instantShare": 56
+    },
+    "wins": {
+     "checked": true,
+     "combos": 6,
+     "infinite": 6,
+     "ending": 6,
+     "twoCard": 6,
+     "lines": 2,
+     "web": 6,
+     "throughCommander": 0,
+     "fastest": 6,
+     "lineCost": 4,
+     "printed": 0,
+     "massPump": 1
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "aggro",
+       "share": 46
+      },
+      {
+       "key": "tokens",
+       "share": 28
+      },
+      {
+       "key": "lifegain",
+       "share": 11
+      }
+     ],
+     "typal": {
+      "type": "Human",
+      "count": 25,
+      "share": 47
+     },
+     "creatures": 53,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "lifegain",
+      "count": 7
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.4,
+      2.5,
+      3.3,
+      3.9,
+      4.3,
+      4.7,
+      5,
+      5.5,
+      5.8,
+      6.2,
+      6.5,
+      6.8
+     ],
+     "commanderTurn": 4,
+     "winTurn": null,
+     "winBy": {
+      "4": 6,
+      "6": 15,
+      "8": 22,
+      "10": 30
+     }
+    },
+    "upgrade": {
+     "pricey": 47,
+     "medianRank": 1709
+    }
+   },
+   "bracket": {
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "game_changers",
+     "combos"
+    ]
+   }
+  },
+  {
+   "id": "cedh:Urza, Lord High Artificer CEDH",
+   "name": "Urza, Lord High Artificer CEDH",
+   "group": "cedh",
+   "url": "https://archidekt.com/decks/2565352",
+   "commanders": [
+    "Urza, Lord High Artificer"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "above",
+   "practicalBracket": "4",
+   "powerBracket": "4",
+   "floor": {
+    "reason": "mld",
+    "mld": [
+     "Static Orb",
+     "Winter Orb"
+    ]
+   },
+   "points": 46,
+   "breakdown": {
+    "game_changers": 7,
+    "stax_effects": 3,
+    "counterspells": 4,
+    "free_spells": 2,
+    "price_1_5": 3,
+    "price_10_20": 3,
+    "price_20_30": 3,
+    "combos": 21
+   },
+   "violations": [
+    "price_cap",
+    "banned",
+    "gc_locks_price",
+    "gc_locks_price"
+   ],
+   "verdict": "out",
+   "label": null,
+   "price": 580.19,
+   "gc": 6,
+   "salt": {
+    "total": 59.8,
+    "average": 0.89,
+    "top": [
+     {
+      "name": "Winter Orb",
+      "salt": 2.96
+     },
+     {
+      "name": "Rhystic Study",
+      "salt": 2.73
+     },
+     {
+      "name": "Static Orb",
+      "salt": 2.62
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 64,
+    "average": 14,
+    "offPlan": 16
+   },
+   "power": {
+    "score": 9,
+    "base": 9,
+    "raw": 66.7,
+    "pillars": {
+     "wins": 92,
+     "interaction": 78,
+     "salt": 69,
+     "synergy": 0
+    }
+   },
+   "profile": {
+    "manabase": {
+     "lands": 35,
+     "basics": 33,
+     "tapped": 1,
+     "fetches": 0,
+     "colors": [
+      {
+       "color": "U",
+       "pips": 55,
+       "share": 1,
+       "sources": 36,
+       "target": 24,
+       "cover": 1.5
+      }
+     ],
+     "weakest": "U",
+     "fixing": 100,
+     "quality": 97,
+     "curve": 82,
+     "score": 93
+    },
+    "speed": {
+     "avgMv": 2.72,
+     "cheap": 34,
+     "high": 5,
+     "ramp": 7,
+     "rocks": 3,
+     "dorks": 2,
+     "rituals": 1,
+     "landRamp": 0,
+     "fastMana": 3
+    },
+    "consistency": {
+     "draw": 15,
+     "cheapDraw": 9,
+     "tutors": 4,
+     "recursion": 1
+    },
+    "interaction": {
+     "counters": 9,
+     "removal": 3,
+     "wipes": 1,
+     "protection": 5,
+     "graveHate": 0,
+     "stax": 5,
+     "free": 6,
+     "cheapAnswers": 9,
+     "instantShare": 92
+    },
+    "wins": {
+     "checked": true,
+     "combos": 10,
+     "infinite": 10,
+     "ending": 10,
+     "twoCard": 7,
+     "lines": 6,
+     "web": 10,
+     "throughCommander": 0,
+     "fastest": 4,
+     "lineCost": 2,
+     "printed": 3,
+     "massPump": 1
+    },
+    "shape": {
+     "archetypes": [
+      {
+       "key": "control",
+       "share": 29
+      },
+      {
+       "key": "spellslinger",
+       "share": 16
+      },
+      {
+       "key": "aggro",
+       "share": 15
+      }
+     ],
+     "typal": {
+      "type": "Artificer",
+      "count": 4,
+      "share": 25
+     },
+     "creatures": 16,
+     "throughCommander": 0,
+     "engine": {
+      "theme": "cost-reducer",
+      "count": 4
+     }
+    },
+    "goldfish": {
+     "games": 500,
+     "mana": [
+      1.3,
+      2.4,
+      3.6,
+      4.5,
+      5.2,
+      5.9,
+      6.4,
+      6.9,
+      7.5,
+      8,
+      8.4,
+      8.9
+     ],
+     "commanderTurn": 4,
+     "winTurn": 7,
+     "winBy": {
+      "4": 11,
+      "6": 25,
+      "8": 37,
+      "10": 47
+     }
+    },
+    "upgrade": {
+     "pricey": 34,
+     "medianRank": 723
+    }
+   },
+   "bracket": {
+    "fits": false,
+    "checklist": 4,
+    "estimate": "R",
+    "failed": [
+     "game_changers",
+     "mass_land_denial",
      "combos"
     ]
    }

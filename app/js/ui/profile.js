@@ -1,10 +1,11 @@
 import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { ARCH } from './constants.js';
-import { drawOdds } from '../engine/index.js';
 import { $, esc, fill } from './helpers.js';
 import { renderPod } from './pod.js';
-import { answer, cardList, fold, paint, tableWrap } from './reading.js';
+import { RULES } from '../rules.js';
+import { readingHtml } from './verdict.js';
+import { cardList, fold, paint, tableWrap } from './reading.js';
 
 // The power level: how strong the deck is, measured against the 36 precons, the pod's
 // decks and public cEDH lists (data/deck_study.json). It is its own reading and never
@@ -33,43 +34,46 @@ const med = (group, key) => {
   const v = state.study && state.study.medians[group] && state.study.medians[group][key];
   return typeof v === 'number' ? v : null;
 };
+export const studyMedian = med;
 const isNone = (v) => v === null || v === undefined;
 const show = (v) => (isNone(v) ? '—' : String(v));
 const facts = (list) => '<ul class="rd-facts">' + list.map(([v, label]) => '<li><b>' + v + '</b> ' + esc(label) + '</li>').join('') + '</ul>';
 const archName = (key) => (ARCH.find(x => x.k === key) || { name: { [state.lang]: key } }).name[state.lang];
 
-// Why the score sits where it does: which values pull away from the pod's median.
-function why(r, t) {
-  const { pillars, upgraded } = r.power;
-  const names = (keys) => new Intl.ListFormat(state.lang).format(keys.map(k => t['pf_' + k].toLocaleLowerCase(state.lang)));
-  const lead = () => {
-    if (!state.study) return '';
-    const gap = (k) => pillars[k] - med('pod', 'pillar_' + k);
-    const up = Object.keys(pillars).filter(k => gap(k) > 5), down = Object.keys(pillars).filter(k => gap(k) < -5);
-    return up.length && down.length ? fill(t.pfWhyBoth, { a: names(up), b: names(down) })
-      : up.length ? fill(t.pfWhyUp, { a: names(up) })
-      : down.length ? fill(t.pfWhyDown, { b: names(down) }) : t.pfWhyEven;
-  };
-  return [lead(), upgraded ? t.pfWhyLift : ''].filter(Boolean).join(' ');
-}
-
-// A card or combo sets the bracket here, so the score and the bracket disagree on purpose.
-function floorNote(r, t) {
-  const f = r.level.floor;
-  if (!f || r.level.bracket === r.level.powerBracket) return '';
-  return '<div class="rd-floor"><p class="rd-floor-t">' + esc(fill(t['vWhyFloor_' + f.reason], { c: (f.reason === 'mld' ? f.mld : f.combos).join(', ') })) + '</p>' +
-    '<p>' + esc(fill(t.pfFloorX, { b: r.level.powerBracket })) + '</p></div>';
-}
+const WEIGHT = { wins: 40, interaction: 25, salt: 15, synergy: 20 };
 
 function head(r, t) {
-  const { level, power } = r;
-  const sub = level.pending ? esc(t.vPending)
-    : esc(fill(t.pfScore, { v: level.score })) + ' · ' + esc(t['band_' + powerBand(power.score)]);
-  return answer({ label: t.pfPracticalLabel, value: level.pending ? '…' : level.bracket, sub,
-    body: (level.precon ? '<div class="rd-floor"><p class="rd-floor-t">' + esc(fill(t.pfPrecon, { c: level.precon.name })) + '</p></div>' : '') + floorNote(r, t) +
-      (r.bracket.landMaybe.length ? '<p class="rd-flag">' + esc(fill(t.landMaybe, { c: r.bracket.landMaybe.map(n => n.split(' // ')[0]).join(', ') })) + '</p>' : '') +
-      (level.pending ? '' : '<p class="rd-why">' + esc(why(r, t)) + '</p>') +
-      '<p class="rd-apart">' + esc(t.pfApart) + '</p>' });
+  const { level } = r;
+  return '<header class="pw-head"><p class="sum-label">' + esc(t.pfPracticalLabel) + '</p>' +
+    '<h3 class="sum-bracket">' + (level.pending ? '…' : esc(level.bracket)) + '<small>' + esc(fill(t.pfScore, { v: level.score })) + ' · ' + esc(t['band_' + powerBand(level.score)]) + '</small></h3>' +
+    (level.pending ? '<p class="sum-read">' + esc(t.vPending) + '</p>' : readingHtml(r, t)) +
+    '<p class="sum-note">' + esc(t.pfApart) + '</p></header>';
+}
+
+// The whole scale drawn once: each bracket's span, this deck, and where the reference groups sit.
+function ladder(r, t) {
+  const steps = RULES.power_brackets.brackets;
+  const x = (v) => ((v - 1) / 9 * 100).toFixed(1) + '%';
+  const seg = steps.map(([top, label], i) => {
+    const from = i ? steps[i - 1][0] : 1;
+    return '<li style="left:' + x(from) + ';width:calc(' + x(top) + ' - ' + x(from) + ')"' + (label === r.level.powerBracket ? ' class="on"' : '') + '><span>' + esc(label) + '</span></li>';
+  }).join('');
+  const refs = GROUPS.map(g => [t['pfRef_' + g], med(g, 'power')]).filter(([, m]) => m !== null)
+    .map(([l, m]) => '<span class="pw-ref" style="left:' + x(m) + '"><i></i>' + esc(l) + ' ' + m + '</span>').join('');
+  return '<section class="pw-sec"><h4>' + esc(t.pwLadderT) + '</h4><div class="pw-ladder">' +
+    '<span class="pw-you" style="left:' + x(r.power.score) + '"><b>' + r.power.score + '</b>' + esc(t.pwYou) + '</span>' +
+    '<ol class="pw-steps">' + seg + '</ol><div class="pw-refs">' + refs + '</div></div></section>';
+}
+
+// The arithmetic in the open: value, weight, what it adds, and how the sum becomes the score.
+function how(r, t) {
+  const { pillars, raw, upgraded, score } = r.power;
+  return '<section class="pw-sec"><h4>' + esc(t.pwHowT) + '</h4><p class="sum-note">' + esc(t.pwHowX) + '</p>' +
+    tableWrap('<thead><tr><th scope="col">' + esc(t.pwCol) + '</th><th scope="col">/100</th><th scope="col">' + esc(t.pwWeight) + '</th><th scope="col">' + esc(t.pwAdds) + '</th></tr></thead><tbody>' +
+      Object.keys(pillars).map(k => '<tr><th scope="row">' + esc(t['pf_' + k]) + '</th><td>' + pillars[k] + '</td><td>' + WEIGHT[k] + '%</td><td class="rd-own">' + (pillars[k] * WEIGHT[k] / 100).toFixed(1) + '</td></tr>').join('') +
+      '<tr class="pw-total"><th scope="row">' + esc(t.pwRaw) + '</th><td></td><td></td><td class="rd-own">' + raw + '</td></tr>' +
+      '<tr class="pw-total"><th scope="row">' + esc(t.pwOnScale) + '</th><td></td><td></td><td class="rd-own">' + score + ' / 10</td></tr></tbody>') +
+    (upgraded ? '<p class="sum-note">' + esc(t.pwLift) + '</p>' : '') + '</section>';
 }
 
 // Where this value sits among the medians, in words. Synergy's medians are all 0, hence the c > b guards.
@@ -131,7 +135,7 @@ function synergyExtra(r, t) {
 function behind(k, r, t) {
   const salted = new Map((r.salt ? r.salt.top : []).map(c => [c.name, String(c.salt)]));
   const marks = r.power.benchmarks.filter(b => b.pillar === k).map(b =>
-    benchmark(b, t, cardList(b.cards, b.key === 'saltiness' ? { note: (n) => salted.get(n) || '' } : undefined))).join('');
+    benchmark(b, t, cardList(b.cards, { cap: 8, note: b.key === 'saltiness' ? (n) => salted.get(n) || '' : () => '' }))).join('');
   const extra = { wins: winsExtra, salt: saltExtra, synergy: synergyExtra }[k];
   return (extra ? extra(r, t) : '') + marks;
 }
@@ -145,45 +149,7 @@ function value(k, r, t) {
     '<p class="rd-value-n">' + (none ? '—' : v) + '</p>' +
     '<p class="rd-value-stand">' + esc(none ? t.lvlNone : standing(v, k, t)) + '</p></div>' +
     '<ul class="rd-bars">' + bar(t.pfThisDeck, none ? 0 : v, true) + refs.map(([l, m]) => bar(l, m, false)).join('') + '</ul>' +
-    fold('value:' + k, t.pfBehind, '', behind(k, r, t)) + '</article>';
-}
-
-// Mana by turn: one series over time, every column labelled, so it is its own text equivalent.
-function manaChart(g, t) {
-  const turns = [1, 2, 3, 4, 5, 6, 8, 10];
-  const top = Math.max(...turns.map(n => g.mana[n - 1]), 1);
-  return '<h5 class="rd-sub-t">' + esc(t.gfManaT) + '</h5><ol class="rd-cols">' + turns.map(n =>
-    '<li style="--h:' + Math.round(g.mana[n - 1] / top * 100) + '"><b>' + g.mana[n - 1] + '</b><span class="rd-col" aria-hidden="true"></span>' +
-    '<span class="rd-col-l"><span class="vh">' + esc(t.gfTurn) + ' </span>T' + n + '</span></li>').join('') + '</ol>';
-}
-
-// Unscored context, all in one calm place: tempo with nobody interfering, the odds of
-// seeing each role, and the measures that describe the deck without counting for power.
-function context(r, t) {
-  const g = r.profile.goldfish, L = r.profile.ledger;
-  const deck = r.stats.total_cards - r.commanders.length;
-  const lead = [g.commanderTurn !== null ? fill(t.gfCommander, { v: g.commanderTurn }) : '',
-    g.winBy ? (g.winTurn !== null ? fill(t.gfWin, { v: g.winTurn }) : t.gfNoWin) + ' ' + fill(t.gfWinBy, { a: g.winBy[6], b: g.winBy[8], c: g.winBy[10] }) : ''].filter(Boolean).join(' ');
-  const roles = [['pr_ramp', L.ramp], ['pr_draw', L.draw], ['pr_tutors', L.tutors], ['pr_cheap_answers', L.cheapAnswers]];
-  const odds = tableWrap('<thead><tr><th></th>' + [2, 4, 6, 8].map(n => '<th scope="col">T' + n + '</th>').join('') + '</tr></thead><tbody>' +
-    // seven in hand plus one a turn after the first
-    roles.map(([label, cards]) => '<tr><th scope="row">' + esc(t[label]) + ' <span class="rd-dim">' + cards.length + '</span></th>' +
-      [2, 4, 6, 8].map(turn => '<td>' + Math.round(drawOdds(deck, cards.length, 6 + turn) * 100) + '%</td>').join('') + '</tr>').join('') + '</tbody>');
-  const marks = r.power.benchmarks.filter(b => !b.scored).map(b => benchmark(b, t, cardList(b.cards, { cap: 0 }))).join('');
-  return '<p class="rd-text rd-strong">' + esc(t.pfNotScored) + '</p>' +
-    (lead ? '<p class="rd-text">' + esc(lead) + '</p>' : '') + manaChart(g, t) +
-    '<p class="rd-q">' + esc(fill(t.gfX, { n: g.games })) + '</p>' +
-    '<h5 class="rd-sub-t">' + esc(t.gfOddsT) + '</h5>' + odds + marks;
-}
-
-function manabase(m, t) {
-  const rows = m.colors.map(c => '<tr><th scope="row"><span class="rd-pip" data-c="' + esc(c.color) + '" aria-hidden="true"></span>' + esc(c.color) + '</th>' +
-    '<td>' + Math.round(c.share * 100) + '%</td><td>' + c.sources + ' / ' + c.target +
-    (c.color === m.weakest && c.cover < 1 ? ' <span class="rd-short">' + esc(t.pfShort) + '</span>' : '') + '</td>' +
-    '<td class="rd-cover" aria-hidden="true" style="--v:' + Math.round(Math.min(c.cover, 1) * 100) + '"><span class="rd-bar-track"><i></i></span></td></tr>').join('');
-  return '<p class="rd-text">' + esc(fill(t.pfManaX, { f: m.fixing, q: m.quality, c: m.curve })) + '</p>' +
-    '<p class="rd-text">' + esc(fill(t.pfManaLands, { l: m.lands, b: m.basics, t: m.tapped, e: m.fetches })) + '</p>' +
-    (rows ? tableWrap('<thead><tr><th></th><th scope="col">' + esc(t.pfPips) + '</th><th scope="col">' + esc(t.pfSources) + '</th><th></th></tr></thead><tbody>' + rows + '</tbody>') : '');
+    '<div class="rd-behind">' + behind(k, r, t) + '</div></article>';
 }
 
 function shape(r, t) {
@@ -224,13 +190,11 @@ export function renderProfile() {
   loadStudy();
   const t = T(), r = state.result;
   const { power, profile } = r;
-  const g = profile.goldfish, top = profile.shape.archetypes[0];
-  paint($('profile'), '<div class="panel rd">' + head(r, t) +
-    '<div class="rd-values"><div class="rd-intro"><h3>' + esc(t.pfValuesT) + '</h3><p>' + esc(t.pfValuesX) + '</p></div>' +
+  const top = profile.shape.archetypes[0];
+  paint($('profile'), '<div class="panel rd pw">' + head(r, t) + ladder(r, t) + how(r, t) +
+    '<div class="rd-values"><div class="rd-intro"><h3>' + esc(t.pwValuesT) + '</h3><p>' + esc(t.pfValuesX) + '</p></div>' +
       Object.keys(power.pillars).map(k => value(k, r, t)).join('') + '</div>' +
     '<div class="rd-folds">' +
-      fold('context', t.pf_tempo, g.commanderTurn !== null ? fill(t.gfAside, { v: g.commanderTurn }) : '', context(r, t)) +
-      fold('mana', t.pfManaT, fill(t.pfManaAside, { v: profile.manabase.score }), manabase(profile.manabase, t)) +
       fold('shape', t.pfShapeT, top ? archName(top.key) : '', shape(r, t)) +
       fold('compare', t.pfCompareT, '', comparison(r, t)) +
     '</div>' +

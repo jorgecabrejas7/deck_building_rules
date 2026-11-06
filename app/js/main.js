@@ -3,7 +3,7 @@
 // because every cross-module call happens inside event handlers, after eval.
 import * as PodEngine from './engine/index.js';
 import { RULES } from './rules.js';
-import { state, store, saveSession, loadSession, VIEW_KEYS } from './state.js';
+import { state, store, cardCache, saveSession, loadSession, VIEW_KEYS } from './state.js';
 import { deckToText } from './advice.js';
 import { T } from './i18n.js';
 import { $ } from './ui/helpers.js';
@@ -20,6 +20,7 @@ import { renderBracket } from './ui/bracket.js';
 import { renderCombos } from './ui/combos.js';
 import { renderProfile } from './ui/profile.js';
 import { renderDeck } from './ui/deck.js';
+import { renderMana } from './ui/mana.js';
 import { renderTips } from './ui/tips.js';
 import { renderRamp } from './ui/ramp.js';
 import { renderHand } from './ui/hand.js';
@@ -68,7 +69,7 @@ const VIEW_RENDER = {
   bracket: renderBracket,
   combos: renderCombos,
   power: renderProfile,
-  mana: () => { renderComp(); renderCurve(); renderRamp(); renderHand(); },
+  mana: () => { renderMana(); renderCurve(); renderRamp(); renderComp(); renderHand(); },
 };
 
 export function renderAll() {
@@ -81,9 +82,8 @@ export function renderAll() {
   document.body.dataset.tab = state.tab;
   document.body.dataset.view = state.view;
   // the summary belongs to the report: Pod and Guide are about other things
-  // every visit starts on the landing; after that, Cargar is just the paste box
-  if (state.tab !== 'load') state.landing = false;
-  $('hero').hidden = state.tab !== 'load' || !state.landing;
+  // the landing is the Cargar page: every visit starts there, and coming back returns to it
+  $('hero').hidden = state.tab !== 'load';
   $('summary').style.display = has && state.tab === 'informe' ? '' : 'none';
   renderSectionNav();
   document.documentElement.lang = state.lang;
@@ -98,6 +98,9 @@ export function renderAll() {
       for (const k of ['partPlanT', 'partPodT', 'partPodX', 'partBrT', 'partBrX', 'partPfT', 'partPfX', 'tipsCompT']) $(k).textContent = t[k];
       // out of the pod, the way back in is what the player came for
       $('view-points').classList.toggle('out', state.result.evalRes.tier === 'above');
+      // the commander's art lights every view of the report from behind
+      const art = r0 => (cardCache[r0] || {}).img_art;
+      $('reportStage').style.backgroundImage = state.result.commanders[0] && art(state.result.commanders[0]) ? 'url("' + art(state.result.commanders[0]) + '")' : 'none';
       VIEW_RENDER[state.view]();
     }
   }
