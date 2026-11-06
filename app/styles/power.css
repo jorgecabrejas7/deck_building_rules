@@ -462,3 +462,6 @@ a.rd-link,.combo-link,.sum-note a{color:var(--ink)}
   .cb{grid-template-columns:minmax(0,1fr);gap:var(--sp-4)}
   .cb-arts{max-width:240px;margin-inline:auto}
 }
+/* the precon upgrade guide */
+.precon-step .sug-tile{flex:1 1 240px}
+.precon-tier{padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);background:var(--wash);color:var(--ink2);font-size:var(--fs-caption)}

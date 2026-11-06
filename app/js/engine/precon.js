@@ -15,3 +15,31 @@ export function matchPrecon(entries, precons) {
   if (!best || size - best.shared > MAX_CHANGES || best.shared < 100 - MAX_CHANGES) return null;
   return { name: best.name, date: best.date, changes: size - best.shared };
 }
+
+// ---- the precon upgrade guide ----
+// swaps = [{ card, cutCard }] in the order to make them. Walks them on running stats, so a
+// second tutor costs what a second tutor costs, and stops at the first one past `limit`.
+// A swap a pod rule forbids (addCost gives null) is passed over. A swap that adds no points
+// always fits, even on a deck already over the limit.
+// addCost(card, stats) and dials(card) come from advice.js, which needs the browser's rules.
+export function upgradePlan(swaps, { points, limit, stats, addCost, dials }) {
+  const shift = (from, names, by) => {
+    const s = { ...from };
+    for (const d of names) s[d] = Math.max((s[d] || 0) + by, 0);
+    return s;
+  };
+  const steps = [];
+  let total = points, now = stats;
+  for (const swap of swaps) {
+    const without = swap.cutCard ? shift(now, dials(swap.cutCard), -1) : now;
+    const cost = addCost(swap.card, without);
+    if (cost === null) continue;
+    // what a card saves is what adding it back would cost
+    const effect = cost - (swap.cutCard ? addCost(swap.cutCard, without) || 0 : 0);
+    if (effect > 0 && total + effect > limit) return { steps, total, next: { card: swap.card, total: total + effect } };
+    total += effect;
+    now = shift(without, dials(swap.card), 1);
+    steps.push({ ...swap, effect, total });
+  }
+  return { steps, total, next: null };
+}

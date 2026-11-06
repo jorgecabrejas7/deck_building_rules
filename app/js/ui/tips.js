@@ -7,7 +7,7 @@ import { $, esc, archKey, catLabel, fill } from './helpers.js';
 import { bindSugPopovers } from './popover.js';
 import { compositionHtml } from './verdict.js';
 import { compSlots, tagCount } from './comp.js';
-import { orderedCuts, powerUpOptions, roomCuts, fetchUpgradeCards, deckColorIdentity, synergyAdvice, UPGRADE_QUERIES } from '../advice.js';
+import { orderedCuts, powerUpOptions, roomCuts, fetchUpgradeCards, deckColorIdentity, synergyAdvice, cardAddCost, cardDials, UPGRADE_QUERIES } from '../advice.js';
 
 // Compact "why this card" line: rank · price · speed. One glance, no prose.
 function whyAdd(c) {
@@ -83,6 +83,24 @@ function cutPlanHtml(r, t) {
     (combo ? ' ' + esc(fill(t.planCombos, { v: combo })) : '') + '</p>';
 }
 
+// A recognised precon's synergy swaps in order, each with its point effect and the running
+// total, up to the pod's budget.
+function preconGuideHtml(swaps, tile, t) {
+  const r = state.result, start = r.evalRes.points;
+  const limit = RULES.tiers.tier2.max_points, t1 = RULES.tiers.tier1.max_points;
+  const plan = PodEngine.upgradePlan(swaps, { points: start, limit, stats: r.stats, addCost: cardAddCost, dials: cardDials });
+  const cross = start <= t1 ? plan.steps.findIndex(s => s.total > t1) : -1;
+  const rows = plan.steps.map((s, i) =>
+    (i === cross ? '<li class="precon-tier">' + esc(fill(t.preconTier1, { n: t1 })) + '</li>' : '') +
+    '<li class="plan-step precon-step">' + tile(s.pick, s.cut) +
+    '<span class="plan-after mono">' + (s.effect < 0 ? '−' + -s.effect : '+' + s.effect) + ' → ' + s.total + '</span></li>').join('');
+  return '<p class="note-sm">' + esc(fill(t.preconStart, { v: start, m: limit, n: t1 })) + '</p>' +
+    (rows ? '<ol class="plan-list">' + rows + '</ol>' : '') +
+    '<p class="note-sm">' + esc(plan.next
+      ? fill(t.preconStops, { c: plan.next.card.name, v: plan.next.total, m: limit })
+      : fill(t.preconEnds, { v: plan.total, m: limit })) + '</p>';
+}
+
 export function renderTips() {
   const t = T(), r = state.result, ev = r.evalRes;
   // #tipsMain/#tipsUp/#tipsComp are static shells (index.html); the async ones
@@ -99,7 +117,7 @@ export function renderTips() {
     ? '<h3 class="secT secT-lg">' + esc(fill(t.planOutT, { v: ev.points })) + '</h3>' + cutPlanHtml(r, t)
     : '<p class="plan-note">' + esc(t['planIn_' + ev.tier]) + '</p>' + (ev.tier === 'tier2'
       ? '<details class="adv-disclosure"><summary>' + esc(t.downToggle) + '</summary><div class="adv-disc-body">' + cutPlanHtml(r, t) + '</div></details>' : '');
-  $('tipsUp').innerHTML = '<h3 class="secT secT-lg">' + t.synT + '</h3><div class="note-muted">' + t.tipsLoading + '</div>';
+  $('tipsUp').innerHTML = '<h3 class="secT secT-lg">' + (r.level.precon ? t.preconT : t.synT) + '</h3><div class="note-muted">' + t.tipsLoading + '</div>';
   renderCompBrief();
   bindTips();
   fillAsync();
@@ -134,9 +152,10 @@ function cacheTips(key) {
 async function fillSynergy(key) {
   const t = T(), r = state.result, lang = state.lang, es = lang === 'es';
   const { few } = slotState();
+  const precon = r.level.precon;
   let data = null, failNote = null;
   try {
-    data = await synergyAdvice(r, few.map(f => f.cat), 6);
+    data = await synergyAdvice(r, few.map(f => f.cat), precon ? 10 : 6);
     if (!data) failNote = t.synNoPage;
     else if (!data.picks.length) failNote = t.synNoPicks;
   } catch (e) { failNote = t.synFailNet; }
@@ -164,8 +183,7 @@ async function fillSynergy(key) {
       if (found) used.add(found.x.name);
       return found;
     };
-    const tiles = data.picks.map(p => {
-      const cut = pickCut(p);
+    const tile = (p, cut) => {
       const why = [(es ? 'sinergia +' : 'synergy +') + Math.round(p.synergy * 100) + '%']
         .concat(p.incl !== null ? [es
           ? 'en el ' + Math.round(p.incl * 100) + '% de los mazos de ' + cmdShort
@@ -181,15 +199,20 @@ async function fillSynergy(key) {
           : (es ? 'sinergia ' : 'synergy ') + (cut.syn >= 0 ? '+' : '') + Math.round(cut.syn * 100) + '%' +
             (cut.syn >= 0 ? ' · ' + t.cutCompare : '');
       return bigSugTile(p.card, cut ? { name: cut.x.name, card: cut.x.card } : null, { why, cutWhy });
-    });
-    body += '<div class="sug-grid">' + tiles.slice(0, 3).join('') + '</div>' +
-      (tiles.length > 3 ? '<details class="adv-disclosure"><summary>' + esc(fill(t.sugMore, { v: tiles.length - 3 })) + '</summary>' +
-        '<div class="adv-disc-body sug-grid">' + tiles.slice(3).join('') + '</div></details>' : '');
+    };
+    const swaps = data.picks.map(pick => { const cut = pickCut(pick); return { pick, cut, card: pick.card, cutCard: cut && cut.x.card }; });
+    if (precon) body += preconGuideHtml(swaps, tile, t);
+    else {
+      const tiles = swaps.map(s => tile(s.pick, s.cut));
+      body += '<div class="sug-grid">' + tiles.slice(0, 3).join('') + '</div>' +
+        (tiles.length > 3 ? '<details class="adv-disclosure"><summary>' + esc(fill(t.sugMore, { v: tiles.length - 3 })) + '</summary>' +
+          '<div class="adv-disc-body sug-grid">' + tiles.slice(3).join('') + '</div></details>' : '');
+    }
   }
   // tier-up advice is opt-in: collapsed, fetched only on demand, and pointless out of the pod
   if (r.evalRes.tier !== 'above') body += '<details class="adv-disclosure" data-up-lazy><summary>' + t.tierUpToggle + '</summary>' +
     '<div class="adv-disc-body" data-up-body><div class="note-muted">' + t.tipsLoading + '</div></div></details>';
-  el.innerHTML = '<h3 class="secT secT-lg">' + t.synT + '</h3>' + body;
+  el.innerHTML = '<h3 class="secT secT-lg">' + (precon ? t.preconT : t.synT) + '</h3>' + body;
   bindTips();
   return failNote ? 'degrade' : 'ok';
 }
