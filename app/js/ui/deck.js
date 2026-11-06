@@ -1,4 +1,4 @@
-import { budgetTotals, cardValues, cardmarketUrl, cardmarketWants } from '../engine/index.js';
+import { budgetTotals, cardValues, cardmarketUrl, cardmarketWants, trimPlan } from '../engine/index.js';
 import { state, store } from '../state.js';
 import { T } from '../i18n.js';
 import { TYPES, TYPE_ORDER } from './constants.js';
@@ -129,6 +129,35 @@ function budget(t) {
   return '<div class="rd-folds dk-budget">' + fold('budget', t.bgT, eur(b.atCheapest ?? b.atDefault), body) + '</div>';
 }
 
+// Reaching a legal 100, whatever the deck's bracket. A locked card leaves the cuts for the
+// protected list, so its toggle stays reachable. `excess` counts the whole list: a card Scryfall
+// could not find is still a line the player will play.
+function paintTrim(all, excess, focus) {
+  const t = T(), dv = state.deckView, box = $('dkTrim'), plan = trimPlan(all, excess, dv.locked);
+  const unknown = excess + 100 - state.result.stats.total_cards;
+  const lock = (c) => '<button type="button" class="rd-filter" data-lock="' + esc(c.name) + '" aria-pressed="' + dv.locked.has(c.name) + '" aria-label="' +
+    esc(fill(t.dkTrimLockCard, { c: short(c.name) })) + '">' + esc(t.dkTrimLock) + '</button>';
+  const line = (c, count, extra) => '<li><span class="dk-b-name">' + esc(short(c.name)) + (count > 1 ? ' <small>×' + count + '</small>' : '') + '</span>' + extra + lock(c) + '</li>';
+  const kept = all.filter(c => dv.locked.has(c.name));
+  box.innerHTML = '<h3 class="dk-trim-title">' + esc(fill(t.dkTrimOver, { n: excess })) + '</h3><p class="dk-note">' + esc(t.dkTrimX) + '</p>' +
+    (unknown ? '<p class="dk-note">' + esc(fill(t.dkTrimUnknown, { n: unknown })) + '</p>' : '') +
+    (plan.cuts.length ? '<div><h4 class="dk-b-title">' + esc(t.dkTrimCuts) + '</h4><ol class="dk-b-list">' + plan.cuts.map(c => line(c, c.copies, levelTag(c, t) +
+      (c.reasons.length ? '<ul class="dk-why">' + c.reasons.map(x => '<li>' + esc(reasonText(x, t)) + '</li>').join('') + '</ul>' : ''))).join('') + '</ol></div>' : '') +
+    (kept.length ? '<div><h4 class="dk-b-title">' + esc(t.dkTrimKept) + '</h4><ul class="dk-b-list">' + kept.map(c => line(c, 0, '')).join('') + '</ul></div>' : '') +
+    (plan.short ? '<p class="dk-note">' + esc(fill(t.dkTrimShort, { n: plan.short })) + '</p>' : '') +
+    '<button type="button" id="dkTrimApply" class="btn-accent-sm"' + (plan.names.length && canEdit() ? '' : ' disabled') + '>' + esc(t.dkTrimApply) + '</button>';
+  const locks = [...box.querySelectorAll('[data-lock]')];
+  for (const b of locks) b.onclick = () => {
+    const n = b.dataset.lock;
+    if (!dv.locked.delete(n)) dv.locked.add(n);
+    paintTrim(all, excess, n);
+  };
+  // only this box repaints and the toggle has moved between lists: keep the keyboard on it. An
+  // unlocked card the plan no longer needs is on neither list, so the next toggle takes over.
+  if (focus) (locks.find(b => b.dataset.lock === focus) || locks[0])?.focus({ preventScroll: true });
+  $('dkTrimApply').onclick = () => removeFromDeck(plan.names);
+}
+
 const select = (id, label, options, value) => '<label class="arch-field dk-select"><span>' + esc(label) + '</span><select id="' + id + '" class="arch-select">' +
   options.map(([k, text]) => '<option value="' + k + '"' + (k === value ? ' selected' : '') + '>' + esc(text) + '</option>').join('') + '</select></label>';
 
@@ -145,7 +174,8 @@ export function renderDeck() {
   const levelBtn = (l, label, n) => '<button type="button" class="rd-filter" data-lv="' + l + '" data-level="' + l + '" aria-pressed="' + ((dv.level || 0) === l) + '">' + esc(label) + ' <b>' + n + '</b></button>';
   const seg = (k, label) => '<button type="button" data-mode="' + k + '" class="' + (dv.mode === k ? 'active' : '') + '" aria-pressed="' + (dv.mode === k) + '">' + esc(t[label]) + '</button>';
   const hint = note(t);
-  paint($('view-deck'), '<div class="part-head"><div><h2 class="part-title">' + esc(t.dkT) + '</h2><p class="part-sub">' + esc(t.dkX) + '</p></div></div>' + budget(t) +
+  const excess = state.deck.entries.reduce((s, e) => s + e.quantity, 0) - 100;
+  paint($('view-deck'), '<div class="part-head"><div><h2 class="part-title">' + esc(t.dkT) + '</h2><p class="part-sub">' + esc(t.dkX) + '</p></div></div>' + (excess > 0 ? '<section id="dkTrim" class="dk-trim"></section>' : '') + budget(t) +
     '<div class="dk-controls"><div class="rd-filter-bar">' + levelBtn(0, t.dkAll, all.reduce((s, c) => s + c.x.qty, 0)) + LEVELS.map(l => levelBtn(l, t['dkLevel_' + l], count(l))).join('') + '</div>' +
       '<div class="dk-tools"><input id="dkSearch" type="search" class="cmd-search" placeholder="' + esc(t.dkSearch) + '" aria-label="' + esc(t.dkSearch) + '" value="' + esc(dv.q) + '">' +
       select('dkGroup', t.dkGroup, GROUPS.map(([k, l]) => [k, t[l]]), dv.group) +
@@ -195,6 +225,7 @@ export function renderDeck() {
   };
   paintList();
   bindAddBox();
+  if (excess > 0) paintTrim(all, excess);
 
   const fetchBtn = $('bgFetch');
   // startCheapest flips to 'fetching' before its first await, so this repaint disables the button

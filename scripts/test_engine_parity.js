@@ -1017,4 +1017,33 @@ for (const [label] of swBad) console.log(`SYNERGY WEB FAIL: ${label}`);
 console.log(`Synergy web: ${SW_CASES.length - swBad.length}/${SW_CASES.length} correct`);
 if (swBad.length) fails++;
 
+// ---- trim to 100 ----
+const tpCard = (name, score, qty = 1, over = {}) => ({ name, score, commander: false, reasons: [{ k: "offPlan" }], x: { qty }, ...over });
+const tpValues = [tpCard("Boss", 1, 1, { commander: true }), tpCard("Key", 90), tpCard("Forest", 30, 4), tpCard("Swamp", 30, 2), tpCard("Brick", 5), tpCard("Dud", 10)];
+const tpNone = new Set();
+const tpPlan = (excess, locked = tpNone) => PodEngine.trimPlan(tpValues, excess, locked);
+const tpAllLocked = new Set(["Brick", "Dud", "Forest", "Swamp"]);
+const tpTwo = PodEngine.cardValues({ cardsInfo: cvDeck, commanders: ["Boss"], ledger: cvLedger, table: cvTable });
+const tpReal = PodEngine.trimPlan(tpTwo, 2, tpNone);
+const tpI18n = fs.readFileSync(path.join(ROOT, "app", "js", "i18n.js"), "utf8");
+const TP_CASES = [
+  ["the weakest go first", tpPlan(2).names.join() === "Brick,Dud"],
+  ["a commander never goes, even as the lowest score", !tpPlan(9).names.includes("Boss")],
+  ["a basic goes one copy at a time", tpPlan(3).names.join() === "Brick,Dud,Forest" && tpPlan(3).cuts[2].copies === 1],
+  ["equal basics thin evenly, the biggest stack first", tpPlan(6).names.slice(2).join() === "Forest,Forest,Forest,Swamp"],
+  ["copies of one card make one line with its count, and one mention each", tpPlan(4).cuts.find(c => c.name === "Forest").copies === 2 && tpPlan(4).cuts.length === 3 && tpPlan(4).names.length === 4],
+  ["a locked card stays, and the next weakest takes its place", tpPlan(2, new Set(["Brick"])).names.join() === "Dud,Forest"],
+  ["locking a stack keeps every copy of it", !tpPlan(9, new Set(["Forest"])).names.includes("Forest")],
+  ["the plan cuts exactly the excess", tpPlan(5).names.length === 5 && tpPlan(5).short === 0],
+  ["when locks make 100 unreachable it says how many remain", tpPlan(5, tpAllLocked).short === 4 && tpPlan(5, tpAllLocked).names.join() === "Key"],
+  ["at 100 cards or below there is nothing to cut", tpPlan(0).cuts.length === 0 && tpPlan(-3).names.length === 0 && tpPlan(-3).short === 0],
+  ["the input is left as it was", tpValues[2].x.qty === 4 && tpValues[2].copies === undefined],
+  ["cuts carry the reasons cardValues gave them", tpReal.cuts.length === 2 && tpReal.cuts.every(c => tpTwo.find(v => v.name === c.name).reasons === c.reasons)],
+  ["the plan's words are in both languages", ["dkTrimOver", "dkTrimX", "dkTrimUnknown", "dkTrimCuts", "dkTrimKept", "dkTrimLock", "dkTrimLockCard", "dkTrimShort", "dkTrimApply"].every(k => tpI18n.split(k + ":").length === 3)],
+];
+const tpBad = TP_CASES.filter(([, ok]) => !ok);
+for (const [label] of tpBad) console.log(`TRIM FAIL: ${label}`);
+console.log(`Trim to 100: ${TP_CASES.length - tpBad.length}/${TP_CASES.length} correct`);
+if (tpBad.length) fails++;
+
 process.exit(fails || cmdFails ? 1 : 0);

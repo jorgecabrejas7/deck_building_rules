@@ -586,3 +586,11 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .web-hubs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:var(--sp-5)}
 .web-hub{display:flex;flex-direction:column;gap:var(--sp-2)}
 .web-hub h5{margin:0;font-size:var(--fs-body);font-weight:600}
+/* the plan that brings a deck over 100 back to a legal list */
+.dk-trim{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-3);padding:var(--sp-4);border:1px solid var(--border);border-radius:var(--r-md)}
+.dk-trim>*{margin:0}
+.dk-trim>div{align-self:stretch}
+.dk-trim-title{font-size:var(--fs-body);font-weight:600}
+.dk-trim .dk-why{order:1;flex:1 0 100%;color:var(--muted)}
+.dk-trim .dk-why li{display:list-item;padding:0;border:0}
+.dk-trim .btn-accent-sm:disabled{opacity:.6}
