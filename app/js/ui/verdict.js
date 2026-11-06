@@ -4,6 +4,8 @@ import { RULES } from '../rules.js';
 import { ARCH, CATS, EXTRA_PTS, MSG, dialName } from './constants.js';
 import { $, esc, archKey, fill, tierTone } from './helpers.js';
 import { compSlots, tagCount } from './comp.js';
+import { moreList } from '../engine/index.js';
+import { makeRuleZeroCard } from './rulezero.js';
 
 // The answer to "is this deck in the pod?", first thing in the report: the point budget
 // decides, as it always has. The power level and Wizards' checklist sit below as the
@@ -25,7 +27,7 @@ function violationLines(r, lang) {
 export function readingHtml(r, t) {
   const l = r.level;
   const lead = l.floor ? fill(t.readFloor, { b: l.powerBracket }) : l.watch.length ? t.readWatch : fill(t.readFits, { b: l.bracket });
-  const item = (w) => fill(t['watch_' + (w.kind === 'combo' ? w.tag : w.kind)], { c: w.items.slice(0, 3).join(' · ') + (w.items.length > 3 ? ' +' + (w.items.length - 3) : '') });
+  const item = (w) => fill(t['watch_' + (w.kind === 'combo' ? w.tag : w.kind)], { c: moreList(w.items, 3) });
   return (l.precon ? '<p class="sum-note">' + esc(fill(t.readPrecon, { c: l.precon.name })) + '</p>' : '') +
     '<p class="sum-read">' + esc(lead) + '</p>' +
     (l.watch.length ? '<ul class="sum-watch">' + l.watch.map(w => '<li>' + esc(item(w)) + '</li>').join('') + '</ul>' : '') +
@@ -53,7 +55,9 @@ export function renderVerdict() {
     '</div>' +
     '<div class="sum-pod"><p>' + esc(reason(r, t)) + (lines.length ? ' ' + esc(lines[0]) + (lines.length > 1 ? ' +' + (lines.length - 1) : '') : '') + '</p>' +
       '<a class="sum-cta" href="#points" data-go="points">' + esc(out ? t.sumBack : t.sumImprove) + ' →</a></div>' +
+    (l.pending ? '' : '<button type="button" class="sum-share" id="r0Btn">' + esc(t.r0Btn) + '</button>') +
     '</section>';
+  if (!l.pending) $('r0Btn').onclick = makeRuleZeroCard;
 }
 
 // The coach's read of the deck's parts against its archetype: quiet polish, never the

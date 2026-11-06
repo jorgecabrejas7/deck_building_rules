@@ -501,4 +501,23 @@ for (const [label] of cvBad) console.log(`CARD VALUE FAIL: ${label}`);
 console.log(`Card values: ${CV_CASES.length - cvBad.length}/${CV_CASES.length} correct`);
 if (cvBad.length) fails++;
 
+// (n) fitting text on the rule-zero card, measured at one unit per character.
+const chars = s => s.length;
+const fitsIn = n => s => s.length <= n;
+const FIT_CASES = [
+  ["words wrap at the width", PodEngine.wrapLines("aa bb cc", 5, chars).join("|") === "aa bb|cc"],
+  ["a word wider than the line keeps its own line", PodEngine.wrapLines("aaaaaaa b", 3, chars).join("|") === "aaaaaaa|b"],
+  ["no text, no lines", PodEngine.wrapLines("", 5, chars).length === 0],
+  ["a short list has no count", PodEngine.moreList(["a", "b"], 3) === "a · b"],
+  ["a long list counts the rest", PodEngine.moreList(["a", "b", "c", "d"], 2) === "a · b +2"],
+  ["fitList keeps everything that fits", PodEngine.fitList(["aa", "bb"], fitsIn(7)) === "aa · bb"],
+  ["fitList drops what does not fit and counts it", PodEngine.fitList(["aa", "bb", "cc"], fitsIn(7)) === "aa +2"],
+  ["an item too long is cut, and the count stays", PodEngine.fitList(["aaaaaaaa", "b"], fitsIn(6)) === "aa… +1"],
+  ["fitList on nothing is empty", PodEngine.fitList([], fitsIn(6)) === ""],
+];
+const fitBad = FIT_CASES.filter(([, ok]) => !ok);
+for (const [label] of fitBad) console.log(`TEXT FIT FAIL: ${label}`);
+console.log(`Text fit: ${FIT_CASES.length - fitBad.length}/${FIT_CASES.length} correct`);
+if (fitBad.length) fails++;
+
 process.exit(fails || cmdFails ? 1 : 0);

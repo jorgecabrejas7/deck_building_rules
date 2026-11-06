@@ -462,3 +462,5 @@ a.rd-link,.combo-link,.sum-note a{color:var(--ink)}
   .cb{grid-template-columns:minmax(0,1fr);gap:var(--sp-4)}
   .cb-arts{max-width:240px;margin-inline:auto}
 }
+.sum-share{align-self:flex-start;min-height:44px;padding:0 var(--sp-5);border:1.5px solid var(--ink);border-radius:var(--r-pill);background:none;color:var(--ink);font:inherit;font-weight:500;cursor:pointer}
+.sum-share:disabled{opacity:.6;cursor:progress}
