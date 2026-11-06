@@ -812,5 +812,29 @@ const rkBad = RK_CASES.filter(([, ok]) => !ok);
 for (const [label] of rkBad) console.log(`RANKINGS FAIL: ${label}`);
 console.log(`Rankings: ${RK_CASES.length - rkBad.length}/${RK_CASES.length} correct`);
 if (rkBad.length) fails++;
+// Deck history: versions kept per commander, and what changed between them.
+const hsV = (cards, date = "d") => ({ date, points: 1, power: 2, bracket: "2", cards });
+const hsBase = [["Sol Ring", 1], ["Island", 30], ["Opt", 1]];
+const hsMany = Array.from({ length: PodEngine.MAX_VERSIONS + 5 }, (_, i) => hsV([["Card " + i, 1]], "v" + i))
+  .reduce((list, v) => PodEngine.addVersion(list, v), []);
+const hsDiff = PodEngine.diffCards(hsBase, [["Island", 32], ["Opt", 1], ["Ponder", 1]]);
+const hsLine = PodEngine.versionTimeline([hsV(hsBase, "old"), hsV([["Island", 30], ["Opt", 1]], "new")]);
+const HS_CASES = [
+  ["the first analysis adds a version", PodEngine.addVersion([], hsV(hsBase)).length === 1],
+  ["an unchanged list adds nothing", PodEngine.addVersion([hsV(hsBase)], hsV(hsBase, "later")).length === 1],
+  ["the same list in another order adds nothing", PodEngine.addVersion([hsV(hsBase)], hsV([...hsBase].reverse())).length === 1],
+  ["a changed quantity is a new version", PodEngine.addVersion([hsV(hsBase)], hsV([["Sol Ring", 1], ["Island", 31], ["Opt", 1]])).length === 2],
+  ["going back to an older list is a new version", PodEngine.addVersion([hsV(hsBase), hsV([["Opt", 1]])], hsV(hsBase)).length === 3],
+  ["the cap is 20", PodEngine.MAX_VERSIONS === 20 && hsMany.length === 20],
+  ["past the cap the oldest go first", hsMany[0].date === "v5" && hsMany[19].date === "v24"],
+  ["added cards, with extra copies counted", JSON.stringify(hsDiff.added) === JSON.stringify([{ name: "Island", n: 2 }, { name: "Ponder", n: 1 }])],
+  ["cut cards", JSON.stringify(hsDiff.cut) === JSON.stringify([{ name: "Sol Ring", n: 1 }])],
+  ["the timeline runs newest first with the diff from the one before", hsLine[0].date === "new" && hsLine[0].diff.cut[0].name === "Sol Ring" && !hsLine[0].diff.added.length],
+  ["the oldest version has no diff", hsLine[1].diff === null],
+];
+const hsBad = HS_CASES.filter(([, ok]) => !ok);
+for (const [label] of hsBad) console.log(`DECK HISTORY FAIL: ${label}`);
+console.log(`Deck history: ${HS_CASES.length - hsBad.length}/${HS_CASES.length} correct`);
+if (hsBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

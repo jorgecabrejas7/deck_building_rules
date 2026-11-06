@@ -534,3 +534,15 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .pod-move,.pod-new{margin-left:var(--sp-2);font-size:var(--fs-micro)}
 .pod-move{color:var(--ink2)}
 .pod-new{padding:1px var(--sp-1);border-radius:4px;background:var(--wash);color:var(--ink)}
+/* Resumen: the deck's saved versions */
+.hist{display:flex;flex-direction:column;gap:var(--sp-2);padding-block:var(--sp-5) var(--sp-3)}
+.hist h3{margin:0}
+.hist-list{margin:var(--sp-2) 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:var(--sp-2)}
+.hist-list li{display:flex;flex-direction:column;gap:var(--sp-1);padding:var(--sp-3) var(--sp-4);border-left:3px solid var(--ink);border-radius:var(--r-md);background:var(--wash)}
+.hist-list li+li{border-left-color:var(--ink2)}
+.hist-head{margin:0;display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-3);font-size:var(--fs-body)}
+.hist-head time{font-weight:600}
+.hist-cards{margin:0;font-size:var(--fs-caption);line-height:1.5;color:var(--muted);overflow-wrap:anywhere}
+.hist-cards b{font-weight:600}
+.hist-add b{color:var(--ink)}
+.hist-cut b{color:var(--text)}
