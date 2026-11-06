@@ -503,3 +503,7 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
   .cb.nr{grid-template-columns:minmax(0,88px) minmax(0,1fr);gap:var(--sp-3)}
   .nr .cb-arts{max-width:none;margin-inline:0}
 }
+/* this deck beside its commander's average, and the cards unusual for that commander */
+.avg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:var(--sp-4);align-items:start}
+.avg-diff{color:var(--ink2);font-weight:600;font-variant-numeric:tabular-nums}
+.dk-unusual{flex:none;padding:2px var(--sp-2);border-radius:var(--r-pill);background:var(--wash);color:var(--ink);font-size:var(--fs-micro);font-weight:500}

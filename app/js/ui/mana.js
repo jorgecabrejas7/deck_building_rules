@@ -1,6 +1,7 @@
-import { atLeastOdds, drawOdds } from '../engine/index.js';
+import { atLeastOdds, compareToAverage, drawOdds } from '../engine/index.js';
 import { state } from '../state.js';
 import { T } from '../i18n.js';
+import { TYPES } from './constants.js';
 import { $, esc, fill } from './helpers.js';
 import { studyMedian } from './profile.js';
 import { paint, tableWrap } from './reading.js';
@@ -58,6 +59,21 @@ function compare(r, t) {
     rows.map(([k, v]) => '<tr><th scope="row">' + esc(t['pr_' + k]) + '</th><td class="rd-own">' + (v ?? '—') + '</td>' + ['precon', 'pod', 'cedh'].map(g => cell(studyMedian(g, k))).join('') + '</tr>').join('') + '</tbody>'));
 }
 
+const avgTable = (head, label, rows, t) => tableWrap('<thead><tr><th scope="col">' + esc(head) + '</th><th scope="col">' + esc(t.pfThisDeck) + '</th><th scope="col">' + esc(t.avgAverage) + '</th><th scope="col">' + esc(t.avgDiff) + '</th></tr></thead><tbody>' +
+  rows.map(x => '<tr><th scope="row">' + esc(label(x.k)) + '</th><td class="rd-own">' + x.own + '</td><td>' + x.avg + '</td>' +
+    '<td class="' + (x.diff ? 'avg-diff' : 'rd-dim') + '">' + (x.diff > 0 ? '+' + x.diff : x.diff < 0 ? '−' + -x.diff : '=') + '</td></tr>').join('') + '</tbody>');
+
+function average(r, t) {
+  const a = state.averageData;
+  if (!a || !r.commanders.length) return '';
+  if (!a.average) return section(t.avgT, a.loading ? t.avgLoading : a.failed ? t.avgFailed : t.avgNone, '');
+  const { name, decks, rank } = a.average, c = compareToAverage({ cardsInfo: r.cardsInfo, commanders: r.commanders, average: a.average });
+  const typeLabel = (k) => TYPES[k] ? TYPES[k][state.lang] : k === 'land' ? TYPES.L[state.lang] : t[k === 'basic' ? 'avgBasics' : 'avgNonbasics'];
+  const mvLabel = (mv) => fill(t.dkMvN, { v: mv === 7 ? '7+' : mv });
+  const note = fill(t.avgDecks, { n: name, d: decks.toLocaleString(state.lang) }) + (rank ? ' ' + fill(t.avgRank, { r: rank.toLocaleString(state.lang) }) : '');
+  return section(t.avgT, note, '<div class="avg-grid">' + avgTable(t.avgTypes, typeLabel, c.types, t) + avgTable(t.mnCurveP, mvLabel, c.curve, t) + '</div>');
+}
+
 export function renderMana() {
   const t = T(), r = state.result, m = r.profile.manabase, g = r.profile.goldfish;
   const deck = r.stats.total_cards - r.commanders.length;
@@ -66,5 +82,5 @@ export function renderMana() {
     '<h2 class="sum-bracket">' + m.score + '<small>' + esc(fill(t.mnOf, { v: '' }).trim()) + '</small></h2>' +
     '<p class="sum-read">' + esc(why) + '</p></header>' +
     section(t.mnPartsT, '', '<div class="mn-parts">' + meter(t.mnFix, m.fixing, t.mnFixX) + meter(t.mnQual, m.quality, t.mnQualX) + meter(t.mnCurveP, m.curve, t.mnCurveX) + '</div>') +
-    colours(m, t) + drops(m, deck, t) + tempo(g, t) + roleOdds(r, deck, t) + compare(r, t) + '</div>');
+    colours(m, t) + drops(m, deck, t) + tempo(g, t) + roleOdds(r, deck, t) + compare(r, t) + average(r, t) + '</div>');
 }

@@ -2,9 +2,12 @@
 // Access-Control-Allow-Origin:* — reachable directly from the browser, no proxy.
 // Each cardview carries `synergy` (how much more often the card shows up in
 // THIS commander's decks vs the format baseline) plus inclusion counts.
+// The commander's average deck comes from the same place, in the same way.
 // Pure data module, no DOM. Cached in localStorage per commander slug.
+import { parseAverage } from './engine/average.js';
 
-const CACHE_PREFIX = 'pdc_syn_v1:';
+const SYNERGY_PREFIX = 'pdc_syn_v1:';
+const AVERAGE_PREFIX = 'pdc_avg_v1:';
 const TTL_MS = 7 * 864e5; // 7 days — synergy tables move slowly
 
 // EDHREC slug: front face, lowercase, accents stripped, punctuation dropped.
@@ -16,23 +19,28 @@ export function edhrecSlug(name) {
     .replace(/^-+|-+$/g, '');
 }
 
-function readCache(slug) {
+function readCache(prefix, slug) {
   try {
-    const raw = JSON.parse(localStorage.getItem(CACHE_PREFIX + slug));
+    const raw = JSON.parse(localStorage.getItem(prefix + slug));
     if (raw && Date.now() - raw._ts < TTL_MS) return raw;
   } catch (e) { /* corrupt/absent entry: refetch */ }
   return null;
 }
-function writeCache(slug, data) {
-  try { localStorage.setItem(CACHE_PREFIX + slug, JSON.stringify({ _ts: Date.now(), ...data })); } catch (e) { /* quota: run uncached */ }
+function writeCache(prefix, slug, data) {
+  try { localStorage.setItem(prefix + slug, JSON.stringify({ _ts: Date.now(), ...data })); } catch (e) { /* quota: run uncached */ }
 }
 
 // null = no EDHREC page for this slug (404); throws on network/server errors.
-async function fetchPage(slug) {
-  const res = await fetch('https://json.edhrec.com/pages/commanders/' + slug + '.json');
+async function fetchJson(path) {
+  const res = await fetch('https://json.edhrec.com/pages/' + path + '.json');
   if (res.status === 404 || res.status === 403) return null;
   if (!res.ok) throw new Error('EDHREC ' + res.status);
-  const data = await res.json();
+  return res.json();
+}
+
+async function fetchSynergy(slug) {
+  const data = await fetchJson('commanders/' + slug);
+  if (!data) return null;
   const lists = (((data.container || {}).json_dict || {}).cardlists) || [];
   const cards = [];
   for (const cl of lists) {
@@ -42,13 +50,12 @@ async function fetchPage(slug) {
     }
   }
   // EDHREC answers 200 with an empty body for a pair it has no page for
-  return cards.length ? cards : null;
+  return cards.length ? { cards } : null;
 }
 
-// Synergy table for the deck's commander(s): {slug, cards:[{n,s,nd,pd}]} or
-// null when EDHREC has no page. Partner pairs get a combined page on EDHREC;
-// try both orders before falling back to the first commander alone.
-export async function getSynergy(commanders) {
+// The first page EDHREC has for the commander(s), or null. Partner pairs get a combined
+// page on EDHREC; try both orders before falling back to the first commander alone.
+async function firstPage(commanders, prefix, fetchPage) {
   const names = (commanders || []).filter(Boolean);
   if (!names.length) return null;
   const slugs = [];
@@ -58,15 +65,24 @@ export async function getSynergy(commanders) {
   }
   slugs.push(edhrecSlug(names[0]));
   for (const slug of slugs) {
-    const hit = readCache(slug);
+    const hit = readCache(prefix, slug);
     if (hit) {
       if (hit.missing) continue;
-      return { slug, cards: hit.cards };
+      return { slug, ...hit };
     }
-    const cards = await fetchPage(slug);
-    if (cards === null) { writeCache(slug, { missing: true }); continue; }
-    writeCache(slug, { cards });
-    return { slug, cards };
+    const page = await fetchPage(slug);
+    if (page === null) { writeCache(prefix, slug, { missing: true }); continue; }
+    writeCache(prefix, slug, page);
+    return { slug, ...page };
   }
   return null;
 }
+
+// Synergy table for the deck's commander(s): {slug, cards:[{n,s,nd,pd}]} or null.
+export const getSynergy = (commanders) => firstPage(commanders, SYNERGY_PREFIX, fetchSynergy);
+
+// Average deck for the commander(s), as parseAverage reads it, or null.
+export const getAverage = (commanders) => firstPage(commanders, AVERAGE_PREFIX, async (slug) => {
+  const data = await fetchJson('average-decks/' + slug);
+  return data && parseAverage(data);
+});

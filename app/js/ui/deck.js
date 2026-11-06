@@ -61,6 +61,8 @@ function pointChip(c, t) {
   return '<span class="dk-points">' + esc(c.points.saves ? fill(t.dkSavesShort, { v: c.points.saves }) : t.dkFixesShort) + '</span>';
 }
 
+const unusualChip = (c, t) => c.unusual ? '<span class="dk-unusual" title="' + esc(t.dkUnusualX) + '">' + esc(t.dkUnusual) + '</span>' : '';
+
 const levelTag = (c, t) => '<span class="dk-level" title="' + esc(t['dkLevel_' + c.level]) + '">' + pips(c.level) + '<span class="vh">' + esc(t['dkLevel_' + c.level]) + '</span></span>';
 
 function row(c, t) {
@@ -68,15 +70,15 @@ function row(c, t) {
   return '<li><button type="button" class="dk-row" data-card="' + esc(c.name) + '" aria-pressed="false">' +
     '<img src="' + esc(c.x.card.img_art || '') + '" loading="lazy" alt="">' +
     '<span class="dk-main"><span class="dk-name">' + esc(short(c.name)) + (c.x.qty > 1 ? ' <small>×' + c.x.qty + '</small>' : '') + '</span>' +
-    '<span class="dk-sub">' + esc(sub) + '</span></span>' + pointChip(c, t) + levelTag(c, t) + '</button></li>';
+    '<span class="dk-sub">' + esc(sub) + '</span></span>' + unusualChip(c, t) + pointChip(c, t) + levelTag(c, t) + '</button></li>';
 }
 
 // One real card face: images and stacks only differ in how much of it the layout shows.
 function face(c, t) {
-  return '<li><button type="button" class="dk-face" data-card="' + esc(c.name) + '" aria-pressed="false" aria-label="' + esc(short(c.name) + ', ' + t['dkLevel_' + c.level]) + '">' +
+  return '<li><button type="button" class="dk-face" data-card="' + esc(c.name) + '" aria-pressed="false" aria-label="' + esc(short(c.name) + ', ' + t['dkLevel_' + c.level] + (c.unusual ? ', ' + t.dkUnusual : '')) + '">' +
     '<img src="' + esc(c.x.card.img_normal || '') + '" loading="lazy" decoding="async" alt="">' +
     (c.x.qty > 1 ? '<span class="dk-qty">×' + c.x.qty + '</span>' : '') +
-    '<span class="dk-face-foot">' + pointChip(c, t) + levelTag(c, t) + '</span></button></li>';
+    '<span class="dk-face-foot">' + unusualChip(c, t) + pointChip(c, t) + levelTag(c, t) + '</span></button></li>';
 }
 
 const reasonText = (r, t) => fill(t['dkR_' + r.k], { n: r.n, s: r.s, i: r.seenIn });
@@ -91,6 +93,7 @@ function inspector(c, t) {
     '<h3 class="dk-i-name">' + esc(short(c.name)) + '</h3>' +
     '<p class="dk-i-level">' + pips(c.level) + ' ' + esc(c.commander ? t.dkCommander : t['dkLevel_' + c.level]) + '</p>' +
     '<button type="button" id="dkRemove" class="btn-outline dk-remove"' + (canEdit() ? '' : ' disabled') + '>' + esc(c.x.qty > 1 ? t.dkRemoveCopy : t.dkRemove) + '</button>' +
+    (c.unusual ? '<p class="dk-note">' + esc(t.dkUnusualX) + '</p>' : '') +
     (c.jobs.length ? '<h4>' + esc(t.dkDoes) + '</h4><ul class="dk-jobs">' + c.jobs.map(j => '<li>' + esc(t['dkJob_' + j]) + '</li>').join('') + '</ul>' : '') +
     (reasons.length ? '<h4>' + esc(t.dkWhy) + '</h4><ul class="dk-why">' + reasons.map(x => '<li>' + esc(reasonText(x, t)) + '</li>').join('') + '</ul>' : '') +
     '<dl class="dk-facts">' + fact(t.dkPtsCost, esc(pts)) +

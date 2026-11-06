@@ -8,7 +8,8 @@ import { renderBanner } from './ui/tabbar.js';
 import { renderAll } from './main.js';
 import { renderProfile } from './ui/profile.js';
 import { renderDeck } from './ui/deck.js';
-import { getSynergy } from './synergy.js';
+import { renderMana } from './ui/mana.js';
+import { getSynergy, getAverage } from './synergy.js';
 
 // Only the latest analysis may publish: a player pressing Analizar while the saved deck
 // loads gets their own deck, whichever one Scryfall answers first.
@@ -153,6 +154,7 @@ export function recompute(notFound) {
     precon: state.precons ? PodEngine.matchPrecon(resolved, state.precons) : null,
     combos: combos ? bracket.combos : [], landMaybe: bracket.landMaybe, gameChangers: bracket.checks.find(c => c.id === 'game_changers').cards });
   const synergy = synergyFor(cardsInfo, commanders);
+  loadAverage(commanders);
   // what-if cut deltas for every card that drives a points dial or violation
   const drivingNames = new Set();
   for (const list of Object.values(evalRes.driving)) for (const [n] of list) drivingNames.add(n);
@@ -189,6 +191,18 @@ function synergyFor(cardsInfo, commanders) {
     if (state.tab === 'informe' && state.view === 'deck') renderDeck();
   });
   return { status: 'loading' };
+}
+
+// Fetched like the synergy table, and never awaited: the report does not wait for it.
+function loadAverage(commanders) {
+  const key = commanders.join('|');
+  if (state.averageData && state.averageData.key === key) return;
+  state.averageData = { key, loading: true, failed: false, average: null };
+  getAverage(commanders).then(average => ({ average }), () => ({ failed: true })).then(got => {
+    if (!state.averageData || state.averageData.key !== key) return;
+    state.averageData = { key, loading: false, failed: false, average: null, ...got };
+    if (state.result && state.tab === 'informe' && state.view === 'mana') renderMana();
+  });
 }
 
 // The command zone drives colour identity, synergy advice and the archetype
