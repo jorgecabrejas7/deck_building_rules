@@ -6,3 +6,5 @@ exclude:
   - decks
   - docs
   - data/pod_decks.sqlite
+  - deploy
+  - notebooks

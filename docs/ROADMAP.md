@@ -93,6 +93,9 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 ## How the app is laid out
 The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Cargar page, where every visit starts. Each report takes its colours from the commander's identity (`--h1`, `--h2`). The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
 
+## Where it runs
+Two copies, each published on its own: GitHub Pages on every push to main, and https://169-58-71-242.sslip.io/pod/ through `deploy/deploy.sh`, which publishes the last commit. The server's services and how to add one are in `/srv/README.md` there.
+
 ## Where to pick up
 The next milestone is M4. Read the standing decisions above first, and check the open questions below before changing any score.
 

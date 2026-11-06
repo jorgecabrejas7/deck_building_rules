@@ -1,0 +1,13 @@
+# Pod Deck Checker at /pod/ (deck_building_rules repo, deploy/deploy.sh). Public: everything runs in the player's browser.
+# Installed in /etc/caddy/services/, which the site block of /etc/caddy/Caddyfile imports.
+# The app reads ../data and ../rules, so a release keeps those folders side by side and the page lives at /pod/app/.
+
+redir /pod /pod/app/ 308
+redir /pod/ /pod/app/ 308
+
+handle_path /pod/* {
+	root * /srv/pod-checker/site
+	# every file revalidates: a deploy must never mix old and new modules (the app's sw.js does the same)
+	header Cache-Control "no-cache"
+	file_server
+}
