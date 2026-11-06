@@ -49,6 +49,7 @@ export const state = {
   saltDb: null,      // data/salt.json, loaded with the combo database
   cardTags: null,    // data/card_tags.json as name -> tags, loaded alongside it
   synergyData: null, // {key, table} for the current commander(s)
+  averageData: null, // {key, loading, failed, average} EDHREC's average deck for them
   study: null,       // data/deck_study.json: reference medians and the pod table
   podSort: { key: 'power', dir: -1 },
   cmdOpen: false,   // the commander picker stays folded until asked for

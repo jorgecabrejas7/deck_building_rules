@@ -14,6 +14,7 @@
  *   (j) the goldfish simulation and draw odds.
  *   (k) the power level, kept apart from the pod verdict, and Jorge's read of his decks.
  *   (l) how much each card does for its deck.
+ *   (m) the deck beside its commander's average list, and cards unusual for the commander.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -500,5 +501,35 @@ const cvBad = CV_CASES.filter(([, ok]) => !ok);
 for (const [label] of cvBad) console.log(`CARD VALUE FAIL: ${label}`);
 console.log(`Card values: ${CV_CASES.length - cvBad.length}/${CV_CASES.length} correct`);
 if (cvBad.length) fails++;
+
+// (m) the deck beside its commander's average list, and the cards unusual for that commander
+const avgPage = { creature: 1, instant: 0, sorcery: 0, artifact: 2, enchantment: 0, battle: 0, planeswalker: 0, land: 36, basic: 13, nonbasic: 23,
+  panels: { mana_curve: { 1: 8, 7: 1, 12: 1 } }, container: { json_dict: { card: { name: "Boss", num_decks: 1234, rank: 7, salt: 1.5 } } } };
+const avgRead = PodEngine.parseAverage(avgPage);
+const avgCard = (name, type, cmc, qty = 1, type_line = "") => ({ qty, card: { name, cmc, type_line }, cls: { type } });
+const avgOut = PodEngine.compareToAverage({ commanders: ["Boss // Back"], average: avgRead, cardsInfo: [
+  avgCard("Boss // Back", "C", 3), avgCard("Beast", "C", 3), avgCard("Golem", "C", 9), avgCard("Rock", "A", 1),
+  avgCard("Island", "L", 0, 20, "Basic Land — Island"), avgCard("Dual", "L", 0, 1, "Land")] });
+const avgRow = (list, k) => list.find(r => r.k === k);
+const AVG_CASES = [
+  ["a page reads its deck count and rank", avgRead.decks === 1234 && avgRead.rank === 7 && avgRead.name === "Boss"],
+  ["curve values past 7 fold into the top column", avgRead.curve[7] === 2 && avgRead.curve[1] === 8],
+  ["a redirect or empty answer is no page", PodEngine.parseAverage({ redirect: "/average-decks/x" }) === null && PodEngine.parseAverage({}) === null],
+  ["a page with no rank says so", PodEngine.parseAverage({ ...avgPage, container: { json_dict: { card: { name: "Boss" } } } }).rank === null],
+  ["the commander stays out of the count", avgRow(avgOut.types, "C").own === 2],
+  ["differences are signed against the average", avgRow(avgOut.types, "C").diff === 1 && avgRow(avgOut.types, "A").diff === -1],
+  ["lands split into basics and nonbasics, counting copies", avgRow(avgOut.types, "land").own === 21 && avgRow(avgOut.types, "basic").own === 20 && avgRow(avgOut.types, "nonbasic").diff === -22],
+  ["a type empty on both sides is dropped", !avgRow(avgOut.types, "B") && !avgRow(avgOut.types, "I")],
+  ["the curve counts nonlands, heavy cards in the top column", avgRow(avgOut.curve, 7).own === 1 && avgRow(avgOut.curve, 3).own === 1 && avgRow(avgOut.curve, 1).diff === -7 && !avgRow(avgOut.curve, 0)],
+  ["a card off the commander's page is unusual", cvA.get("Stranger").unusual === true],
+  ["a card in few of its decks is unusual", cvA.get("Brick").unusual === true],
+  ["a card in many of its decks is not", cvA.get("Good").unusual === false],
+  ["lands and the commander are never marked", cvA.get("Dual").unusual === false && cvA.get("Boss").unusual === false],
+  ["with no page nothing is marked", [...cvOf({ table: null }).values()].every(c => c.unusual === false)],
+];
+const avgBad = AVG_CASES.filter(([, ok]) => !ok);
+for (const [label] of avgBad) console.log(`AVERAGE FAIL: ${label}`);
+console.log(`Average deck: ${AVG_CASES.length - avgBad.length}/${AVG_CASES.length} correct`);
+if (avgBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

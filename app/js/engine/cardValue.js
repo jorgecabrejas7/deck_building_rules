@@ -9,6 +9,9 @@ const front = (name) => String(name).split(" // ")[0];
 const JOBS = { fastMana: 25, tutors: 25, finishers: 25, draw: 15, ramp: 15, answersTotal: 15, engine: 15, protection: 12, recursion: 12, stax: 8 };
 const LEVELS = [[70, 5], [45, 4], [25, 3], [12, 2]];
 const levelOf = (score) => (LEVELS.find(([min]) => score >= min) || [0, 1])[1];
+// Under this share of the commander's decks, or off its page altogether. Mana bases follow
+// budget more than plan, so lands are never marked.
+const UNUSUAL_BELOW = 0.05;
 
 function fit(row, reasons) {
   if (!row) { reasons.push({ k: "offPlan" }); return 0; }
@@ -67,6 +70,7 @@ export function cardValues({ cardsInfo, commanders, ledger, combos, table, whatI
     const wi = whatIf[x.name];
     return { name: x.name, x, jobs, combos: pieces, reasons, commander,
       score, level: commander ? 5 : levelOf(score),
+      unusual: !!table && !isLand && !commander && (!row || !row.pd || row.nd / row.pd < UNUSUAL_BELOW),
       points: wi && (wi.dPts > 0 || wi.fixes) ? { saves: Math.max(wi.dPts, 0), fixes: !!wi.fixes } : null };
   }).sort((a, b) => b.commander - a.commander || b.score - a.score || a.name.localeCompare(b.name));
 }
