@@ -3,7 +3,7 @@
 // because every cross-module call happens inside event handlers, after eval.
 import * as PodEngine from './engine/index.js';
 import { RULES } from './rules.js';
-import { state, store, saveSession, loadSession, TAB_KEYS, VIEW_KEYS } from './state.js';
+import { state, store, saveSession, loadSession, VIEW_KEYS } from './state.js';
 import { deckToText } from './advice.js';
 import { T } from './i18n.js';
 import { $ } from './ui/helpers.js';
@@ -81,7 +81,9 @@ export function renderAll() {
   document.body.dataset.tab = state.tab;
   document.body.dataset.view = state.view;
   // the summary belongs to the report: Pod and Guide are about other things
-  $('hero').hidden = state.tab !== 'load' || has || state.restoring;
+  // every visit starts on the landing; after that, Cargar is just the paste box
+  if (state.tab !== 'load') state.landing = false;
+  $('hero').hidden = state.tab !== 'load' || !state.landing;
   $('summary').style.display = has && state.tab === 'informe' ? '' : 'none';
   renderSectionNav();
   document.documentElement.lang = state.lang;
@@ -164,20 +166,13 @@ const __boot = () => {
     if (Array.isArray(sess.tableTexts))
       state.tableTexts = [0, 1, 2, 3].map(i => typeof sess.tableTexts[i] === 'string' ? sess.tableTexts[i] : '');
   }
-  state.restoring = !!(sess && typeof sess.deckText === 'string' && sess.deckText.trim());
+  history.scrollRestoration = 'manual';
   renderAll();
-  if (state.restoring) {
-    analyze().then(() => {
-      state.restoring = false;
-      // land on the saved tab unless the user already navigated meanwhile
-      if (state.result && state.tab === 'informe' && TAB_KEYS.includes(sess.tab)) {
-        state.tab = sess.tab;
-        if (VIEW_KEYS.includes(sess.view)) state.view = sess.view;
-        renderAll();
-      }
-    });
-  } else if (sess && ['load', 'guide', 'pod'].includes(sess.tab)) {
-    state.tab = sess.tab; renderAll();
+  // the saved deck is analyzed behind the landing, so Informe is ready and opens where it was left
+  if (sess && typeof sess.deckText === 'string' && sess.deckText.trim()) {
+    state.restoring = true;
+    if (VIEW_KEYS.includes(sess.view)) state.view = sess.view;
+    analyze().finally(() => { state.restoring = false; });
   }
 };
 if (document.readyState !== 'loading') __boot();

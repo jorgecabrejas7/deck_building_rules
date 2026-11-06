@@ -36,7 +36,7 @@ export function initHero() {
     idle += Math.min(now - last, 50) * 0.008; last = now;
     const spin = idle + p * 540;
     const gather = easeOut(clamp01((p - 0.5) / 0.4));
-    const radius = Math.min(innerWidth * 0.36, innerHeight * 0.48) * (1 - gather);
+    const radius = Math.min(innerWidth * 0.36, innerHeight * 0.34) * (1 - gather);
     const step = 360 / cards.length;
     let nearest = 0, best = -2;
     cards.forEach((card, i) => {

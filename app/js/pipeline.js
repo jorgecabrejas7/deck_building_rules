@@ -33,8 +33,7 @@ export async function analyze() {
     state.combosData = null;
     recompute(notFound);
     state.fetchSt = 'idle';
-    state.tab = 'informe';
-    state.view = 'summary';
+    if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; state.landing = false; }
     Object.assign(state.deckView, { level: null, q: '', card: null, open: false });
   } catch (e) {
     console.error(e); state.error = 'netErr';
