@@ -546,3 +546,18 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .hist-cards b{font-weight:600}
 .hist-add b{color:var(--ink)}
 .hist-cut b{color:var(--text)}
+/* goldfish hands */
+.gf-bar{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.gf-bar button:disabled{opacity:.6}
+.gf-stats{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-block:var(--sp-3)}
+.gf-stat{display:flex;flex-direction:column;min-width:72px;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-md);background:var(--fill)}
+.gf-stat b{font-size:var(--fs-lead);font-weight:600}
+.gf-stat span{font-size:var(--fs-caption);color:var(--muted)}
+.gf-mana{background:var(--wash)}
+.gf-mana b{color:var(--ink)}
+.gf-zone{margin:var(--sp-4) 0 var(--sp-2);font-size:var(--fs-caption);font-weight:600;color:var(--ink2)}
+.gf-zone span{font-weight:400;color:var(--muted)}
+.gf-field{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:var(--sp-2)}
+.gf-field img,.gf-card img{display:block;width:100%;border-radius:var(--r-md);background:var(--track)}
+.gf-card{display:block;width:100%;padding:0;border:none;background:none;border-radius:var(--r-md);text-align:start;transition:transform var(--dur) var(--ease)}
+.gf-card:hover{transform:translateY(-3px)}

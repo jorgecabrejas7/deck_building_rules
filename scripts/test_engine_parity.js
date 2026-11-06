@@ -836,5 +836,62 @@ const hsBad = HS_CASES.filter(([, ok]) => !ok);
 for (const [label] of hsBad) console.log(`DECK HISTORY FAIL: ${label}`);
 console.log(`Deck history: ${HS_CASES.length - hsBad.length}/${HS_CASES.length} correct`);
 if (hsBad.length) fails++;
+// Goldfish hands: the state operations of the playable solo game, on a fixed shuffle.
+const G = PodEngine.Goldfish;
+const gg = G.gameCards({ cardsInfo: pfDeck([
+  [gfCard("Boss", 4, "Legendary Creature — Human"), 1],
+  [gfCard("Island", 0, "Basic Land — Island", { oracle_text: "({T}: Add {U}.)" }), 80],
+  [gfCard("Dual", 0, "Land", { oracle_text: "{T}: Add {U} or {R}." }), 1],
+  [gfCard("Tomb", 0, "Land", { oracle_text: "{T}: Add {C}{C}." }), 1],
+  [gfCard("Rock", 1, "Artifact", { oracle_text: "{T}: Add {C}{C}." }), 1],
+  [gfCard("Bolt", 1, "Instant", { oracle_text: "Bolt deals 3 damage to any target." }), 16],
+]), commanders: ["Boss"], read: gfRead });
+const gfSeq = (seed) => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+const gfOf = (name) => { const c = [...gg.library, ...gg.command].find(k => k.name === name); return { ...G.newGame(gg, gfSeq(1)), hand: [c], library: [] }; };
+const gfNames = (g) => [...g.hand, ...g.library, ...g.battlefield].map(c => c.name).sort().join();
+const gfStart = G.newGame(gg, gfSeq(7));
+const gfMull2 = G.mulligan(G.mulligan(gfStart, gfSeq(3)), gfSeq(5));
+const gfKept = G.keep(gfMull2);
+const gfBottomed = G.bottom(gfKept, 2);
+const gfDone = G.bottom(gfBottomed, 0);
+const gfT1 = G.keep(gfStart);
+const gfT2 = G.nextTurn(gfT1);
+let gfLast = gfT1;
+for (let i = 0; i < 20; i++) gfLast = G.nextTurn(gfLast);
+const gfCasted = G.cast(gfT1, 0);
+let gfMax = gfStart;
+for (let i = 0; i < 10; i++) gfMax = G.mulligan(gfMax, gfSeq(i + 2));
+const gfManaOf = (name) => G.manaAvailable(G.play(gfOf(name), 0));
+const GG_CASES = [
+  ["the opening hand is 7, the commander waits in the command zone", gfStart.hand.length === 7 && gfStart.library.length === 92 && gfStart.turn === 0 &&
+    gfStart.command.map(c => c.name).join() === "Boss" && !gfNames(gfStart).includes("Boss")],
+  ["the shuffle follows the injected random", JSON.stringify(G.newGame(gg, gfSeq(7)).library) === JSON.stringify(gfStart.library) &&
+    JSON.stringify(G.newGame(gg, gfSeq(9)).library) !== JSON.stringify(gfStart.library)],
+  ["a mulligan draws 7 again from the whole deck", gfMull2.hand.length === 7 && gfMull2.mulligans === 2 && gfNames(gfMull2) === gfNames(gfStart)],
+  ["keeping after two mulligans owes two cards, and the game waits", gfKept.toBottom === 2 && gfKept.turn === 0],
+  ["a bottomed card goes under the library", gfBottomed.hand.length === 6 && gfBottomed.library.at(-1) === gfKept.hand[2] && gfBottomed.turn === 0],
+  ["the last card owed starts turn 1", gfDone.hand.length === 5 && gfDone.library.length === 94 && gfDone.turn === 1 && gfDone.toBottom === 0 && gfNames(gfDone) === gfNames(gfStart)],
+  ["keeping 7 starts turn 1 at once", gfT1.turn === 1 && gfT1.toBottom === 0 && gfT1.hand.length === 7],
+  ["mulligans stop at 7", gfMax.mulligans === G.MAX_MULLIGANS],
+  ["next turn draws the top card", gfT2.turn === 2 && gfT2.hand.at(-1) === gfT1.library[0] && gfT2.library.length === 91],
+  ["the game stops at turn 8", gfLast.turn === G.LAST_TURN && gfLast.hand.length === 14],
+  ["an empty library draws nothing", G.nextTurn({ ...gfOf("Island"), turn: 1 }).hand.length === 1],
+  ["playing moves the card, and a copy leaves only one", (() => {
+    const g = { ...gfT1, hand: [gg.library[0], gg.library[0]] }; const p = G.play(g, 1);
+    return p.hand.length === 1 && p.battlefield.length === 1;
+  })()],
+  ["a permanent returns to hand", (() => { const p = G.play(gfOf("Bolt"), 0), b = G.giveBack(p, 0); return b.hand.length === 1 && !b.battlefield.length; })()],
+  ["the commander casts and returns to the command zone", gfCasted.battlefield[0].name === "Boss" && !gfCasted.command.length &&
+    G.giveBack(gfCasted, 0).command[0].name === "Boss" && G.giveBack(gfCasted, 0).hand.length === gfT1.hand.length],
+  ["a basic gives 1 although its text is reminder text", gfManaOf("Island") === 1],
+  ["a choice of colours gives 1", gfManaOf("Dual") === 1],
+  ["a land that makes two gives 2", gfManaOf("Tomb") === 2],
+  ["a rock gives what manaProduced reads", gfManaOf("Rock") === 2],
+  ["a spell gives none", gfManaOf("Bolt") === 0],
+];
+const ggBad = GG_CASES.filter(([, ok]) => !ok);
+for (const [label] of ggBad) console.log(`GOLDFISH HANDS FAIL: ${label}`);
+console.log(`Goldfish hands: ${GG_CASES.length - ggBad.length}/${GG_CASES.length} correct`);
+if (ggBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

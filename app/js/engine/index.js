@@ -19,6 +19,7 @@ export { saltScore } from "./salt.js";
 export { synergyScore } from "./synergyScore.js";
 export { computePower, METRIC_RANGE } from "./power.js";
 export { simulateGoldfish, drawOdds, atLeastOdds } from "./goldfish.js";
+export * as Goldfish from "./goldfishGame.js";
 export { powerLevel } from "./powerLevel.js";
 export { cardValues } from "./cardValue.js";
 export { parseAverage, compareToAverage } from "./average.js";
