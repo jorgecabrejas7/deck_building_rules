@@ -7,6 +7,7 @@ import { renderInput } from './ui/input.js';
 import { renderBanner } from './ui/tabbar.js';
 import { renderAll } from './main.js';
 import { renderProfile } from './ui/profile.js';
+import { renderDeck } from './ui/deck.js';
 import { getSynergy } from './synergy.js';
 
 export async function analyze() {
@@ -33,6 +34,8 @@ export async function analyze() {
     recompute(notFound);
     state.fetchSt = 'idle';
     state.tab = 'informe';
+    state.view = 'summary';
+    state.deckView = { level: null, q: '', group: 'value', card: null, open: false };
   } catch (e) {
     console.error(e); state.error = 'netErr';
   }
@@ -151,7 +154,8 @@ function synergyFor(cardsInfo, commanders) {
     state.synergyData = { key, loading: false, table };
     if (!state.result) return;
     state.result.synergy = PodEngine.synergyScore({ cardsInfo: state.result.cardsInfo, commanders, table });
-    if (state.tab === 'informe') renderProfile();
+    if (state.tab === 'informe' && state.view === 'power') renderProfile();
+    if (state.tab === 'informe' && state.view === 'deck') renderDeck();
   });
   return { status: 'loading' };
 }

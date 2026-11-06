@@ -16,7 +16,7 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 | Card reader accurate on real decks | CS | ✅ Scryfall tags, 89% precision and 94% recall on 196 labelled cards |
 | Benchmark breakdown: tier, question and the cards behind it | DC | ✅ 14 benchmarks |
 | Card ledger: which cards drive each score | CS, DC | ✅ |
-| Per-card score and weight in the deck list | CS | 🟡 top cards by jobs done |
+| Per-card value in the deck list: level, jobs, why, point cost | CS | ✅ `engine/cardValue.js`, Mazo view; weights are our own judgement |
 | Score drivers with named boosts and penalties | CS | ✅ replaced by benchmarks |
 | Deck fingerprint: plain-language description of the deck | CS | ✅ |
 | Goldfish turns: mana by turn, commander turn, winning line turn | DC | ✅ |
@@ -89,6 +89,12 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 - Leaderboards, global deck search, cEDH meta tiers: need millions of decks. Pod table is our version.
 - Commander quiz, sleeves, flavour extras (nutrition label, field reports): decoration.
 
+## How the app is laid out
+The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
+
+## Where to pick up
+The next milestone is M4. Read the standing decisions above first, and check the open questions below before changing any score.
+
 ## Milestones
 - **M1, card reader:** done.
 - **M2, benchmarks and card ledger:** done.
@@ -104,5 +110,10 @@ Written synopsis and mulligan guide · chat assistant with memory · roast · ru
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing
 
 ## Open questions for Jorge
-- Which of the 13 decks he has not placed read wrongly?
+- Which of the 13 decks he has not placed read wrongly? Nine sit at 4.1, the weakest part of the scale.
+- Should Family Matters, World Shaper and Riders of Rohan read Bracket 4 on power level, through the floor rule?
+- Should Liliana count as mass land denial? It sets Teysha's Bracket 4 floor.
+- Is 6 mana per turn the right limit for the two-card combo floor?
+- Do the card values read right on his decks? Massacre Wurm reads Marginal in Teysha, for example. Weights are in `engine/cardValue.js`.
+- The deck study's four rule proposals, and his in/out marks, are still unanswered (`data/deck_study.json`, `docs/`).
 - Are the Lightning and Luffy commander tags right?

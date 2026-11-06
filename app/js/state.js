@@ -18,24 +18,22 @@ const SESSION_KEY = 'pdc_session_v1';
 export function saveSession(){
   const ta = document.getElementById('deckText');
   try { localStorage.setItem(SESSION_KEY, JSON.stringify({
-    deckText: ta ? ta.value : '', arch: state.arch, tab: state.tab,
+    deckText: ta ? ta.value : '', arch: state.arch, tab: state.tab, view: state.view,
     tableTexts: state.tableTexts, cmdPick: state.cmdPick,
   })); } catch (e) {}
 }
-// Pre-consolidation tab keys map onto the merged report/detail panes.
-const TAB_MIGRATE = { power: 'informe', tips: 'informe', analysis: 'detalles' };
 export function loadSession(){
   try {
     const s = JSON.parse(localStorage.getItem(SESSION_KEY));
     if (!s || typeof s !== 'object') return null;
-    if (TAB_MIGRATE[s.tab]) s.tab = TAB_MIGRATE[s.tab];
     return s;
   } catch (e) { return null; }
 }
 
 export const state = {
   lang: store.lang, theme: store.theme, sysDark: matchMedia('(prefers-color-scheme: dark)').matches,
-  arch: 'auto', grp: 'type', cf: 'all', curveBin: null, hl: null, openArch: null, tab: 'load',
+  arch: 'auto', cf: 'all', curveBin: null, hl: null, openArch: null, tab: 'load', view: 'summary',
+  deckView: { level: null, q: '', group: 'value', card: null, open: false },
   deck: null,        // {entries, commanders, deckName}
   cmdPick: null,     // user-chosen commander name(s); null = auto-detect
   result: null,      // {stats, flagged, evalRes, cardsInfo, detected, notFound, validation, commander, commanders, options, bracket, profile, power, level, salt, synergy, whatIf}
@@ -52,4 +50,5 @@ export const state = {
   comboFilter: 'all', comboAll: false, // bracket report: combo list filter + show-all
   cmpView: 'all',    // side-by-side card comparison: 'all' | 'diff'
 };
-export const TAB_KEYS = ['load', 'informe', 'detalles', 'pod', 'guide'];
+export const TAB_KEYS = ['load', 'informe', 'pod', 'guide'];
+export const VIEW_KEYS = ['summary', 'deck', 'points', 'bracket', 'combos', 'power', 'mana'];

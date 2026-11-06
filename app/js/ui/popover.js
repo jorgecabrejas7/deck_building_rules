@@ -120,7 +120,7 @@ export function initHelpPopovers() {
         return;
       }
       // tap outside any popover trigger closes both singletons
-      if (!(e.target.closest && e.target.closest('.sugTile, .cardTile'))) {
+      if (!(e.target.closest && e.target.closest('.sugTile'))) {
         hideCardPopover();
         hideHelpPopover();
       }

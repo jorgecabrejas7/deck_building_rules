@@ -3,7 +3,6 @@ import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { ARCH, BASECOMP, CATS } from './constants.js';
 import { $, archKey, archName, catLabel, esc } from './helpers.js';
-import { renderBrowser } from './browser.js';
 
 export function slotsFor(key) {
   const a = ARCH.find(x => x.k === key);
@@ -47,10 +46,10 @@ export function renderComp() {
   for (const row of $('comp').querySelectorAll('[data-hl]'))
     row.onclick = () => {
       state.hl = state.hl === row.dataset.hl ? null : row.dataset.hl;
-      renderComp(); renderBrowser();
+      renderComp();
       // partial render bypasses renderAll's focus restore: put focus back on the row
       const el = $('comp').querySelector('[data-hl="' + row.dataset.hl + '"]');
       if (el) el.focus({ preventScroll: true });
     };
-  const cl = $('clearHl'); if (cl) cl.onclick = () => { state.hl = null; renderComp(); renderBrowser(); };
+  const cl = $('clearHl'); if (cl) cl.onclick = () => { state.hl = null; renderComp(); };
 }

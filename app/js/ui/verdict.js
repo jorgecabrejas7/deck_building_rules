@@ -47,14 +47,9 @@ export function renderVerdict() {
     '<span class="vh-power mono">' + ev.points + ' <small>/ ' + RULES.tiers.tier2.max_points + ' ' + esc(t.pts.toLowerCase()) + '</small></span></div>' +
     '<p class="vh-why">' + esc(reason(r, t)) + '</p>' +
     (subs ? '<div class="vh-subs">' + subs + '</div>' : '') +
-    '<a class="vh-action" href="#sec-plan">' + esc(ev.tier === 'above' ? t.vActionOut : t.vActionIn) + ' ↓</a>' +
-    '<div class="vh-also"><a class="vh-bracket" href="#sec-profile">' + esc(powerLine(r, t)) + '</a>' +
-    '<a class="vh-bracket" href="#sec-bracket">' + esc(bracketLine(r, t)) + '</a></div></div>';
-  // the report closes on the same answers it opened with
-  const podMark = ev.tier === 'above' ? '✕ ' + t.endOut : '✓ ' + t.endIn;
-  const brMark = r.bracket.pending ? '' : (r.bracket.fits ? t.endBracketOk : t.endBracketNo);
-  $('informeEnd').innerHTML = '<div class="informe-end' + (ev.tier === 'above' ? ' mixed' : '') + '">' +
-    [podMark, brMark].filter(Boolean).map(esc).join(' · ') + '</div>';
+    '<a class="vh-action" href="#points" data-go="points">' + esc(ev.tier === 'above' ? t.vActionOut : t.vActionIn) + ' →</a>' +
+    '<div class="vh-also"><a class="vh-bracket" href="#power" data-go="power">' + esc(powerLine(r, t)) + '</a>' +
+    '<a class="vh-bracket" href="#bracket" data-go="bracket">' + esc(bracketLine(r, t)) + '</a></div></div>';
 }
 
 // The coach's read of the deck's parts against its archetype: quiet polish, never the

@@ -2,7 +2,7 @@
 
 @media (max-width: 999px) {
   img{max-width:100%}
-  .tile-name,.cmd-name,.sug-name,.ramp-text{overflow-wrap:anywhere}
+  .cmd-name,.sug-name,.ramp-text{overflow-wrap:anywhere}
   .hero-inner{padding-block:var(--sp-2)}
   .brand-tag{display:none}
   .brand-mark{display:none}
@@ -20,12 +20,12 @@
   .section-nav a{min-height:44px;display:flex;align-items:center}
   body[data-tab=informe] .summary-row{position:absolute;top:100%;left:0;right:0;padding:var(--sp-2) var(--gutter);border-bottom:1px solid var(--border);
     background:color-mix(in oklab,var(--bg) 92%,transparent);-webkit-backdrop-filter:saturate(1.6) blur(20px);backdrop-filter:saturate(1.6) blur(20px)}
-  body[data-tab=detalles] .summary-row{padding-block:var(--sp-2)}
+  body[data-tab=informe] .sticky-wrap:not(.stuck) .summary-row{opacity:0;visibility:hidden}
   .summary-row{gap:var(--sp-4)}
   .stat-tile,.tier-box{flex:none}
 
   /* panels tighten, never crowd */
-  .input-panel,.power-panel,.comp-panel,.browser-panel,.panel-pad,.panel-pad-lg,.tm-panel,.curve-card{padding:var(--sp-5) 20px}
+  .input-panel,.power-panel,.comp-panel,.panel-pad,.panel-pad-lg,.tm-panel,.curve-card{padding:var(--sp-5) 20px}
   .arch-head{padding-inline:20px}
   .arch-body{padding-inline:20px}
   .guide-list .arch-head{min-height:44px}
@@ -51,9 +51,7 @@
   .comp-row .comp-pill{grid-column:2;grid-row:1}
   .comp-row .comp-track{grid-column:1/-1;grid-row:2}
 
-  .card-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:var(--sp-3)}
   .hand-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:var(--sp-2)}
-  .tile-name{font-size:var(--fs-micro)}
 
   .curve-wrap{grid-template-columns:1fr}
   .curve-bins{gap:var(--sp-1);height:186px}
@@ -91,7 +89,7 @@
   .header-actions .btn-txt{display:none}
   .header-actions .btn-outline,.header-actions .btn-outline-accent{width:44px;min-width:44px;padding:0;justify-content:center}
   .seg-toggle button{padding-inline:var(--sp-2)}
-  .card-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-3) var(--sp-2)}
+
   .hand-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 
   .tm-grid{grid-template-columns:1fr}

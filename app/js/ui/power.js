@@ -139,5 +139,5 @@ function comboBlock() {
   const inf = state.result.bracket.combos.filter(c => c.infinite);
   // the combo list lives in one place; the dial only points at it
   if (!inf.length) return '<div class="note-ok">✓ ' + t.comboNone + '</div>';
-  return '<a class="combo-link" href="#combos">' + t.comboSeeAll.replace('%v', inf.length) + ' ↓</a>';
+  return '<a class="combo-link" href="#combos" data-go="combos">' + t.comboSeeAll.replace('%v', inf.length) + ' →</a>';
 }

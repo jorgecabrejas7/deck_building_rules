@@ -13,6 +13,7 @@
  *   (h) the deck profile: manabase arithmetic, salt, synergy and the power scale.
  *   (j) the goldfish simulation and draw odds.
  *   (k) the power level, kept apart from the pod verdict, and Jorge's read of his decks.
+ *   (l) how much each card does for its deck.
  *   (i) the card reader against hand-labelled cards, with and without Scryfall's tags.
  *
  * Usage: node scripts/test_engine_parity.js [--selftest]
@@ -439,5 +440,37 @@ const vBad = V_CASES.filter(([, ok]) => !ok);
 for (const [label] of vBad) console.log(`POWER LEVEL FAIL: ${label}`);
 console.log(`Power level: ${V_CASES.length - vBad.length}/${V_CASES.length} correct`);
 if (vBad.length) fails++;
+
+// (l) card values. The arithmetic stays obvious on small synthetic decks.
+const cv = (name, extra = {}) => ({ name, qty: 1, cls: { type: extra.land ? "L" : "C", cat: "oth", tags: [] },
+  card: { name, cmc: extra.cmc ?? 3, type_line: extra.land ? "Land" : "Creature", color_identity: extra.ci || [], produced_mana: extra.makes || [], oracle_text: extra.oracle || "", edhrec_rank: extra.rank || null } });
+const cvDeck = [cv("Boss", { ci: ["U", "R"] }), cv("Rock", { cmc: 2 }), cv("Piece"), cv("Good"), cv("Stranger"), cv("Brick", { cmc: 7 }),
+  cv("Dual", { land: true, makes: ["U", "R"] }), cv("Gate", { land: true, makes: ["U"], oracle: "This land enters tapped." }),
+  { ...cv("Island", { land: true, makes: ["U"] }), card: { ...cv("Island", { land: true }).card, type_line: "Basic Land — Island", produced_mana: ["U"] } }];
+const cvLedger = { fastMana: ["Rock"], ramp: ["Rock"], ending: ["Piece"], web: ["Piece"], twoCard: ["Piece"] };
+const cvTable = { cards: [{ n: "Good", s: 0.4, nd: 50, pd: 100 }, { n: "Rock", s: 0, nd: 60, pd: 100 }, { n: "Brick", s: -0.1, nd: 1, pd: 100 }] };
+const cvOf = (over = {}) => new Map(PodEngine.cardValues({ cardsInfo: cvDeck, commanders: ["Boss"], ledger: cvLedger,
+  combos: [{ cards: ["Piece", "Boss"] }], table: cvTable, ...over }).map(c => [c.name, c]));
+const cvA = cvOf();
+const CV_CASES = [
+  ["the commander tops the deck", cvA.get("Boss").level === 5 && PodEngine.cardValues({ cardsInfo: cvDeck, commanders: ["Boss"], ledger: cvLedger, table: cvTable })[0].name === "Boss"],
+  ["a piece of a winning line reads key", cvA.get("Piece").level === 5 && cvA.get("Piece").combos.length === 1],
+  ["a card that fits the commander and is widely run reads strong", cvA.get("Good").level === 4],
+  ["a card off the commander's page with no job reads weak", cvA.get("Stranger").level === 1],
+  ["an expensive card with no job is marked heavy", cvA.get("Brick").reasons.some(r => r.k === "heavy")],
+  ["with no page, rank stands in and no card is called off plan", (() => {
+    const v = cvOf({ table: null }); return v.get("Stranger").reasons.every(r => r.k !== "offPlan");
+  })()],
+  ["a dual beats a tapped mono land, and a basic reads solid", cvA.get("Dual").score > cvA.get("Gate").score && cvA.get("Island").level === 3],
+  ["points stay apart from value: a costly card keeps its level", (() => {
+    const v = cvOf({ whatIf: { Good: { dPts: 3, fixes: false } } }).get("Good");
+    return v.level === cvA.get("Good").level && v.points.saves === 3;
+  })()],
+  ["a card that saves nothing shows no point cost", cvOf({ whatIf: { Good: { dPts: 0, fixes: false } } }).get("Good").points === null],
+];
+const cvBad = CV_CASES.filter(([, ok]) => !ok);
+for (const [label] of cvBad) console.log(`CARD VALUE FAIL: ${label}`);
+console.log(`Card values: ${CV_CASES.length - cvBad.length}/${CV_CASES.length} correct`);
+if (cvBad.length) fails++;
 
 process.exit(fails || cmdFails ? 1 : 0);

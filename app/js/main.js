@@ -3,14 +3,14 @@
 // because every cross-module call happens inside event handlers, after eval.
 import * as PodEngine from './engine/index.js';
 import { RULES } from './rules.js';
-import { state, store, saveSession, loadSession, TAB_KEYS } from './state.js';
+import { state, store, saveSession, loadSession, TAB_KEYS, VIEW_KEYS } from './state.js';
 import { deckToText } from './advice.js';
 import { T } from './i18n.js';
 import { $ } from './ui/helpers.js';
 import { applyTheme, renderHeader } from './ui/header.js';
 import { renderInput } from './ui/input.js';
 import { renderSummary } from './ui/summary.js';
-import { renderTabbar, renderBanner, renderSectionNav } from './ui/tabbar.js';
+import { renderTabbar, renderBanner, renderSectionNav, setView } from './ui/tabbar.js';
 import { renderPower } from './ui/power.js';
 import { renderValidation } from './ui/validation.js';
 import { renderComp } from './ui/comp.js';
@@ -19,7 +19,7 @@ import { renderCommander } from './ui/commander.js';
 import { renderBracket } from './ui/bracket.js';
 import { renderCombos } from './ui/combos.js';
 import { renderProfile } from './ui/profile.js';
-import { renderBrowser } from './ui/browser.js';
+import { renderDeck } from './ui/deck.js';
 import { renderTips } from './ui/tips.js';
 import { renderRamp } from './ui/ramp.js';
 import { renderHand } from './ui/hand.js';
@@ -59,6 +59,17 @@ function restoreFocus(f) {
   if (el) el.focus({ preventScroll: true });
 }
 
+// Only the view on screen is drawn, so the suggestions and other late data wait until asked for.
+const VIEW_RENDER = {
+  summary: () => { renderVerdict(); renderCommander(); },
+  deck: renderDeck,
+  points: () => { renderPower(); renderTips(); },
+  bracket: renderBracket,
+  combos: renderCombos,
+  power: renderProfile,
+  mana: () => { renderComp(); renderCurve(); renderRamp(); renderHand(); },
+};
+
 export function renderAll() {
   const focus = focusKey(document.activeElement) || lastFocus;
   applyTheme(); renderHeader(); renderInput(); renderGuide(); renderTabbar(); renderTableMode();
@@ -67,8 +78,9 @@ export function renderAll() {
   $('footer').textContent = t.footer;
   const has = !!state.result;
   document.body.dataset.tab = state.tab;
-  // the summary belongs to the deck's own tabs: Pod and Guide are about other things
-  $('summary').style.display = has && (state.tab === 'informe' || state.tab === 'detalles') ? '' : 'none';
+  document.body.dataset.view = state.view;
+  // the summary belongs to the report: Pod and Guide are about other things
+  $('summary').style.display = has && state.tab === 'informe' ? '' : 'none';
   renderSectionNav();
   document.documentElement.lang = state.lang;
   document.querySelector('.skip-link').textContent = t.skipLink;
@@ -80,9 +92,10 @@ export function renderAll() {
     if (state.tab === 'informe') {
       // the part headings are static per language; their ids match their keys
       for (const k of ['partPlanT', 'partPodT', 'partPodX', 'partBrT', 'partBrX', 'partPfT', 'partPfX', 'tipsCompT']) $(k).textContent = t[k];
-      renderVerdict(); renderCommander(); renderPower(); renderBracket(); renderCombos(); renderProfile(); renderTips();
+      // out of the pod, the way back in is what the player came for
+      $('view-points').classList.toggle('out', state.result.evalRes.tier === 'above');
+      VIEW_RENDER[state.view]();
     }
-    if (state.tab === 'detalles') { renderComp(); renderCurve(); renderRamp(); renderHand(); renderBrowser(); }
   }
   if (state.tab === 'pod') renderPod();
   restoreFocus(focus);
@@ -119,8 +132,11 @@ const __boot = () => {
   $('emptyPod').onclick = () => { state.tab = 'pod'; renderAll(); };
   $('archSel').onchange = (e) => { state.arch = e.target.value; renderAll(); };
   $('deckText').oninput = () => { state.error = null; renderInput(); saveSession(); };
-  $('gtBtn').onclick = () => { state.grp = 'type'; renderBrowser(); };
-  $('gcBtn').onclick = () => { state.grp = 'cat'; renderBrowser(); };
+  // every link between views, from the nav or from inside a panel
+  document.addEventListener('click', (e) => {
+    const link = e.target instanceof Element && e.target.closest('[data-go]');
+    if (link) { e.preventDefault(); setView(link.dataset.go); }
+  });
   $('tableModeBtn').onclick = () => {
     state.tableOpen = !state.tableOpen;
     // opening with an analyzed deck: seat it at Mazo 1 so comparing starts ready
@@ -149,7 +165,11 @@ const __boot = () => {
   if (sess && typeof sess.deckText === 'string' && sess.deckText.trim()) {
     analyze().then(() => {
       // land on the saved tab unless the user already navigated meanwhile
-      if (state.result && state.tab === 'informe' && TAB_KEYS.includes(sess.tab)) { state.tab = sess.tab; renderAll(); }
+      if (state.result && state.tab === 'informe' && TAB_KEYS.includes(sess.tab)) {
+        state.tab = sess.tab;
+        if (VIEW_KEYS.includes(sess.view)) state.view = sess.view;
+        renderAll();
+      }
     });
   } else if (sess && ['load', 'guide', 'pod'].includes(sess.tab)) {
     state.tab = sess.tab; renderAll();

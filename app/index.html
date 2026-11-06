@@ -106,54 +106,48 @@ window.addEventListener('error', function (e) {
     <div id="tableMode" hidden></div>
   </div>
 
-  <!-- Informe: three separate readings. The point budget decides who is in the pod and
-       comes first, with what to do about it. Wizards' brackets and the power level are
-       judged on their own and never change the pod verdict. -->
+  <!-- Informe: one view at a time. The point budget alone decides who is in the pod; Wizards'
+       brackets, the power level and the card values are separate readings of the same deck. -->
   <div id="tab-informe" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-informe">
-    <div id="verdict"></div>
-    <div id="commanderPanel"></div>
-    <section id="sec-points" class="report-part" aria-labelledby="partPodT">
-      <div class="part-head"><div><h2 id="partPodT" class="part-title"></h2><p id="partPodX" class="part-sub"></p></div></div>
-      <div id="power" class="panel power-panel"></div>
-    </section>
-    <section id="sec-plan" class="report-part" aria-labelledby="partPlanT">
-      <div class="part-head"><h2 id="partPlanT" class="part-title"></h2></div>
-      <div id="tips" class="stack-16">
-        <div id="tipsMain"></div>
-        <div id="tipsUp" class="panel panel-pad-lg" aria-live="polite"></div>
-        <details class="panel adv-fold"><summary id="tipsCompT"></summary><div id="tipsComp" class="panel-pad-lg" aria-live="polite"></div></details>
-      </div>
-    </section>
-    <section id="sec-bracket" class="report-part" aria-labelledby="partBrT">
-      <div class="part-head"><div><h2 id="partBrT" class="part-title"></h2><p id="partBrX" class="part-sub"></p></div></div>
-      <div id="bracket"></div>
-      <div id="combos"></div>
-    </section>
-    <section id="sec-profile" class="report-part" aria-labelledby="partPfT">
-      <div class="part-head"><div><h2 id="partPfT" class="part-title"></h2><p id="partPfX" class="part-sub"></p></div></div>
-      <div id="profile"></div>
-    </section>
-    <div id="informeEnd"></div>
-  </div>
-
-  <!-- Detalles: reference and exploration — insight panels first, the 100-card browser last -->
-  <div id="tab-detalles" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-detalles">
-    <div id="comp" class="comp-panel"></div>
-    <div id="curveWrap" class="curve-wrap"></div>
-    <div id="rampPanel" class="panel panel-pad"></div>
-    <div id="handPanel" class="panel panel-pad-lg"></div>
-    <div class="panel browser-panel">
-      <div class="row-between">
-        <h2 id="browserT" class="secT"></h2>
-        <div class="row-center">
-          <span id="groupByLbl" class="lbl-muted"></span>
-          <div class="seg-toggle-sm">
-            <button id="gtBtn"></button>
-            <button id="gcBtn"></button>
-          </div>
+    <div id="view-summary" class="view">
+      <div id="verdict"></div>
+      <div id="commanderPanel"></div>
+    </div>
+    <div id="view-deck" class="view"></div>
+    <div id="view-points" class="view">
+      <section id="sec-plan" class="report-part" aria-labelledby="partPlanT">
+        <div class="part-head"><h2 id="partPlanT" class="part-title"></h2></div>
+        <div id="tips" class="stack-16">
+          <div id="tipsMain"></div>
+          <div id="tipsUp" class="panel panel-pad-lg" aria-live="polite"></div>
+          <details class="panel adv-fold"><summary id="tipsCompT"></summary><div id="tipsComp" class="panel-pad-lg" aria-live="polite"></div></details>
         </div>
-      </div>
-      <div id="groups" class="groups"></div>
+      </section>
+      <section id="sec-points" class="report-part" aria-labelledby="partPodT">
+        <div class="part-head"><div><h2 id="partPodT" class="part-title"></h2><p id="partPodX" class="part-sub"></p></div></div>
+        <div id="power" class="panel power-panel"></div>
+      </section>
+    </div>
+    <div id="view-bracket" class="view">
+      <section class="report-part" aria-labelledby="partBrT">
+        <div class="part-head"><div><h2 id="partBrT" class="part-title"></h2><p id="partBrX" class="part-sub"></p></div></div>
+        <div id="bracket"></div>
+      </section>
+    </div>
+    <div id="view-combos" class="view">
+      <div id="combos"></div>
+    </div>
+    <div id="view-power" class="view">
+      <section class="report-part" aria-labelledby="partPfT">
+        <div class="part-head"><div><h2 id="partPfT" class="part-title"></h2><p id="partPfX" class="part-sub"></p></div></div>
+        <div id="profile"></div>
+      </section>
+    </div>
+    <div id="view-mana" class="view">
+      <div id="comp" class="comp-panel"></div>
+      <div id="curveWrap" class="curve-wrap"></div>
+      <div id="rampPanel" class="panel panel-pad"></div>
+      <div id="handPanel" class="panel panel-pad-lg"></div>
     </div>
   </div>
 

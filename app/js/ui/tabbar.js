@@ -1,10 +1,10 @@
-import { state, TAB_KEYS } from '../state.js';
+import { state, TAB_KEYS, VIEW_KEYS } from '../state.js';
 import { T } from '../i18n.js';
 import { $, esc } from './helpers.js';
 import { startCheapest } from '../pipeline.js';
 import { renderAll } from '../main.js';
 
-const TAB_LABEL = { load: 'tabLoad', informe: 'tabInforme', detalles: 'tabDetalles', pod: 'tabPod', guide: 'tabGuide' };
+const TAB_LABEL = { load: 'tabLoad', informe: 'tabInforme', pod: 'tabPod', guide: 'tabGuide' };
 
 export function renderTabbar() {
   const t = T();
@@ -42,14 +42,23 @@ export function renderTabbar() {
   if (active.offsetLeft + active.offsetWidth > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = active.offsetLeft;
 }
 
-// Jump links through the long report. Points fold away by default, so going there opens them.
+// The report is one view at a time, so a change of view starts at the top of the page.
+export function setView(view) {
+  state.tab = 'informe'; state.view = view;
+  renderAll();
+  $('stickySentinel').scrollIntoView();
+}
+
 export function renderSectionNav() {
   const t = T(), nav = $('sectionNav');
   nav.hidden = !(state.result && state.tab === 'informe');
   if (nav.hidden) return;
   nav.setAttribute('aria-label', t.navAria);
-  nav.innerHTML = [['verdict', t.navVerdict], ['sec-points', t.navPoints], ['sec-plan', t.partPlanT], ['sec-bracket', t.navBracket], ['sec-profile', t.navProfile]]
-    .map(([id, label]) => '<a href="#' + id + '">' + esc(label) + '</a>').join('');
+  nav.innerHTML = VIEW_KEYS.map(v => '<a href="#' + v + '" data-go="' + v + '"' + (state.view === v ? ' aria-current="page"' : '') + '>' + esc(t['view_' + v]) + '</a>').join('');
+  for (const k of VIEW_KEYS) $('view-' + k).hidden = state.view !== k;
+  // on a phone the links scroll: keep the current one in view
+  const a = nav.querySelector('[aria-current]').getBoundingClientRect(), n = nav.getBoundingClientRect();
+  if (a.right > n.right || a.left < n.left) nav.scrollLeft += a.left - n.left - 16;
 }
 
 export function renderBanner() {
@@ -57,7 +66,9 @@ export function renderBanner() {
   // cheaper printings only change price points, so the offer only shows where those exist
   const pricePts = state.result ? Object.entries(state.result.evalRes.breakdown)
     .filter(([k]) => k.startsWith('price')).reduce((sum, [, v]) => sum + v, 0) : 0;
-  if (!state.result || (state.tab !== 'informe' && state.tab !== 'detalles') || (state.fetchSt === 'idle' && !pricePts)) { el.innerHTML = ''; return; }
+  // cheaper printings are about points: the offer waits on the two views that talk about them
+  const offerHere = state.view === 'summary' || state.view === 'points';
+  if (!state.result || state.tab !== 'informe' || (state.fetchSt === 'idle' && (!pricePts || !offerHere))) { el.innerHTML = ''; return; }
   if (state.fetchSt === 'idle') {
     el.innerHTML = '<button id="fetchBtn" class="price-pill">' + t.pricePill + '</button>';
     $('fetchBtn').onclick = startCheapest;
