@@ -108,6 +108,7 @@ text export always works.
 Dev checks (users never need these):
   node scripts/test_engine_parity.js   # JS engine == Python rules on all 36 precons
   python3 scripts/tier_rules.py --selftest --calibrate
+  node scripts/test_i18n.js            # Spanish and English carry the same strings
 
 When rules change: edit rules/pod_rules.json — the app fetches it at runtime,
 so there is nothing else to sync. Re-run the parity test + calibration.

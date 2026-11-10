@@ -179,34 +179,10 @@ export async function runTableMode() {
       const parsed = PodEngine.parseDecklist(text);
       const names = [...new Set(parsed.entries.map(e => e.name))];
       const { notFound } = await PodEngine.fetchCards(names, cardCache, () => {});
-      const resolved = parsed.entries.filter(e => cardCache[e.name]);
-      const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
-      const commanders = PodEngine.pickCommanders(parsed, cardCache);
-      let comboList = null;
-      if (comboDb) {
-        comboList = PodEngine.activeCombos(PodEngine.matchCombos(parsed.entries.map(e => e.name), comboDb), commanders);
-        const infinite = comboList.filter(c => c.infinite);
-        stats.combos = infinite.length;
-        stats.combo_sizes = infinite.map(c => c.n);
-      }
-      const ev = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
-      const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name, cls: PodEngine.classifyCard(cardCache[e.name]) }));
-      const det = PodEngine.detectArchetype(cardsInfo);
-      const cmd = commanders[0] || null;
-      const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, notFound);
-      const bracket = PodEngine.evaluateBrackets({
-        stats, flagged, db: cardCache, validation, commanders,
-        deckNames: resolved.map(e => e.name),
-        combos: comboList, comboDb, landDenial,
-        loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
-        unresolved: notFound.length,
-      });
-      const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: comboList ? bracket.combos : null, commanders, cardTags });
-      const salt = saltDb ? PodEngine.saltScore(resolved.map(e => e.name), saltDb) : null;
-      const power = PodEngine.computePower(profile, stats, salt);
-      const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!comboList && !!salt, floor: comboList ? bracket.floor : null,
-        precon: precons ? PodEngine.matchPrecon(resolved, precons) : null,
-        combos: comboList ? bracket.combos : [], landMaybe: bracket.landMaybe, gameChangers: bracket.checks.find(c => c.id === 'game_changers').cards });
+      const r = PodEngine.analyzeDeck({ parsed, db: cardCache, rules: RULES,
+        combos: comboDb ? PodEngine.matchCombos(parsed.entries.map(e => e.name), comboDb) : null,
+        comboDb, landDenial, saltDb, cardTags, precons, notFound });
+      const { stats, evalRes: ev, cardsInfo, detected: det, commander: cmd, bracket, power, level, salt } = r;
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),
         tier: ev.tier, pts: ev.points, price: stats.total_price_eur, gc: stats.game_changers,

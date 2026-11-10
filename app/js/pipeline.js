@@ -129,57 +129,19 @@ function recordVersion() {
 
 export function recompute(notFound) {
   const parsed = state.deck;
-  const resolved = parsed.entries.filter(e => cardCache[e.name]);
-  const { stats, flagged } = PodEngine.computeDeckStats(resolved, cardCache);
   // A user pick overrules detection, but only for the deck it was made on:
   // the same legend can sit in someone else's 99, so matching by name alone
   // would silently re-derive THEIR deck around YOUR commander.
   const pick = state.cmdPick && state.cmdPick.key === PodEngine.deckFingerprint(parsed.entries)
     ? state.cmdPick.names : null;
-  const picked = PodEngine.normalizeCommanders(pick, resolved, cardCache);
-  const commanders = picked.length ? picked : PodEngine.pickCommanders(parsed, cardCache);
-  const commander = commanders[0] || null;
   const _cd = state.combosData && state.combosData.status === 'done' ? state.combosData : null;
-  const combos = _cd ? PodEngine.activeCombos(_cd.list, commanders) : null;
-  const infinite = (combos || []).filter(c => c.infinite);
-  stats.combos = infinite.length;
-  stats.combo_sizes = infinite.map(c => c.n);
-  const evalRes = PodEngine.evaluateDeck(stats, flagged, RULES, resolved.map(e => e.name));
-  const cardsInfo = resolved.map(e => ({ card: cardCache[e.name], qty: e.quantity, name: e.name,
-    cls: PodEngine.classifyCard(cardCache[e.name]) }));
-  const detected = PodEngine.detectArchetype(cardsInfo);
-  const options = PodEngine.commanderOptions(resolved, cardCache);
   const missing = notFound !== undefined ? notFound : (state.result ? state.result.notFound : []);
-  const validation = PodEngine.validateDeck(cardsInfo, commanders, cardCache, missing);
-  const bracket = PodEngine.evaluateBrackets({
-    stats, flagged, db: cardCache, validation, commanders,
-    deckNames: resolved.map(e => e.name),
-    combos, comboDb: _cd ? _cd.cardLists : null, landDenial: state.landDenial,
-    loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion,
-    unresolved: missing.length,
-  });
-  const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: combos ? bracket.combos : null, commanders, cardTags: state.cardTags });
-  const salt = state.saltDb ? PodEngine.saltScore(resolved.map(e => e.name), state.saltDb) : null;
-  const saltParts = state.saltDb ? PodEngine.saltBreakdown({ cardsInfo, saltDb: state.saltDb, cardTags: state.cardTags,
-    landDenial: state.landDenial, combos: combos ? bracket.combos : null }) : null;
-  const power = PodEngine.computePower(profile, stats, salt);
-  const level = PodEngine.powerLevel({ power, rules: RULES, checked: !!combos && !!salt, floor: combos ? bracket.floor : null,
-    precon: state.precons ? PodEngine.matchPrecon(resolved, state.precons) : null,
-    combos: combos ? bracket.combos : [], landMaybe: bracket.landMaybe, gameChangers: bracket.checks.find(c => c.id === 'game_changers').cards });
-  const synergy = synergyFor(cardsInfo, commanders);
-  loadAverage(commanders);
-  // what-if cut deltas for every card that drives a points dial or violation
-  const drivingNames = new Set();
-  for (const list of Object.values(evalRes.driving)) for (const [n] of list) drivingNames.add(n);
-  const whatIf = {};
-  const comboPts = evalRes.breakdown.combos || 0;
-  for (const n of drivingNames) {
-    const wi = PodEngine.whatIfCut(resolved, cardCache, RULES, n);
-    whatIf[n] = { dPts: evalRes.points - comboPts - wi.points, tier: wi.tier,
-      fixes: evalRes.violations.length > 0 && wi.violations < evalRes.violations.length };
-  }
-  state.result = { stats, flagged, evalRes, cardsInfo, detected, commander, commanders, options,
-    bracket, profile, power, level, salt, saltParts, synergy, whatIf, notFound: missing, validation };
+  const r = PodEngine.analyzeDeck({ parsed, db: cardCache, rules: RULES, pick,
+    combos: _cd ? _cd.list : null, comboDb: _cd ? _cd.cardLists : null, landDenial: state.landDenial,
+    saltDb: state.saltDb, cardTags: state.cardTags, precons: state.precons, notFound: missing });
+  r.synergy = synergyFor(r.cardsInfo, r.commanders);
+  loadAverage(r.commanders);
+  state.result = r;
   state.hand = null;
   state.tipsCache = null;
   if (!state.edits.undo.length) state.edits.base = PodEngine.editFigures(state.result);

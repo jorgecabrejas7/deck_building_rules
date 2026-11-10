@@ -98,6 +98,8 @@ These reasons assume a private pod tool. The monetization research should reopen
 ## How the app is laid out
 The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Cargar page, where every visit starts. Each report takes its colours from the commander's identity (`--h1`, `--h2`). The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná, Sinergias (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
 
+Every deck is read by one pure function, `analyzeDeck` in `engine/analyze.js`: the app, table mode, the deck study and the parity test all call it with the rules passed in, so a pod's own rules or a deck being built go through the same code. Synergy is left out because it is an EDHREC fetch; each caller adds it.
+
 ## Translations
 Every text is in Spanish and English, through `L` / `T()` in `i18n.js`, and placeholders are filled with `fill` from the same file. A new feature keeps its strings in `app/js/i18n/<feature>.js`, merged into `L`. No inline `lang === 'es' ? … : …` in new code. A missing key shows `⟦key⟧` on screen, and `node scripts/test_i18n.js` fails on any gap or any placeholder that differs between the two languages.
 
