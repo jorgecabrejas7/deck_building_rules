@@ -31,6 +31,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -38,6 +39,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
+
+USE_I18N = True
+LANGUAGE_CODE = "es"
+LANGUAGES = [("es", "Español"), ("en", "English")]
 
 ROOT_URLCONF = "pod.urls"
 TEMPLATES = [{
@@ -103,6 +108,7 @@ HEADLESS_FRONTEND_URLS = {
 ACCOUNT_LOGIN_METHODS = {"username"}
 ACCOUNT_SIGNUP_FIELDS = ["username*", "email", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_RATE_LIMITS = {"signup": "5/h/ip"}  # each signup emails the admin; allauth merges this over its defaults
 
 if os.environ.get("GOOGLE_CLIENT_ID"):
     SOCIALACCOUNT_PROVIDERS = {"google": {"APP": {

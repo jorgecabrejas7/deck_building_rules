@@ -15,7 +15,7 @@ async function api(url, method = 'GET', body) {
   try {
     const r = await fetch(url, {
       method, credentials: 'same-origin',
-      headers: { 'X-CSRFToken': csrf(), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      headers: { 'X-CSRFToken': csrf(), 'Accept-Language': state.lang, ...(body ? { 'Content-Type': 'application/json' } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
     return { status: r.status, data: await r.json().catch(() => ({})) };

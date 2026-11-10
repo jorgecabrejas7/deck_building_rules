@@ -119,8 +119,12 @@ The site is private while in development: it needs an account Jorge approves. Th
 
 Run it locally:
   python3 -m venv server/.venv && server/.venv/bin/pip install -r server/requirements-dev.txt
-  cd server && .venv/bin/python manage.py migrate && .venv/bin/python manage.py seed_dev
+  cd server && export DJANGO_DEBUG=1
+  .venv/bin/python manage.py migrate
+  .venv/bin/python manage.py seed_dev     # writes server/seed/dev_accounts.json
   .venv/bin/uvicorn pod.asgi:application --port 8000
 then open http://127.0.0.1:8000/pod/app/ (DEBUG serves the front end from the repo, same gate).
+
+Production backup: cron runs `server/backup_db.py` daily (the server has no `sqlite3` CLI): `15 3 * * * /srv/pod-checker/venv/bin/python /srv/pod-checker/site/server/backup_db.py /srv/pod-checker/db/pod.sqlite3 /srv/pod-checker/db/backups >> /srv/pod-checker/backup.log 2>&1`, 14 days kept.
 
 Tests: python3 -m pytest server (from the venv, or server/.venv/bin/pytest -c server/pytest.ini)

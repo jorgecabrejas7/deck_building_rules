@@ -1,4 +1,6 @@
 import json
+import re
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -6,6 +8,7 @@ from allauth.account.signals import user_signed_up
 from allauth.socialaccount.signals import social_account_added
 from django.contrib.admin.sites import site
 from django.core import mail
+from django.core.cache import cache
 from django.test import Client
 
 from accounts.admin import approve
@@ -28,6 +31,11 @@ def signup(client, name="ana"):
 @pytest.fixture(autouse=True)
 def admin_email(settings):
     settings.ADMIN_EMAIL = "boss@x.com"
+
+
+@pytest.fixture(autouse=True)
+def fresh_rate_limits():
+    cache.clear()
 
 
 @pytest.fixture
@@ -143,3 +151,26 @@ def test_dev_static_traversal(client, active, repo):
     assert client.get("/pod/app/../secret.txt").status_code in (301, 400, 404)
     assert client.get("/pod/app/%2e%2e/secret.txt").status_code == 404
     assert client.get("/pod/app/..%2fsecret.txt").status_code == 404
+
+
+@pytest.mark.parametrize("lang, word", [("es", "corta"), ("en", "short")])
+def test_allauth_errors_follow_accept_language(client, lang, word):
+    r = client.post(
+        BASE + "auth/signup", json.dumps({"username": "ana", "email": "a@x.com", "password": "a1"}),
+        content_type="application/json", HTTP_ACCEPT_LANGUAGE=lang)
+    assert r.status_code == 400
+    assert word in r.json()["errors"][0]["message"]
+
+
+def test_sixth_signup_from_one_ip_is_refused(client):
+    assert [signup(client, f"u{i}").status_code for i in range(5)] == [401] * 5
+    assert signup(client, "u5").status_code == 429
+
+
+def test_open_paths_match_caddy():
+    from accounts.views import GATED_API, OPEN_PATHS
+    caddy = (Path(__file__).resolve().parents[2] / "deploy/pod.caddy").read_text()
+    expr = re.search(r"@gated expression `(.*)`", caddy).group(1)
+    assert re.search(r"!path\((.*?)\) &&", expr).group(1).replace("'", "").split(", ") == OPEN_PATHS
+    for p in GATED_API:
+        assert f"!path('{p}*')" in expr
