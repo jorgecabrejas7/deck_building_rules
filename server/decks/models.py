@@ -11,7 +11,7 @@ def new_token():
 class Deck(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="decks")
     name = models.CharField(max_length=100)
-    # "pods" behaves as private until pods exist
+    # "pods": readable by members of the pods it is entered in
     visibility = models.CharField(max_length=10, default="private",
                                   choices=[(v, v) for v in ("private", "pods", "link")])
     link_token = models.CharField(max_length=32, unique=True, default=new_token)
