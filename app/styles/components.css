@@ -40,7 +40,7 @@ body.dark .seg-toggle button.active,body.dark .seg-toggle-sm button.active{backg
 .load-head{display:flex;flex-direction:column;align-items:center;gap:var(--sp-4);text-align:center;max-width:720px}
 .load-title{font-size:var(--fs-hero);font-weight:600;letter-spacing:var(--track-tight);line-height:1.08;text-wrap:balance}
 .load-sub{font-size:var(--fs-lead);line-height:1.45;color:var(--muted);max-width:52ch;text-wrap:balance}
-.input-panel{width:100%;max-width:720px;display:flex;flex-direction:column;gap:var(--sp-4)}
+.input-panel{width:100%;box-sizing:border-box;max-width:720px;display:flex;flex-direction:column;gap:var(--sp-4)}
 .deck-input{display:block;box-sizing:border-box;width:100%;border:1px solid var(--borderCtl);border-radius:var(--r-lg);background:var(--panel);padding:var(--sp-5);font-family:var(--font-mono);font-size:var(--fs-caption);line-height:1.6;resize:vertical;min-height:220px}
 .input-notice{background:var(--warnBg);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);font-size:var(--fs-body);color:var(--warnFg)}
 .load-actions{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}

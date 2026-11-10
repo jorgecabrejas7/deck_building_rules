@@ -267,7 +267,7 @@ html[data-slide=back]{--slide:-1}
 @keyframes bar-grow{from{transform:scaleX(0)}}
 
 /* the landing: planeswalkers shuffled into a deck by scrolling. Dark in both themes, a table at night. */
-.main>#hero{width:100%;margin:calc(var(--sp-5)*-1 - var(--sp-2)) 0 0;height:320vh;color:#f5f4f0}
+.main>#hero{width:100%;margin:calc(var(--sp-5)*-1 - var(--sp-2)) 0 0;height:320vh;color:#f5f4f0;overflow-x:clip}
 .main>#hero[hidden]{display:none}
 .hero-pin{position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;background:oklch(0.12 0.008 260);display:flex;flex-direction:column;align-items:center;opacity:calc(1 - var(--leave,0));contain:strict}
 .hero-tint{position:absolute;inset:0;pointer-events:none}
@@ -456,6 +456,7 @@ a.rd-link,.combo-link,.sum-note a{color:var(--ink)}
 .cb-steps p{margin:0;font-size:var(--fs-caption);color:var(--muted)}
 .cb-sym{width:1em;height:1em;vertical-align:-.12em;margin-inline:1px}
 /* the paste box below the landing */
+#tab-load{overflow-x:clip}
 #tab-load .load{position:relative}
 #tab-load .load::before{content:"";position:absolute;z-index:-1;inset:0 -20% 0;background:radial-gradient(40% 50% at 25% 45%,oklch(.7 .15 240 / .2),transparent),radial-gradient(40% 50% at 75% 45%,oklch(.7 .15 28 / .18),transparent),radial-gradient(40% 40% at 50% 80%,oklch(.7 .15 150 / .16),transparent);pointer-events:none}
 @media (max-width:760px){
