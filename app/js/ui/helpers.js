@@ -49,7 +49,10 @@ export function announce(msg) { const el = $('srStatus'); if (el) el.textContent
 export function dialCost(spec, lang) {
   const P = lang === 'es';
   if (spec.forbidden) return P ? 'PROHIBIDO (y cada copia suma +1 pt)' : 'FORBIDDEN (and each copy still adds +1 pt)';
-  if (spec.scoring === 'per_combo_size') return P ? '2 gratis; después: 2 cartas +3 · 3 cartas +2 · 4+ +1' : '2 free; then: 2-card +3 · 3-card +2 · 4+ +1';
+  if (spec.scoring === 'per_combo_size') {
+    const sp = spec.size_points, d = spec.default_size_points;
+    return P ? `${spec.free_combos} gratis; después: 2 cartas +${sp['2']} · 3 cartas +${sp['3']} · 4+ +${d}` : `${spec.free_combos} free; then: 2-card +${sp['2']} · 3-card +${sp['3']} · 4+ +${d}`;
+  }
   const steps = Object.entries(spec.point_steps).map(([k, v]) => k + '→' + v).join(', ');
   return (P ? 'gratis hasta ' : 'free up to ') + spec.baseline_max + (steps ? ' · ' + steps : '') + (P ? ' · después +1/unidad' : ' · then +1/unit');
 }
