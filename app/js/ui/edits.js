@@ -1,7 +1,7 @@
 import * as PodEngine from '../engine/index.js';
 import { state } from '../state.js';
-import { T } from '../i18n.js';
-import { $, esc, eur, fill } from './helpers.js';
+import { T, fill } from '../i18n.js';
+import { $, esc, eur } from './helpers.js';
 import { addToDeck, canEdit, listText, resetEdits, searchToAdd, undoEdit } from '../edits.js';
 
 const short = (name) => String(name).split(' // ')[0];

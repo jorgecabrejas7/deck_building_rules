@@ -5,8 +5,8 @@ import { state, cardCache, persistCache } from './state.js';
 import { deckToText } from './advice.js';
 import { recompute, checkCombos } from './pipeline.js';
 import { renderAll } from './main.js';
-import { T } from './i18n.js';
-import { $, announce, fill } from './ui/helpers.js';
+import { T, fill } from './i18n.js';
+import { $, announce } from './ui/helpers.js';
 
 // The bar compares against the deck as it stood before the first edit, so that first edit waits
 // for the combo check that completes those figures. Cheaper printings would move the prices under

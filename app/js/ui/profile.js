@@ -1,7 +1,7 @@
 import { state } from '../state.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { ARCH } from './constants.js';
-import { $, esc, fill } from './helpers.js';
+import { $, esc } from './helpers.js';
 import { renderPod } from './pod.js';
 import { RULES } from '../rules.js';
 import { readingHtml } from './verdict.js';
@@ -103,9 +103,9 @@ function level(b, t) {
 }
 
 function benchmark(b, t, cards) {
-  return '<section class="rd-bm"><div class="rd-bm-head"><h5>' + esc(t['bm_' + b.key] || b.key) + '</h5>' + level(b, t) + '</div>' +
-    '<p class="rd-q">' + esc(t['bmq_' + b.key] || '') + '</p>' +
-    facts(b.values.map(v => [isNone(v.value) ? esc(t.lvlNone) : esc(v.value), t['pm_' + v.key] || v.key])) + cards + '</section>';
+  return '<section class="rd-bm"><div class="rd-bm-head"><h5>' + esc('bm_' + b.key in t ? t['bm_' + b.key] : b.key) + '</h5>' + level(b, t) + '</div>' +
+    '<p class="rd-q">' + esc('bmq_' + b.key in t ? t['bmq_' + b.key] : '') + '</p>' +
+    facts(b.values.map(v => [isNone(v.value) ? esc(t.lvlNone) : esc(v.value), 'pm_' + v.key in t ? t['pm_' + v.key] : v.key])) + cards + '</section>';
 }
 
 // Per value: what only makes sense beside its measures.

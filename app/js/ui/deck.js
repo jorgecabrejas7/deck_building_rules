@@ -1,8 +1,8 @@
 import { budgetTotals, cardValues, cardmarketUrl, cardmarketWants, trimPlan } from '../engine/index.js';
 import { state, store } from '../state.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { TYPES, TYPE_ORDER } from './constants.js';
-import { $, announce, esc, eur, fill } from './helpers.js';
+import { $, announce, esc, eur } from './helpers.js';
 import { ICON, fold, paint } from './reading.js';
 import { startCheapest } from '../pipeline.js';
 import { canEdit, removeFromDeck } from '../edits.js';
@@ -67,7 +67,7 @@ const unusualChip = (c, t) => c.unusual ? '<span class="dk-unusual" title="' + e
 const levelTag = (c, t) => '<span class="dk-level" title="' + esc(t['dkLevel_' + c.level]) + '">' + pips(c.level) + '<span class="vh">' + esc(t['dkLevel_' + c.level]) + '</span></span>';
 
 function row(c, t) {
-  const sub = [manaText(c.x.card), ...c.jobs.slice(0, 2).map(j => t['dkJob_' + j])].filter(Boolean).join(' · ');
+  const sub = [manaText(c.x.card), ...c.jobs.slice(0, 2).filter(j => 'dkJob_' + j in t).map(j => t['dkJob_' + j])].filter(Boolean).join(' · ');
   return '<li><button type="button" class="dk-row" data-card="' + esc(c.name) + '" aria-pressed="false">' +
     '<img src="' + esc(c.x.card.img_art || '') + '" loading="lazy" alt="">' +
     '<span class="dk-main"><span class="dk-name">' + esc(short(c.name)) + (c.x.qty > 1 ? ' <small>×' + c.x.qty + '</small>' : '') + '</span>' +

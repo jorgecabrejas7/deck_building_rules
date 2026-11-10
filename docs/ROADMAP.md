@@ -98,6 +98,9 @@ These reasons assume a private pod tool. The monetization research should reopen
 ## How the app is laid out
 The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Cargar page, where every visit starts. Each report takes its colours from the commander's identity (`--h1`, `--h2`). The report is one view at a time, never a long scroll: Resumen, Mazo, Puntos, Bracket, Combos, Poder, Curva y maná, Sinergias (`VIEW_KEYS` in `state.js`, drawn by `VIEW_RENDER` in `main.js`). Any `data-go="view"` link switches view. Every reading panel follows `ui/reading.js`: the answer first, a sentence why, the evidence folded. Styles for those panels and the deck view live in `styles/power.css`.
 
+## Translations
+Every text is in Spanish and English, through `L` / `T()` in `i18n.js`, and placeholders are filled with `fill` from the same file. A new feature keeps its strings in `app/js/i18n/<feature>.js`, merged into `L`. No inline `lang === 'es' ? … : …` in new code. A missing key shows `⟦key⟧` on screen, and `node scripts/test_i18n.js` fails on any gap or any placeholder that differs between the two languages.
+
 ## Where it runs
 https://169-58-71-242.sslip.io/pod/ is the site. The server publishes `origin/main` by itself within 5 minutes of a push (`deploy/publish.sh`, from cron). The Caddy routes are in `deploy/pod.caddy`; changing them needs Jorge's sudo. The old GitHub Pages address forwards there. The server's services and how to add one are in `/srv/README.md`.
 
@@ -116,6 +119,7 @@ Not yet prepared for a public launch: no licence file, no fan-content or non-aff
 
 ## Every milestone must pass
 - `node scripts/test_engine_parity.js`
+- `node scripts/test_i18n.js`
 - `python3 scripts/tier_rules.py --calibrate` (the pod rules: 32 / 4 / 0)
 - `node scripts/deck_study.js` after any engine change: every cEDH list above every precon
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing

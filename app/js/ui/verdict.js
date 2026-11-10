@@ -1,9 +1,9 @@
 import { state, loadHistory } from '../state.js';
 import { versionTimeline } from '../engine/history.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { RULES } from '../rules.js';
 import { ARCH, CATS, EXTRA_PTS, MSG, dialName } from './constants.js';
-import { $, esc, archKey, fill, tierTone } from './helpers.js';
+import { $, esc, archKey, tierTone } from './helpers.js';
 import { compSlots, tagCount } from './comp.js';
 import { moreList } from '../engine/index.js';
 import { makeRuleZeroCard } from './rulezero.js';

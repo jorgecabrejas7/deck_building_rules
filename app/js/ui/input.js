@@ -30,6 +30,6 @@ export function renderInput() {
   for (const b of $('samples').querySelectorAll('[data-sample]'))
     b.onclick = () => { $('deckText').value = SAMPLES[b.dataset.sample]; state.error = null; renderInput(); };
   const notice = $('inputNotice');
-  if (state.error) { notice.hidden = false; notice.textContent = t[state.error] || state.error; }
+  if (state.error) { notice.hidden = false; notice.textContent = state.error in t ? t[state.error] : state.error; }
   else notice.hidden = true;
 }

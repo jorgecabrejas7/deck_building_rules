@@ -1,9 +1,9 @@
 import * as PodEngine from '../engine/index.js';
 import { state, cardCache, persistCache, saveSession } from '../state.js';
 import { RULES } from '../rules.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { ARCH, DIAL_META, CATS } from './constants.js';
-import { $, esc, eur, fill, tierTone } from './helpers.js';
+import { $, esc, eur, tierTone } from './helpers.js';
 import { analyze, getCardTags, getComboDb, getLandDenial, getPrecons, getSaltDb } from '../pipeline.js';
 import { renderInput } from './input.js';
 import { slotsFor } from './comp.js';

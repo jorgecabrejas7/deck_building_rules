@@ -1,7 +1,7 @@
 import { state } from '../state.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { synergyWeb } from '../engine/index.js';
-import { $, esc, fill } from './helpers.js';
+import { $, esc } from './helpers.js';
 import { bindCardTilePopover } from './popover.js';
 import { answer, cardList, cardName, paint } from './reading.js';
 

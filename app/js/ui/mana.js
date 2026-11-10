@@ -1,8 +1,8 @@
 import { atLeastOdds, compareToAverage, drawOdds } from '../engine/index.js';
 import { state } from '../state.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { TYPES } from './constants.js';
-import { $, esc, fill } from './helpers.js';
+import { $, esc } from './helpers.js';
 import { studyMedian } from './profile.js';
 import { paint, tableWrap } from './reading.js';
 
@@ -27,7 +27,7 @@ function colours(m, t) {
 
 function drops(m, deck, t) {
   // seven in hand plus one a turn after the first
-  const rows = [2, 3, 4, 5, 6].map(n => [fill(t.mnDropN.replace('%v', n), { v: n }), atLeastOdds(deck, m.lands, n, 6 + n)]);
+  const rows = [2, 3, 4, 5, 6].map(n => [fill(t.mnDropN, { v: n }), atLeastOdds(deck, m.lands, n, 6 + n)]);
   rows.unshift([t.mnOpen, atLeastOdds(deck, m.lands, 2, 7)]);
   return section(t.mnDropsT, t.mnDropsX, '<ul class="mn-odds">' + rows.map(([label, p]) => {
     const pct = Math.round(p * 100);

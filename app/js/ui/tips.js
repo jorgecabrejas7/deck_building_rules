@@ -1,9 +1,9 @@
 import * as PodEngine from '../engine/index.js';
 import { state, cardCache } from '../state.js';
 import { RULES } from '../rules.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { BLOCK_MSG, CATS, dialName } from './constants.js';
-import { $, esc, archKey, catLabel, fill } from './helpers.js';
+import { $, esc, archKey, catLabel } from './helpers.js';
 import { bindSugPopovers } from './popover.js';
 import { compositionHtml } from './verdict.js';
 import { compSlots, tagCount } from './comp.js';

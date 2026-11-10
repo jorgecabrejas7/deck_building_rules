@@ -1,8 +1,7 @@
 import { state, cardCache } from '../state.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { RULES } from '../rules.js';
 import { wrapLines, fitList } from '../engine/index.js';
-import { fill } from './helpers.js';
 
 // A picture of the deck's readings to show the table before a game: it describes, and
 // everything on it is what the report already says.

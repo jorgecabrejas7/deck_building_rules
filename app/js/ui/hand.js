@@ -1,7 +1,7 @@
 import { Goldfish, readCard } from '../engine/index.js';
 import { state, cardCache } from '../state.js';
-import { T } from '../i18n.js';
-import { $, esc, fill } from './helpers.js';
+import { T, fill } from '../i18n.js';
+import { $, esc } from './helpers.js';
 
 function begin() {
   const r = state.result;

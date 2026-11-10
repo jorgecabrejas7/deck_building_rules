@@ -1,8 +1,8 @@
 import { state, cardCache } from '../state.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { COMBO_TAGS, deckFingerprint, fetchCards, groupNear, nearCombos, nearPlayable } from '../engine/index.js';
 import { comboFeatureText } from './constants.js';
-import { $, esc, fill } from './helpers.js';
+import { $, esc } from './helpers.js';
 import { checkCombos, getComboDb } from '../pipeline.js';
 import { ICON, answer, cardName, fold, more, paint } from './reading.js';
 
@@ -88,7 +88,7 @@ const loadShard = (id) => {
 function stepsHtml(s, t) {
   if (!s) return '<p class="rd-q">' + esc(t.cbNoSteps) + '</p>';
   const need = [...lines(s.e), ...lines(s.p)];
-  const zones = (s.z || []).map(z => t['zone_' + z]).filter(Boolean);
+  const zones = (s.z || []).filter(z => 'zone_' + z in t).map(z => t['zone_' + z]);
   return (need.length || s.x ? '<section><h5>' + esc(t.cbNeed) + '</h5><ul>' + (s.x ? '<li>' + esc(t.cbMana) + ': ' + withSymbols(s.x) + '</li>' : '') +
       (zones.length ? '<li>' + esc(t.cbZones) + ': ' + esc(zones.join(', ')) + '</li>' : '') + need.map(l => '<li>' + withSymbols(l) + '</li>').join('') + '</ul></section>' : '') +
     (s.d ? '<section><h5>' + esc(t.cbSteps) + '</h5><ol>' + lines(s.d).map(l => '<li>' + withSymbols(l) + '</li>').join('') + '</ol></section>' : '') +

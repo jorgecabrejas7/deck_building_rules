@@ -1,6 +1,6 @@
 import { state } from '../state.js';
-import { T } from '../i18n.js';
-import { esc, fill } from './helpers.js';
+import { T, fill } from '../i18n.js';
+import { esc } from './helpers.js';
 import { bindCardTilePopover } from './popover.js';
 
 // The anatomy every reading panel shares (power level, Wizards' checklist, combos):

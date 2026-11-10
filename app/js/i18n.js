@@ -502,4 +502,9 @@ cmdWhyBanned:'banned in Commander',cmdWhyNotLegendary:'not a legendary creature'
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Over the top · Spellslinger'}
 };
 
-export const T = () => L[state.lang];
+// A missing key shows ⟦key⟧ (no fallback language); `in` stays truthful so callers can still test for a key.
+const marked = (o) => new Proxy(o, { get: (o, k) => (k in o || typeof k !== 'string' ? o[k] : '⟦' + k + '⟧') });
+const PER_LANG = { es: marked(L.es), en: marked(L.en) };
+export const T = () => PER_LANG[state.lang];
+
+export const fill = (s, vals) => Object.entries(vals).reduce((out, [k, v]) => out.replaceAll('%' + k, () => v), s);

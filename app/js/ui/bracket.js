@@ -1,10 +1,10 @@
 import { state } from '../state.js';
 import { RULES } from '../rules.js';
-import { T } from '../i18n.js';
+import { T, fill } from '../i18n.js';
 import { COMBO_TAGS } from '../engine/index.js';
 import { MSG } from './constants.js';
 import { comboLine, tagChip } from './combos.js';
-import { $, esc, fill } from './helpers.js';
+import { $, esc } from './helpers.js';
 import { ICON, answer, cardList, cardName, fold, more, paint, tableWrap } from './reading.js';
 
 // Wizards' checklist, deliberately separate from the pod's point budget and from the
