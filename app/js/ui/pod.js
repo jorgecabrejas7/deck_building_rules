@@ -1,125 +1,315 @@
-import { state } from '../state.js';
-import { T } from '../i18n.js';
-import { $, esc, tierTone } from './helpers.js';
-import { podRankings } from '../engine/index.js';
+// The Pod tab (F3): the player's pods, the active pod's decks read in the browser with its own rules, its members and its admin tools.
+import * as PodEngine from '../engine/index.js';
+import { state, persistCache } from '../state.js';
+import { T, fill } from '../i18n.js';
+import { api } from '../api.js';
+import { setRules } from '../rules.js';
+import { $, esc, tierTone, announce } from './helpers.js';
 import { loadStudy } from './profile.js';
-import { analyze } from '../pipeline.js';
+import { analyze, readDeck, readDeps, recompute } from '../pipeline.js';
 import { deckToText } from '../advice.js';
 import { runTableMode } from './table.js';
 import { renderAll } from '../main.js';
 
-// Pod deck registry: decks from data/pod_decks.json (maintained with
-// scripts/pod_decks.py) joined to their numbers from data/deck_study.json. The list
-// still works without the study, which is why the join starts from the registry.
-const SORTS = {
-  power: s => s.power.score, points: s => s.points, salt: s => s.salt.total,
-  synergy: s => (s.synergy ? s.synergy.coverage : -1), price: s => s.price, bracket: s => s.bracket.checklist,
+const API = '../api/';
+const rows = new Map();     // deckId|updated_at|rules_updated_at -> the figures read for that deck
+let run = 0;                // the latest table computation; an older one stops publishing
+let progress = null;        // {n, m} while decks are being read
+let loadingDetail = false;
+let status = 'idle';        // idle | error: the last detail load
+let asking = null;         // 'leave' | 'm<userId>' | 'd<deckId>': the action awaiting its second press
+let msg = null;             // i18n key of the last answer worth showing
+let adding = null;          // {decks}: my decks that could join, once Añadir mi mazo is pressed
+let renaming = false;
+let editing = false;
+let editorEl = null;        // kept across renders so a half-edited rule is not lost
+let copied = false;
+let failed = false;         // reading the table failed: not retried until the rules or the pod change
+
+const keyOf = (d) => d.id + '|' + d.updated_at + '|' + state.pod.rules_updated_at;
+const inviteLink = (code) => new URL('index.html#join=' + code, location.href).href;
+
+// ---- the picker, on Cargar and at the top of the tab ----
+const pickerOptions = () => {
+  const t = T();
+  return '<option value="">' + esc(t.pdTemplate) + '</option>' +
+    state.pods.map(p => '<option value="' + p.id + '"' + (p.id === state.activeId ? ' selected' : '') + '>' + esc(p.name) + '</option>').join('');
 };
-// shortcut: typos fixed for display only, because the registry mirrors Archidekt; drop these if the lists get renamed there
-const NAME_FIX = [[/necome/, 'become'], [/Acetic/, 'Ascetic'], [/Teysha/, 'Teysa']];
-const displayName = (n) => NAME_FIX.reduce((name, [bad, good]) => name.replace(bad, good), n);
-
-function rankCell(r, t) {
-  if (!r) return '<td class="mono num">—</td>';
-  const label = !r.change ? t.podMoveSame : (r.change > 0 ? t.podMoveUp : t.podMoveDown).replace('{n}', Math.abs(r.change));
-  const move = r.isNew ? '<span class="pod-new">' + esc(t.podRankNew) + '</span>'
-    : r.change === null ? ''
-    : '<span class="pod-move" role="img" aria-label="' + esc(label) + '" title="' + esc(label) + '">' +
-      (r.change > 0 ? '▲' + r.change : r.change < 0 ? '▼' + -r.change : '=') + '</span>';
-  return '<td class="mono num">' + (r.rank ?? '—') + move + '</td>';
+export function renderPodPicker() {
+  const label = $('podSel').closest('label');
+  label.hidden = !state.pods;
+  if (!state.pods) return;
+  $('podLabel').textContent = T().pdPicker;
+  $('podSel').innerHTML = pickerOptions();
 }
 
-function rowFor(d, s, r, t) {
-  const num = (v) => '<td class="mono num">' + v + '</td>';
-  const tier = !s ? '—' : '<span class="tier-pill ' + tierTone(s.tier) + '">' + esc(t['short_' + s.tier]) + '</span>' +
-    (s.violations.includes('banned') ? '<span class="pod-why">' + esc(t.podBanned) + '</span>' : '');
-  return '<tr><th scope="row"><span class="pod-name">' + esc(displayName(d.name)) + '</span>' +
-    (d.url ? ' <a class="pod-link" href="' + esc(d.url) + '" target="_blank" rel="noopener noreferrer">Archidekt ↗</a>' : '') + '</th>' +
-    rankCell(r, t) + '<td>' + tier + '</td>' +
-    num(s ? s.points : '—') + num(s ? esc(s.practicalBracket) + ' · ' + s.power.score.toFixed(1) + (s.floor ? '<span class="pod-why">' + esc(t.podFloor_mld) + '</span>' : '') : '—') + num(s ? s.bracket.checklist : '—') +
-    num(s ? s.salt.total.toFixed(1) : '—') + num(s && s.synergy ? s.synergy.coverage + '%' : '—') + num(s ? '€' + Math.round(s.price) : '—') +
-    '<td class="pod-actions"><button data-pod-load="' + d.id + '" class="btn-ghost-sm">' + t.podLoad + '</button>' +
-    (state.deck ? '<button data-pod-cmp="' + d.id + '" class="btn-ghost-sm">' + t.podCompare + '</button>' : '') + '</td></tr>';
+// A pod's rules reach every figure, so switching, saving rules or reading a pod again redoes the open analysis.
+function applyRules() {
+  run++; progress = null; failed = false;
+  setRules(state.pod);
+  state.tableResults = null;
+  if (state.result) recompute();
+}
+async function loadDetail(id) {
+  const res = await api(API + 'pods/' + id);
+  return res.status === 200 ? res.data.pod : null;
+}
+// Asks the server again for the list and the active pod: after anything that changes either.
+async function reload() {
+  const res = await api(API + 'pods');
+  if (res.status !== 200) { msg = 'pdErr'; return; }
+  state.pods = res.data.pods;
+  state.activeId = res.data.active ? res.data.active.id : null;
+  state.pod = state.activeId ? await loadDetail(state.activeId) : null;
+  if (state.activeId && !state.pod) { msg = 'pdErr'; return; }
+  applyRules();
+}
+const reset = () => { asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
+
+export async function selectPod(id) {
+  const res = await api(API + 'pods/active', 'POST', { pod: id });
+  if (res.status !== 204) { msg = 'pdErr'; return renderAll(); }
+  reset(); msg = null;
+  state.activeId = id;
+  state.pod = id ? await loadDetail(id) : null;
+  applyRules();
+  renderAll();
 }
 
-function table(decks, t) {
-  const study = state.study;
-  const of = (d) => (study ? study.decks.find(s => s.group === 'pod' && s.podId === d.id) : null);
-  const { key, dir } = state.podSort;
-  const rows = decks.map(d => ({ d, s: of(d) }));
-  const snapshots = state.podHistory.snapshots;
-  const ranks = podRankings(snapshots, decks.map(d => d.id));
-  const rankNote = !snapshots.length ? ''
-    : '<p class="note-sm">' + esc(snapshots.length > 1 ? t.podRankNote.replace('{date}', snapshots.at(-2).date) : t.podRankFirst.replace('{date}', snapshots[0].date)) + '</p>';
-  if (study) rows.sort((a, b) => dir * ((a.s ? SORTS[key](a.s) : -1) - (b.s ? SORTS[key](b.s) : -1)));
-  const head = (k, label) => {
-    const on = key === k;
-    return '<th scope="col" class="num" aria-sort="' + (on ? (dir < 0 ? 'descending' : 'ascending') : 'none') + '">' +
-      '<button type="button" class="pod-sort' + (on ? ' on' : '') + '" data-podsort="' + k + '">' + esc(label) +
-      (on ? ' <span aria-hidden="true">' + (dir < 0 ? '▼' : '▲') + '</span>' : '') + '</button></th>';
-  };
-  const ref = (label, m) => '<tr class="pod-ref"><th scope="row">' + esc(label) + '</th><td></td><td></td>' +
-    ['points', 'power', null, 'salt_total', 'synergy_coverage', 'price'].map(k => {
-      const v = k && m[k];
-      return '<td class="mono num">' + (typeof v !== 'number' ? '' : k === 'price' ? '€' + Math.round(v) : k === 'synergy_coverage' ? Math.round(v) + '%' : k === 'points' ? v : v.toFixed(1)) + '</td>';
-    }).join('') + '<td></td></tr>';
-  return '<div class="tbl-scroll pod-scroll"><table class="pod-table"><thead><tr><th scope="col">' + esc(t.tmDeck) + '</th><th scope="col" class="num">' + esc(t.podRankT) + '</th><th scope="col">' + esc(t.tierWord) + '</th>' +
-    head('points', t.pts) + head('power', t.pfPractical) + head('bracket', t.brTileN) + head('salt', t.pfSalt) + head('synergy', t.pfSyn) + head('price', t.price) +
-    '<td></td></tr></thead><tbody>' + rows.map(({ d, s }) => rowFor(d, s, ranks.get(d.id), t)).join('') +
-    (study ? ref(t.pfRef_precon, study.medians.precon) + ref(t.pfRef_cedh, study.medians.cedh) : '') +
-    '</tbody></table></div>' + (study ? '<p class="note-sm">' + esc(t.podStudyNote) + '</p>' : '') + rankNote;
+// The #join= link. true: joined; false: the code is no good; null: sent to sign in and back.
+export async function joinPod(code) {
+  const res = await api(API + 'pods/join', 'POST', { code });
+  if (res.status === 403) { location.assign('account.html' + location.hash); return null; }
+  if (res.status !== 200) { msg = res.data.errors && res.data.errors.pods === 'limit' ? 'pdErrLimit' : 'pdJoinBad'; return false; }
+  reset(); msg = null;
+  await reload();
+  return true;
+}
+
+// ---- the deck table: one deck at a time, never more than the browser can hold ----
+const figures = (r) => ({ tier: r.evalRes.tier, banned: r.evalRes.violations.some(v => v.id === 'banned'), points: r.evalRes.points,
+  level: r.level, checklist: r.bracket.checklist, salt: r.salt ? r.salt.total : null, price: r.stats.total_price_eur });
+
+async function compute() {
+  const mine = ++run;
+  const todo = state.pod.decks.filter(d => d.list && !rows.has(keyOf(d)));
+  if (!todo.length) { progress = null; return; }
+  progress = { n: 0, m: todo.length };
+  renderPod();
+  try {
+    const deps = await readDeps();
+    for (const d of todo) {
+      if (mine !== run) return;
+      const key = keyOf(d), commanders = d.list.commanders;
+      const r = await readDeck({ entries: d.list.entries, commanders }, deps, commanders.length ? commanders : null);
+      if (mine !== run) return;
+      rows.set(key, figures(r));
+      progress.n++;
+      renderPod();
+    }
+    persistCache();
+  } catch (e) { console.error(e); msg = 'pdErr'; failed = true; }
+  if (mine === run) { progress = null; renderPod(); }
+}
+
+const cell = (v) => '<td class="mono num">' + v + '</td>';
+function deckRow(d, t) {
+  const f = d.list ? rows.get(keyOf(d)) : null;
+  const who = d.mine ? t.pdYou : fill(t.pdOwner, { n: d.owner });
+  const head = '<th scope="row"><span class="pod-name">' + esc(d.name) + '</span><span class="pod-why pod-who">' + esc(who) + '</span></th>';
+  let body;
+  if (!d.list) body = '<td colspan="6" class="note-sm">' + esc(t.pdPrivate) + '</td>';
+  else if (!f) body = '<td colspan="6" class="note-sm">…</td>';
+  else body = '<td><span class="tier-pill ' + tierTone(f.tier) + '">' + esc(t['short_' + f.tier]) + '</span>' +
+      (f.banned ? '<span class="pod-why">' + esc(t.podBanned) + '</span>' : '') + '</td>' +
+    cell(f.points) + cell(f.level.pending ? '—' : esc(f.level.bracket) + ' · ' + f.level.score) + cell(f.level.pending ? '…' : f.checklist) +
+    cell(f.salt === null ? '—' : f.salt.toFixed(1)) + cell('€' + Math.round(f.price));
+  const ask = asking === 'd' + d.id;
+  const out = !(d.mine || state.pod.role === 'admin') ? ''
+    : ask ? '<span class="dk-confirm">' + esc(fill(t.pdRemoveDeckAsk, { n: d.name })) + '</span><button class="btn-ghost-sm btn-danger" data-act="deck-out-yes" data-deck="' + d.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
+    : '<button class="btn-ghost-sm" data-act="deck-out" data-deck="' + d.id + '">' + esc(t.pdRemoveDeck) + '</button>';
+  const acts = (d.list ? '<button class="btn-ghost-sm" data-act="analyze" data-deck="' + d.id + '">' + esc(t.pdAnalyze) + '</button>' +
+    (state.deck ? '<button class="btn-ghost-sm" data-act="compare" data-deck="' + d.id + '">' + esc(t.pdCompare) + '</button>' : '') : '') + out;
+  return '<tr>' + head + body + '<td><div class="pod-actions">' + acts + '</div></td></tr>';
+}
+
+function deckTable(t) {
+  const med = state.study && state.study.medians;
+  const ref = (label, m) => '<tr class="pod-ref"><th scope="row">' + esc(label) + '</th><td></td>' +
+    cell(Math.round(m.points)) + cell(m.power.toFixed(1)) + cell('') + cell(m.salt_total.toFixed(1)) + cell('€' + Math.round(m.price)) + '<td></td></tr>';
+  const th = (label, cls) => '<th scope="col"' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(label) + '</th>';
+  const decks = state.pod.decks;
+  return '<div class="tbl-scroll pod-scroll"><table class="pod-table"><thead><tr>' + th(t.tmDeck) + th(t.tierWord) + th(t.pts, 'num') +
+    th(t.pfPractical, 'num') + th(t.brTileN, 'num') + th(t.pfSalt, 'num') + th(t.price, 'num') + '<td></td></tr></thead><tbody>' +
+    decks.map(d => deckRow(d, t)).join('') +
+    (med ? ref(t.pfRef_precon, med.precon) + ref(t.pfRef_cedh, med.cedh) : '') + '</tbody></table></div>' +
+    (progress ? '<p class="note-sm" role="status">' + esc(fill(t.pdCalc, progress)) + '</p>' : '') +
+    (decks.length ? '' : '<p class="note-sm">' + esc(t.pdEmpty) + '</p>') + (med ? '<p class="note-sm">' + esc(t.pdRefNote) + '</p>' : '');
+}
+
+// ---- adding a deck, members, admin ----
+function addHtml(t) {
+  const inPod = new Set(state.pod.decks.map(d => d.id));
+  if (!adding) return '<button class="btn-ghost-sm" data-act="add-open">' + esc(t.pdAdd) + '</button>';
+  const free = adding.decks.filter(d => !inPod.has(d.id));
+  if (!free.length) return '<p class="note-sm">' + esc(t.pdAddNone) + '</p>';
+  return '<form class="dk-form" data-addform><select name="deck" aria-label="' + esc(t.pdAdd) + '">' +
+    free.map(d => '<option value="' + d.id + '">' + esc(d.name) + '</option>').join('') + '</select>' +
+    '<button class="btn-primary">' + esc(t.pdAddGo) + '</button><button type="button" class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button></form>';
+}
+
+function membersHtml(t) {
+  const admin = state.pod.role === 'admin';
+  const ask = (key, text, yes) => '<span class="dk-confirm">' + esc(text) + '</span><button class="btn-ghost-sm btn-danger" data-act="' + yes + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>';
+  const li = state.pod.members.map(m => {
+    let acts = '';
+    if (m.me) acts = asking === 'leave' ? ask(fill(t.pdLeaveAsk, { n: state.pod.name }), 'leave-yes') : '<button class="btn-ghost-sm" data-act="leave">' + esc(t.pdLeave) + '</button>';
+    else if (admin) {
+      acts = (m.role === 'admin' ? '' : '<button class="btn-ghost-sm" data-act="promote" data-user="' + m.id + '">' + esc(t.pdMakeAdmin) + '</button>') +
+        (asking === 'm' + m.id ? ask(fill(t.pdKickAsk, { n: m.name }), 'kick-yes" data-user="' + m.id) : '<button class="btn-ghost-sm" data-act="kick" data-user="' + m.id + '">' + esc(t.pdKick) + '</button>');
+    }
+    return '<li class="pod-member"><span class="pod-mname">' + esc(m.name) + (m.me ? ' <span class="lbl-muted">(' + esc(t.pdYou) + ')</span>' : '') +
+      ' <span class="lbl-muted">' + esc(m.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + '</span></span><span class="dk-actions">' + acts + '</span></li>';
+  }).join('');
+  return '<h3 class="pod-sub">' + esc(t.pdMembers) + '</h3><ul class="pod-members">' + li + '</ul>';
+}
+
+function adminHtml(t) {
+  const p = state.pod;
+  const name = renaming
+    ? '<form class="dk-form" data-renameform><input name="name" value="' + esc(p.name) + '" maxlength="100" required aria-label="' + esc(t.pdRename) + '">' +
+      '<button class="btn-ghost-sm">' + esc(t.pdSave) + '</button><button type="button" class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button></form>'
+    : '<button class="btn-ghost-sm" data-act="rename">' + esc(t.pdRename) + '</button>';
+  return '<h3 class="pod-sub">' + esc(t.pdAdmin) + '</h3><div class="dk-actions">' + name +
+    '<button class="btn-ghost-sm" data-act="rules" aria-expanded="' + editing + '">' + esc(editing ? t.pdCloseRules : t.pdEditRules) + '</button></div>' +
+    (editing ? '<div id="podRules" class="pod-rules"></div>' : '') +
+    '<div class="pod-invite"><span class="lbl-muted">' + esc(t.pdInvite) + '</span><input readonly class="pod-link-in" value="' + esc(inviteLink(p.invite_code)) + '" aria-label="' + esc(t.pdInvite) + '">' +
+    '<div class="dk-actions"><button class="btn-ghost-sm" data-act="copy">' + esc(copied ? t.pdCopied : t.pdCopy) + '</button>' +
+    '<button class="btn-ghost-sm" data-act="regen">' + esc(t.pdRegen) + '</button></div><p class="note-sm">' + esc(t.pdRegenNote) + '</p></div>';
+}
+
+function createHtml(t) {
+  return '<details class="pod-create"' + (state.pod ? '' : ' open') + '><summary>' + esc(t.pdCreate) + '</summary><form class="dk-form" data-createform>' +
+    '<input name="name" maxlength="100" required placeholder="' + esc(t.pdName) + '" aria-label="' + esc(t.pdName) + '">' +
+    '<label class="dk-vis"><span class="lbl-muted">' + esc(t.pdCopyFrom) + '</span><select name="from"><option value="">' + esc(t.pdTemplate) + '</option>' +
+    state.pods.map(p => '<option value="' + p.id + '">' + esc(p.name) + '</option>').join('') + '</select></label>' +
+    '<button class="btn-primary">' + esc(t.pdCreateGo) + '</button></form></details>';
 }
 
 export function renderPod() {
-  const t = T();
+  const t = T(), el = $('podPanel');
   loadStudy();
-  const el = $('podPanel');
-  if (!state.podDecks) {
-    state.podDecks = { status: 'loading', decks: [] };
-    fetch('../data/pod_decks.json')
-      .then(r => { if (!r.ok) throw new Error('pod_decks ' + r.status); return r.json(); })
-      .then(d => { state.podDecks = { status: 'done', decks: d.decks || [] }; })
-      .catch((e) => {
-        // maintainer hint stays in the console; players see t.podErr
-        console.warn('pod deck list failed: data/pod_decks.json (maintained with scripts/pod_decks.py)', e);
-        state.podDecks = { status: 'error', decks: [] };
-      })
-      .then(() => { if (state.tab === 'pod') renderPod(); });
+  const head = '<div class="part-head"><div><h2 class="part-title">' + esc(state.pod ? state.pod.name : t.tabPod) + '</h2><p class="part-sub">' + esc(t.pdIntro) + '</p></div></div>';
+  const note = (k) => '<p class="note-sm">' + esc(t[k]) + '</p>';
+  let body;
+  if (!state.pods) body = note('pdSignInNote') + '<a class="btn-primary dk-login" href="account.html">' + esc(t.sdSignIn) + '</a>';
+  else {
+    if (state.activeId && !state.pod && !loadingDetail && status !== 'error') {
+      loadingDetail = true;
+      loadDetail(state.activeId).then(p => { state.pod = p; status = p ? 'idle' : 'error'; }).finally(() => {
+        loadingDetail = false;
+        if (state.tab === 'pod') renderPod();
+      });
+    }
+    const pick = '<label class="arch-field"><span class="lbl-muted">' + esc(t.pdPicker) + '</span><select id="podSelTab" class="arch-select">' + pickerOptions() + '</select></label>';
+    const flash = msg ? '<p class="note-bad" role="status">' + esc(t[msg]) + '</p>' : '';
+    if (!state.activeId) body = pick + flash + note('pdNoPod') + createHtml(t);
+    else if (!state.pod) body = pick + flash + note(status === 'error' ? 'pdErr' : 'pdLoading');
+    else {
+      const p = state.pod;
+      body = pick + flash + '<p class="note-sm">' + esc(p.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + ' · ' + esc(fill(t.pdCounts, { n: p.members.length, m: p.decks.length })) + '</p>' +
+        '<div class="panel pod-card">' + deckTable(t) + '<div class="dk-actions">' + addHtml(t) + '</div></div>' +
+        '<div class="panel pod-card">' + membersHtml(t) + (p.role === 'admin' ? adminHtml(t) : '') + '</div>' + createHtml(t);
+    }
   }
-  if (!state.podHistory) {
-    state.podHistory = { snapshots: [] };
-    fetch('../data/pod_history.json')
-      .then(r => { if (!r.ok) throw new Error('pod_history ' + r.status); return r.json(); })
-      .then(h => { state.podHistory = h; if (state.tab === 'pod') renderPod(); })
-      .catch(e => console.warn('pod history unavailable', e));
+  el.innerHTML = '<div class="stack-16">' + head + body + '</div>';
+  const host = $('podRules');
+  if (host) {
+    if (!editorEl) {
+      editorEl = document.createElement('div');
+      import('./podrules.js').then(m => m.renderRulesEditor(editorEl, state.pod, onSaved));
+    }
+    host.replaceWith(editorEl);
   }
-  const pd = state.podDecks;
-  const body = pd.status === 'loading' ? '<div class="note-muted">' + t.podLoading + '</div>'
-    : pd.status === 'error' ? '<div class="note-bad">' + t.podErr + '</div>'
-    : !pd.decks.length ? '<div class="note-muted">' + esc(t.podEmpty) + '</div>'
-    : table(pd.decks, t);
-  el.innerHTML = '<div class="stack-16"><div class="part-head"><div><h2 class="part-title">' + t.podT + '</h2>' +
-    '<p class="part-sub">' + esc(t.podHint) + '</p></div></div><div class="panel pod-card">' + body + '</div></div>';
-  for (const b of el.querySelectorAll('[data-podsort]')) b.onclick = () => {
-    const k = b.dataset.podsort;
-    state.podSort = { key: k, dir: state.podSort.key === k ? -state.podSort.dir : -1 };
-    renderPod();
-    // a partial render bypasses renderAll's focus restore
-    const again = el.querySelector('[data-podsort="' + k + '"]');
-    if (again) again.focus({ preventScroll: true });
-  };
-  for (const b of el.querySelectorAll('[data-pod-load]')) b.onclick = () => {
-    const d = pd.decks.find(x => x.id === +b.dataset.podLoad);
-    $('deckText').value = d.decklist;
-    state.error = null; state.tab = 'load';
-    renderAll();
-    analyze();
-  };
-  for (const b of el.querySelectorAll('[data-pod-cmp]')) b.onclick = () => {
-    const d = pd.decks.find(x => x.id === +b.dataset.podCmp);
-    state.tableTexts = [deckToText(state.deck), d.decklist, '', ''];
-    state.tableOpen = true; state.tableResults = null; state.tab = 'load';
-    renderAll();
-    runTableMode();
-  };
+  const stale = state.pod && !progress && !failed && state.pod.decks.some(d => d.list && !rows.has(keyOf(d)));
+  if (stale) compute();
+  el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange;
 }
+
+function onSaved(pod) {
+  state.pod = pod; editing = false; editorEl = null;
+  applyRules();
+  renderAll();
+ 
+}
+
+// ---- actions ----
+async function act(method, path, body, ok) {
+  const res = await api(API + path, method, body);
+  const errs = res.data.errors || {};
+  if (res.status !== ok) {
+    msg = errs.decks === 'limit' || errs.pods === 'limit' ? 'pdErrLimit' : errs.role === 'last_admin' ? 'pdErrLastAdmin' : 'pdErr';
+    renderPod(); return null;
+  }
+  msg = null;
+  return res;
+}
+const here = (path) => 'pods/' + state.pod.id + (path ? '/' + path : '');
+
+async function refresh() { asking = null; adding = null; renaming = false; await reload(); renderAll(); }
+
+function openDeck(entry) {
+  const list = entry.list, text = deckToText(list);
+  $('deckText').value = text;
+  state.arch = 'auto'; state.error = null; state.restoring = false;
+  state.cmdPick = list.commanders.length ? { key: PodEngine.deckFingerprint(PodEngine.parseDecklist(text).entries), names: list.commanders } : null;
+  state.openDeck = entry.mine ? { id: entry.id, name: entry.name, commanders: list.commanders } : null;
+  analyze();
+}
+
+async function onClick(e) {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.tagName === 'SELECT') return;
+  const a = b.dataset.act, entry = state.pod && state.pod.decks.find(d => d.id === Number(b.dataset.deck)), user = Number(b.dataset.user);
+  if (a === 'cancel') { asking = null; adding = null; renaming = false; return renderPod(); }
+  if (a === 'analyze') return openDeck(entry);
+  if (a === 'compare') {
+    state.tableTexts = [deckToText(state.deck), deckToText(entry.list), '', ''];
+    state.tableOpen = true; state.tableResults = null; state.tab = 'load';
+    renderAll(); return runTableMode();
+  }
+  if (a === 'add-open') {
+    const res = await api(API + 'decks');
+    adding = { decks: res.status === 200 ? res.data.decks : [] };
+    if (res.status !== 200) msg = 'pdErr';
+    return renderPod();
+  }
+  if (a === 'deck-out') { asking = 'd' + entry.id; return renderPod(); }
+  if (a === 'deck-out-yes') { if (await act('DELETE', here('decks/' + entry.id), undefined, 204)) refresh(); return; }
+  if (a === 'leave') { asking = 'leave'; return renderPod(); }
+  if (a === 'leave-yes') { if (await act('POST', here('leave'), undefined, 204)) { reset(); await reload(); renderAll(); } return; }
+  if (a === 'kick') { asking = 'm' + user; return renderPod(); }
+  if (a === 'kick-yes') { if (await act('DELETE', here('members/' + user), undefined, 204)) refresh(); return; }
+  if (a === 'promote') { if (await act('POST', here('members/' + user), { role: 'admin' }, 204)) refresh(); return; }
+  if (a === 'rename') { renaming = true; return renderPod(); }
+  if (a === 'rules') { editing = !editing; editorEl = null; return renderPod(); }
+  if (a === 'regen') { const res = await act('POST', here('invite'), undefined, 200); if (res) { state.pod.invite_code = res.data.invite_code; renderPod(); } return; }
+  if (a === 'copy') {
+    try { await navigator.clipboard.writeText(inviteLink(state.pod.invite_code)); } catch (err) { return; }
+    copied = true; renderPod(); announce(T().pdCopied);
+    setTimeout(() => { copied = false; if (state.tab === 'pod') renderPod(); }, 1600);
+  }
+}
+
+async function onSubmit(e) {
+  e.preventDefault();
+  const f = e.target;
+  if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
+  else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }
+  else if ('createform' in f.dataset) {
+    const res = await act('POST', 'pods', { name: f.name.value.trim(), from: f.from.value ? Number(f.from.value) : null }, 201);
+    if (res) { reset(); await reload(); renderAll(); }
+  }
+}
+
+function onChange(e) { if (e.target.id === 'podSelTab') selectPod(Number(e.target.value) || null); }

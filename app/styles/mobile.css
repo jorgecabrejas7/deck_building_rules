@@ -58,11 +58,13 @@
 
   .pod-card{padding:var(--sp-3) var(--sp-4)}
   .pod-table tbody th{min-width:120px}
+  .pod-table .pod-actions{flex-wrap:wrap}
+  .pod-link-in,.pod-create input,.pod-create select{font-size:16px}
   .modal-backdrop{padding:var(--sp-3) var(--sp-2)}
   .modal-body{padding:var(--sp-6) 20px;border-radius:var(--r-lg)}
 
   /* ≥44px touch targets on real controls */
-  .adv-disclosure summary,.adv-fold>summary,.cmd-chip,.cmd-search,.combo-link,.pod-sort,.tab-btn,.btn-primary,.btn-accent,.btn-accent-sm,.btn-outline,
+  .adv-disclosure summary,.adv-fold>summary,.cmd-chip,.cmd-search,.combo-link,.tab-btn,.btn-primary,.btn-accent,.btn-accent-sm,.btn-outline,
   .btn-outline-accent,.btn-ghost-sm,.chip-dashed,.cf-btn,.link-btn,
   .comp-clear,.pill-clear,.btn-build,.seg-toggle button,.seg-toggle-sm button,
   .modal-close,.price-pill,.arch-field{min-height:44px}

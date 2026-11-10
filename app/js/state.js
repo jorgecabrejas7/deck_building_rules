@@ -67,7 +67,9 @@ export const state = {
   fetchSt: 'idle', fi: {done:0,total:0,card:''}, copied: false, busy: false, error: null,
   hand: null, combosData: null, tableOpen: false, tableTexts: ['', '', '', ''], tableResults: null, tableBusy: false,
   tipsCache: null,   // {key, html} — suggestions fetched per analysis+archetype
-  podDecks: null,    // {status, decks} — lazy-loaded from data/pod_decks.json
+  pods: null,        // the player's pods (summaries), null when signed out or offline
+  activeId: null,    // the active pod's id; its full detail loads when the Pod tab opens
+  pod: null,         // the active pod, in full: members, decks and their lists
   landDenial: null,  // data/land_denial.json, which of Spellbook's flags really are mass land denial
   precons: null,     // data/precons.json, to recognise a stock precon
   saltDb: null,      // data/salt.json, loaded with the combo database
@@ -75,8 +77,6 @@ export const state = {
   synergyData: null, // {key, table} for the current commander(s)
   averageData: null, // {key, loading, failed, average} EDHREC's average deck for them
   study: null,       // data/deck_study.json: reference medians and the pod table
-  podHistory: null,  // data/pod_history.json: dated snapshots behind the pod's ranking
-  podSort: { key: 'power', dir: -1 },
   cmdOpen: false,   // the commander picker stays folded until asked for
   comboFilter: 'all', comboAll: false, // bracket report: combo list filter + show-all
   near: null,        // {key, status, groups, all}: combos one card away, for this deck and commander

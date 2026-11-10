@@ -1,10 +1,10 @@
 import * as PodEngine from '../engine/index.js';
-import { state, cardCache, persistCache, saveSession } from '../state.js';
 import { RULES } from '../rules.js';
+import { state, cardCache, persistCache, saveSession } from '../state.js';
 import { T, fill } from '../i18n.js';
 import { ARCH, DIAL_META, CATS } from './constants.js';
 import { $, esc, eur, tierTone } from './helpers.js';
-import { analyze, getCardTags, getComboDb, getLandDenial, getPrecons, getSaltDb } from '../pipeline.js';
+import { analyze, readDeck, readDeps } from '../pipeline.js';
 import { renderInput } from './input.js';
 import { slotsFor } from './comp.js';
 import { bindSugPopovers } from './popover.js';
@@ -169,19 +169,9 @@ export async function runTableMode() {
   state.tableBusy = true; renderTableMode();
   const results = [];
   try {
-    let comboDb = null;
-    try { comboDb = await getComboDb(); } catch (e) { /* combos stay unchecked */ }
-    const saltDb = await getSaltDb().catch(() => null);
-    const cardTags = await getCardTags().catch(() => null);
-    const landDenial = await getLandDenial().catch(() => null);
-    const precons = await getPrecons().catch(() => null);
+    const deps = await readDeps();
     for (const text of texts) {
-      const parsed = PodEngine.parseDecklist(text);
-      const names = [...new Set(parsed.entries.map(e => e.name))];
-      const { notFound } = await PodEngine.fetchCards(names, cardCache, () => {});
-      const r = PodEngine.analyzeDeck({ parsed, db: cardCache, rules: RULES,
-        combos: comboDb ? PodEngine.matchCombos(parsed.entries.map(e => e.name), comboDb) : null,
-        comboDb, landDenial, saltDb, cardTags, precons, notFound });
+      const r = await readDeck(PodEngine.parseDecklist(text), deps, null);
       const { stats, evalRes: ev, cardsInfo, detected: det, commander: cmd, bracket, power, level, salt } = r;
       const a = ARCH.find(x => x.k === det.key) || ARCH[ARCH.length - 1];
       results.push({ name: cmd ? cmd.split(' // ')[0] : T().tmDeck + ' ' + (results.length + 1),

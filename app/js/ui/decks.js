@@ -69,7 +69,7 @@ async function openSaved(id) {
 // A #deck= link: the latest version of someone else's deck, never saved into the visitor's session. false = unreadable.
 export async function openLinked(token) {
   const res = await api(API + 'decks/link/' + encodeURIComponent(token));
-  if (res.status === 403) { location.assign('account.html'); return true; } // only signed-in players read links
+  if (res.status === 403) { location.assign('account.html' + location.hash); return true; } // only signed-in players read links
   if (res.status !== 200) return false;
   fillDeck(res.data.version);
   state.openDeck = null; // someone else's deck: saving it makes the visitor's own copy
@@ -156,7 +156,7 @@ const changes = (v, older, t) => {
 };
 
 function cardHtml(d, t) {
-  const n = d.version_count, vis = d.visibility === 'link' ? 'link' : 'private';
+  const n = d.version_count, vis = d.visibility;
   const head = renameId === d.id
     ? '<form class="dk-form" data-rename="' + d.id + '"><input name="name" value="' + esc(d.name) + '" maxlength="100" required aria-label="' + esc(t.sdRename) + '">' +
       '<button class="btn-ghost-sm">' + esc(t.sdRenameSave) + '</button><button type="button" class="btn-ghost-sm" data-act="cancel">' + esc(t.sdCancel) + '</button></form>'
@@ -170,7 +170,7 @@ function cardHtml(d, t) {
     '<div class="dk-actions"><button class="btn-primary" data-act="open">' + esc(t.sdOpen) + '</button>' +
     '<button class="btn-ghost-sm" data-act="rename">' + esc(t.sdRename) + '</button>' +
     '<button class="btn-ghost-sm" data-act="history" aria-expanded="' + !!open + '">' + esc(open ? t.sdHideHistory : t.sdHistory) + '</button></div>' +
-    '<div class="dk-actions"><label class="dk-vis"><span class="lbl-muted">' + esc(t.sdVis) + '</span><select data-act="vis"><option value="private"' + (vis === 'private' ? ' selected' : '') + '>' + esc(t.sdVisPrivate) + '</option><option value="link"' + (vis === 'link' ? ' selected' : '') + '>' + esc(t.sdVisLink) + '</option></select></label>' +
+    '<div class="dk-actions"><label class="dk-vis"><span class="lbl-muted">' + esc(t.sdVis) + '</span><select data-act="vis"><option value="private"' + (vis === 'private' ? ' selected' : '') + '>' + esc(t.sdVisPrivate) + '</option><option value="pods"' + (vis === 'pods' ? ' selected' : '') + '>' + esc(t.sdVisPods) + '</option><option value="link"' + (vis === 'link' ? ' selected' : '') + '>' + esc(t.sdVisLink) + '</option></select></label>' +
     (vis === 'link' ? '<button class="btn-ghost-sm" data-act="copy">' + esc(copiedId === d.id ? t.copied : t.sdCopyLink) + '</button>' : '') + '</div>' +
     (open ? '<ol class="dk-history">' + hist.versions.map((v, i) => '<li><b>' + esc(fmtDate(v.created_at)) + '</b>' + (v.note ? ' · ' + esc(v.note) : '') + changes(v, hist.versions[i + 1], t) + '</li>').join('') + '</ol>' : '') +
     '<div class="dk-actions">' + del + '</div></article>';

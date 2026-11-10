@@ -146,14 +146,7 @@ verdictGoTips:'Ver cartas concretas ↓',verdictMismatch:'El arquetipo elegido n
 verdictLeadT1:'Tier 1 limpio',verdictLeadT2:'Tier 2 legal',verdictReady:'listo para la mesa',
 verdictPolish:'Pulir la composición',verdictMore:'más',
 capWord:'tope',cutCompare:'la de menos sinergia que te queda',
-tabPod:'Pod',podT:'Mazos del pod',
-podHint:'Los mazos de referencia del pod. Analiza cualquiera o compáralo con tu mazo actual.',
-podEmpty:'Todavía no hay mazos del pod guardados.',
-podRankT:'Puesto',podRankNew:'nuevo',podMoveUp:'Sube {n}',podMoveDown:'Baja {n}',podMoveSame:'Sin cambio',
-podRankNote:'Puesto por poder; los empates lo comparten. Cambio desde el estudio del {date}: un mazo nuevo no mueve a los demás.',
-podRankFirst:'Puesto por poder; los empates lo comparten. Solo hay un estudio, del {date}: el cambio aparecerá con el siguiente.',
-podErr:'No se pudo cargar la lista de mazos del pod — inténtalo más tarde.',podLoad:'Analizar',podCompare:'Comparar con mi mazo',
-podToTable:'+ Mesa',podBy:'de',podAdded:'añadido',podLoading:'Cargando mazos del pod…',
+tabPod:'Pod',
 partPodT:'Nivel del pod',partPodX:'El presupuesto de puntos del pod: Tier 1 = precon de caja, Tier 2 = algo por encima. Esto es lo único que decide quién entra.',
 partBrT:'Brackets de Wizards',partBrX:'La lista oficial, aparte de la del pod: en qué bracket encaja este mazo y por qué.',
 partPfT:'Nivel de poder',partPfX:'Una lectura aparte, en la escala de brackets: cuánta fuerza tiene el mazo y de dónde sale.',
@@ -186,7 +179,6 @@ lvl_S:'Nivel cEDH',lvl_A:'Alto',lvl_B:'Medio',lvl_C:'Bajo',lvl_F:'Mínimo',lvlNo
 gfAside:'Comandante en turno %v',gfManaT:'Maná disponible por turno',gfTurn:'Turno',pfManaAside:'%v de 100',pfShort:'Pocas fuentes',
 brReadLabel:'Bracket de Wizards',brLevelTag:'Esto por sí solo lo sitúa en Bracket %v',
 comboSub:'%i infinitos · %w ganan la partida · %d de 2 piezas',comboWhyFast:'La línea más barata pide %v de maná: %c.',comboWhyAnchor:'La pieza que más se repite es %c, en %v combos.',
-podStudyNote:'Con cada carta a su impresión más barata. Las dos últimas filas son medianas de referencia.',podLabel_in:'dentro',podLabel_out:'fuera',
 brTileN:'WIZARDS',
 brReadWotc:'Lista de Wizards',brReadSb:'Estimación de Spellbook',brIllegal:'Ilegal',
 brName2:'Core o menos',brName3:'Upgraded',brName4:'Optimized o más',
@@ -395,14 +387,7 @@ verdictGoTips:'See concrete cards ↓',verdictMismatch:'The selected archetype d
 verdictLeadT1:'Clean Tier 1',verdictLeadT2:'Tier 2 legal',verdictReady:'table-ready',
 verdictPolish:'Polish the composition',verdictMore:'more',
 capWord:'cap',cutCompare:'your lowest-synergy card left',
-tabPod:'Pod',podT:'Pod decks',
-podHint:'The pod’s reference decks. Analyze any of them or compare against your current deck.',
-podEmpty:'No pod decks stored yet.',
-podRankT:'Rank',podRankNew:'new',podMoveUp:'Up {n}',podMoveDown:'Down {n}',podMoveSame:'No change',
-podRankNote:'Ranked by power; ties share a rank. Change since the study of {date}: a new deck moves nobody else.',
-podRankFirst:'Ranked by power; ties share a rank. There is only one study so far, from {date}: change appears with the next one.',
-podErr:'Could not load the pod deck list — try again later.',podLoad:'Analyze',podCompare:'Compare with my deck',
-podToTable:'+ Table',podBy:'by',podAdded:'added',podLoading:'Loading pod decks…',
+tabPod:'Pod',
 partPodT:'Pod level',partPodX:'The pod’s point budget: Tier 1 = a boxed precon, Tier 2 = a little above. This alone decides who is in.',
 partBrT:'Wizards’ brackets',partBrX:'The official list, separate from the pod’s: which bracket this deck fits, and why.',
 partPfT:'Power level',partPfX:'A separate reading on the bracket scale: how strong the deck is, and why.',
@@ -435,7 +420,6 @@ lvl_S:'cEDH level',lvl_A:'High',lvl_B:'Medium',lvl_C:'Low',lvl_F:'Minimal',lvlNo
 gfAside:'Commander on turn %v',gfManaT:'Mana available by turn',gfTurn:'Turn',pfManaAside:'%v of 100',pfShort:'Few sources',
 brReadLabel:'Wizards’ bracket',brLevelTag:'This alone puts it at Bracket %v',
 comboSub:'%i infinite · %w win the game · %d two-piece',comboWhyFast:'The cheapest line needs %v mana: %c.',comboWhyAnchor:'The piece that repeats most is %c, in %v combos.',
-podStudyNote:'With every card at its cheapest printing. The last two rows are reference medians.',podLabel_in:'in',podLabel_out:'out',
 brTileN:'WIZARDS',
 brReadWotc:'Wizards’ checklist',brReadSb:'Spellbook’s estimate',brIllegal:'Illegal',
 brName2:'Core or lower',brName3:'Upgraded',brName4:'Optimized or higher',
@@ -504,7 +488,9 @@ s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:
 // Feature dictionaries live in their own files; a key may be defined once.
 import account from './i18n/account.js';
 import decks from './i18n/decks.js';
-for (const dict of [account, decks]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
+import pods from './i18n/pods.js';
+import podrules from './i18n/podrules.js';
+for (const dict of [account, decks, pods, podrules]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
   if (k in L[lang]) throw new Error('i18n key clash: ' + k);
   L[lang][k] = v;
 }
