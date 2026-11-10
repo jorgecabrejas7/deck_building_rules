@@ -193,6 +193,8 @@ function adminHtml(t) {
 }
 
 // ---- games (F5): invite another member, open or end my games ----
+// opening the Pod tab reloads them, so an invitation from another member shows up
+export function podOpened() { games = null; }
 async function loadGames() {
   const id = state.pod.id;
   games = { podId: id, list: [], busy: true };

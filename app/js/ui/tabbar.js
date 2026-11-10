@@ -3,6 +3,7 @@ import { T } from '../i18n.js';
 import { $, esc } from './helpers.js';
 import { startCheapest } from '../pipeline.js';
 import { renderAll } from '../main.js';
+import { podOpened } from './pod.js';
 
 const TAB_LABEL = { load: 'tabLoad', decks: 'tabDecks', informe: 'tabInforme', pod: 'tabPod', guide: 'tabGuide' };
 
@@ -20,6 +21,7 @@ export function renderTabbar() {
       if (b.disabled) return;
       const changed = state.tab !== b.dataset.tab;
       state.tab = b.dataset.tab;
+      if (changed && state.tab === 'pod') podOpened();
       renderAll();
       // a tab change is a new page: don't land mid-way down an unrelated panel
       if (changed) $('stickySentinel').scrollIntoView();

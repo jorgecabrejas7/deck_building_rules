@@ -15,7 +15,7 @@ from pods.models import Pod, PodMember
 LIST = {"entries": [{"name": "Sol Ring", "quantity": 1}], "commanders": ["Atraxa"]}
 
 # Relies on table.py: new_game accepts {seat: {"entries","commanders"}}; apply(state, seat, {"type":"life",
-# "seat":1|2,"delta":int}) changes state or raises ActionError("invalid") for a bad delta and ("stale") for a bad seat;
+# "seat":1|2,"delta":int}) changes state or raises ActionError("invalid") for a bad delta, and ("stale") for an unknown card id;
 # view(state, seat) returns a dict with "players" keyed by str seat.
 LIFE = {"type": "life", "seat": 1, "delta": -1}
 
@@ -88,7 +88,8 @@ def test_lobby_flow(setup):
     assert Game.objects.get(pk=gid).state == {}
     r = post(b, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(b.user).id})
     assert r.json()["status"] == "active"
-    assert Game.objects.get(pk=gid).state["life"] == {"1": 40, "2": 40}
+    players = Game.objects.get(pk=gid).state["players"]
+    assert players["1"]["life"] == players["2"]["life"] == 40
     assert post(a, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(a.user).id}).status_code == 400
 
 
@@ -178,7 +179,7 @@ def test_errors_and_rate_limit(setup):
         await c.receive_json_from()
         await c.send_to(act(1, {"type": "life", "seat": 1, "delta": "x"}))
         assert await c.receive_json_from() == {"type": "error", "ack": 1, "code": "invalid"}
-        await c.send_to(act(2, {"type": "life", "seat": 7, "delta": 1}))
+        await c.send_to(act(2, {"type": "tap", "cards": ["000000000000"], "tapped": True}))
         assert await c.receive_json_from() == {"type": "error", "ack": 2, "code": "stale"}
         await c.send_to("not json")
         assert (await c.receive_json_from())["code"] == "invalid"
