@@ -1,9 +1,9 @@
 {
- "salt_updated": "2026-11-05",
- "combos_updated": "2026-11-06T14:12:37.194384+00:00",
+ "salt_updated": "2026-11-09",
+ "combos_updated": "2026-11-09T12:12:19.041985+00:00",
  "labelled": 0,
  "groups": {
-  "precon": 198,
+  "precon": 206,
   "podIn": 10,
   "podOut": 14,
   "cedh": 9
@@ -15,7 +15,7 @@
    "pillar_synergy": 0,
    "pillar_interaction": 24,
    "pillar_wins": 4,
-   "salt_total": 22.75,
+   "salt_total": 22.55,
    "salt_average": 0.3,
    "synergy_coverage": 97,
    "synergy_average": 32,
@@ -24,7 +24,7 @@
    "manabase_quality": 83,
    "fetches": 2,
    "lands": 38,
-   "avg_mv": 3.69,
+   "avg_mv": 3.68,
    "cheap_plays": 17,
    "ramp": 12,
    "fast_mana": 5,
@@ -43,7 +43,7 @@
    "mana_turn_4": 4.6,
    "two_card_ending": 0,
    "game_changers": 0,
-   "price": 71.31,
+   "price": 72.28,
    "points": 0
   },
   "pod": {
@@ -142,7 +142,7 @@
     "podOut": 22.5,
     "cedh": 100
    },
-   "precon_vs_pod": 0.76,
+   "precon_vs_pod": 0.77,
    "podIn_vs_podOut": 0.75,
    "pod_vs_cedh": 1
   },
@@ -154,7 +154,7 @@
     "podOut": 0,
     "cedh": 0
    },
-   "precon_vs_pod": 0.52,
+   "precon_vs_pod": 0.53,
    "podIn_vs_podOut": 0.45,
    "pod_vs_cedh": 0.43
   },
@@ -166,7 +166,7 @@
     "podOut": 34.5,
     "cedh": 90
    },
-   "precon_vs_pod": 0.72,
+   "precon_vs_pod": 0.73,
    "podIn_vs_podOut": 0.42,
    "pod_vs_cedh": 0.89
   },
@@ -178,19 +178,19 @@
     "podOut": 17.5,
     "cedh": 87
    },
-   "precon_vs_pod": 0.58,
+   "precon_vs_pod": 0.57,
    "podIn_vs_podOut": 0.72,
    "pod_vs_cedh": 0.96
   },
   {
    "key": "salt_total",
    "medians": {
-    "precon": 22.75,
+    "precon": 22.55,
     "podIn": 24.1,
     "podOut": 29.6,
     "cedh": 87.4
    },
-   "precon_vs_pod": 0.76,
+   "precon_vs_pod": 0.77,
    "podIn_vs_podOut": 0.74,
    "pod_vs_cedh": 1
   },
@@ -214,7 +214,7 @@
     "podOut": 72.5,
     "cedh": 78
    },
-   "precon_vs_pod": 0.34,
+   "precon_vs_pod": 0.33,
    "podIn_vs_podOut": 0.21,
    "pod_vs_cedh": 0.5
   },
@@ -226,7 +226,7 @@
     "podOut": 18.5,
     "cedh": 18
    },
-   "precon_vs_pod": 0.38,
+   "precon_vs_pod": 0.37,
    "podIn_vs_podOut": 0.27,
    "pod_vs_cedh": 0.45
   },
@@ -250,7 +250,7 @@
     "podOut": 100,
     "cedh": 100
    },
-   "precon_vs_pod": 0.51,
+   "precon_vs_pod": 0.5,
    "podIn_vs_podOut": 0.5,
    "pod_vs_cedh": 0.5
   },
@@ -274,7 +274,7 @@
     "podOut": 1.5,
     "cedh": 6
    },
-   "precon_vs_pod": 0.38,
+   "precon_vs_pod": 0.37,
    "podIn_vs_podOut": 0.54,
    "pod_vs_cedh": 0.84
   },
@@ -293,7 +293,7 @@
   {
    "key": "avg_mv",
    "medians": {
-    "precon": 3.69,
+    "precon": 3.68,
     "podIn": 2.78,
     "podOut": 3.01,
     "cedh": 1.96
@@ -310,7 +310,7 @@
     "podOut": 24.5,
     "cedh": 52
    },
-   "precon_vs_pod": 0.81,
+   "precon_vs_pod": 0.82,
    "podIn_vs_podOut": 0.39,
    "pod_vs_cedh": 0.97
   },
@@ -334,7 +334,7 @@
     "podOut": 6,
     "cedh": 12
    },
-   "precon_vs_pod": 0.65,
+   "precon_vs_pod": 0.64,
    "podIn_vs_podOut": 0.63,
    "pod_vs_cedh": 0.86
   },
@@ -346,7 +346,7 @@
     "podOut": 13.5,
     "cedh": 11
    },
-   "precon_vs_pod": 0.51,
+   "precon_vs_pod": 0.5,
    "podIn_vs_podOut": 0.58,
    "pod_vs_cedh": 0.29
   },
@@ -358,7 +358,7 @@
     "podOut": 1,
     "cedh": 19
    },
-   "precon_vs_pod": 0.62,
+   "precon_vs_pod": 0.61,
    "podIn_vs_podOut": 0.74,
    "pod_vs_cedh": 0.99
   },
@@ -382,7 +382,7 @@
     "podOut": 2,
     "cedh": 10
    },
-   "precon_vs_pod": 0.71,
+   "precon_vs_pod": 0.7,
    "podIn_vs_podOut": 0.49,
    "pod_vs_cedh": 0.89
   },
@@ -394,7 +394,7 @@
     "podOut": 7.5,
     "cedh": 7
    },
-   "precon_vs_pod": 0.38,
+   "precon_vs_pod": 0.39,
    "podIn_vs_podOut": 0.32,
    "pod_vs_cedh": 0.33
   },
@@ -406,7 +406,7 @@
     "podOut": 3,
     "cedh": 0
    },
-   "precon_vs_pod": 0.32,
+   "precon_vs_pod": 0.33,
    "podIn_vs_podOut": 0.61,
    "pod_vs_cedh": 0.13
   },
@@ -430,7 +430,7 @@
     "podOut": 1.5,
     "cedh": 12
    },
-   "precon_vs_pod": 0.53,
+   "precon_vs_pod": 0.54,
    "podIn_vs_podOut": 0.56,
    "pod_vs_cedh": 0.95
   },
@@ -442,7 +442,7 @@
     "podOut": 0,
     "cedh": 6
    },
-   "precon_vs_pod": 0.56,
+   "precon_vs_pod": 0.57,
    "podIn_vs_podOut": 0.63,
    "pod_vs_cedh": 0.88
   },
@@ -478,7 +478,7 @@
     "podOut": 4.5,
     "cedh": 3
    },
-   "precon_vs_pod": 0.5,
+   "precon_vs_pod": 0.49,
    "podIn_vs_podOut": 0.69,
    "pod_vs_cedh": 0.33
   },
@@ -521,7 +521,7 @@
   {
    "key": "price",
    "medians": {
-    "precon": 71.31,
+    "precon": 72.28,
     "podIn": 108.05,
     "podOut": 214.6,
     "cedh": 1788.39
@@ -11764,6 +11764,450 @@
    }
   },
   {
+   "id": "precon:TRC:Federation Fleet",
+   "name": "Federation Fleet",
+   "group": "precon",
+   "commanders": [
+    "Jean-Luc Picard, Luminary"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 0,
+   "breakdown": {},
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 69.05,
+   "gc": 0,
+   "salt": {
+    "total": 11.7,
+    "average": 0.26,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Supreme Verdict",
+      "salt": 0.7
+     },
+     {
+      "name": "Chronomantic Escape",
+      "salt": 0.61
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 33,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 2.3,
+    "base": 2.3,
+    "raw": 7.5,
+    "pillars": {
+     "wins": 0,
+     "interaction": 30,
+     "salt": 0,
+     "synergy": 0
+    }
+   }
+  },
+  {
+   "id": "precon:TRC:Federation Fleet Collector's Edition",
+   "name": "Federation Fleet Collector's Edition",
+   "group": "precon",
+   "commanders": [
+    "Jean-Luc Picard, Luminary"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 0,
+   "breakdown": {},
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 69.05,
+   "gc": 0,
+   "salt": {
+    "total": 11.7,
+    "average": 0.26,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Supreme Verdict",
+      "salt": 0.7
+     },
+     {
+      "name": "Chronomantic Escape",
+      "salt": 0.61
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 33,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 2.3,
+    "base": 2.3,
+    "raw": 7.5,
+    "pillars": {
+     "wins": 0,
+     "interaction": 30,
+     "salt": 0,
+     "synergy": 0
+    }
+   }
+  },
+  {
+   "id": "precon:TRC:Klingon Fury",
+   "name": "Klingon Fury",
+   "group": "precon",
+   "commanders": [
+    "Worf, Defiant Commander"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 0,
+   "breakdown": {},
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 89.77,
+   "gc": 0,
+   "salt": {
+    "total": 13.9,
+    "average": 0.3,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Ruinous Ultimatum",
+      "salt": 1.02
+     },
+     {
+      "name": "Disrupt Decorum",
+      "salt": 0.62
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 51,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 2.5,
+    "base": 2.5,
+    "raw": 9.2,
+    "pillars": {
+     "wins": 13,
+     "interaction": 16,
+     "salt": 0,
+     "synergy": 0
+    }
+   }
+  },
+  {
+   "id": "precon:TRC:Klingon Fury Collector's Edition",
+   "name": "Klingon Fury Collector's Edition",
+   "group": "precon",
+   "commanders": [
+    "Worf, Defiant Commander"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 0,
+   "breakdown": {},
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 89.77,
+   "gc": 0,
+   "salt": {
+    "total": 13.9,
+    "average": 0.3,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Ruinous Ultimatum",
+      "salt": 1.02
+     },
+     {
+      "name": "Disrupt Decorum",
+      "salt": 0.62
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 51,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 2.5,
+    "base": 2.5,
+    "raw": 9.2,
+    "pillars": {
+     "wins": 13,
+     "interaction": 16,
+     "salt": 0,
+     "synergy": 0
+    }
+   }
+  },
+  {
+   "id": "precon:TRC:Landing Party",
+   "name": "Landing Party",
+   "group": "precon",
+   "commanders": [
+    "Commander Spock"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 2,
+   "breakdown": {
+    "price_1_5": 2
+   },
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 100.26,
+   "gc": 0,
+   "salt": {
+    "total": 15.4,
+    "average": 0.3,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Scute Swarm",
+      "salt": 1.31
+     },
+     {
+      "name": "Heroic Intervention",
+      "salt": 0.9
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 32,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 2,
+    "base": 2,
+    "raw": 4.7,
+    "pillars": {
+     "wins": 0,
+     "interaction": 18,
+     "salt": 1,
+     "synergy": 0
+    }
+   }
+  },
+  {
+   "id": "precon:TRC:Landing Party Collector's Edition",
+   "name": "Landing Party Collector's Edition",
+   "group": "precon",
+   "commanders": [
+    "Commander Spock"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 2,
+   "breakdown": {
+    "price_1_5": 2
+   },
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 100.26,
+   "gc": 0,
+   "salt": {
+    "total": 15.4,
+    "average": 0.3,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Scute Swarm",
+      "salt": 1.31
+     },
+     {
+      "name": "Heroic Intervention",
+      "salt": 0.9
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 32,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 2,
+    "base": 2,
+    "raw": 4.7,
+    "pillars": {
+     "wins": 0,
+     "interaction": 18,
+     "salt": 1,
+     "synergy": 0
+    }
+   }
+  },
+  {
+   "id": "precon:TRC:We Are the Borg",
+   "name": "We Are the Borg",
+   "group": "precon",
+   "commanders": [
+    "The Borg Queen"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 0,
+   "breakdown": {},
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 108.01,
+   "gc": 0,
+   "salt": {
+    "total": 14,
+    "average": 0.3,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Unwinding Clock",
+      "salt": 1.18
+     },
+     {
+      "name": "Toxic Deluge",
+      "salt": 0.87
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 43,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 3.1,
+    "base": 3.1,
+    "raw": 15.3,
+    "pillars": {
+     "wins": 30,
+     "interaction": 13,
+     "salt": 0,
+     "synergy": 0
+    }
+   }
+  },
+  {
+   "id": "precon:TRC:We Are the Borg Collector's Edition",
+   "name": "We Are the Borg Collector's Edition",
+   "group": "precon",
+   "commanders": [
+    "The Borg Queen"
+   ],
+   "cards": 100,
+   "missing": 0,
+   "tier": "tier1",
+   "practicalBracket": "2",
+   "powerBracket": "2",
+   "floor": null,
+   "points": 0,
+   "breakdown": {},
+   "violations": [],
+   "verdict": "in",
+   "label": null,
+   "price": 108.01,
+   "gc": 0,
+   "salt": {
+    "total": 14,
+    "average": 0.3,
+    "top": [
+     {
+      "name": "Sol Ring",
+      "salt": 1.46
+     },
+     {
+      "name": "Unwinding Clock",
+      "salt": 1.18
+     },
+     {
+      "name": "Toxic Deluge",
+      "salt": 0.87
+     }
+    ]
+   },
+   "synergy": {
+    "coverage": 100,
+    "average": 43,
+    "offPlan": 0
+   },
+   "power": {
+    "score": 3.1,
+    "base": 3.1,
+    "raw": 15.3,
+    "pillars": {
+     "wins": 30,
+     "interaction": 13,
+     "salt": 0,
+     "synergy": 0
+    }
+   }
+  },
+  {
    "id": "pod:1",
    "name": "Tidus, Yuna's Guardian",
    "group": "pod",
@@ -17440,7 +17884,7 @@
      "removal": 6,
      "wipes": 0,
      "protection": 1,
-     "graveHate": 4,
+     "graveHate": 3,
      "stax": 12,
      "free": 6,
      "cheapAnswers": 11,
