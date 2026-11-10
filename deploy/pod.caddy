@@ -1,4 +1,5 @@
-# Pod Deck Checker at /pod/ (deck_building_rules repo). Public: the checker runs in the player's browser.
+# Pod Deck Checker at /pod/ (deck_building_rules repo). The checker runs in the player's browser; while the site is
+# private in development every path except the account page and what it needs asks the Django backend first.
 # Installed in /etc/caddy/services/, which the site block of /etc/caddy/Caddyfile imports.
 # The app reads ../data and ../rules, so a release keeps those folders side by side and the page lives at /pod/app/.
 
@@ -6,6 +7,14 @@ redir /pod /pod/app/ 308
 redir /pod/ /pod/app/ 308
 
 handle_path /pod/* {
+	# GATE (step 2; delete this block for the backend-only step 1). forward_auth sorts before handle, so it runs
+	# first: a 2xx from /pod/api/gate lets the request through, anything else (its 302 to the account page) is the answer.
+	# Open paths, identical to OPEN_PATHS in server/accounts/views.py. The Moxfield and Archidekt proxies stay gated.
+	@gated expression `!path('/app/account.html', '/app/js/account.js', '/app/js/i18n.js', '/app/js/i18n/*', '/app/js/state.js', '/app/js/engine/history.js', '/app/js/engine/decks.js', '/app/styles/*') && !(path('/api/*') && !path('/api/moxfield/*') && !path('/api/archidekt/*'))`
+	forward_auth @gated 127.0.0.1:8770 {
+		uri /pod/api/gate
+	}
+
 	# These sites refuse browsers, so the server asks for one public deck at a time. The patterns only accept
 	# a deck id: this can never reach anything else. The player's address and cookies stay here.
 	@moxfield {
@@ -36,8 +45,10 @@ handle_path /pod/* {
 			header_up -X-Forwarded-For
 		}
 	}
+	# the Django backend sees the full /pod/api/... path
 	handle /api/* {
-		respond 404
+		rewrite * /pod{uri}
+		reverse_proxy 127.0.0.1:8770
 	}
 	handle {
 		root * /srv/pod-checker/site

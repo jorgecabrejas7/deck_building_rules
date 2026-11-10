@@ -4,7 +4,7 @@ Every feature worth considering for the checker, from commandersalt.com (CS), de
 
 **Long-term goal (2026-11-07):** Jorge plans to monetize this as a public website. That is not the current work: for now, prepare the architecture so going public is easy. Nothing is decided yet about how it earns money. The next steps are an architecture review, then monetization research. Until they produce decisions, the standing decisions below hold, and any that block a public launch get reopened there rather than quietly changed.
 
-**Standing decisions:** a static app on Jorge's server, whose only server-side part is a route that fetches one public deck from sites that refuse browsers. No AI for now. Pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Commander Spellbook alone rates each combo, and a two-card line at 6 mana or less a turn is only a tip. The deck reads where its strength puts it, with anything above that bracket listed as worth a look (Spellbook's combo labels, cards that may deny lands, game changers) instead of raising it. Only mass land denial, as sorted by hand in `data/land_denial.json`, sets Bracket 4 on its own. Precons read on strength like any deck: the scale is fitted on all 198 (`data/precons.json`), so 193 land at Bracket 2, and the few above are real exceptions such as Creative Energy. Pages describe a deck rather than judge it: they say which bracket it fits and why, never what to cut to reach another bracket. The way back into the pod stays, in Puntos. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
+**Standing decisions:** a static front end plus one Django backend at `/pod/api/` (F1), both on Jorge's server, plus the route that fetches one public deck from sites that refuse browsers. No AI for now. Pod first, shareable by link. While the site is private in development every page except the account page needs an account, and Jorge approves each one: the pod is small and the data sources' terms are unchecked. At public launch the analyzer opens without an account (the gate comes off), because Wizards' Fan Content Policy forbids requiring registration to access fan content; accounts then only unlock saved decks and pods. Many pods are coming (F3), so nothing may assume there is only one. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Commander Spellbook alone rates each combo, and a two-card line at 6 mana or less a turn is only a tip. The deck reads where its strength puts it, with anything above that bracket listed as worth a look (Spellbook's combo labels, cards that may deny lands, game changers) instead of raising it. Only mass land denial, as sorted by hand in `data/land_denial.json`, sets Bracket 4 on its own. Precons read on strength like any deck: the scale is fitted on all 198 (`data/precons.json`), so 193 land at Bracket 2, and the few above are real exceptions such as Creative Energy. Pages describe a deck rather than judge it: they say which bracket it fits and why, never what to cut to reach another bracket. The way back into the pod stays, in Puntos. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
 
@@ -87,8 +87,8 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 Written synopsis and mulligan guide · chat assistant with memory · roast · rules Q&A · new-set impact report · plain-English card search.
 
 ### Skip, with reason
-These reasons assume a private pod tool. The monetization research should reopen the accounts and billing lines.
-- Accounts, cloud decks, comments, public visibility, public API: pod-first.
+These reasons assume a private pod tool. The monetization research should reopen the billing lines.
+- Comments, public visibility, public API: pod-first.
 - Credits, subscriptions, billing: nothing to charge for.
 - Collection, binders, wishlist, card scanner, price alerts: need accounts and a camera pipeline, and no one asked.
 - Webcam lobbies, store accounts, event checks, Discord bot: other products.
@@ -100,11 +100,32 @@ The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Carg
 
 Every deck is read by one pure function, `analyzeDeck` in `engine/analyze.js`: the app, table mode, the deck study and the parity test all call it with the rules passed in, so a pod's own rules or a deck being built go through the same code. Synergy is left out because it is an EDHREC fetch; each caller adds it.
 
+## Stack of the backend (F1)
+| Choice | Why |
+|---|---|
+| Django 5.2 LTS, plain views | accounts, admin and sessions come built in; the API is a handful of small views |
+| django-allauth headless, username + password and Google | maintained login, signup, password and Google flows; the front end keeps its own pages |
+| argon2 | the strongest hasher Django ships |
+| SQLite in WAL mode | one small server, one writer at a time is enough, and a backup is a file copy |
+| whitenoise, uvicorn | admin static files without another route, and one process behind Caddy |
+| Rejected: Node, FastAPI, DRF, Postgres | Node or FastAPI would rebuild auth and admin; DRF is weight for a few JSON views; Postgres is a second service nobody needs yet |
+
+## Privacy
+We store the username, email, display name, language and a password hash (or the Google link), and later the user's saved decks and pods. Nothing is sold or shared. A signed-in user can delete the account in the profile page; that removes the account and its data, and never touches the browser's `pdc_*` keys. Backups stay on the server for 14 days. Data requests go by email (the contact address is still a placeholder on the privacy page).
+
+## Building stages
+- **F0:** static analyzer, pod rules, table mode. Done.
+- **F1:** users and the private gate. This one.
+- **F2:** saved decks per user, and a picker of the user's public Archidekt decks.
+- **F3:** pods with their own rules. Jorge's pod is seeded from `rules/pod_rules.json`, then edited in the app; the pod registry (`scripts/pod_decks.py`) is retired.
+- **F4:** deck builder.
+- **F5:** two-player table.
+
 ## Translations
 Every text is in Spanish and English, through `L` / `T()` in `i18n.js`, and placeholders are filled with `fill` from the same file. A new feature keeps its strings in `app/js/i18n/<feature>.js`, merged into `L`. No inline `lang === 'es' ? … : …` in new code. A missing key shows `⟦key⟧` on screen, and `node scripts/test_i18n.js` fails on any gap or any placeholder that differs between the two languages.
 
 ## Where it runs
-https://169-58-71-242.sslip.io/pod/ is the site. The server publishes `origin/main` by itself within 5 minutes of a push (`deploy/publish.sh`, from cron). The Caddy routes are in `deploy/pod.caddy`; changing them needs Jorge's sudo. The old GitHub Pages address forwards there. The server's services and how to add one are in `/srv/README.md`.
+https://169-58-71-242.sslip.io/pod/ is the site. The server publishes `origin/main` by itself within 5 minutes of a push (`deploy/publish.sh`, from cron). The Caddy routes are in `deploy/pod.caddy`; changing them needs Jorge's sudo. The same publish builds the backend: it creates the venv (`/srv/pod-checker/venv`), installs `server/requirements.txt` when it changed, runs `migrate` and `collectstatic` before switching the release, then restarts the user service `pod-api` (`deploy/pod-api.service`, uvicorn on 127.0.0.1:8770, settings from `/srv/pod-checker/pod-api.env`, mode 0600). Without that env file the backend steps are skipped. The database is `/srv/pod-checker/db/pod.sqlite3`, copied daily by a cron line into `db/backups/`, 14 days kept. Caddy gates the site: every path except the account page and its modules (`OPEN_PATHS`, the same list in `server/accounts/views.py` and `deploy/pod.caddy`) first asks `/pod/api/gate`, which sends anyone not signed in to `/pod/app/account.html`. The Moxfield and Archidekt routes are gated too. The old GitHub Pages address forwards there. The server's services and how to add one are in `/srv/README.md`.
 
 ## Where to pick up
 What's left is marked ⬜ above (mostly M4 depth and smaller M5 items). Read the standing decisions above first, and check the open questions below before changing any score.
@@ -120,6 +141,7 @@ Not yet prepared for a public launch: no licence file, no fan-content or non-aff
 - **M6-M7, as priorities allow:** synergy web, commander comparison, saved versions and history, offline, QR, playtester, rulebook search.
 
 ## Every milestone must pass
+- `python3 -m pytest server` (from the server venv, see the README)
 - `node scripts/test_engine_parity.js`
 - `node scripts/test_i18n.js`
 - `python3 scripts/tier_rules.py --calibrate` (the pod rules: 32 / 4 / 0)

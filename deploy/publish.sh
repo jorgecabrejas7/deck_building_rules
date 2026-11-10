@@ -18,13 +18,27 @@ main() {
   [ "$sha" != "$last" ] || return 0
 
   tmp=$(mktemp -d)
-  git archive "$sha" app rules data | tar -x -C "$tmp"
+  git archive "$sha" app rules data server | tar -x -C "$tmp"
   rm -f "$tmp/data/pod_decks.sqlite"
   rel=$(date +%Y%m%d-%H%M%S)
+  # backend: only once Jorge has made the env file; every step runs before the switch, so a failure (set -e) keeps the old release live
+  local V=/srv/pod-checker/venv env=/srv/pod-checker/pod-api.env backend=0
+  if [ -f "$env" ]; then
+    backend=1
+    [ -x "$V/bin/python" ] || python3 -m venv "$V"
+    if ! cmp -s "$tmp/server/requirements.txt" "$V/requirements.txt"; then
+      "$V/bin/pip" install -q -r "$tmp/server/requirements.txt"
+      cp "$tmp/server/requirements.txt" "$V/requirements.txt"
+    fi
+    (cd "$tmp/server" && set -a && . "$env" && set +a && export PYTHONDONTWRITEBYTECODE=1 && "$V/bin/python" manage.py migrate --noinput && "$V/bin/python" manage.py collectstatic --noinput)
+  else
+    echo "$(date -Is) no $env yet: backend steps skipped"
+  fi
   # compared by content: git archive stamps every file with the commit time, which would defeat the hard links
   rsync -rlc --chmod=D755,F644 --link-dest=/srv/pod-checker/site/ "$tmp/" "/srv/pod-checker/releases/$rel/"
   ln -sfn "releases/$rel" ../site.new
   mv -T ../site.new ../site
+  [ "$backend" = 0 ] || XDG_RUNTIME_DIR=/run/user/$(id -u) systemctl --user restart pod-api || echo "$(date -Is) pod-api not restarted (unit missing?)"
   (cd ../releases && ls -1d */ | sort | head -n -3 | while read -r old; do rm -r -- "./$old"; done)
   echo "$sha" > ../published
   git merge -q --ff-only "$sha"

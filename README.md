@@ -112,3 +112,15 @@ Dev checks (users never need these):
 
 When rules change: edit rules/pod_rules.json — the app fetches it at runtime,
 so there is nothing else to sync. Re-run the parity test + calibration.
+
+## Accounts and server (server/)
+
+The site is private while in development: it needs an account Jorge approves. The backend is Django under server/ (accounts, admin, the gate), served at /pod/api/.
+
+Run it locally:
+  python3 -m venv server/.venv && server/.venv/bin/pip install -r server/requirements-dev.txt
+  cd server && .venv/bin/python manage.py migrate && .venv/bin/python manage.py seed_dev
+  .venv/bin/uvicorn pod.asgi:application --port 8000
+then open http://127.0.0.1:8000/pod/app/ (DEBUG serves the front end from the repo, same gate).
+
+Tests: python3 -m pytest server (from the venv, or server/.venv/bin/pytest -c server/pytest.ini)

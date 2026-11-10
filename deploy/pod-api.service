@@ -1,0 +1,15 @@
+# User unit for the Django backend behind /pod/api/ (installed by Jorge, see docs/ROADMAP.md "Where it runs").
+#   install -D deploy/pod-api.service ~/.config/systemd/user/pod-api.service
+#   systemctl --user daemon-reload && systemctl --user enable --now pod-api
+# `site` is a symlink switched per release and WorkingDirectory resolves at start, so publish.sh restarts it every time.
+[Unit]
+Description=Pod Deck Checker backend
+
+[Service]
+WorkingDirectory=/srv/pod-checker/site/server
+EnvironmentFile=/srv/pod-checker/pod-api.env
+ExecStart=/srv/pod-checker/venv/bin/uvicorn pod.asgi:application --host 127.0.0.1 --port 8770
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
