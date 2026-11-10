@@ -31,6 +31,7 @@ import { renderTableMode } from './ui/table.js';
 import { renderCurve } from './ui/curve.js';
 import { renderGuide } from './ui/guide.js';
 import { renderPod } from './ui/pod.js';
+import { renderDecks, saveDeck, openLinked } from './ui/decks.js';
 import { openHow, closeHow } from './ui/how.js';
 import { copyReport, copyShareLink } from './ui/report.js';
 import { initHelpPopovers } from './ui/popover.js';
@@ -120,6 +121,7 @@ export function renderAll() {
       renderEditBar();
     }
   }
+  if (state.tab === 'decks') renderDecks();
   if (state.tab === 'pod') renderPod();
   restoreFocus(focus);
   saveSession();
@@ -140,8 +142,9 @@ const __boot = () => {
   $('enBtn').onclick = () => { state.lang = 'en'; store.lang = 'en'; renderAll(); };
   $('copyBtn').onclick = copyReport;
   $('shareBtn').onclick = copyShareLink;
+  $('saveBtn').onclick = saveDeck;
   // a link pasted into an open tab only changes the hash, so boot again to read it
-  addEventListener('hashchange', () => { if (location.hash.startsWith('#d=')) location.reload(); });
+  addEventListener('hashchange', () => { if (/^#(d|deck)=/.test(location.hash)) location.reload(); });
   $('howBtn').onclick = openHow;
   $('howModal').onclick = (e) => { if (e.target === $('howModal')) closeHow(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHow(); });
@@ -191,7 +194,7 @@ const __boot = () => {
   }
   history.scrollRestoration = 'manual';
   // raised before the first render, which saves the session
-  state.shared = location.hash.startsWith('#d=');
+  state.shared = /^#(d|deck)=/.test(location.hash);
   renderAll();
   // the saved deck is analyzed behind the landing, so Informe is ready and opens where it was left
   const restoreSaved = () => {
@@ -201,6 +204,16 @@ const __boot = () => {
     analyze().finally(() => { state.restoring = false; });
   };
   if (!state.shared) { restoreSaved(); return; }
+  if (location.hash.startsWith('#deck=')) {
+    openLinked(location.hash.slice(6)).then(ok => {
+      if (ok) return;
+      state.shared = false; state.shareBad = true;
+      history.replaceState(null, '', location.pathname + location.search);
+      restoreSaved();
+      renderAll();
+    });
+    return;
+  }
   PodEngine.decodeShare(location.hash.slice(3)).then(deck => {
     if (!deck) {
       state.shared = false; state.shareBad = true;

@@ -2,25 +2,13 @@
 import { state, store } from './state.js';
 import { T } from './i18n.js';
 import { legalHtml } from './i18n/account.js';
+import { api, csrf } from './api.js';
 
 const API = '../api/', AUTH = API + '_allauth/browser/v1/';
 const $ = (id) => document.getElementById(id);
-const csrf = () => (document.cookie.match(/(?:^|; )pod_csrftoken=([^;]*)/) || [])[1] || '';
 const params = new URLSearchParams(location.search);
 let me = null;        // GET /me answer, or null when the server did not answer
 let current = null;   // the view being shown, re-run on language change
-
-// status 0 = the server could not be reached
-async function api(url, method = 'GET', body) {
-  try {
-    const r = await fetch(url, {
-      method, credentials: 'same-origin',
-      headers: { 'X-CSRFToken': csrf(), 'Accept-Language': state.lang, ...(body ? { 'Content-Type': 'application/json' } : {}) },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return { status: r.status, data: await r.json().catch(() => ({})) };
-  } catch (e) { return { status: 0, data: {} }; }
-}
 
 const svg = (d) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
 const SUN = svg('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>');
