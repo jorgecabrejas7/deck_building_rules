@@ -22,9 +22,12 @@ def all_cards(state):
 
 def assert_no_leak(state, viewer):
     dumped = json.dumps(view(state, viewer))
+    seen = {n for p in state["players"].values() for n in p["commanders"]}  # public in players
+    seen |= {c["name"] for c, z in all_cards(state)
+            if (z not in ("library", "hand") and not c["face_down"]) or viewer in c["known_by"]}
     for c, z in all_cards(state):
-        seen = (z not in ("library", "hand") and not c["face_down"]) or viewer in c["known_by"]
-        if not seen and c["name"] not in ("a-card-000", "b-card-000"):  # commander names are public
+        # a name also on a visible card (duplicate token names) cannot be told apart
+        if c["name"] not in seen:
             assert json.dumps(c["name"]) not in dumped, f"{c['name']} leaked to seat {viewer}"
     assert "known_by" not in dumped
 
