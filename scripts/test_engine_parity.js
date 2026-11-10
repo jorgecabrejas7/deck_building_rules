@@ -565,17 +565,31 @@ const ED_CASES = [
     const entries = expected[0].cards.map(c => ({ name: c.name, quantity: c.quantity }));
     const cmds = PodEngine.pickCommanders({ entries, commanders: [] }, db);
     const cut = PodEngine.removeCards({ entries, commanders: cmds }, cmds);
-    const resolved = cut.entries.filter(e => db[e.name]);
-    const { stats, flagged } = PodEngine.computeDeckStats(resolved, db);
-    const cardsInfo = resolved.map(e => ({ card: db[e.name], qty: e.quantity, name: e.name, cls: PodEngine.classifyCard(db[e.name]) }));
-    const bracket = PodEngine.evaluateBrackets({ stats, flagged, db, validation: PodEngine.validateDeck(cardsInfo, [], db, []), commanders: [], deckNames: resolved.map(e => e.name),
-      combos: [], comboDb: combos, loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion, unresolved: 0 });
-    const profile = PodEngine.computeProfile({ cardsInfo, stats, combos: bracket.combos, commanders: [] });
-    const level = PodEngine.powerLevel({ power: PodEngine.computePower(profile, stats, null), rules: RULES, checked: true, floor: bracket.floor, combos: bracket.combos, landMaybe: bracket.landMaybe, gameChangers: [] });
-    const values = PodEngine.cardValues({ cardsInfo, commanders: [], ledger: profile.ledger, combos: bracket.combos, table: null, whatIf: {} });
+    const r = PodEngine.analyzeDeck({ parsed: cut, db, rules: RULES, combos: [], comboDb: combos });
+    const { cardsInfo, stats, profile, level } = r;
+    const values = PodEngine.cardValues({ cardsInfo, commanders: [], ledger: profile.ledger, combos: r.bracket.combos, table: null, whatIf: {} });
     return !cut.commanders.length && stats.total_cards === 100 - cmds.length && !!level.bracket && values.length === cardsInfo.length;
   })()],
 ];
+// (l2) analyzeDeck: the one chain every caller shares
+const anBad = [];
+for (const exp of expected) {
+  const parsed = { entries: exp.cards.map(c => ({ name: c.name, quantity: c.quantity })), commanders: [] };
+  const r = PodEngine.analyzeDeck({ parsed, db, rules: RULES, games: 50 });
+  if (r.evalRes.points !== exp.points || r.evalRes.tier !== exp.tier || r.evalRes.violations.length !== exp.violations) anBad.push(`${exp.deck}: points/tier/violations differ from Python`);
+  if (!r.bracket.pending || !r.level.pending) anBad.push(`${exp.deck}: no combo check should read as pending`);
+}
+const anOther = expected.map(exp => {
+  const parsed = { entries: exp.cards.map(c => ({ name: c.name, quantity: c.quantity })), commanders: [] };
+  const detected = PodEngine.pickCommanders(parsed, db);
+  const alt = PodEngine.commanderOptions(parsed.entries, db).find(o => o.solo && !detected.includes(o.name));
+  return alt && { parsed, alt: alt.name };
+}).find(Boolean);
+if (!anOther) anBad.push("no precon has a second legal commander to pick");
+else if (PodEngine.analyzeDeck({ parsed: anOther.parsed, db, rules: RULES, pick: [anOther.alt], games: 50 }).commanders.join() !== anOther.alt) anBad.push("a legal pick is not honoured");
+for (const m of anBad) console.log(`ANALYZE FAIL: ${m}`);
+console.log(`Analyze deck: ${expected.length * 2 + 1 - anBad.length}/${expected.length * 2 + 1} correct`);
+if (anBad.length) fails++;
 const edBad = ED_CASES.filter(([, ok]) => !ok);
 for (const [label] of edBad) console.log(`EDIT FAIL: ${label}`);
 console.log(`What-if edits: ${ED_CASES.length - edBad.length}/${ED_CASES.length} correct`);

@@ -107,28 +107,14 @@ async function synergyTable(commanders) {
 
 // ---- one deck through the same engine the app uses ----
 async function study(d) {
-  const resolved = d.parsed.entries.filter(e => cards[e.name]);
-  const names = resolved.map(e => e.name);
-  const { stats, flagged } = E.computeDeckStats(resolved, cards);
-  const commanders = E.pickCommanders(d.parsed, cards);
-  const combos = E.activeCombos(E.matchCombos(names, comboDb), commanders);
-  const infinite = combos.filter(c => c.infinite);
-  stats.combos = infinite.length;
-  stats.combo_sizes = infinite.map(c => c.n);
-  const ev = E.evaluateDeck(stats, flagged, RULES, names);
-  const cardsInfo = resolved.map(e => ({ card: cards[e.name], qty: e.quantity, name: e.name, cls: E.classifyCard(cards[e.name]) }));
-  const validation = E.validateDeck(cardsInfo, commanders, cards, []);
-  const bracket = E.evaluateBrackets({ stats, flagged, db: cards, validation, commanders, deckNames: names,
-    combos, comboDb, landDenial, loopCards: RULES.hard_bans.banned_cards.extra_turn_recursion });
-  const profile = E.computeProfile({ cardsInfo, stats, combos: bracket.combos, commanders, cardTags });
-  const salt = E.saltScore(names, saltDb);
-  const synergy = E.synergyScore({ cardsInfo, commanders, table: await synergyTable(commanders) });
-  const power = E.computePower(profile, stats, salt);
-  const level = E.powerLevel({ power, rules: RULES, checked: true, floor: bracket.floor, precon: E.matchPrecon(d.parsed.entries, precons),
-    combos: bracket.combos, landMaybe: bracket.landMaybe, gameChangers: bracket.checks.find(c => c.id === "game_changers").cards });
+  const names = d.parsed.entries.filter(e => cards[e.name]).map(e => e.name);
+  const r = E.analyzeDeck({ parsed: d.parsed, db: cards, rules: RULES, combos: E.matchCombos(names, comboDb), comboDb,
+    landDenial, saltDb, cardTags, precons });
+  const { stats, bracket, profile, salt, power, level, commanders } = r, ev = r.evalRes;
+  const synergy = E.synergyScore({ cardsInfo: r.cardsInfo, commanders, table: await synergyTable(commanders) });
   const verdict = ev.tier === "above" ? "out" : "in";
   return { id: d.id, name: d.name, group: d.group, url: d.url, podId: d.podId, commanders,
-    cards: stats.total_cards, missing: d.parsed.entries.length - resolved.length,
+    cards: stats.total_cards, missing: d.parsed.entries.length - names.length,
     tier: ev.tier, practicalBracket: level.bracket, powerBracket: level.powerBracket, floor: bracket.floor ? { reason: bracket.floor.reason, mld: bracket.floor.mld, combos: bracket.floor.combos } : null,  points: ev.points, breakdown: ev.breakdown, violations: ev.violations.map(v => v.id === "conditional" ? v.condId : v.id),
     verdict, label: labels[d.podId] || null, price: stats.total_price_eur, gc: stats.game_changers,
     bracket: { fits: bracket.fits, checklist: bracket.checklist, estimate: bracket.estimate, failed: bracket.failed },

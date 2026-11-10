@@ -1,5 +1,6 @@
 // PodEngine barrel: pure logic, no DOM. Node-importable (parity test) and
 // browser-importable (app). Mirrors scripts/power_metrics.py + scripts/tier_rules.py.
+export { analyzeDeck } from "./analyze.js";
 export { computeDeckStats } from "./stats.js";
 export { evaluateDeck, validateDeck, whatIfCut, dialPoints } from "./rules.js";
 export { detectInput, parseDecklist, deckFingerprint } from "./decks.js";
