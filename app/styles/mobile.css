@@ -103,3 +103,6 @@
 @media (hover: none) {
   .catHelp{cursor:default}
 }
+@media (max-width:700px){
+  .nd-chip,.nd-start{min-height:44px}
+}

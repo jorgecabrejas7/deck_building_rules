@@ -5,6 +5,7 @@ import { T, fill } from '../i18n.js';
 import { BLOCK_MSG, CATS, dialName } from './constants.js';
 import { $, esc, archKey, catLabel } from './helpers.js';
 import { bindSugPopovers } from './popover.js';
+import { addByName, canEdit, removeFromDeck } from '../edits.js';
 import { compositionHtml } from './verdict.js';
 import { compSlots, tagCount } from './comp.js';
 import { orderedCuts, powerUpOptions, roomCuts, fetchUpgradeCards, deckColorIdentity, synergyAdvice, cardAddCost, cardDials, UPGRADE_QUERIES } from '../advice.js';
@@ -30,14 +31,17 @@ const frontFace = n => n.split(' // ')[0];
 function bigSugTile(c, cut, x = {}) {
   const t = T();
   const price = c.price != null ? '€' + c.price : '';
-  return '<div class="sugTile sug-tile" data-img="' + esc(c.img_normal || '') + '" data-name="' + esc(c.name) + '">' +
-    '<span class="sug-thumb"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
+  const dis = canEdit() ? '' : ' disabled';
+  return '<div class="sug-tile">' +
+    '<span class="sug-thumb sugTile" data-img="' + esc(c.img_normal || '') + '" data-name="' + esc(c.name) + '"' + (c.img_art ? ' style="background-image:url(\'' + c.img_art + '\')"' : '') + '></span>' +
     '<div class="sug-body"><div class="sug-name">' + esc(c.name) +
     (price ? ' <span class="mono chip-price">' + price + '</span>' : '') + '</div>' +
     '<div class="sug-why">' + esc(x.why || whyAdd(c)) + '</div>' +
+    '<div class="sug-act"><button type="button" class="btn-outline sug-btn" data-add-name="' + esc(c.name) + '"' + dis + '>' + esc(t.tipAdd) + '</button></div>' +
     (cut ? '<div class="sug-cut">' + esc(t.tipsSwap) + ': <b>' + esc(cut.name) + '</b>' +
       (x.cutWhy ? ' <span class="why">(' + esc(x.cutWhy) + ')</span>'
-        : cut.card && cut.card.edhrec_rank ? ' <span class="mono">#' + fmtRank(cut.card.edhrec_rank) + '</span>' : '') + '</div>' : '') +
+        : cut.card && cut.card.edhrec_rank ? ' <span class="mono">#' + fmtRank(cut.card.edhrec_rank) + '</span>' : '') +
+      ' <button type="button" class="btn-outline sug-btn" data-cut-name="' + esc(cut.name) + '"' + dis + '>' + esc(t.tipCut) + '</button></div>' : '') +
     '</div></div>';
 }
 
@@ -125,6 +129,8 @@ export function renderTips() {
 
 function bindTips() {
   bindSugPopovers($('tips'));
+  for (const b of $('tips').querySelectorAll('[data-add-name]')) b.onclick = () => addByName(b.dataset.addName);
+  for (const b of $('tips').querySelectorAll('[data-cut-name]')) b.onclick = () => removeFromDeck([b.dataset.cutName]);
   for (const b of $('tips').querySelectorAll('[data-retry]'))
     b.onclick = () => { state.tipsCache = null; renderTips(); };
   // tier-up options fetch lazily, only when the disclosure is first opened
