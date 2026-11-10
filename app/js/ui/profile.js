@@ -117,9 +117,7 @@ function winsExtra(r, t) {
 function saltExtra(r, t) {
   const { salt } = r;
   if (!salt) return '';
-  const pod = state.study ? state.study.decks.filter(d => d.group === 'pod').map(d => d.salt.total) : [];
-  const rank = pod.length ? fill(t.pfSaltRank, { v: Math.round(pod.filter(x => x < salt.total).length / pod.length * 100) }) + '. ' : '';
-  return '<p class="rd-text">' + esc(rank + fill(t.pfSaltX, { a: salt.average })) + '</p>' + saltSources(r, t);
+  return '<p class="rd-text">' + esc(fill(t.pfSaltX, { a: salt.average })) + '</p>' + saltSources(r, t);
 }
 
 // Where the salt comes from: each category's share and the cards behind it.

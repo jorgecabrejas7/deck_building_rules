@@ -44,3 +44,12 @@ export function catLabel(cat, lang) { return esc(CATS[cat][lang]) + helpIcon(cat
 
 // Screen-reader status line (#srStatus is a visually-hidden aria-live region).
 export function announce(msg) { const el = $('srStatus'); if (el) el.textContent = msg; }
+
+// A dial's cost in words, straight from its rules spec (RULES is read at call time).
+export function dialCost(spec, lang) {
+  const P = lang === 'es';
+  if (spec.forbidden) return P ? 'PROHIBIDO (y cada copia suma +1 pt)' : 'FORBIDDEN (and each copy still adds +1 pt)';
+  if (spec.scoring === 'per_combo_size') return P ? '2 gratis; después: 2 cartas +3 · 3 cartas +2 · 4+ +1' : '2 free; then: 2-card +3 · 3-card +2 · 4+ +1';
+  const steps = Object.entries(spec.point_steps).map(([k, v]) => k + '→' + v).join(', ');
+  return (P ? 'gratis hasta ' : 'free up to ') + spec.baseline_max + (steps ? ' · ' + steps : '') + (P ? ' · después +1/unidad' : ' · then +1/unit');
+}

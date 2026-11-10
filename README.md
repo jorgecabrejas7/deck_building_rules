@@ -77,13 +77,10 @@ shortlist would ask the user to trust a filter they cannot inspect.
 Rules live in app/js/engine/commander.js; verified against all 36 precons
 (36/36 correct, including the one real partner pair).
 
-Pod deck registry: reference decks live in a SQLite database managed by
-scripts/pod_decks.py (add via Archidekt URL — fetched server-side, no CORS —
-or a text-export file; rm/list/export). Every change re-exports
-data/pod_decks.json, which the app's "Pod" tab reads: analyze any stored deck
-or compare it against the currently loaded one in table mode.
-  python3 scripts/pod_decks.py add --url https://archidekt.com/decks/12345 --owner Jorge
-  python3 scripts/pod_decks.py add --file deck.txt --name "Mi mazo" --owner Ana
+Pods live in the app: each pod keeps its own rules and decks there. The old
+SQLite registry and its script are gone; data/pod_decks.json stays only as a
+frozen study fixture (the decks behind scripts/deck_study.js, holding Jorge's
+locked read) and is no longer maintained.
 
 Price dials count non-game-changer cards only: a game changer already pays on
 its own dial, so charging it again on a price band would make an expensive game

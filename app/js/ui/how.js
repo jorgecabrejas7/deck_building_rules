@@ -2,22 +2,24 @@ import { state } from '../state.js';
 import { RULES } from '../rules.js';
 import { DIAL_META } from './constants.js';
 import { BRACKET3 } from '../engine/bracket.js';
-import { $, esc } from './helpers.js';
+import { $, esc, dialCost } from './helpers.js';
 
 function renderHow() {
   const lang = state.lang;
   const t1 = RULES.tiers.tier1.max_points, t2 = RULES.tiers.tier2.max_points;
   const P = lang === 'es';
+  const cond = (id) => RULES.conditionals.find(c => c.id === id);
+  const gcThen = cond('gc_locks_price').then;
+  const gcB = gcThen.find(x => x.dial === 'price_10_20').value;
+  const word = (n) => (P ? ['cero', 'uno', 'dos'] : ['zero', 'one', 'two'])[n];
+  const gcMax = word(cond('tutors_gate_gc').then[0].value), tutMax = word(cond('combos_gate_tutors').then[0].value);
+  const mana = cond('mana_cheat_stacking');
+  const fm = mana.if_all.find(x => x.dial === 'fast_mana').value + 1, fs = mana.if_all.find(x => x.dial === 'free_spells').value + 1;
+  const cap = RULES.hard_bans.max_card_price_eur;
   const dialRows = DIAL_META.map(m => {
     const spec = RULES.dials[m.k];
     if (!spec) return '';
-    let cost;
-    if (spec.forbidden) cost = P ? 'PROHIBIDO (y cada copia suma +1 pt)' : 'FORBIDDEN (and each copy still adds +1 pt)';
-    else if (spec.scoring === 'per_combo_size') cost = P ? '2 gratis; después: 2 cartas +3 · 3 cartas +2 · 4+ +1' : '2 free; then: 2-card +3 · 3-card +2 · 4+ +1';
-    else {
-      const steps = Object.entries(spec.point_steps).map(([k, v]) => k + '→' + v).join(', ');
-      cost = (P ? 'gratis hasta ' : 'free up to ') + spec.baseline_max + (steps ? ' · ' + steps : '') + (P ? ' · después +1/unidad' : ' · then +1/unit');
-    }
+    const cost = dialCost(spec, lang);
     return '<tr><td>' + m.name[lang] + '</td>' +
       '<td class="mono">' + esc(cost) + '</td></tr>';
   }).join('');
@@ -38,10 +40,10 @@ function renderHow() {
 <li>Destrucción masiva de tierras.</li></ul>
 <h3>Condicionales de los puntos (informativos)</h3>
 <ul>
-<li>Con un game changer: en el RESTO del mazo, máximo 3 cartas de €10–20 y ninguna de €20–30. (Un game changer paga solo en su dial: no cuenta además como carta cara, así que uno barato y uno caro pesan igual. El tope duro de €30 sí se aplica a todas las cartas.)</li>
-<li>Con tutores: cero game changers.</li>
-<li>Con cualquier combo infinito: cero tutores.</li>
-<li>Maná rápido alto (9+) y hechizos gratis altos (5+) a la vez: +2 puntos extra.</li></ul>
+<li>Con un game changer: en el RESTO del mazo, máximo ${gcB} cartas de €10–20 y ninguna de €20–30. (Un game changer paga solo en su dial: no cuenta además como carta cara, así que uno barato y uno caro pesan igual. El tope duro de €${cap} sí se aplica a todas las cartas.)</li>
+<li>Con tutores: ${gcMax} game changers.</li>
+<li>Con cualquier combo infinito: ${tutMax} tutores.</li>
+<li>Maná rápido alto (${fm}+) y hechizos gratis altos (${fs}+) a la vez: +${mana.penalty_points} puntos extra.</li></ul>
 <h3>Qué se analiza</h3>
 <p>Solo el mazo de verdad: las cartas de un <b>maybeboard</b> o un <b>sideboard</b> no se analizan, porque no se juegan. Se detectan por cabecera («SIDEBOARD:», «Maybeboard»), por comentario («// Maybeboard») y por la etiqueta de categoría de Archidekt («[Maybeboard]»).</p>
 <h3>Brackets (el sistema oficial de Wizards)</h3>
@@ -83,10 +85,10 @@ function renderHow() {
 <li>Mass land destruction.</li></ul>
 <h3>Conditionals (one luxury excludes others)</h3>
 <ul>
-<li>With a game changer: in the REST of the deck, at most 3 cards at €10–20 and none at €20–30. (A game changer pays on its own dial only — it is not also counted as an expensive card, so a cheap one and a costly one weigh the same. The hard €30 cap does still apply to every card.)</li>
-<li>With tutors: zero game changers.</li>
-<li>With any infinite combo: zero tutors.</li>
-<li>High fast mana (9+) and high free spells (5+) together: +2 extra points.</li></ul>
+<li>With a game changer: in the REST of the deck, at most ${gcB} cards at €10–20 and none at €20–30. (A game changer pays on its own dial only — it is not also counted as an expensive card, so a cheap one and a costly one weigh the same. The hard €${cap} cap does still apply to every card.)</li>
+<li>With tutors: ${gcMax} game changers.</li>
+<li>With any infinite combo: ${tutMax} tutors.</li>
+<li>High fast mana (${fm}+) and high free spells (${fs}+) together: +${mana.penalty_points} extra points.</li></ul>
 <h3>What gets analyzed</h3>
 <p>Only the real deck: cards in a <b>maybeboard</b> or <b>sideboard</b> are not analyzed, because they are not played. They are detected by header ("SIDEBOARD:", "Maybeboard"), by comment marker ("// Maybeboard") and by Archidekt's per-line category tag ("[Maybeboard]").</p>
 <h3>Brackets (Wizards' official system)</h3>

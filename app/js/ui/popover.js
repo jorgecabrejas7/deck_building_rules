@@ -1,7 +1,8 @@
 import { state } from '../state.js';
 import { T } from '../i18n.js';
 import { CAT_HELP, DIAL_META } from './constants.js';
-import { $ } from './helpers.js';
+import { RULES } from '../rules.js';
+import { $, dialCost } from './helpers.js';
 
 // Owns the two singleton popover nodes: #popover (card image) and #textPop
 // (category help), shared by the browser, tips, ramp and curve sections.
@@ -85,7 +86,7 @@ export function bindCardTilePopover(tile, getSrc) { bindTarget(tile, getSrc); }
 // rule prose for a power dial).
 function helpTextFor(el) {
   if (el.dataset.cat) { const h = CAT_HELP[el.dataset.cat]; return h && h[state.lang]; }
-  if (el.dataset.dial) { const m = DIAL_META.find(d => d.k === el.dataset.dial); return m && m.help[state.lang]; }
+  if (el.dataset.dial) { const m = DIAL_META.find(d => d.k === el.dataset.dial); return m && m.help[state.lang] + (RULES.dials[m.k] ? ' — ' + dialCost(RULES.dials[m.k], state.lang) : ''); }
   return null;
 }
 

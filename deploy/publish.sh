@@ -19,7 +19,6 @@ main() {
 
   tmp=$(mktemp -d)
   git archive "$sha" app rules data server | tar -x -C "$tmp"
-  rm -f "$tmp/data/pod_decks.sqlite"
   rel=$(date +%Y%m%d-%H%M%S)
   # backend: only once Jorge has made the env file; every step runs before the switch, so a failure (set -e) keeps the old release live
   local V=/srv/pod-checker/venv env=/srv/pod-checker/pod-api.env backend=0

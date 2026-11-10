@@ -2,7 +2,6 @@
 /**
  * The deck study: runs the app's own engine over every precon, the pod's decks
  * and the cEDH anchors, and writes data/deck_study.json for the app and the report.
- * Each run also records the pod's power and points by date in data/pod_history.json.
  * It answers "what puts a deck inside or outside the pod?" by showing which
  * measures separate the groups (rank AUC: 0.5 = no separation, 1 = perfect).
  *
@@ -46,6 +45,7 @@ const fromText = (d, group) => ({ id: group + ":" + (d.id ?? d.name), name: d.na
   podId: d.id, parsed: E.parseDecklist(d.decklist) });
 const decks = [
   ...preconDecks(),
+  // data/pod_decks.json is a frozen study fixture (the pod's decks, holding Jorge's locked read); pods now live in the app.
   ...read("data/pod_decks.json").decks.map(d => fromText(d, "pod")),
   ...read("data/anchors_cedh.json").decks.map(d => fromText(d, "cedh")),
 ];
@@ -199,9 +199,6 @@ const out = { salt_updated: saltDb.updated, combos_updated: comboDb.updated, lab
   medians: Object.fromEntries(["precon", "pod", "cedh"].map(g => [g, Object.fromEntries(Object.entries(MEASURES).map(([k, fn]) => [k, median(group(d => d.group === g).map(fn))]))])),
   comparisons, decks: trimmed };
 fs.writeFileSync(path.join(ROOT, "data", "deck_study.json"), JSON.stringify(out, null, 1));
-const HISTORY_PATH = path.join(ROOT, "data", "pod_history.json");
-const snapshots = E.addSnapshot(loadJson(HISTORY_PATH).snapshots || [], E.podSnapshot(new Date().toISOString().slice(0, 10), pod));
-fs.writeFileSync(HISTORY_PATH, JSON.stringify({ snapshots }, null, 1));
 
 if (process.argv.includes("--metrics")) {
   const quant = (xs, q) => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(q * (s.length - 1))]; };
@@ -218,4 +215,4 @@ console.log("\n-- cEDH anchors --");
 for (const d of cedh) console.log(line(d));
 const pw = preconResults.map(d => d.power.score);
 console.log(`\nprecons: power min ${Math.min(...pw)} median ${median(pw)} max ${Math.max(...pw)} | cEDH min ${Math.min(...cedh.map(d => d.power.score))}`);
-console.log("wrote data/deck_study.json and data/pod_history.json");
+console.log("wrote data/deck_study.json");

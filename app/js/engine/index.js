@@ -29,7 +29,6 @@ export { removeCards, addCard, stacksInDeck, deckDiff, carryPick, editFigures } 
 export { wrapLines, moreList, fitList } from "./fitText.js";
 export { budgetTotals, cardmarketUrl, cardmarketWants } from "./budget.js";
 export { tableCheck, TABLE_CHECK } from "./tableCheck.js";
-export { podSnapshot, addSnapshot, podRankings } from "./rankings.js";
 export { addVersion, diffCards, versionTimeline, MAX_VERSIONS } from "./history.js";
 export { upgradePlan } from "./precon.js";
 export { synergyWeb, WEB_REASONS } from "./synergyWeb.js";
