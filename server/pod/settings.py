@@ -9,8 +9,9 @@ SECRET_KEY = "dev-only-insecure-key" if DEBUG else os.environ["DJANGO_SECRET_KEY
 POD_HOST = os.environ.get("POD_HOST", "localhost")
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"] if DEBUG else [POD_HOST]
 CSRF_TRUSTED_ORIGINS = [f"https://{POD_HOST}"]
-ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "")
+ADMIN_EMAIL = "admin@localhost" if DEBUG else os.environ["ADMIN_EMAIL"]  # without it new accounts would wait unseen
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+X_FRAME_OPTIONS = "SAMEORIGIN"  # the app may frame its own pages; other sites still cannot
 
 INSTALLED_APPS = [
     "django.contrib.admin",

@@ -148,7 +148,8 @@ function pick() {
   const want = params.get('view') || 'signin';
   if (want === 'privacy') return 'privacy';
   if (me && me.state === 'active') return want === 'profile' ? 'profile' : null;
-  if (me && me.state === 'pending') return 'pending';
+  // pending is the landing, but its own sign-in link must still reach the form (another account may be approved)
+  if (me && me.state === 'pending' && !params.has('view')) return 'pending';
   return want === 'signup' ? 'signup' : 'signin';
 }
 function show(view) { current = view; render(); }
