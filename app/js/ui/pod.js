@@ -35,6 +35,8 @@ const pickerOptions = () => {
   return '<option value="">' + esc(t.pdTemplate) + '</option>' +
     state.pods.map(p => '<option value="' + p.id + '"' + (p.id === state.activeId ? ' selected' : '') + '>' + esc(p.name) + '</option>').join('');
 };
+const count = (n, one, many) => n === 1 ? one : fill(many, { n });
+
 export function renderPodPicker() {
   const label = $('podSel').closest('label');
   label.hidden = !state.pods;
@@ -217,7 +219,7 @@ export function renderPod() {
     else if (!state.pod) body = pick + flash + note(status === 'error' ? 'pdErr' : 'pdLoading');
     else {
       const p = state.pod;
-      body = pick + flash + '<p class="note-sm">' + esc(p.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + ' · ' + esc(fill(t.pdCounts, { n: p.members.length, m: p.decks.length })) + '</p>' +
+      body = pick + flash + '<p class="note-sm">' + esc(p.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + ' · ' + esc(count(p.members.length, t.pdMember1, t.pdMemberN) + ' · ' + count(p.decks.length, t.pdDeck1, t.pdDeckN)) + '</p>' +
         '<div class="panel pod-card">' + deckTable(t) + '<div class="dk-actions">' + addHtml(t) + '</div></div>' +
         '<div class="panel pod-card">' + membersHtml(t) + (p.role === 'admin' ? adminHtml(t) : '') + '</div>' + createHtml(t);
     }
