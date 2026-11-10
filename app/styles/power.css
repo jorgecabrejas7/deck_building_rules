@@ -594,3 +594,22 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .dk-trim .dk-why{order:1;flex:1 0 100%;color:var(--muted)}
 .dk-trim .dk-why li{display:list-item;padding:0;border:0}
 .dk-trim .btn-accent-sm:disabled{opacity:.6}
+/* the pod rules editor */
+.pr{display:flex;flex-direction:column;gap:var(--sp-5)}
+.pr h3{margin:0 0 var(--sp-3);font-size:var(--fs-body);font-weight:600}
+.pr section{display:flex;flex-direction:column;gap:var(--sp-3)}
+.pr-grid,.pr-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--sp-3)}
+.pr-f{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-caption);color:var(--muted)}
+.pr-f input,.pr-f textarea{min-height:44px;padding:8px 12px;border:1px solid var(--borderCtl);border-radius:var(--r-sm);background:var(--panel);color:var(--text);font:inherit;font-size:var(--fs-ui)}
+.pr-f input{width:7.5em}
+.pr-ban textarea{width:100%;min-height:10em}
+.pr-x{min-width:44px;min-height:44px}
+.pr-arrow{align-self:center}
+.pr-dial{border:1px solid var(--border);border-radius:var(--r-md);padding:0 var(--sp-3)}
+.pr-dial summary{min-height:44px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+.pr-dial[open]{padding-bottom:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-3)}
+.pr-cond{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2);padding:var(--sp-3);border:1px solid var(--border);border-radius:var(--r-md)}
+.pr-cond .pr-f{display:inline-flex}.pr-cond .pr-f input{width:5em}
+.pr-note{margin:0;color:var(--muted)}
+.pr-err{margin:0;color:var(--badFg);font-size:var(--fs-caption)}
+.pr-actions{display:flex;align-items:center;gap:var(--sp-3)}
