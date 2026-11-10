@@ -2,6 +2,8 @@
 
 Every feature worth considering for the checker, from commandersalt.com (CS), deckcheck.co (DC) and our own ideas. Update the status in the same commit that changes it.
 
+**Long-term goal (2026-11-07):** Jorge plans to monetize this as a public website. That is not the current work: for now, prepare the architecture so going public is easy. Nothing is decided yet about how it earns money. The next steps are an architecture review, then monetization research. Until they produce decisions, the standing decisions below hold, and any that block a public launch get reopened there rather than quietly changed.
+
 **Standing decisions:** a static app on Jorge's server, whose only server-side part is a route that fetches one public deck from sites that refuse browsers. No AI for now. Pod first, shareable by link, with no accounts. The pod's point budget in `rules/pod_rules.json` alone decides who is in the pod. The power level (`power_brackets`, precons at Bracket 2, then 2*, 3, 3*, 4, 4*, 5, built on ways to win, interaction, salt and synergy) is a separate reading that never changes that verdict, as is Wizards' checklist. Commander Spellbook alone rates each combo, and a two-card line at 6 mana or less a turn is only a tip. The deck reads where its strength puts it, with anything above that bracket listed as worth a look (Spellbook's combo labels, cards that may deny lands, game changers) instead of raising it. Only mass land denial, as sorted by hand in `data/land_denial.json`, sets Bracket 4 on its own. Precons read on strength like any deck: the scale is fitted on all 198 (`data/precons.json`), so 193 land at Bracket 2, and the few above are real exceptions such as Creative Energy. Pages describe a deck rather than judge it: they say which bracket it fits and why, never what to cut to reach another bracket. The way back into the pod stays, in Puntos. Jorge's read of the pod's decks is locked in the parity test: if a scoring change breaks one, ask Jorge.
 
 Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs server/AI) · ⛔ skip. M1-M7 are the milestones below.
@@ -85,6 +87,7 @@ Status: ✅ have · 🟡 partial · ⬜ can do static · 🅿️ parked (needs s
 Written synopsis and mulligan guide · chat assistant with memory · roast · rules Q&A · new-set impact report · plain-English card search.
 
 ### Skip, with reason
+These reasons assume a private pod tool. The monetization research should reopen the accounts and billing lines.
 - Accounts, cloud decks, comments, public visibility, public API: pod-first.
 - Credits, subscriptions, billing: nothing to charge for.
 - Collection, binders, wishlist, card scanner, price alerts: need accounts and a camera pipeline, and no one asked.
@@ -99,7 +102,9 @@ The landing is a scroll-driven planeswalker scene (`ui/hero.js`) and is the Carg
 https://169-58-71-242.sslip.io/pod/ is the site. The server publishes `origin/main` by itself within 5 minutes of a push (`deploy/publish.sh`, from cron). The Caddy routes are in `deploy/pod.caddy`; changing them needs Jorge's sudo. The old GitHub Pages address forwards there. The server's services and how to add one are in `/srv/README.md`.
 
 ## Where to pick up
-What's left is marked ⬜ below (mostly M4 depth and smaller M5 items). Read the standing decisions above first, and check the open questions below before changing any score.
+What's left is marked ⬜ above (mostly M4 depth and smaller M5 items). Read the standing decisions above first, and check the open questions below before changing any score.
+
+Not yet prepared for a public launch: no licence file, no fan-content or non-affiliation notice on the site, no real domain (the address is an sslip.io name), and no review of whether the data sources' terms allow commercial use. The site calls Scryfall, Commander Spellbook's bulk export, EDHREC's undocumented JSON, and Moxfield's unofficial API. The pod's own rules, decks and wording are built into the product.
 
 ## Milestones
 - **M1, card reader:** done.
@@ -116,7 +121,6 @@ What's left is marked ⬜ below (mostly M4 depth and smaller M5 items). Read the
 - Browser: both languages and themes, phone width, no console errors, then the live page after pushing
 
 ## Open questions for Jorge
-- `manaProduced` counts "Add {G} or {U}" as 2 mana, which inflates the Rampeo panel and the goldfish simulation. Fixing it can move power scores.
 - Which of the 13 decks Jorge has not placed read wrongly? Eight sit at 4.1, the weakest part of the scale.
 - Does Korvold (7.9) or Winota (7.0) belong among the cEDH lists? Both score below the rest.
 - Do the card values read right on the pod's decks? Massacre Wurm reads Marginal in Teysha, for example. Weights are in `engine/cardValue.js`.

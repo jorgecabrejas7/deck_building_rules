@@ -892,6 +892,10 @@ const GG_CASES = [
   ["a land that makes two gives 2", gfManaOf("Tomb") === 2],
   ["a rock gives what manaProduced reads", gfManaOf("Rock") === 2],
   ["a spell gives none", gfManaOf("Bolt") === 0],
+  ...[["{T}: Add {G} or {U}.", 1], ["{T}: Add {W}, {U}, or {B}.", 1], ["{T}: Add {C}{C}.", 2],
+    ["{1}, {T}: Add {W}{W}, {W}{U}, or {U}{U}.", 2], ["Add {B}{B}{B}.", 3], ["{T}: Add one mana of any color.", 1],
+    ["{T}: Add {C}.\n{T}: Add {W} or {U}. This artifact deals 1 damage to you.", 1], ["Draw a card.", 0]]
+    .map(([oracle_text, n]) => [`manaProduced reads ${n} from: ${oracle_text}`, PodEngine.manaProduced({ oracle_text }) === n]),
 ];
 const ggBad = GG_CASES.filter(([, ok]) => !ok);
 for (const [label] of ggBad) console.log(`GOLDFISH HANDS FAIL: ${label}`);

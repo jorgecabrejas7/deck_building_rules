@@ -9,11 +9,8 @@ export const MAX_MULLIGANS = 7;
 const front = (n) => String(n).split(" // ")[0];
 const without = (zone, i) => zone.filter((_, k) => k !== i);
 
-// shortcut: manaProduced adds up "{G} or {U}" as 2 and the simulation's numbers rest on that, so
-// a choice of colours is read as 1 here; fix it there if power may move. Costs ({1},{T}) are not netted.
-function sourceMana(card) {
-  return /add [^.\n]* or /i.test(card.oracle_text || "") ? 1 : Math.max(manaProduced(card), 1);
-}
+// shortcut: costs such as {1},{T} are not netted, so a Signet reads as 2; net them if hands feel too fast.
+const sourceMana = (card) => Math.max(manaProduced(card), 1);
 
 // read: readCard for this deck, so a rock means the same here as in the profile.
 export function gameCards({ cardsInfo, commanders, read }) {

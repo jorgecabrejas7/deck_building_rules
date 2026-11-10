@@ -6,7 +6,8 @@ export function manaProduced(card) {
   const m = o.match(/add ([^.\n]*)/i);
   if (!m) return 0;
   const seg = m[1];
-  const sym = (seg.match(/\{[wubrgc0-9]\}/gi) || []).length;
+  // "{G} or {U}" is one mana and "{W}{W}, {W}{U}, or {U}{U}" is two: a card pays one of the choices
+  const sym = Math.max(...seg.split(/,|\bor\b/i).map(c => (c.match(/\{[wubrgc0-9]\}/gi) || []).length));
   if (sym) return sym;
   const words = { one: 1, two: 2, three: 3, four: 4 };
   const wm = seg.match(/\b(one|two|three|four)\b/i);
