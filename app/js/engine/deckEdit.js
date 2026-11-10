@@ -22,6 +22,14 @@ export function addCard(deck, name) {
 // Same rule as validateDeck's singleton check, and snow basics count too.
 export const stacksInDeck = (card) => /\bBasic\b/.test(card.type_line || "") || /any number of cards named/i.test(card.oracle_text || "");
 
+// Why a card may not join the deck, as the i18n key of the reason; null when it may.
+// `identity` is the commanders' colours, or null while there is no commander to hold it to.
+export function addRefusal(deck, card, identity) {
+  if (!stacksInDeck(card) && deck.entries.some(e => e.name === card.name)) return "edSingleton";
+  if (identity && (card.color_identity || []).some(c => !identity.includes(c))) return "edIdentity";
+  return null;
+}
+
 export function deckDiff(before, after) {
   const was = new Map(before.entries.map(e => [e.name, e.quantity]));
   const now = new Map(after.entries.map(e => [e.name, e.quantity]));

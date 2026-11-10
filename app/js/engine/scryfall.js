@@ -145,7 +145,7 @@ function ciFits(cardCi, deckCi) {
 export async function searchScryfall(q, { excludeNames, bannedNames, limit = 6, requireCat = null, allowGameChanger = false } = {}) {
   const excl = new Set(excludeNames || []);
   const ban = new Set(bannedNames || []);
-  const res = await fetch("https://api.scryfall.com/cards/search?unique=cards&q=" + encodeURIComponent(q));
+  const res = await scryfallFetch("https://api.scryfall.com/cards/search?unique=cards&q=" + encodeURIComponent(q));
   if (!res.ok) throw new Error("Scryfall " + res.status);
   const data = await res.json();
   const out = [];

@@ -1038,4 +1038,29 @@ for (const [label] of tpBad) console.log(`TRIM FAIL: ${label}`);
 console.log(`Trim to 100: ${TP_CASES.length - tpBad.length}/${TP_CASES.length} correct`);
 if (tpBad.length) fails++;
 
+// ---- the builder: what may join a deck, and decks too small to be one ----
+const rfDeck = { entries: [{ name: "Sol Ring", quantity: 1 }, { name: "Forest", quantity: 3 }], commanders: [] };
+const rfRed = { name: "Rakdos Charm", color_identity: ["B", "R"], type_line: "Instant" };
+const nonFinite = (v) => typeof v === "number" ? !Number.isFinite(v) : v && typeof v === "object" ? Object.values(v).some(nonFinite) : false;
+const tinyCards = expected[0].cards.map(c => ({ name: c.name, quantity: 1 }));
+const tinyRuns = [1, 2, 20].map(n => {
+  try {
+    const r = PodEngine.analyzeDeck({ parsed: { entries: tinyCards.slice(0, n), commanders: [] }, db, rules: RULES, games: 50 });
+    const values = PodEngine.cardValues({ cardsInfo: r.cardsInfo, commanders: r.commanders, ledger: r.profile.ledger, combos: r.bracket.combos, table: null, whatIf: {} });
+    return !nonFinite(r) && !nonFinite(values);
+  } catch (e) { console.log(e); return false; }
+});
+const RF_CASES = [
+  ["a second non-stacking card is refused as a singleton", PodEngine.addRefusal(rfDeck, db["Sol Ring"], null) === "edSingleton"],
+  ["a fourth Forest is allowed", PodEngine.addRefusal(rfDeck, db["Forest"], ["G"]) === null],
+  ["a card outside the commanders' colours is refused", PodEngine.addRefusal(rfDeck, rfRed, ["G"]) === "edIdentity"],
+  ["with no commander, any colours are allowed", PodEngine.addRefusal(rfDeck, rfRed, null) === null],
+  ["a colourless card fits any identity", PodEngine.addRefusal({ entries: [] }, db["Sol Ring"], []) === null],
+  ...[1, 2, 20].map((n, i) => [`a ${n}-card deck analyzes without a non-finite number`, tinyRuns[i]]),
+];
+const rfBad = RF_CASES.filter(([, ok]) => !ok);
+for (const [label] of rfBad) console.log(`BUILDER FAIL: ${label}`);
+console.log(`Deck builder: ${RF_CASES.length - rfBad.length}/${RF_CASES.length} correct`);
+if (rfBad.length) fails++;
+
 process.exit(fails || cmdFails ? 1 : 0);

@@ -16,7 +16,7 @@ import { getSynergy, getAverage } from './synergy.js';
 let latestRun = 0;
 
 // fromLink: the opening of a #d= link. Any other analysis is the visitor's own, so saving resumes.
-export async function analyze(fromLink = false) {
+export async function analyze(fromLink = false, built = false) {
   const run = ++latestRun;
   if (!fromLink && state.shared) { state.shared = false; history.replaceState(null, '', location.pathname + location.search); }
   if (!state.restoring) state.shareBad = false;
@@ -44,8 +44,9 @@ export async function analyze(fromLink = false) {
     persistCache();
     if (run !== latestRun) return;
     state.deck = parsed;
-    state.deckSource = det.kind === 'archidekt' ? { source: 'archidekt', url: 'https://archidekt.com/decks/' + det.id }
+    state.deckSource = built ? { source: 'builder' } : det.kind === 'archidekt' ? { source: 'archidekt', url: 'https://archidekt.com/decks/' + det.id }
       : det.kind === 'moxfield' ? { source: 'moxfield', url: 'https://www.moxfield.com/decks/' + det.id } : { source: 'paste' };
+    if (built) state.openDeck = null;
     state.edits = { undo: [], base: null, text: '' };
     state.combosData = null;
     recompute(notFound);
@@ -53,7 +54,7 @@ export async function analyze(fromLink = false) {
     const cmdKey = (c) => [...c].sort().join('|');
     if (state.openDeck && cmdKey(state.openDeck.commanders) !== cmdKey(state.result.commanders)) state.openDeck = null;
     state.fetchSt = 'idle';
-    if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; }
+    if (!state.restoring) { state.tab = 'informe'; state.view = built ? 'deck' : 'summary'; }
     Object.assign(state.deckView, { level: null, q: '', card: null, open: false, add: '', hits: null, locked: new Set() });
   } catch (e) {
     console.error(e);
@@ -142,7 +143,7 @@ export async function checkCombos() {
 function recordVersion() {
   const r = state.result;
   // a shared deck isn't the visitor's, and a what-if isn't a version until it is analyzed as one
-  if (r.level.pending || !r.commanders.length || state.shared || (state.edits && state.edits.undo.length)) return;
+  if (state.deckSource?.source === 'builder' || r.level.pending || !r.commanders.length || state.shared || (state.edits && state.edits.undo.length)) return;
   saveVersion(r.commanders, { date: new Date().toISOString(), points: r.evalRes.points, power: r.level.score,
     bracket: r.level.bracket, cards: state.deck.entries.map(e => [e.name, e.quantity]) });
 }
