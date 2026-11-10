@@ -423,3 +423,20 @@ body.modal-open{overflow:hidden}
 
 /* deck profile panel */
 
+
+/* ---- Mis mazos ---- */
+.dk-list{display:flex;flex-direction:column;gap:var(--sp-4)}
+.dk-card,.dk-import{display:flex;flex-direction:column;gap:var(--sp-3);padding:var(--sp-4) var(--sp-5)}
+.dk-name{font-size:var(--fs-lead);font-weight:600;overflow-wrap:anywhere}
+.dk-actions,.dk-form{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2)}
+.dk-vis{display:flex;align-items:center;gap:var(--sp-2)}
+.dk-card select,.dk-form input{min-height:44px;box-sizing:border-box;border:1px solid var(--borderCtl);border-radius:var(--r-md);background:var(--panel);color:var(--text);padding:0 var(--sp-3);font-size:16px}
+.dk-form input{flex:1;min-width:0}
+.dk-card .btn-primary,.dk-import .btn-primary,.dk-card .btn-ghost-sm,.dk-import .btn-ghost-sm,.dk-login{min-height:44px;padding-block:0;display:inline-flex;align-items:center;text-decoration:none}
+.dk-card .btn-primary,.dk-import .btn-primary,.dk-login{padding-inline:var(--sp-5)}
+.btn-danger{color:var(--badFg);background:var(--badBg)}
+.dk-confirm{font-size:var(--fs-caption);color:var(--badFg)}
+.dk-history{margin:0;padding-left:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-2);font-size:var(--fs-caption)}
+.dk-import-list{display:flex;flex-direction:column;gap:var(--sp-1)}
+.dk-pick{display:flex;align-items:center;gap:var(--sp-3);min-height:44px}
+.dk-pick input{width:20px;height:20px;flex:none}

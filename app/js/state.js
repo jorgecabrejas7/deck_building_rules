@@ -55,6 +55,10 @@ export const state = {
   shared: false,     // showing a deck from a #d= link: nothing saves until the visitor analyzes their own
   shareBad: false,   // the #d= link could not be read
   linkCopied: false,
+  // shortcut: openDeck is not kept across reloads, persist it if players ask
+  openDeck: null,    // {id, name, text}: the saved deck behind the analysis, so Guardar adds a version; cleared when the paste box moves away from text
+  deckSource: null,  // {source, url?}: where the analyzed list came from, saved with it
+  saveSt: null,      // label key shown on the Guardar button for a moment
   deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false, add: '', hits: null, locked: new Set() },
   deck: null,        // {entries, commanders, deckName}
   cmdPick: null,     // user-chosen commander name(s); null = auto-detect
@@ -78,5 +82,5 @@ export const state = {
   near: null,        // {key, status, groups, all}: combos one card away, for this deck and commander
   cmpView: 'all',    // side-by-side card comparison: 'all' | 'diff'
 };
-export const TAB_KEYS = ['load', 'informe', 'pod', 'guide'];
+export const TAB_KEYS = ['load', 'decks', 'informe', 'pod', 'guide'];
 export const VIEW_KEYS = ['summary', 'deck', 'points', 'bracket', 'combos', 'power', 'mana', 'web'];

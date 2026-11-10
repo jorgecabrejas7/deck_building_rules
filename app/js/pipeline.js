@@ -22,6 +22,7 @@ export async function analyze(fromLink = false) {
   if (!state.restoring) state.shareBad = false;
   const text = $('deckText').value;
   const det = PodEngine.detectInput(text);
+  if (state.openDeck && state.openDeck.text !== text) state.openDeck = null; // another list is no longer that saved deck
   state.busy = true; state.error = null; renderInput();
   try {
     let parsed;
@@ -44,6 +45,8 @@ export async function analyze(fromLink = false) {
     persistCache();
     if (run !== latestRun) return;
     state.deck = parsed;
+    state.deckSource = det.kind === 'archidekt' ? { source: 'archidekt', url: 'https://archidekt.com/decks/' + det.id }
+      : det.kind === 'moxfield' ? { source: 'moxfield', url: 'https://www.moxfield.com/decks/' + det.id } : { source: 'paste' };
     state.edits = { undo: [], base: null, text: '' };
     state.combosData = null;
     recompute(notFound);

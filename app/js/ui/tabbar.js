@@ -4,12 +4,12 @@ import { $, esc } from './helpers.js';
 import { startCheapest } from '../pipeline.js';
 import { renderAll } from '../main.js';
 
-const TAB_LABEL = { load: 'tabLoad', informe: 'tabInforme', pod: 'tabPod', guide: 'tabGuide' };
+const TAB_LABEL = { load: 'tabLoad', decks: 'tabDecks', informe: 'tabInforme', pod: 'tabPod', guide: 'tabGuide' };
 
 export function renderTabbar() {
   const t = T();
   $('tabbar').innerHTML = TAB_KEYS.map(k => {
-    const enabled = k === 'load' || k === 'guide' || k === 'pod' || !!state.result;
+    const enabled = k === 'load' || k === 'decks' || k === 'guide' || k === 'pod' || !!state.result;
     const active = state.tab === k;
     return '<button id="tabbtn-' + k + '" data-tab="' + k + '" ' + (enabled ? '' : 'disabled') +
       ' role="tab" aria-selected="' + active + '" aria-controls="tab-' + k + '" tabindex="' + (active ? 0 : -1) + '"' +

@@ -503,7 +503,8 @@ s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:
 
 // Feature dictionaries live in their own files; a key may be defined once.
 import account from './i18n/account.js';
-for (const dict of [account]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
+import decks from './i18n/decks.js';
+for (const dict of [account, decks]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
   if (k in L[lang]) throw new Error('i18n key clash: ' + k);
   L[lang][k] = v;
 }
