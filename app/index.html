@@ -117,6 +117,13 @@ window.addEventListener('error', function (e) {
         <span id="tryLabel" class="lbl-muted"></span>
         <span id="samples" class="chip-row"></span>
       </div>
+      <div id="newDeck" class="new-deck">
+        <h3 id="ndT" class="new-deck-t"></h3>
+        <p id="ndX" class="lbl-muted"></p>
+        <input id="ndSearch" type="search" class="cmd-search" autocomplete="off">
+        <div id="ndPicked"></div>
+        <ul id="ndHits" class="dk-hits" aria-live="polite"></ul>
+      </div>
       <div class="controls-row">
         <button id="tableModeBtn" type="button" class="link-btn"></button>
         <button id="emptyPod" type="button" class="link-btn"></button>
