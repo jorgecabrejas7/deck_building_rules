@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from accounts import views
+from decks import views as decks
 
 admin.site.has_permission = lambda request: request.user.is_active and request.user.is_superuser
 admin.site.login = lambda request, extra_context=None: views.redirect_to_account()
@@ -14,9 +15,15 @@ urlpatterns = [
     path("pod/api/me", views.me),
     path("pod/api/me/delete", views.me_delete),
     path("pod/api/gate", views.gate),
+    path("pod/api/decks", decks.decks),
+    path("pod/api/decks/<int:id>", decks.deck),
+    path("pod/api/decks/<int:id>/versions", decks.versions),
+    path("pod/api/decks/link/<str:token>", decks.link),
 ]
 if settings.DEV_STATIC:
     urlpatterns += [
+        path("pod/api/archidekt/<int:id>", decks.archidekt_deck),
+        path("pod/api/archidekt/user/<str:username>", decks.archidekt_user),
         path("pod/", views.dev_redirect),
         path("pod/app", views.dev_redirect),
         path("pod/app/", views.dev_static, {"root": "app", "rest": ""}),
