@@ -111,7 +111,7 @@ Every deck is read by one pure function, `analyzeDeck` in `engine/analyze.js`: t
 | Rejected: Node, FastAPI, DRF, Postgres | Node or FastAPI would rebuild auth and admin; DRF is weight for a few JSON views; Postgres is a second service nobody needs yet |
 
 ## Privacy
-We store the username, email, display name, language and a password hash (or the Google link), and later the user's saved decks and pods. Nothing is sold or shared. A signed-in user can delete the account in the profile page; that removes the account and its data, and never touches the browser's `pdc_*` keys. Backups stay on the server for 14 days. Data requests go by email (the contact address is still a placeholder on the privacy page).
+We store the username, email, display name, language and a password hash (or the Google link), and later the user's saved decks and pods. Nothing is sold or shared. A signed-in user can delete the account in the profile page; that removes the account and its data, and never touches the browser's `pdc_*` keys. Backups stay on the server for 14 days. Data requests go by email to the contact address on the privacy and terms pages (`account.html?view=privacy|terms`, linked from every footer). The Google OAuth app is published (2026-11-10), so anyone with Google can request an account; every new account still waits for approval in the admin page.
 
 ## Building stages
 - **F0:** static analyzer, pod rules, table mode. Done.

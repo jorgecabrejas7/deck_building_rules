@@ -135,18 +135,18 @@ function viewProfile() {
   });
 }
 
-function viewPrivacy() {
+// k is 'priv' or 'terms': the page title is t[k+'T'], the rows t[k]
+const legalView = (k) => () => {
   const t = T();
-  $('card').innerHTML = `<h2>${t.privT}</h2><dl class="priv">${t.priv.map(([h, p]) => `<dt>${h}</dt><dd>${p}</dd>`).join('')}</dl><a class="btn-alt" href="./">${t.backApp}</a>`;
-  $('card').querySelector('dd:last-of-type').textContent += '⟦contact TBD⟧'; // placeholder until Jorge gives a contact
-}
+  $('card').innerHTML = `<h2>${t[k + 'T']}</h2><dl class="priv">${t[k].map(([h, p]) => `<dt>${h}</dt><dd>${p}</dd>`).join('')}</dl><a class="btn-alt" href="./">${t.backApp}</a>`;
+};
 
-const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, profile: viewProfile, privacy: viewPrivacy };
+const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, profile: viewProfile, privacy: legalView('priv'), terms: legalView('terms') };
 
 // The state decides what is allowed; the ?view= only picks among the allowed ones.
 function pick() {
   const want = params.get('view') || 'signin';
-  if (want === 'privacy') return 'privacy';
+  if (want === 'privacy' || want === 'terms') return want;
   if (me && me.state === 'active') return want === 'profile' ? 'profile' : null;
   // pending is the landing, but its own sign-in link must still reach the form (another account may be approved)
   if (me && me.state === 'pending' && !params.has('view')) return 'pending';
