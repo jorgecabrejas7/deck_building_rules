@@ -10,7 +10,7 @@ handle_path /pod/* {
 	# GATE (step 2; delete this block for the backend-only step 1). forward_auth sorts before handle, so it runs
 	# first: a 2xx from /pod/api/gate lets the request through, anything else (its 302 to the account page) is the answer.
 	# Open paths, identical to OPEN_PATHS in server/accounts/views.py. The Moxfield and Archidekt proxies stay gated.
-	@gated expression `!path('/app/account.html', '/app/js/account.js', '/app/js/i18n.js', '/app/js/i18n/*', '/app/js/state.js', '/app/js/engine/history.js', '/app/js/engine/decks.js', '/app/styles/*') && !(path('/api/*') && !path('/api/moxfield/*') && !path('/api/archidekt/*'))`
+	@gated expression `!path('/app/account.html', '/app/js/account.js', '/app/js/api.js', '/app/js/i18n.js', '/app/js/i18n/*', '/app/js/state.js', '/app/js/engine/history.js', '/app/js/engine/decks.js', '/app/styles/*') && !(path('/api/*') && !path('/api/moxfield/*') && !path('/api/archidekt/*'))`
 	forward_auth @gated 127.0.0.1:8770 {
 		uri /pod/api/gate
 	}
@@ -34,6 +34,21 @@ handle_path /pod/* {
 	@archidekt {
 		method GET
 		path_regexp archidekt ^/api/archidekt/([0-9]{1,12})$
+	}
+	# a player's public Commander decks, listed by Archidekt username
+	@archidektuser {
+		method GET
+		path_regexp archidektuser ^/api/archidekt/user/([A-Za-z0-9_.-]{1,40})$
+	}
+	handle @archidektuser {
+		rewrite * /api/decks/v3/?ownerUsername={re.archidektuser.1}&deckFormat=3&pageSize=50
+		reverse_proxy https://archidekt.com {
+			header_up Host {upstream_hostport}
+			header_up User-Agent pod-deck-checker
+			header_up -Cookie
+			header_up -Referer
+			header_up -X-Forwarded-For
+		}
 	}
 	handle @archidekt {
 		rewrite * /api/decks/{re.archidekt.1}/

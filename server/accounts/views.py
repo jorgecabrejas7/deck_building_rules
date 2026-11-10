@@ -13,7 +13,7 @@ from .models import User
 ACCOUNT_PAGE = "/pod/app/account.html"
 # Paths as seen inside handle_path /pod/*; keep identical to deploy/pod.caddy.
 OPEN_PATHS = [
-    "/app/account.html", "/app/js/account.js", "/app/js/i18n.js", "/app/js/i18n/*",
+    "/app/account.html", "/app/js/account.js", "/app/js/api.js", "/app/js/i18n.js", "/app/js/i18n/*",
     "/app/js/state.js", "/app/js/engine/history.js", "/app/js/engine/decks.js",
     "/app/styles/*",
 ]
