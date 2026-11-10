@@ -491,7 +491,8 @@ import decks from './i18n/decks.js';
 import pods from './i18n/pods.js';
 import podrules from './i18n/podrules.js';
 import builder from './i18n/builder.js';
-for (const dict of [account, decks, pods, podrules, builder]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
+import table from './i18n/table.js';
+for (const dict of [account, decks, pods, podrules, builder, table]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
   if (k in L[lang]) throw new Error('i18n key clash: ' + k);
   L[lang][k] = v;
 }

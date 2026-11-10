@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La guía del Yoryi · Mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/mobile.css">
+<link rel="stylesheet" href="styles/table.css">
+</head>
+<body class="tbl">
+<script>/* pre-paint theme: keep in sync with js/ui/header.js applyTheme() */
+if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');</script>
+<div id="top" class="tb-top"></div>
+<div id="roll" class="tb-roll" aria-live="polite"></div>
+<main id="board" class="tb-board"></main>
+<div id="toast" class="tb-toast" role="status" aria-live="polite"></div>
+<div id="hand" class="tb-hand"></div>
+<div id="sheet" class="sheet" hidden></div>
+<div id="preview" class="preview" data-preview-close hidden></div>
+<script type="module" src="js/table.js"></script>
+</body>
+</html>
