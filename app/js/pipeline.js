@@ -90,6 +90,21 @@ export async function getCardTags() {
   if (!cardTags) cardTags = PodEngine.indexCardTags(await (await fetch('../data/card_tags.json')).json());
   return cardTags;
 }
+// A deck read in the browser, the way Modo mesa and the Pod tab need it: no state, one deck at a time.
+// A failed database costs only what it feeds, so each one may come back null.
+export async function readDeps() {
+  const [comboDb, saltDb, cardTags, landDenial, precons] = await Promise.all(
+    [getComboDb(), getSaltDb(), getCardTags(), getLandDenial(), getPrecons()].map(p => p.catch(() => null)));
+  return { comboDb, saltDb, cardTags, landDenial, precons };
+}
+export async function readDeck(parsed, deps, pick) {
+  const names = [...new Set(parsed.entries.map(e => e.name))];
+  const { notFound } = await PodEngine.fetchCards(names, cardCache, () => {});
+  return PodEngine.analyzeDeck({ parsed, db: cardCache, rules: RULES, pick,
+    combos: deps.comboDb ? PodEngine.matchCombos(parsed.entries.map(e => e.name), deps.comboDb) : null,
+    ...deps, notFound });
+}
+
 // Only the latest check may publish: an edit made during one has already changed the deck it read.
 let latestCheck = 0;
 export async function checkCombos() {

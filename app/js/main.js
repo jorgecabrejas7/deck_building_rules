@@ -2,7 +2,7 @@
 // NOTE: UI modules import renderAll from here (an intentional cycle) — safe
 // because every cross-module call happens inside event handlers, after eval.
 import * as PodEngine from './engine/index.js';
-import { RULES } from './rules.js';
+import { RULES, TEMPLATE, bootPods } from './rules.js';
 import { state, store, cardCache, saveSession, loadSession, VIEW_KEYS } from './state.js';
 import { deckToText } from './advice.js';
 import { T, fill } from './i18n.js';
@@ -30,7 +30,7 @@ import { renderHand } from './ui/hand.js';
 import { renderTableMode } from './ui/table.js';
 import { renderCurve } from './ui/curve.js';
 import { renderGuide } from './ui/guide.js';
-import { renderPod } from './ui/pod.js';
+import { renderPod, renderPodPicker, selectPod, joinPod } from './ui/pod.js';
 import { renderDecks, saveDeck, openLinked } from './ui/decks.js';
 import { openHow, closeHow } from './ui/how.js';
 import { copyReport, copyShareLink } from './ui/report.js';
@@ -88,7 +88,7 @@ const VIEW_RENDER = {
 
 export function renderAll() {
   const focus = focusKey(document.activeElement) || lastFocus;
-  applyTheme(); renderHeader(); renderInput(); renderGuide(); renderTabbar(); renderTableMode();
+  applyTheme(); renderHeader(); renderInput(); renderGuide(); renderTabbar(); renderTableMode(); renderPodPicker();
   const t = T();
   $('loadSub').textContent = t.emptyX;
   $('footerText').textContent = fill(t.footer, { r: RULES.version });
@@ -144,7 +144,7 @@ const __boot = () => {
   $('shareBtn').onclick = copyShareLink;
   $('saveBtn').onclick = saveDeck;
   // a link pasted into an open tab only changes the hash, so boot again to read it
-  addEventListener('hashchange', () => { if (/^#(d|deck)=/.test(location.hash)) location.reload(); });
+  addEventListener('hashchange', () => { if (/^#(d|deck|join)=/.test(location.hash)) location.reload(); });
   $('howBtn').onclick = openHow;
   $('howModal').onclick = (e) => { if (e.target === $('howModal')) closeHow(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHow(); });
@@ -161,6 +161,7 @@ const __boot = () => {
   $('analyzeBtn').onclick = () => { state.restoring = false; analyze(); };
   $('emptyPod').onclick = () => { state.tab = 'pod'; renderAll(); };
   $('archSel').onchange = (e) => { state.arch = e.target.value; renderAll(); };
+  $('podSel').onchange = (e) => selectPod(Number(e.target.value) || null);
   $('deckText').oninput = () => { state.error = null; renderInput(); saveSession(); };
   // every link between views, from the nav or from inside a panel
   document.addEventListener('click', (e) => {
@@ -181,7 +182,7 @@ const __boot = () => {
     $('stickyWrap').classList.toggle('stuck', !e.isIntersecting);
     $('summary').dispatchEvent(new Event('scroll')); // re-check the strip's edge fade at the new width
   }).observe($('stickySentinel'));
-  const st = PodEngine.runSelfTest(RULES);
+  const st = PodEngine.runSelfTest(TEMPLATE);
   if (!st.pass) console.warn('PodEngine selftest FAILED', st.results.filter(r => !r.pass));
   // restore the previous session's inputs, then re-derive the analysis
   const sess = loadSession();
@@ -193,6 +194,7 @@ const __boot = () => {
       state.tableTexts = [0, 1, 2, 3].map(i => typeof sess.tableTexts[i] === 'string' ? sess.tableTexts[i] : '');
   }
   history.scrollRestoration = 'manual';
+  if (bootPods) { state.pods = bootPods.pods; state.activeId = bootPods.active ? bootPods.active.id : null; }
   // raised before the first render, which saves the session
   state.shared = /^#(d|deck)=/.test(location.hash);
   renderAll();
@@ -203,6 +205,17 @@ const __boot = () => {
     if (VIEW_KEYS.includes(sess.view)) state.view = sess.view;
     analyze().finally(() => { state.restoring = false; });
   };
+  if (/^#join=/.test(location.hash)) {
+    // an invite link: join (or sign in and come back), then land on the pod
+    joinPod(location.hash.slice(6)).then(ok => {
+      if (ok === null) return;
+      history.replaceState(null, '', location.pathname + location.search);
+      state.tab = 'pod';
+      renderAll();
+      restoreSaved();
+    });
+    return;
+  }
   if (!state.shared) { restoreSaved(); return; }
   if (location.hash.startsWith('#deck=')) {
     openLinked(location.hash.slice(6)).then(ok => {

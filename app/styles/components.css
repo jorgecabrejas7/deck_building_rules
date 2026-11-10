@@ -407,12 +407,21 @@ body.modal-open{overflow:hidden}
 .pod-table .pod-actions button{white-space:nowrap}
 .pod-table .pod-actions{display:flex;gap:var(--sp-1);margin:0;flex-wrap:nowrap;justify-content:flex-end;padding-right:0}
 .pod-name{font-weight:500;font-size:var(--fs-body)}
-.pod-link{display:block;font-size:var(--fs-micro);font-weight:400;text-decoration:none}
 .pod-why{display:block;font-size:var(--fs-micro);color:var(--badFg);margin-top:2px}
 .pod-ref th,.pod-ref td{color:var(--muted);font-weight:400}
-.pod-sort{border:none;background:none;padding:2px 0;font-size:var(--fs-micro);font-weight:500;color:var(--muted);white-space:nowrap}
-.pod-sort:hover{color:var(--text)}
-.pod-sort.on{color:var(--text);font-weight:600}
+.pod-who{color:var(--muted);margin-top:0}
+.pod-card{display:flex;flex-direction:column;gap:var(--sp-3)}
+.pod-table .pod-actions button,.pod-card .btn-ghost-sm,.pod-card .btn-primary,.pod-create .btn-primary{min-height:44px}
+.pod-sub{font-size:var(--fs-lead);font-weight:600;margin:var(--sp-2) 0 0}
+.pod-members{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.pod-member{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2);min-height:44px;border-bottom:1px solid var(--border2)}
+.pod-mname{overflow-wrap:anywhere}
+.pod-invite{display:flex;flex-direction:column;gap:var(--sp-2)}
+.pod-link-in,.pod-create input,.pod-create select{min-height:44px;box-sizing:border-box;border:1px solid var(--borderCtl);border-radius:var(--r-md);background:var(--panel);color:var(--text);padding:0 var(--sp-3);font:inherit}
+.pod-link-in{width:100%}
+.pod-create summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:500}
+.pod-create input{flex:1;min-width:0}
+.pod-rules{border-top:1px solid var(--border2);padding-top:var(--sp-3)}
 
 /* bracket, combos, profile: restyled in power.css, kept here until then */
 /* bracket panel */
