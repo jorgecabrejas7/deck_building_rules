@@ -3,6 +3,7 @@ import { T, fill } from '../i18n.js';
 import { COMBO_TAGS, deckFingerprint, fetchCards, groupNear, nearCombos, nearPlayable } from '../engine/index.js';
 import { comboFeatureText } from './constants.js';
 import { $, esc } from './helpers.js';
+import { addByName, canEdit } from '../edits.js';
 import { checkCombos, getComboDb } from '../pipeline.js';
 import { ICON, answer, cardName, fold, more, paint } from './reading.js';
 
@@ -129,7 +130,7 @@ function nearLine(c, t) {
 function nearCard({ card, combos }, t) {
   const rest = combos.slice(NEAR_IN_CARD);
   return '<li class="cb nr"><div class="cb-arts" data-n="1">' + cardImage(card) + '</div><div class="cb-body">' +
-    '<h5>' + esc(card) + '</h5><p class="cb-tag">' + esc(fill(combos.length === 1 ? t.nearOne : t.nearMany, { v: combos.length })) + '</p>' +
+    '<h5>' + esc(card) + '</h5><button type="button" class="btn-outline sug-btn" data-add-name="' + esc(card) + '"' + (canEdit() ? '' : ' disabled') + '>' + esc(t.nearAdd) + '</button><p class="cb-tag">' + esc(fill(combos.length === 1 ? t.nearOne : t.nearMany, { v: combos.length })) + '</p>' +
     combos.slice(0, NEAR_IN_CARD).map(c => nearLine(c, t)).join('') +
     (rest.length ? more(fill(t.sugMore, { v: rest.length }), rest.map(c => nearLine(c, t)).join('')) : '') + '</div></li>';
 }
@@ -149,6 +150,7 @@ function paintNear() {
     const key = row.dataset.key;
     loadShard(shardOf(key)).then(rows => { if (row.isConnected) row.querySelector('.cb-steps').innerHTML = stepsHtml(rows[key], t); });
   }, { once: true });
+  for (const b of el.querySelectorAll('[data-add-name]')) b.onclick = () => addByName(b.dataset.addName);
   const moreBtn = $('nearMore');
   if (moreBtn) moreBtn.onclick = () => { near.all = true; paintNear(); $('nearList').focus({ preventScroll: true }); };
 }

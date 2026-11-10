@@ -613,3 +613,6 @@ body:has(.edit-bar:not([hidden])) .dk-inspect{max-height:calc(100vh - var(--stic
 .pr-note{margin:0;color:var(--muted)}
 .pr-err{margin:0;color:var(--badFg);font-size:var(--fs-caption)}
 .pr-actions{display:flex;align-items:center;gap:var(--sp-3)}
+
+.sug-act{margin-top:var(--sp-1)}
+.sug-btn{min-height:44px;min-width:44px;padding:0 var(--sp-3)}

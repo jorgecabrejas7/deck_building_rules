@@ -1,11 +1,11 @@
-import { budgetTotals, cardValues, cardmarketUrl, cardmarketWants, trimPlan } from '../engine/index.js';
+import { stacksInDeck, budgetTotals, cardValues, cardmarketUrl, cardmarketWants, trimPlan } from '../engine/index.js';
 import { state, store } from '../state.js';
 import { T, fill } from '../i18n.js';
 import { TYPES, TYPE_ORDER } from './constants.js';
 import { $, announce, esc, eur } from './helpers.js';
 import { ICON, fold, paint } from './reading.js';
 import { startCheapest } from '../pipeline.js';
-import { canEdit, removeFromDeck } from '../edits.js';
+import { addToDeck, canEdit, removeFromDeck } from '../edits.js';
 import { addBoxHtml, bindAddBox } from './edits.js';
 
 // The whole deck, three ways of looking at it. The list stays put and the card you pick
@@ -97,6 +97,7 @@ function inspector(c, t) {
     '<h3 class="dk-i-name">' + esc(short(c.name)) + '</h3>' +
     '<p class="dk-i-level">' + pips(c.level) + ' ' + esc(c.commander ? t.dkCommander : t['dkLevel_' + c.level]) + '</p>' +
     '<button type="button" id="dkRemove" class="btn-outline dk-remove"' + (canEdit() ? '' : ' disabled') + '>' + esc(c.x.qty > 1 ? t.dkRemoveCopy : t.dkRemove) + '</button>' +
+    (stacksInDeck(card) ? '<button type="button" id="dkAddCopy" class="btn-outline dk-remove"' + (canEdit() ? '' : ' disabled') + '>' + esc(t.dkAddCopy) + '</button>' : '') +
     (c.unusual ? '<p class="dk-note">' + esc(t.dkUnusualX) + '</p>' : '') +
     (c.jobs.length ? '<h4>' + esc(t.dkDoes) + '</h4><ul class="dk-jobs">' + c.jobs.map(j => '<li>' + esc(t['dkJob_' + j]) + '</li>').join('') + '</ul>' : '') +
     (reasons.length ? '<h4>' + esc(t.dkWhy) + '</h4><ul class="dk-why">' + reasons.map(x => '<li>' + esc(reasonText(x, t)) + '</li>').join('') + '</ul>' : '') +
@@ -198,6 +199,8 @@ export function renderDeck() {
       if (c.x.qty === 1) dv.open = false;
       removeFromDeck([c.name]);
     };
+    const add = el.querySelector('#dkAddCopy');
+    if (add) add.onclick = () => addToDeck(c.x.card);
     const close = el.querySelector('.dk-close');
     close.onclick = () => {
       dv.open = false; el.classList.remove('open');
