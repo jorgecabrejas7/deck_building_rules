@@ -18,6 +18,10 @@ pdCreate:'Crear pod',pdName:'Nombre del pod',pdCopyFrom:'Copiar reglas de',pdCre
 pdLoading:'Cargando el pod…',pdErr:'No se pudo contactar con el servidor. Inténtalo de nuevo en un momento.',
 pdErrLimit:'Límite alcanzado: 20 pods por persona y 100 mazos por pod.',pdErrLastAdmin:'Eres el único admin: nombra a otro antes de salir.',
 pdJoinBad:'El enlace de invitación no vale: pide uno nuevo al admin del pod.',
+pdGames:'Partidas',pdGWho:'Oponente',pdGInvite:'Invitar a una partida',pdGNoOthers:'No hay otros miembros a quienes invitar.',pdGNone:'No tienes partidas abiertas en este pod.',
+pdGDeleted:'cuenta borrada',pdGActive:'en juego',pdGWait:'esperando mazos · tú: %a · rival: %b',pdGPicked:'elegido',pdGNotPicked:'sin elegir',
+pdGOpen:'Abrir',pdGEnd:'Terminar',pdGDecline:'Rechazar',pdGAsk:'¿Terminar la partida? Se borra para los dos.',
+pdGLimit:'Límite alcanzado: 5 partidas abiertas por persona.',pdGErr:'No se pudo completar la acción con las partidas. Inténtalo de nuevo.',
 },
 en: {
 pdPicker:'Pod',pdTemplate:'Template (no pod)',
@@ -37,5 +41,9 @@ pdCreate:'Create a pod',pdName:'Pod name',pdCopyFrom:'Copy rules from',pdCreateG
 pdLoading:'Loading the pod…',pdErr:'The server could not be reached. Try again in a moment.',
 pdErrLimit:'Limit reached: 20 pods per person and 100 decks per pod.',pdErrLastAdmin:'You are the only admin: name another one before leaving.',
 pdJoinBad:'The invite link is not valid: ask the pod’s admin for a new one.',
+pdGames:'Games',pdGWho:'Opponent',pdGInvite:'Invite to a game',pdGNoOthers:'There are no other members to invite.',pdGNone:'You have no open games in this pod.',
+pdGDeleted:'deleted account',pdGActive:'in play',pdGWait:'waiting for decks · you: %a · opponent: %b',pdGPicked:'picked',pdGNotPicked:'not picked',
+pdGOpen:'Open',pdGEnd:'End',pdGDecline:'Decline',pdGAsk:'End the game? It is deleted for both players.',
+pdGLimit:'Limit reached: 5 open games per person.',pdGErr:'The games action could not be completed. Try again.',
 },
 };
