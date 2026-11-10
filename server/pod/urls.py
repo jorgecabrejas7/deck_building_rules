@@ -4,6 +4,7 @@ from django.urls import include, path
 
 from accounts import views
 from decks import views as decks
+from games import views as games
 from pods import views as pods
 
 admin.site.has_permission = lambda request: request.user.is_active and request.user.is_superuser
@@ -27,8 +28,11 @@ urlpatterns = [
     path("pod/api/pods/<int:id>/invite", pods.invite),
     path("pod/api/pods/<int:id>/leave", pods.leave),
     path("pod/api/pods/<int:id>/members/<int:user_id>", pods.member),
+    path("pod/api/pods/<int:id>/games", games.pod_games),
     path("pod/api/pods/<int:id>/decks", pods.add_deck),
     path("pod/api/pods/<int:id>/decks/<int:deck_id>", pods.remove_deck),
+    path("pod/api/games/<int:id>/deck", games.game_deck),
+    path("pod/api/games/<int:id>", games.game),
 ]
 if settings.DEV_STATIC:
     urlpatterns += [

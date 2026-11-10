@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "accounts",
     "decks",
     "pods",
+    "games",
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,8 @@ TEMPLATES = [{
     ]},
 }]
 ASGI_APPLICATION = "pod.asgi.application"
+# shortcut: single process only; switch to channels-redis if uvicorn ever runs more than one worker
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
 DATABASES = {"default": {
     "ENGINE": "django.db.backends.sqlite3",

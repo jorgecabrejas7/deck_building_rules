@@ -24,6 +24,8 @@ let renaming = false;
 let editing = false;
 let editorEl = null;        // kept across renders so a half-edited rule is not lost
 let copied = false;
+let games = null;           // {podId, list, busy}: my games in the active pod; null = to be loaded
+let gMsg = null;            // i18n key of the last games answer
 let failed = false;         // reading the table failed: not retried until the rules or the pod change
 
 const keyOf = (d) => d.id + '|' + d.updated_at + '|' + state.pod.rules_updated_at;
@@ -66,7 +68,7 @@ async function reload() {
   if (state.activeId && !state.pod) { msg = 'pdErr'; return; }
   applyRules();
 }
-const reset = () => { asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
+const reset = () => { games = null; gMsg = null; asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
 
 export async function selectPod(id) {
   const res = await api(API + 'pods/active', 'POST', { pod: id });
@@ -190,6 +192,46 @@ function adminHtml(t) {
     '<button class="btn-ghost-sm" data-act="regen">' + esc(t.pdRegen) + '</button></div><p class="note-sm">' + esc(t.pdRegenNote) + '</p></div>';
 }
 
+// ---- games (F5): invite another member, open or end my games ----
+async function loadGames() {
+  const id = state.pod.id;
+  games = { podId: id, list: [], busy: true };
+  const res = await api(API + 'pods/' + id + '/games');
+  if (!state.pod || state.pod.id !== id) return;
+  if (res.status === 200) games = { podId: id, list: res.data.games, busy: false };
+  else { games = { podId: id, list: [], busy: false }; gMsg = 'pdGErr'; }
+  if (state.tab === 'pod') renderPod();
+}
+function gamesHtml(t) {
+  const others = state.pod.members.filter(m => !m.me);
+  const invite = others.length
+    ? '<form class="dk-form" data-gameform><select name="opponent" aria-label="' + esc(t.pdGWho) + '">' +
+      others.map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select>' +
+      '<button class="btn-primary">' + esc(t.pdGInvite) + '</button></form>'
+    : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
+  const li = (games ? games.list : []).map(g => {
+    const who = g.opponent === null ? t.pdGDeleted : g.opponent;
+    const me = g.picked[g.seat], them = g.picked[3 - g.seat];
+    const st = g.status === 'active' ? t.pdGActive
+      : fill(t.pdGWait, { a: me ? t.pdGPicked : t.pdGNotPicked, b: them ? t.pdGPicked : t.pdGNotPicked });
+    const lobby = g.status === 'lobby';
+    const end = asking === 'g' + g.id
+      ? '<span class="dk-confirm">' + esc(t.pdGAsk) + '</span><button class="btn-ghost-sm btn-danger" data-act="game-end-yes" data-game="' + g.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
+      : '<button class="btn-ghost-sm" data-act="game-end" data-game="' + g.id + '">' + esc(lobby ? t.pdGDecline : t.pdGEnd) + '</button>';
+    return '<li class="pod-member"><span class="pod-mname">' + esc(who) + ' <span class="lbl-muted">' + esc(st) + '</span></span><span class="dk-actions">' +
+      '<a class="btn-ghost-sm" href="table.html?game=' + g.id + '">' + esc(t.pdGOpen) + '</a>' + end + '</span></li>';
+  }).join('');
+  return '<h3 class="pod-sub">' + esc(t.pdGames) + '</h3>' + invite + (gMsg ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') +
+    (li ? '<ul class="pod-members">' + li + '</ul>' : games && !games.busy ? '<p class="note-sm">' + esc(t.pdGNone) + '</p>' : '');
+}
+async function gameAct(method, path, body, ok) {
+  const res = await api(API + path, method, body);
+  gMsg = res.status === ok ? null : res.data.errors && res.data.errors.games === 'limit' ? 'pdGLimit' : res.status === 0 ? 'pdErr' : 'pdGErr';
+  asking = null;
+  await loadGames();
+  return res.status === ok;
+}
+
 function createHtml(t) {
   return '<details class="pod-create"' + (state.pod ? '' : ' open') + '><summary>' + esc(t.pdCreate) + '</summary><form class="dk-form" data-createform>' +
     '<input name="name" maxlength="100" required placeholder="' + esc(t.pdName) + '" aria-label="' + esc(t.pdName) + '">' +
@@ -221,7 +263,8 @@ export function renderPod() {
       const p = state.pod;
       body = pick + flash + '<p class="note-sm">' + esc(p.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + ' · ' + esc(count(p.members.length, t.pdMember1, t.pdMemberN) + ' · ' + count(p.decks.length, t.pdDeck1, t.pdDeckN)) + '</p>' +
         '<div class="panel pod-card">' + deckTable(t) + '<div class="dk-actions">' + addHtml(t) + '</div></div>' +
-        '<div class="panel pod-card">' + membersHtml(t) + (p.role === 'admin' ? adminHtml(t) : '') + '</div>' + createHtml(t);
+        '<div class="panel pod-card">' + membersHtml(t) + (p.role === 'admin' ? adminHtml(t) : '') + '</div>' +
+        '<div class="panel pod-card">' + gamesHtml(t) + '</div>' + createHtml(t);
     }
   }
   el.innerHTML = '<div class="stack-16">' + head + body + '</div>';
@@ -233,6 +276,7 @@ export function renderPod() {
     }
     host.replaceWith(editorEl);
   }
+  if (state.pod && (!games || games.podId !== state.pod.id)) loadGames();
   const stale = state.pod && !progress && !failed && state.pod.decks.some(d => d.list && !rows.has(keyOf(d)));
   if (stale) compute();
   el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange;
@@ -280,6 +324,8 @@ async function onClick(e) {
     state.tableOpen = true; state.tableResults = null; state.tab = 'load';
     renderAll(); return runTableMode();
   }
+  if (a === 'game-end') { asking = 'g' + b.dataset.game; return renderPod(); }
+  if (a === 'game-end-yes') { await gameAct('DELETE', 'games/' + b.dataset.game, undefined, 204); return; }
   if (a === 'add-open') {
     const res = await api(API + 'decks');
     adding = { decks: res.status === 200 ? res.data.decks : [] };
@@ -306,7 +352,8 @@ async function onClick(e) {
 async function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
-  if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
+  if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponent: Number(f.opponent.value) }, 201);
+  else if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
   else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }
   else if ('createform' in f.dataset) {
     const res = await act('POST', 'pods', { name: f.name.value.trim(), from: f.from.value ? Number(f.from.value) : null }, 201);
