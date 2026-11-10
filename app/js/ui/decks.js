@@ -43,26 +43,25 @@ export async function saveDeck() {
     const e = res.data.errors || {};
     return flash(e.decks === 'limit' || e.versions === 'limit' ? 'sdLimit' : 'sdFailed');
   }
-  if (!open) state.openDeck = { id: res.data.deck.id, name: res.data.deck.name, text: $('deckText').value };
+  if (!open) state.openDeck = { id: res.data.deck.id, name: res.data.deck.name, commanders: state.result.commanders };
   list = null; status = 'idle'; hist = null;
   flash('sdSaved');
 }
 
 // ---- opening ----
-function fillAndAnalyze(version) {
+function fillDeck(version) {
   const text = deckToText(version.list);
   $('deckText').value = text;
   state.arch = 'auto';
   const names = version.list.commanders;
   state.cmdPick = names.length ? { key: deckFingerprint(parseDecklist(text).entries), names } : null;
-  return text;
 }
 
 async function openSaved(id) {
   const res = await api(API + 'decks/' + id);
   if (res.status !== 200 || !res.data.versions.length) { announce(T().sdLoadErr); return; }
-  const text = fillAndAnalyze(res.data.versions[0]);
-  state.openDeck = { id, name: res.data.deck.name, text };
+  fillDeck(res.data.versions[0]);
+  state.openDeck = { id, name: res.data.deck.name, commanders: res.data.versions[0].list.commanders };
   state.restoring = false;
   analyze();
 }
@@ -72,7 +71,8 @@ export async function openLinked(token) {
   const res = await api(API + 'decks/link/' + encodeURIComponent(token));
   if (res.status === 403) { location.assign('account.html'); return true; } // only signed-in players read links
   if (res.status !== 200) return false;
-  fillAndAnalyze(res.data.version);
+  fillDeck(res.data.version);
+  state.openDeck = null; // someone else's deck: saving it makes the visitor's own copy
   analyze(true);
   return true;
 }
@@ -147,7 +147,7 @@ async function runImport(ids) {
 
 // ---- rendering ----
 const changes = (v, older, t) => {
-  if (!older) return '<span class="note-sm">' + esc(t.sdFirst) + '</span>';
+  if (!older) return ' <span class="note-sm">' + esc(t.sdFirst) + '</span>';
   const { added, cut } = diffCards(cards(older), cards(v));
   const names = (xs) => xs.slice(0, 10).map(x => (x.n > 1 ? x.n + 'x ' : '') + esc(x.name)).join(', ') + (xs.length > 10 ? ' ' + esc(fill(t.sdMore, { n: xs.length - 10 })) : '');
   if (!added.length && !cut.length) return '<span class="note-sm">' + esc(t.sdNoChange) + '</span>';

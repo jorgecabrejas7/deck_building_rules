@@ -115,7 +115,7 @@ so there is nothing else to sync. Re-run the parity test + calibration.
 
 ## Accounts and server (server/)
 
-The site is private while in development: it needs an account Jorge approves. The backend is Django under server/ (accounts, admin, the gate), served at /pod/api/.
+The site is private while in development: it needs an account Jorge approves. The backend is Django under server/ (accounts, admin, the gate, saved decks), served at /pod/api/.
 
 Run it locally:
   python3 -m venv server/.venv && server/.venv/bin/pip install -r server/requirements-dev.txt

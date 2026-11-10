@@ -3,7 +3,10 @@
 @media (max-width: 999px) {
   img{max-width:100%}
   .cmd-name,.sug-name,.ramp-text{overflow-wrap:anywhere}
-  .hero-inner{padding-block:var(--sp-2)}
+  /* seven 44px controls do not fit next to the title on a phone: they take their own row */
+  .hero-inner{padding-block:var(--sp-2);flex-wrap:wrap;row-gap:0}
+  .brand{flex:none}
+  .header-actions{margin-left:auto}
   .brand-tag{display:none}
   .brand-mark{display:none}
   .brand-title{font-size:15px}

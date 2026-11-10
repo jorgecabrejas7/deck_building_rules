@@ -115,8 +115,8 @@ We store the username, email, display name, language and a password hash (or the
 
 ## Building stages
 - **F0:** static analyzer, pod rules, table mode. Done.
-- **F1:** users and the private gate. This one.
-- **F2:** saved decks per user, and a picker of the user's public Archidekt decks.
+- **F1:** users and the private gate. Done.
+- **F2:** saved decks per user, and a picker of the user's public Archidekt decks. Done. Django app `decks` (`Deck`, `DeckVersion`) at `/pod/api/decks…`; a save always adds a version, never overwrites (100 decks a user, 100 versions a deck, refused past that). The header's Guardar saves the analyzed deck; it adds a version while the analysis keeps the commanders of the deck opened from Mis mazos, otherwise it makes a new deck (in memory only, never in `pdc_*`). Visibility is private or link (`index.html#deck=<token>`, signed-in players only, latest version); `pods` exists for F3 and reads as private. Mis mazos is its own tab: open, rename, history (`diffCards`), visibility, delete with an inline confirm, and import from Archidekt by username: Caddy's `@archidektuser` route lists that user's public Commander decks (first 50), each ticked deck is fetched with the existing deck route. In DEBUG Django answers both Archidekt routes so the import works on localhost. The `api()` helper lives in `app/js/api.js`, an open path.
 - **F3:** pods with their own rules. Jorge's pod is seeded from `rules/pod_rules.json`, then edited in the app; the pod registry (`scripts/pod_decks.py`) is retired.
 - **F4:** deck builder.
 - **F5:** two-player table.

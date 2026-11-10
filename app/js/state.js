@@ -56,7 +56,7 @@ export const state = {
   shareBad: false,   // the #d= link could not be read
   linkCopied: false,
   // shortcut: openDeck is not kept across reloads, persist it if players ask
-  openDeck: null,    // {id, name, text}: the saved deck behind the analysis, so Guardar adds a version; cleared when the paste box moves away from text
+  openDeck: null,    // {id, name, commanders}: the saved deck behind the analysis, so Guardar adds a version; cleared when an analysis has other commanders
   deckSource: null,  // {source, url?}: where the analyzed list came from, saved with it
   saveSt: null,      // label key shown on the Guardar button for a moment
   deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false, add: '', hits: null, locked: new Set() },

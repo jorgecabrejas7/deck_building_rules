@@ -22,7 +22,6 @@ export async function analyze(fromLink = false) {
   if (!state.restoring) state.shareBad = false;
   const text = $('deckText').value;
   const det = PodEngine.detectInput(text);
-  if (state.openDeck && state.openDeck.text !== text) state.openDeck = null; // another list is no longer that saved deck
   state.busy = true; state.error = null; renderInput();
   try {
     let parsed;
@@ -50,6 +49,9 @@ export async function analyze(fromLink = false) {
     state.edits = { undo: [], base: null, text: '' };
     state.combosData = null;
     recompute(notFound);
+    // the same commanders are the same saved deck, so editing its list and saving adds a version
+    const cmdKey = (c) => [...c].sort().join('|');
+    if (state.openDeck && cmdKey(state.openDeck.commanders) !== cmdKey(state.result.commanders)) state.openDeck = null;
     state.fetchSt = 'idle';
     if (!state.restoring) { state.tab = 'informe'; state.view = 'summary'; }
     Object.assign(state.deckView, { level: null, q: '', card: null, open: false, add: '', hits: null, locked: new Set() });
