@@ -1,9 +1,6 @@
 // Both languages must carry the same strings and placeholders; fill and the missing-key marker must behave.
-import fs from 'node:fs';
 globalThis.localStorage = { getItem: () => null, setItem() {} };
 globalThis.matchMedia = () => ({ matches: false, addEventListener() {} });
-const rules = fs.readFileSync(new URL('../rules/pod_rules.json', import.meta.url), 'utf8');
-globalThis.fetch = async () => new Response(rules);
 const { L, T, fill } = await import('../app/js/i18n.js');
 
 const errs = [];

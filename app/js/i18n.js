@@ -1,4 +1,3 @@
-import { RULES } from './rules.js';
 import { state } from './state.js';
 
 export const L = {
@@ -82,7 +81,7 @@ curve:'Curva de maná',avg:'media',all:'Todas',cre:'Criaturas',draw:'Robo',rem:'
 nonlands:'no-tierras',pips:'Pips de color',bands:'Bandas de precio',guide:'Guía de arquetipos',
 build:'Usar este arquetipo',slots:'Huecos clave:',
 emptyX:'Te dirá si entra en el pod, si cumple Bracket 3, qué combos lleva y qué cambiar.',
-footer:'hecho para el pod · reglas del pod v'+RULES.version+' · precios Cardmarket vía Scryfall',
+footer:'hecho para el pod · reglas del pod v%r · precios Cardmarket vía Scryfall',
 validT:'Avisos de construcción',
 
 previewAria:'ver carta',
@@ -145,7 +144,7 @@ verdictT:'VALORACIÓN DEL MAZO',verdictGood:'Lo que está bien',verdictBad:'LO Q
 verdictNoneBad:'Nada grave: el mazo cumple los objetivos de su arquetipo.',
 verdictGoTips:'Ver cartas concretas ↓',verdictMismatch:'El arquetipo elegido no coincide con lo que detecta el análisis',
 verdictLeadT1:'Tier 1 limpio',verdictLeadT2:'Tier 2 legal',verdictReady:'listo para la mesa',
-verdictPolish:'Pulir la composición',verdictMore:'más',endLegal:'✓ Legal en el pod — reglas v'+RULES.version,
+verdictPolish:'Pulir la composición',verdictMore:'más',
 capWord:'tope',cutCompare:'la de menos sinergia que te queda',
 tabPod:'Pod',podT:'Mazos del pod',
 podHint:'Los mazos de referencia del pod. Analiza cualquiera o compáralo con tu mazo actual.',
@@ -331,7 +330,7 @@ curve:'Mana curve',avg:'avg',all:'All',cre:'Creatures',draw:'Draw',rem:'Removal'
 nonlands:'nonland',pips:'Color pips',bands:'Price bands',guide:'Archetype guide',
 build:'Use this archetype',slots:'Key slots:',
 emptyX:'You will see whether it fits the pod, whether it meets Bracket 3, its combos, and what to change.',
-footer:'made for the pod · pod rules v'+RULES.version+' · Cardmarket prices via Scryfall',
+footer:'made for the pod · pod rules v%r · Cardmarket prices via Scryfall',
 validT:'Deckbuilding notes',
 
 previewAria:'preview card',
@@ -394,7 +393,7 @@ verdictT:'DECK VERDICT',verdictGood:'What works',verdictBad:'WHAT IS MISSING',
 verdictNoneBad:'Nothing serious: the deck meets its archetype targets.',
 verdictGoTips:'See concrete cards ↓',verdictMismatch:'The selected archetype does not match what the analysis detects',
 verdictLeadT1:'Clean Tier 1',verdictLeadT2:'Tier 2 legal',verdictReady:'table-ready',
-verdictPolish:'Polish the composition',verdictMore:'more',endLegal:'✓ Pod-legal — rules v'+RULES.version,
+verdictPolish:'Polish the composition',verdictMore:'more',
 capWord:'cap',cutCompare:'your lowest-synergy card left',
 tabPod:'Pod',podT:'Pod decks',
 podHint:'The pod’s reference decks. Analyze any of them or compare against your current deck.',
@@ -501,6 +500,13 @@ cmdLegalCount:'%n of %t can be the commander',
 cmdWhyBanned:'banned in Commander',cmdWhyNotLegendary:'not a legendary creature',
 s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:'Over the top · Spellslinger'}
 };
+
+// Feature dictionaries live in their own files; a key may be defined once.
+import account from './i18n/account.js';
+for (const dict of [account]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
+  if (k in L[lang]) throw new Error('i18n key clash: ' + k);
+  L[lang][k] = v;
+}
 
 // A missing key shows ⟦key⟧ (no fallback language); `in` stays truthful so callers can still test for a key.
 const marked = (o) => new Proxy(o, { get: (o, k) => (k in o || typeof k !== 'string' ? o[k] : '⟦' + k + '⟧') });

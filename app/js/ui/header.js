@@ -7,6 +7,7 @@ const ICON = {
   copy: svg('<rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M15 9V6.5A2.5 2.5 0 0 0 12.5 4h-6A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15H9"/>'),
   link: svg('<path d="M10 14a4 4 0 0 0 5.7 0l3-3A4 4 0 0 0 13 5.3l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
   help: svg('<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 2"/><path d="M12 16.6v.01"/>'),
+  user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'),
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>'),
   moon: svg('<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>'),
 };
@@ -38,6 +39,8 @@ export function renderHeader() {
   const howBtn = $('howBtn');
   howBtn.innerHTML = ICON.help + '<span class="btn-txt">' + t.howBtn + '</span>';
   howBtn.setAttribute('aria-label', t.howBtn);
+  $('accountBtn').innerHTML = ICON.user;
+  $('accountBtn').setAttribute('aria-label', t.acctBtn);
   $('enBtn').classList.toggle('active', state.lang === 'en');
   $('esBtn').classList.toggle('active', state.lang === 'es');
   $('enBtn').setAttribute('aria-pressed', String(state.lang === 'en'));

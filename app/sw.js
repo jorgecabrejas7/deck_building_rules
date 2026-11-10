@@ -15,7 +15,7 @@
 // HTTP cache. Any byte change to this file triggers an immediate update
 // (skipWaiting + clients.claim), since browsers refetch the registered SW
 // script bypassing the HTTP cache.
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'pdc-' + VERSION;
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -27,11 +27,11 @@ self.addEventListener('activate', (e) => e.waitUntil((async () => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (e.request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.includes('/api/')) return;
   e.respondWith((async () => {
     try {
       const fresh = await fetch(e.request, { cache: 'no-cache' });
-      if (fresh.ok) (await caches.open(CACHE)).put(e.request, fresh.clone());
+      if (fresh.ok && !fresh.redirected) (await caches.open(CACHE)).put(e.request, fresh.clone());
       return fresh;
     } catch (err) {
       const hit = await caches.match(e.request, { cacheName: CACHE });

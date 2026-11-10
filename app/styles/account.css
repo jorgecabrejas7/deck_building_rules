@@ -1,0 +1,23 @@
+/* Account pages: one centred card, phone first. Colours come from tokens.css only. */
+.acct{flex:1;padding:var(--sp-5) 0}
+.acct-card{box-sizing:border-box;width:min(420px,100% - 2*var(--sp-4));margin:0 auto;padding:var(--sp-6) var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-4)}
+.acct-card h2{font-size:var(--fs-title);font-weight:600;letter-spacing:var(--track-snug)}
+.acct-card h3{font-size:var(--fs-ui);font-weight:600;margin-top:var(--sp-2)}
+.acct-card form{display:flex;flex-direction:column;gap:var(--sp-3)}
+.acct-card section{display:flex;flex-direction:column;gap:var(--sp-3);padding-top:var(--sp-4);border-top:1px solid var(--border)}
+.f-lbl{font-size:var(--fs-caption);font-weight:500;color:var(--muted)}
+.f-in{box-sizing:border-box;width:100%;min-height:44px;padding:0 var(--sp-3);border:1px solid var(--borderCtl);border-radius:var(--r-md);background:var(--panel);color:var(--text);font-size:var(--fs-ui)}
+.f-err{min-height:0;font-size:var(--fs-caption);color:var(--badFg)}
+.f-err:empty{display:none}
+.f-ok{font-size:var(--fs-caption);color:var(--okFg)}
+.acct-card .btn-primary,.btn-alt{box-sizing:border-box;width:100%;min-height:44px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn-alt{padding:13px 32px;border:1px solid var(--borderCtl);border-radius:var(--r-pill);background:transparent;color:var(--text);font-size:var(--fs-ui);font-weight:500}
+.btn-alt:hover{background:var(--fill)}
+.btn-danger{color:var(--badFg);border-color:var(--badBd)}
+.f-or{text-align:center;font-size:var(--fs-caption);color:var(--muted)}
+.f-alt{text-align:center;font-size:var(--fs-body);color:var(--muted)}
+.acct-card p{color:var(--muted)}
+.acct-card dl{margin:0}
+.priv dt{font-weight:600;color:var(--text);margin-top:var(--sp-3)}
+.priv dd{margin:var(--sp-1) 0 0;color:var(--muted)}
+.footer p{margin:var(--sp-1) 0}

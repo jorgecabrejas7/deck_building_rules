@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La guía del Yoryi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/mobile.css">
+<link rel="stylesheet" href="styles/account.css">
+</head>
+<body>
+<script>/* pre-paint theme: keep in sync with js/ui/header.js applyTheme() */
+if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');</script>
+<div class="page">
+<header class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div class="brand-text">
+        <h1 class="brand-title">La guía del Yoryi</h1>
+        <span id="appTag" class="brand-tag"></span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="seg-toggle">
+        <button id="esBtn">ES</button>
+        <button id="enBtn">EN</button>
+      </div>
+      <button id="themeBtn" class="icon-btn"></button>
+    </div>
+  </div>
+</header>
+<main id="mainContent" class="acct">
+  <section id="card" class="panel acct-card"></section>
+</main>
+<div id="footer" class="footer"></div>
+</div>
+<script type="module" src="js/account.js"></script>
+</body>
+</html>
