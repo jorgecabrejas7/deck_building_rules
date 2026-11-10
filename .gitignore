@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+server/.venv/
+server/db.sqlite3
+server/staticfiles/
+server/seed/dev_accounts.json
