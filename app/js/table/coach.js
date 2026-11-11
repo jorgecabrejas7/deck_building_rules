@@ -5,7 +5,7 @@
 import { ICON } from './board.js';
 import { fill } from '../i18n.js';
 
-const FS = 'pdc_table_fs', HINTS = 'pdc_table_hints';
+const FS = 'pdc_table_fs', HINTS = 'pdc_table_hints', IGNORED = 6000;
 const $ = (id) => document.getElementById(id);
 const seen = (k) => { try { return !!localStorage.getItem(k); } catch (err) { return false; } };
 const remember = (k) => { try { localStorage.setItem(k, '1'); } catch (err) { /* storage blocked: offered again next visit */ } };
@@ -25,7 +25,7 @@ const ios = () => /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platf
 const safari = () => /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
 const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
-// once per page: the offer first, then the hints when it is answered (or at once when there is none to make)
+// once per page: the offer first, then the hints when it is answered or ignored for a while (or at once when there is none)
 export function firstRun(dict, fullscreen) {
   if (started) return;
   started = true; T = dict;
@@ -45,6 +45,8 @@ export function firstRun(dict, fullscreen) {
     tip.hidden = true;
     if (!seen(HINTS)) startHints();
   };
+  // a pill left unanswered steps aside for the hints (startHints hides it); it is offered again next visit
+  if (!seen(HINTS)) setTimeout(() => { if (!tip.hidden && at < 0) startHints(); }, IGNORED);
 }
 
 export function startHints() {

@@ -9,6 +9,8 @@ import { buildSheet } from './table/sheet.js';
 import { buildBar } from './table/bar.js';
 import { handHtml, layoutHand, cardAtX, raise } from './table/hand.js';
 import { firstRun, startHints, placeCoach } from './table/coach.js';
+import { line } from './table/log.js';
+import { changed, glowOn, applyGlow, lifeMoved } from './table/cues.js';
 
 const $ = (id) => document.getElementById(id);
 const API = '../api/';
@@ -17,7 +19,7 @@ const BACKOFF = [500, 1000, 2000, 4000, 8000];
 
 let view = null, lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
 let gone = gameId ? null : 'tbNoGame'; // message key once the game is unreachable for good
-let sheet = null, items = [], handOpen = true, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, rollSeen;
+let sheet = null, items = [], handOpen = true, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, logSeq = null;
 // the active board: one at a time on phones, highlighted where both fit. Yours unless you look at theirs
 let focus = 0, focusTimer = null;
 // card size, per viewer: a multiplier on the fitted card width
@@ -37,8 +39,8 @@ function connect() {
   s.onopen = () => { attempt = 0; render(); };
   s.onmessage = (e) => {
     let m; try { m = JSON.parse(e.data); } catch (err) { return; }
-    if (m.type === 'state') { if (m.seq < lastSeq) return; lastSeq = m.seq; view = m.view; render(); }
-    else if (m.type === 'error') toast(T()[{ stale: 'tbStale', rate: 'tbRate', invalid: 'tbInvalid', lobby: 'tbLobbyErr' }[m.code] || 'tbInvalid']);
+    if (m.type === 'state') { if (m.seq < lastSeq) return; lastSeq = m.seq; const prev = view; view = m.view; render(); news(prev); }
+    else if (m.type === 'error') toast(T()[{ stale: 'tbStale', rate: 'tbRate', invalid: 'tbInvalid', lobby: 'tbLobbyErr', undo: 'tbUndoErr' }[m.code] || 'tbInvalid']);
     else if (m.type === 'ended') { gone = 'tbEnded'; render(); }
   };
   s.onclose = (e) => {
@@ -58,9 +60,41 @@ function send(action) {
   sock.send(JSON.stringify({ n: ++n, action }));
 }
 
-function toast(text, info = false) {
-  $('toast').textContent = text; $('toast').classList.toggle('info', info); $('toast').classList.add('on');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('on'), 3500);
+// the page's one live region: errors, rolls, turns and settled life totals are spoken through it, nothing else
+const say = (text) => { $('live').textContent = text; };
+
+// a pill above the hand and your rail. Errors are red; info is neutral and, after your own undoable action, carries Undo for 5 s.
+// html: dictionary text, or a log line (names already escaped)
+function toast(html, info = false, undo = false, quiet = false) {
+  const el = $('toast'), t = T();
+  el.innerHTML = `<span>${html}</span>` + (undo ? `<button class="sb" data-top="undo">${ICON.undo}${t.tbUndo}</button>` : '');
+  el.classList.toggle('info', info);
+  // above whatever is docked at the bottom: the hand, the docked bar, your rail on phones
+  const top = Math.min(innerHeight, ...[...document.querySelectorAll('#hand,#bar.dock,.seat.me>.strip,.seat.me>.peek')]
+    .map((x) => x.getBoundingClientRect()).filter((r) => r.height && r.top > innerHeight / 2).map((r) => r.top));
+  el.style.bottom = Math.round(innerHeight - top + 10) + 'px';
+  el.classList.add('on');
+  if (!quiet) say(el.firstChild.textContent);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), undo ? 5000 : 3500);
+}
+
+// what the log says happened since the last state: your own undoable action offers Undo, a roll shows its result,
+// the opponent's move glows, a turn passed to you is announced once, and life changes float from their number
+function news(prev) {
+  if (!view || view.status !== 'active' || !view.log) return;
+  const fresh = logSeq === null ? [] : view.log.filter((e) => e.seq > logSeq), t = T(), last = fresh[fresh.length - 1];
+  logSeq = view.log.length ? view.log[view.log.length - 1].seq : logSeq === null ? 0 : logSeq;
+  if (!prev || !prev.zones || !fresh.length) return;
+  lifeMoved(prev, view, (s, d) => say(fill(t.tbLifeSay, { n: view.players[s].name || '?', d, l: view.players[s].life })));
+  if (fresh.every((e) => e.seat !== view.you)) glowOn(changed(prev, view));
+  const roll = fresh.filter((e) => e.type === 'roll').pop();
+  if (view.turn.seat === view.you && prev.turn.seat !== view.you && fresh.some((e) => e.type === 'pass_turn')) {
+    if ((focus || view.you) !== view.you && $('sheet').hidden && !press && !picking && !sel.size) setFocus(view.you);
+    toast(fill(t.tbYourTurn, { n: view.turn.number }), true);
+    glowOn([`.seat[data-seat="${view.you}"]>.strip`, `.seat[data-seat="${view.you}"]>.peek`]);
+    if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate([18, 80, 18]);
+  } else if (roll) toast(line(roll, view, t), true);
+  else if (last.seat === view.you && (view.can_undo || last.type === 'undo')) toast(line(last, view, t), true, view.can_undo, true);
 }
 
 // ---- rendering ----
@@ -82,9 +116,6 @@ function render() {
   document.body.classList.toggle('offline', conn === 'wait' || conn === 'off');
   document.body.dataset.conn = conn;
   $('stat').textContent = conn === 'wait' ? t.tbConnecting : conn === 'off' ? t.tbOffline : '';
-  const roll = active && view.roll;
-  if (roll && rollSeen !== undefined && roll.seq !== rollSeen) toast(`${view.players[roll.seat].name || '?'}: ` + (roll.sides === 2 ? (roll.result % 2 === 1 ? t.tbHeads : t.tbTails) : `d${roll.sides} → ${roll.result}`), true);
-  if (view && view.status === 'active') rollSeen = roll ? roll.seq : null;
   const board = $('board');
   if (gone) { board.innerHTML = `<div class="lobby gone"><p>${t[gone]}</p><a class="sb on" href="./">${t.tbBack}</a></div>`; sheet = null; }
   else if (!view) board.textContent = t.tbConnecting;
@@ -104,6 +135,7 @@ function render() {
   applySel();
   if (view && view.status === 'active') loadImages();
   if (active) firstRun(T, fullscreen);
+  applyGlow();
   placeCoach();
 }
 const handRow = () => $('hand').querySelector('.hand-row');
@@ -123,6 +155,7 @@ function renderSheet() {
   const entering = el.hidden;
   if (entering) { opener = document.activeElement; hov.hidden = true; }
   const t = T(), pane = el.querySelector('.sh-pane'), top = pane ? pane.scrollTop : 0;
+  const had = !entering && el.contains(document.activeElement), fi = had && document.activeElement.dataset.i; // a kept sheet keeps the focused button
   const body = built.art ? `<div class="sh-card"><button class="sh-art" data-zoom="${sheet.id}" aria-label="${t.tbZoom}"><img src="${esc(built.art)}" alt=""></button><div class="sh-acts">${built.body}</div></div>` : built.body;
   keepInputs(el, () => {
     el.innerHTML = `<div class="sh-back" data-close></div><div class="sh-pane" role="dialog" aria-modal="true" aria-labelledby="shTitle" tabindex="-1"><div class="sh-grab" aria-hidden="true"></div>`
@@ -131,7 +164,11 @@ function renderSheet() {
   el.hidden = false;
   filterSearch();
   if (entering) { el.classList.add('enter'); setTimeout(() => el.classList.remove('enter'), 400); el.querySelector('.sh-pane').focus({ preventScroll: true }); }
-  else el.querySelector('.sh-pane').scrollTop = top;
+  else {
+    el.querySelector('.sh-pane').scrollTop = top;
+    const f = fi && el.querySelector(`[data-i="${fi}"]:not(:disabled)`);
+    if (f) f.focus({ preventScroll: true }); else if (had) el.querySelector('.sh-pane').focus({ preventScroll: true });
+  }
 }
 
 function filterSearch() {
@@ -330,7 +367,7 @@ function applySel() {
     if (selMode) el.setAttribute('aria-pressed', String(on)); else el.removeAttribute('aria-pressed');
   }
   const say = selMode ? (all.size === 1 ? t.tbSel1 : fill(t.tbSelN, { n: all.size })) : '';
-  if (say !== said) $('selLive').textContent = said = say;
+  if (say !== said) $('live').textContent = said = say;
   renderBar();
 }
 
@@ -559,7 +596,7 @@ document.addEventListener('pointerout', (e) => { if (!e.relatedTarget) hov.hidde
 document.addEventListener('click', (e) => {
   // a single card's bar closes on a tap anywhere else, and that tap does nothing more
   if (sel.size && !selMode && !swallow && !e.target.closest('#bar') && !e.target.closest(BOARD_CARD)) { clearSel(); return; }
-  const el = e.target.closest('[data-b],[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-preview-close]');
+  const el = e.target.closest('[data-b],[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-pad],[data-preview-close]');
   if (!el) return;
   if (swallow) { swallow = false; return; }
   hov.hidden = true;
@@ -596,6 +633,7 @@ document.addEventListener('click', (e) => {
   }
   else if ('pile' in d) openPile(d.pile);
   else if ('life' in d) { const [s, dl] = d.life.split(':').map(Number); send({ type: 'life', seat: s, delta: dl }); }
+  else if ('pad' in d) setSheet({ k: 'pad', seat: Number(d.pad) });
   else if ('cmd' in d) { const [s, i] = d.cmd.split(':').map(Number); setSheet({ k: 'cmd', seat: s, i }); }
   else if ('token' in d) setSheet({ k: 'token' });
   else if ('hand' in d) { if (document.body.classList.contains('away')) setFocus(view.you); else { handOpen = !handOpen; render(); } }
@@ -603,9 +641,21 @@ document.addEventListener('click', (e) => {
   else if (d.top === 'menu') setSheet({ k: 'menu' });
   else if (d.top === 'full') fullscreen();
   else if (d.top === 'untap') send({ type: 'untap_all', seat: view.you });
+  else if (d.top === 'undo') { $('toast').classList.remove('on'); send({ type: 'undo' }); }
+  else if (d.top === 'pass') send({ type: 'pass_turn', draw: true });
+  else if (d.top === 'log') setSheet({ k: 'log' });
 });
 document.addEventListener('input', (e) => { if (e.target.id === 'sq') filterSearch(); });
 document.addEventListener('keydown', (e) => {
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
+  // ctrl/cmd+Z undoes your last action; the life pad takes digits and backspace from the keyboard
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !typing && view && view.can_undo) { e.preventDefault(); send({ type: 'undo' }); return; }
+  if (sheet && sheet.k === 'pad' && !typing && /^[0-9]$|^Backspace$/.test(e.key)) {
+    const v = sheet.v || '';
+    e.preventDefault();
+    setSheet({ ...sheet, v: e.key === 'Backspace' ? v.slice(0, -1) : (v + e.key).replace(/^0+/, '').slice(0, 3) });
+    return;
+  }
   if (e.key !== 'Escape') return;
   if (press) { endPress(null); return; }
   if (picking) { picking = null; render(); return; }

@@ -1,4 +1,5 @@
-// The hand, held as a fan: the cards overlap so the whole hand fits the width, with a slight arc and tilt.
+// The hand, held as a fan, under a head with the hand's toggle, undo, a token and (on your turn) passing it.
+// The fan: the cards overlap so the whole hand fits the width, with a slight arc and tilt.
 // layoutHand measures the row and sets each card's --x (left edge), --r (tilt) and --y (arc); table.css draws them.
 // raise marks the card under a finger or a mouse (.up); cardAtX finds it from the pointer's x.
 import { tile, ICON } from './board.js';
@@ -7,7 +8,10 @@ import { fill } from '../i18n.js';
 export function handHtml(view, t, open) {
   const hand = view.zones[view.you].hand;
   return `<div class="hand-head"><button class="hand-bar" data-hand aria-expanded="${open}">${fill(t.tbHandBar, { n: hand.length })}${ICON.up}</button>`
-    + `<button class="tbtn add" data-token>${ICON.plus}${t.tbToken}</button></div>`
+    + `<button class="tbtn ico" data-top="undo" title="${t.tbUndo}" aria-label="${t.tbUndo}"${view.can_undo ? '' : ' disabled'}>${ICON.undo}</button>`
+    + `<button class="tbtn add" data-token>${ICON.plus}<span>${t.tbToken}</span></button>`
+    // on your turn, passing it is one tap away; the menu passes on the other player's turn, or without a draw
+    + (view.turn && view.turn.seat === view.you ? `<button class="tbtn pass" data-top="pass">${t.tbPass}${ICON.pass}</button>` : '') + `</div>`
     + (open ? `<div class="hand-row">${hand.map((c, i) => tile(c, t).replace('<button ', `<button style="--i:${i}" `)).join('')}</div>` : '');
 }
 

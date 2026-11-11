@@ -2,6 +2,8 @@
 // buildSheet returns {title, body, items, art}: buttons carry data-i, the index of their handler in items.
 // A sheet opened from another one carries `back`; acting in it returns there instead of closing.
 import { ZONES, other, esc, index, tile, art, attachable, ICON } from './board.js';
+import { logHtml } from './log.js';
+import { fill } from '../i18n.js';
 
 const val = (id) => (document.getElementById(id) || {}).value || '';
 const num = (id, lo, hi, d) => Math.min(hi, Math.max(lo, parseInt(val(id), 10) || d));
@@ -109,11 +111,29 @@ export function buildSheet(sh, view, c) {
     body = row(input('sn', '', `maxlength="100" placeholder="${t.tbTokenName}" aria-label="${t.tbTokenName}"`))
       + row(`<label class="cl">${t.tbTokenCount} ${input('sc', 1, 'type="number" min="1" max="20" inputmode="numeric"')}</label>`,
         b(t.tbAdd, () => { const n = val('sn').trim().slice(0, 100); if (n) send({ type: 'token', seat: view.you, name: n, count: num('sc', 1, 20, 1) }); }, 'on'));
+  } else if (sh.k === 'pad') {
+    // any amount: type it, then subtract, add or set. sh.v is what has been typed (up to 3 digits)
+    const s = sh.seat, life = view.players[s].life, v = sh.v || '', n = Number(v);
+    const key = (label, next, aria = label) => b(label, () => c.setSheet({ ...sh, v: next }), 'key', true).replace('<button ', `<button aria-label="${aria}" `);
+    const go = (label, delta, cls = '') => b(fill(label, { n: v }), () => { if (delta) send({ type: 'life', seat: s, delta }); }, cls)
+      .replace('<button ', v ? '<button ' : '<button disabled ');
+    title = fill(t.tbLifeOf, { n: name(s) });
+    body = `<div class="pad"><p class="pad-v">${v || '0'}</p><p class="pad-now">${fill(t.tbLifeNow, { n: life })}</p>`
+      + `<div class="pad-k">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => key(String(d), (v + d).replace(/^0+/, '').slice(0, 3))).join('')}`
+      + key(t.tbPadClear, '') + key('0', (v + '0').replace(/^0+/, '').slice(0, 3)) + key('⌫', v.slice(0, -1), t.tbPadBack) + `</div>`
+      + `<div class="srow">${go(t.tbPadSub, -n)}${go(t.tbPadAdd, n)}${go(t.tbPadSet, Math.max(-999, Math.min(999, n - life)), 'quiet')}</div></div>`;
+  } else if (sh.k === 'log') {
+    title = t.tbLog;
+    body = logHtml(view, t);
   } else if (sh.k === 'menu') {
     const live = view && view.status === 'active', r = (sides) => () => send({ type: 'roll', sides });
+    const pass = (draw) => () => send({ type: 'pass_turn', ...(draw ? { draw } : {}) });
     title = t.tbMenu;
-    body = (live ? row(document.fullscreenEnabled && b(ICON.full + (document.fullscreenElement ? t.tbExitFullscreen : t.tbFullscreen), c.fullscreen),
+    body = (live ? row(b(ICON.log + t.tbLog, () => c.setSheet({ k: 'log', back: sh }), '', true),
+        document.fullscreenEnabled && b(ICON.full + (document.fullscreenElement ? t.tbExitFullscreen : t.tbFullscreen), c.fullscreen),
         b(t.tbMulligan, () => send({ type: 'mulligan' })))
+      + `<h3>${fill(t.tbTurnOf, { n: view.turn.number, s: view.turn.seat === view.you ? t.lgYouLow : name(view.turn.seat) })}</h3>`
+      + row(b(t.tbPass, pass(true), view.turn.seat === view.you ? 'on' : ''), b(t.tbPassNoDraw, pass(false)))
       + `<h3>${t.tbDice}</h3>` + row(b('d6', r(6)), b('d20', r(20)), b(t.tbCoin, r(2)))
       + row(input('sn', 10, `type="number" min="2" max="100" inputmode="numeric" aria-label="${t.tbCustom}"`), b(t.tbRoll, () => send({ type: 'roll', sides: num('sn', 2, 100, 10) })))
       + `<h3>${t.tbHow}</h3><ul class="how"><li>${t.tbHow1}</li><li>${t.tbHow2}</li><li>${t.tbHow3}</li><li>${t.tbHow4}</li><li>${t.tbHow5}</li><li>${t.tbHow6}</li></ul>` + row(b(t.tbHintsAgain, c.hints, 'quiet')) : '')
