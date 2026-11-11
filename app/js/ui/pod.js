@@ -5,6 +5,7 @@ import { T, fill } from '../i18n.js';
 import { api } from '../api.js';
 import { setRules } from '../rules.js';
 import { $, esc, tierTone, announce } from './helpers.js';
+import { friendList, loadFriends } from './friends.js';
 import { loadStudy } from './profile.js';
 import { analyze, readDeck, readDeps, recompute } from '../pipeline.js';
 import { deckToText } from '../advice.js';
@@ -162,6 +163,15 @@ function addHtml(t) {
     '<button class="btn-primary">' + esc(t.pdAddGo) + '</button><button type="button" class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button></form>';
 }
 
+function friendsHtml(t) {
+  const inPod = new Set(state.pod.members.map(m => m.id));
+  const free = friendList().filter(f => !inPod.has(f.id));
+  if (!free.length) return '<p class="note-sm">' + esc(t.pdAddFriendNone) + '</p>';
+  return '<form class="dk-form" data-addfriendform><select name="user" class="arch-select" aria-label="' + esc(t.pdAddFriend) + '">' +
+    free.map(f => '<option value="' + f.id + '">' + esc(f.name) + '</option>').join('') + '</select>' +
+    '<button class="btn-primary">' + esc(t.pdAddFriendGo) + '</button></form>';
+}
+
 function membersHtml(t) {
   const admin = state.pod.role === 'admin';
   const ask = (key, text, yes) => '<span class="dk-confirm">' + esc(text) + '</span><button class="btn-ghost-sm btn-danger" data-act="' + yes + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>';
@@ -169,13 +179,13 @@ function membersHtml(t) {
     let acts = '';
     if (m.me) acts = asking === 'leave' ? ask(fill(t.pdLeaveAsk, { n: state.pod.name }), 'leave-yes') : '<button class="btn-ghost-sm" data-act="leave">' + esc(t.pdLeave) + '</button>';
     else if (admin) {
-      acts = (m.role === 'admin' ? '' : '<button class="btn-ghost-sm" data-act="promote" data-user="' + m.id + '">' + esc(t.pdMakeAdmin) + '</button>') +
+      acts = '<button class="btn-ghost-sm" data-act="' + (m.role === 'admin' ? 'demote' : 'promote') + '" data-user="' + m.id + '">' + esc(m.role === 'admin' ? t.pdDemote : t.pdMakeAdmin) + '</button>' +
         (asking === 'm' + m.id ? ask(fill(t.pdKickAsk, { n: m.name }), 'kick-yes" data-user="' + m.id) : '<button class="btn-ghost-sm" data-act="kick" data-user="' + m.id + '">' + esc(t.pdKick) + '</button>');
     }
     return '<li class="pod-member"><span class="pod-mname">' + esc(m.name) + (m.me ? ' <span class="lbl-muted">(' + esc(t.pdYou) + ')</span>' : '') +
       ' <span class="lbl-muted">' + esc(m.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + '</span></span><span class="dk-actions">' + acts + '</span></li>';
   }).join('');
-  return '<h3 class="pod-sub">' + esc(t.pdMembers) + '</h3><ul class="pod-members">' + li + '</ul>';
+  return '<h3 class="pod-sub">' + esc(t.pdMembers) + '</h3><ul class="pod-members">' + li + '</ul>' + (admin ? friendsHtml(t) : '');
 }
 
 function adminHtml(t) {
@@ -194,7 +204,7 @@ function adminHtml(t) {
 
 // ---- games (F5): invite another member, open or end my games ----
 // opening the Pod tab reloads them, so an invitation from another member shows up
-export function podOpened() { games = null; }
+export function podOpened() { games = null; if (state.tab === 'pod') loadFriends(); }
 async function loadGames() {
   const id = state.pod.id;
   games = { podId: id, list: [], busy: true };
@@ -316,8 +326,8 @@ function onSaved(pod) {
 async function act(method, path, body, ok) {
   const res = await api(API + path, method, body);
   const errs = res.data.errors || {};
-  if (res.status !== ok) {
-    msg = errs.decks === 'limit' || errs.pods === 'limit' ? 'pdErrLimit' : errs.role === 'last_admin' ? 'pdErrLastAdmin' : 'pdErr';
+  if (![ok].flat().includes(res.status)) {
+    msg = errs.user === 'invalid' ? 'pdErrFriend' : errs.decks === 'limit' || errs.pods === 'limit' ? 'pdErrLimit' : errs.role === 'last_admin' ? 'pdErrLastAdmin' : 'pdErr';
     renderPod(); return null;
   }
   msg = null;
@@ -363,6 +373,7 @@ async function onClick(e) {
   if (a === 'kick') { asking = 'm' + user; return renderPod(); }
   if (a === 'kick-yes') { if (await act('DELETE', here('members/' + user), undefined, 204)) refresh(); return; }
   if (a === 'promote') { if (await act('POST', here('members/' + user), { role: 'admin' }, 204)) refresh(); return; }
+  if (a === 'demote') { if (await act('POST', here('members/' + user), { role: 'member' }, 204)) refresh(); return; }
   if (a === 'rename') { renaming = true; return renderPod(); }
   if (a === 'rules') { editing = !editing; editorEl = null; return renderPod(); }
   if (a === 'regen') { const res = await act('POST', here('invite'), undefined, 200); if (res) { state.pod.invite_code = res.data.invite_code; renderPod(); } return; }
@@ -378,6 +389,7 @@ async function onSubmit(e) {
   const f = e.target;
   if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponent: Number(f.opponent.value) }, 201);
   else if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
+  else if ('addfriendform' in f.dataset) { if (await act('POST', here('members'), { user: Number(f.user.value) }, [200, 201])) refresh(); }
   else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }
   else if ('createform' in f.dataset) {
     const res = await act('POST', 'pods', { name: f.name.value.trim(), from: f.from.value ? Number(f.from.value) : null }, 201);
