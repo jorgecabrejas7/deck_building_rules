@@ -1,7 +1,7 @@
 // Bottom sheets: every action a player can take on a card, a pile, a commander or the menu.
 // buildSheet returns {title, body, items, art}: buttons carry data-i, the index of their handler in items.
 // A sheet opened from another one carries `back`; acting in it returns there instead of closing.
-import { ZONES, other, esc, index, tile, art, ICON } from './board.js';
+import { ZONES, other, esc, index, tile, art, attachable, ICON } from './board.js';
 
 const val = (id) => (document.getElementById(id) || {}).value || '';
 const num = (id, lo, hi, d) => Math.min(hi, Math.max(lo, parseInt(val(id), 10) || d));
@@ -40,6 +40,8 @@ export function buildSheet(sh, view, c) {
         (bf || zone === 'exile') && b(t.tbFlip, () => send({ type: 'flip', cards: ids, face_down: !card.face_down })),
         !card.name && b(t.tbLook, () => send({ type: 'look', cards: ids })),
         card.name && !card.shared && b(t.tbReveal, () => send({ type: 'reveal', cards: ids })),
+        (bf || (zone === 'hand' && attachable(card))) && b(t.tbAttach, () => c.pickHost(card.id)),
+        bf && card.attached && b(t.tbDetach, () => send({ type: 'attach', card: card.id, to: null })),
         bf && b(t.tbGive, () => send({ type: 'move', cards: ids, to: { seat: other(seat), zone: 'battlefield' } })),
         card.token && b(t.tbDelete, () => send({ type: 'delete', card: card.id }), 'danger'));
       body += `<h3>${t.tbSendTo}</h3>` + row(
@@ -79,12 +81,19 @@ export function buildSheet(sh, view, c) {
       b(t.tbRevealN, () => { if (lib.length) send({ type: 'reveal', cards: top(n()) }); }));
     body += row(b(t.tbKnown, () => c.setSheet({ k: 'list', seat: s, zone: 'library' }), 'quiet', true));
   } else if (sh.k === 'search') {
-    // sorted by name so the search shows nothing of the library's order; table.js filters the grid as you type
+    // sorted by name so the search shows nothing of the library's order; table.js filters the grid as you type.
+    // Tap a card to pick it, then send it: hand and battlefield are yours, the graveyard is the owner's,
+    // and "top" shuffles the rest first, as a tutor does
     const s = sh.seat, lib = view.zones[s].library, known = lib.filter((x) => x.name).sort((a, b2) => a.name.localeCompare(b2.name));
+    const sel = sh.sel && lib.find((x) => x.id === sh.sel);
+    const put = (label, to, extra = {}, keep = true) => b(label, () => { send({ type: 'move', cards: [sel.id], to, ...extra }); if (keep) c.setSheet({ ...sh, sel: null }); }, '', keep);
     title = `${t.tbSearch} · ${name(s)} (${lib.length})`;
     body = row(`<input class="si" id="sq" type="search" autocomplete="off" placeholder="${t.tbSearchFilter}" aria-label="${t.tbSearchFilter}">`)
-      + (known.length ? grid(known) : `<p>${t.tbEmpty}</p>`)
-      + `<div class="sfoot">${row(b(t.tbShuffleClose, () => send({ type: 'shuffle', seat: s }), 'on'))}</div>`;
+      + (known.length ? `<div class="sgrid">${known.map((x) => tile(x, t).replace('class="tc', `aria-pressed="${x === sel}" class="tc${x === sel ? ' sel' : ''}`)).join('')}</div>` : `<p>${t.tbEmpty}</p>`)
+      + `<div class="sfoot">` + (sel ? `<p class="pick">${esc(sel.name)}</p>` + row(put(t.tbZhand, { seat: view.you, zone: 'hand' }), put(t.tbZbattlefield, { seat: view.you, zone: 'battlefield' }),
+          put(t.tbZgraveyard, { seat: sel.owner, zone: 'graveyard' }), put(t.tbTopShuffled, { seat: s, zone: 'library' }, { pos: 'top', shuffle: true }, false))
+        : `<p class="pick">${t.tbSearchPick}</p>`)
+      + row(b(t.tbShuffleClose, () => send({ type: 'shuffle', seat: s }), sel ? 'quiet' : 'on')) + `</div>`;
   } else if (sh.k === 'list') {
     const all = view.zones[sh.seat][sh.zone], cards = sh.zone === 'library' ? all.filter((x) => x.name) : all;
     title = `${t['tbZ' + sh.zone]} · ${name(sh.seat)} (${all.length})`;

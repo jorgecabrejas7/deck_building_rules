@@ -315,6 +315,55 @@ def test_token_cap(game):
             g = apply(g, 1, {"type": "token", "seat": 1, "name": "t", "count": 20})
 
 
+def test_move_to_top_after_shuffling(game):
+    lib = ids(game, 1, "library")
+    g = apply(game, 1, {"type": "look", "cards": lib[:50]})
+    g = apply(g, 1, mv([lib[40]], 1, "library", pos="top", shuffle=True))
+    top = g["zones"]["1"]["library"][0]
+    assert top["name"] == card(game, lib[40])["name"] and top["known_by"] == [1]
+    assert not any(c["known_by"] for c in g["zones"]["1"]["library"][1:])  # the rest was shuffled
+    with pytest.raises(ActionError):
+        apply(g, 1, mv(ids(g, 1, "hand")[:1], 1, "graveyard", shuffle=True))
+
+
+def test_attach_follows_host_and_falls_off(game):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:3], 1, "battlefield"))
+    aura, host, other = ids(g, 1, "battlefield")
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": host})
+    assert card(g, aura)["attached"] == host
+    assert view(g, 2)["zones"]["1"]["battlefield"][0]["attached"] == host
+    g = apply(g, 1, mv([host], 2, "battlefield"))  # change of control: the aura follows
+    new_host = ids(g, 2, "battlefield")[0]
+    assert card(g, aura)["attached"] == new_host
+    g = apply(g, 2, mv([new_host], 2, "graveyard"))  # host leaves: the aura stays, unattached
+    assert card(g, aura)["attached"] is None
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": other})
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": None})
+    assert card(g, aura)["attached"] is None
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": other})
+    g = apply(g, 1, mv([aura], 1, "hand"))  # the attachment leaves: its pointer goes with it
+    assert card(g, ids(g, 1, "hand")[-1])["attached"] is None
+
+
+def test_attach_from_hand_enters_battlefield(game):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:1], 1, "battlefield"))
+    host, equip = ids(g, 1, "battlefield")[0], ids(g, 1, "hand")[0]
+    g = apply(g, 1, {"type": "attach", "card": equip, "to": host})
+    entered = g["zones"]["1"]["battlefield"][-1]
+    assert entered["attached"] == host and entered["id"] != equip
+    check(g)
+
+
+@pytest.mark.parametrize("bad", ["self", "hand", "nested"])
+def test_attach_invalid(game, bad):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:3], 1, "battlefield"))
+    a, b, c = ids(g, 1, "battlefield")
+    g = apply(g, 1, {"type": "attach", "card": b, "to": c})
+    to = {"self": a, "hand": ids(g, 1, "hand")[0], "nested": b}[bad]
+    with pytest.raises(ActionError):
+        apply(g, 1, {"type": "attach", "card": a, "to": to})
+
+
 def test_fuzz(game):
     rnd = random.Random(1234)
     g = game
@@ -324,7 +373,7 @@ def test_fuzz(game):
         pick = lambda k=None: [c["id"] for c in rnd.sample(cs, min(len(cs), k or rnd.randint(1, 5)))]  # noqa: E731
         seat = rnd.choice((1, 2))
         t = rnd.choice(["move", "move", "move", "tap", "untap_all", "flip", "counter", "token", "delete",
-                        "look", "reveal", "shuffle", "mulligan", "life", "cmd_damage", "roll"])
+                        "look", "reveal", "shuffle", "mulligan", "life", "cmd_damage", "roll", "attach"])
         other = 3 - seat
         a = {
             "move": lambda: mv(pick(), rnd.choice((1, 2)), z := rnd.choice(
@@ -345,13 +394,21 @@ def test_fuzz(game):
             "life": lambda: {"seat": seat, "delta": rnd.randint(-5, 5)},
             "cmd_damage": lambda: {"seat": seat, "commander": f"{'ab'[other - 1]}-card-000", "delta": rnd.randint(-2, 5)},
             "roll": lambda: {"sides": rnd.randint(2, 20)},
+            "attach": lambda: {"card": pick(1)[0], "to": rnd.choice([None] + [c["id"] for zs in g["zones"].values()
+                                                                        for c in zs["battlefield"]][:4])},
         }[t]()
         if t != "move":
             a = {"type": t, **a}
         if "x" in (a.get("cards") or [a.get("card")]):
             continue
-        g = apply(g, seat, a)
+        try:
+            g = apply(g, seat, a)
+        except ActionError:
+            assert t == "attach"  # a random host can be the card itself or already attached
+            continue
         check(g)
+        on_bf = {c["id"] for zs in g["zones"].values() for c in zs["battlefield"]}
+        assert all(c.get("attached") in on_bf | {None} for c, _z in all_cards(g))
         if t in ("move", "shuffle", "mulligan"):
             now = {c["id"] for c, _z in all_cards(g)}
             old = set(a.get("cards", [])) if t == "move" else set()

@@ -21,6 +21,7 @@
 if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');</script>
 <div id="stat" class="tb-stat" role="status" aria-live="polite"></div>
 <main id="board" class="tb-board"></main>
+<div id="pick" class="tb-pick" role="status" hidden></div>
 <div id="toast" class="tb-toast" role="status" aria-live="polite"></div>
 <div id="hand" class="tb-hand"></div>
 <div id="sheet" class="sheet" hidden></div>

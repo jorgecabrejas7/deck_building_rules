@@ -2,7 +2,7 @@
 export default {
 es: {
 tbTapped:'girada',tbDropHere:'Arrastra aquí tus cartas',tbFullscreen:'Pantalla completa',tbExitFullscreen:'Salir de pantalla completa',tbPlay:'Jugar',tbToField:'Al campo',tbSendTo:'Enviar a',
-tbSearch:'Buscar',tbSearchFilter:'Filtrar por nombre',tbShuffleClose:'Barajar y cerrar',tbZoom:'Ver en grande',tbBackSheet:'Volver',
+tbSearch:'Buscar',tbSearchPick:'Toca una carta para elegirla.',tbTopShuffled:'Arriba, tras barajar',tbAttach:'Anexar a…',tbDetach:'Soltar',tbAttachPick:'Toca la carta a la que anexar %n',tbSearchFilter:'Filtrar por nombre',tbShuffleClose:'Barajar y cerrar',tbZoom:'Ver en grande',tbBackSheet:'Volver',
 tbHow:'Cómo se juega',tbHow1:'Toca una carta tuya del campo para girarla o enderezarla.',tbHow2:'Mantén pulsada una carta y arrástrala a otra zona: campo, mano, cementerio, exilio o biblioteca. Con ratón, arrástrala sin más.',tbHow3:'Toca cualquier otra carta o pila para verla en grande y ver sus opciones. Con ratón, pasa por encima para verla y usa el botón derecho para sus opciones.',
 tbConnecting:'Conectando…',tbOffline:'Sin conexión',tbNotSent:'Sin conexión: no se envió',
 tbStale:'No se aplicó: la mesa cambió',tbRate:'Demasiado rápido: espera un momento',tbInvalid:'Acción no válida',tbLobbyErr:'La partida aún no ha empezado',
@@ -22,7 +22,7 @@ tbLife:'Vida',tbMinus:'Restar',tbPlus:'Sumar',tbCmdDmg:'Daño de comandante',tbH
 },
 en: {
 tbTapped:'tapped',tbDropHere:'Drag your cards here',tbFullscreen:'Full screen',tbExitFullscreen:'Exit full screen',tbPlay:'Play',tbToField:'To the battlefield',tbSendTo:'Send to',
-tbSearch:'Search',tbSearchFilter:'Filter by name',tbShuffleClose:'Shuffle and close',tbZoom:'View large',tbBackSheet:'Back',
+tbSearch:'Search',tbSearchPick:'Tap a card to pick it.',tbTopShuffled:'Top, after shuffling',tbAttach:'Attach to…',tbDetach:'Unattach',tbAttachPick:'Tap the card to attach %n to',tbSearchFilter:'Filter by name',tbShuffleClose:'Shuffle and close',tbZoom:'View large',tbBackSheet:'Back',
 tbHow:'How to play',tbHow1:'Tap one of your cards on the battlefield to tap or untap it.',tbHow2:'Press and hold a card, then drag it to another zone: battlefield, hand, graveyard, exile or library. With a mouse, just drag it.',tbHow3:'Tap any other card or pile to see it large with its options. With a mouse, rest on a card to see it and right-click for its options.',
 tbConnecting:'Connecting…',tbOffline:'Offline',tbNotSent:'Offline: not sent',
 tbStale:'Not applied: the table changed',tbRate:'Too fast: wait a moment',tbInvalid:'Invalid action',tbLobbyErr:'The game has not started yet',

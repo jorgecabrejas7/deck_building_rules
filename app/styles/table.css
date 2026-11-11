@@ -232,3 +232,21 @@ body.dragging [data-drop]{transition:background .12s,box-shadow .12s}
 }
 /* three short choices (the dice) share one row */
 .srow:has(>.sb:nth-child(3):last-child)>.sb{flex-basis:0}
+
+/* an aura or equipment tucked behind its host, its top edge showing */
+.stk{position:relative;flex:none;padding-top:calc(var(--n) * var(--cw) * .28)}
+.stk>.tc:not(:last-child){position:absolute;left:0;top:calc(var(--i) * var(--cw) * .28)}
+.stk:has(>.tc.tapped:last-child)>.tc:not(:last-child){left:calc((var(--ch) - var(--cw)) / 2)}
+.bf .tc.drop-on{box-shadow:0 0 0 3px var(--accent),0 8px 18px -6px oklch(0 0 0 / .35);transform:scale(1.06)}
+
+/* choosing a host: the battlefields light up, everything else steps back */
+.tb-pick{position:fixed;left:50%;top:calc(var(--sp-2) + env(safe-area-inset-top));z-index:45;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:calc(100% - 2*var(--sp-3));display:flex;align-items:center;gap:var(--sp-3);padding:6px 6px 6px var(--sp-4);border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:var(--fs-caption);font-weight:500;box-shadow:var(--shadow-2)}
+.tb-pick span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-pick .sb{flex:none;min-height:36px;background:oklch(1 0 0 / .18);color:inherit}
+body.picking .bf .tc{box-shadow:0 0 0 2px color-mix(in oklab,var(--accent) 60%,transparent),0 4px 10px -4px oklch(0 0 0 / .25)}
+body.picking .tb-hand,body.picking .piles,body.picking .strip>:not(.life){opacity:.4;pointer-events:none}
+
+/* the search: the picked card stands out, the footer says what to do */
+.sgrid .tc.sel{box-shadow:0 0 0 3px var(--accent),0 8px 18px -6px oklch(0 0 0 / .35);transform:translateY(-2px)}
+.sfoot .pick{margin:0 0 var(--sp-2);color:var(--text);font-weight:600;font-size:var(--fs-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sfoot .srow+.srow{margin-top:var(--sp-2)}

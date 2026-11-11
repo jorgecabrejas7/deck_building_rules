@@ -3,7 +3,8 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, art, esc, ICON } from './table/board.js';
+import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON } from './table/board.js';
+import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 
 const $ = (id) => document.getElementById(id);
@@ -13,7 +14,7 @@ const BACKOFF = [500, 1000, 2000, 4000, 8000];
 
 let view = null, lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
 let gone = gameId ? null : 'tbNoGame'; // message key once the game is unreachable for good
-let sheet = null, items = [], handOpen = true, decks = null, lobbyErr = '', toastTimer = null, opener = null, rollSeen;
+let sheet = null, items = [], handOpen = true, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, rollSeen;
 const open = () => sock && sock.readyState === WebSocket.OPEN;
 
 // ---- connection ----
@@ -81,6 +82,11 @@ function render() {
   hand.innerHTML = active ? handHtml(view, t, handOpen) : '';
   if (active) hand.dataset.drop = view.you + ':hand'; else delete hand.dataset.drop;
   if ($('handRow')) $('handRow').scrollLeft = sl;
+  const pc = picking && active && cardAt(picking);
+  if (!pc) picking = null;
+  document.body.classList.toggle('picking', !!pc);
+  $('pick').hidden = !pc;
+  if (pc) $('pick').innerHTML = `<span>${fill(t.tbAttachPick, { n: pc.card.name ? esc(pc.card.name) : t.tbHiddenCard })}</span><button class="sb" data-unpick>${t.tbCancel}</button>`;
   renderSheet();
   if (view && view.status === 'active') loadImages();
 }
@@ -118,7 +124,7 @@ function filterSearch() {
 
 const setSheet = (s) => { sheet = s; renderSheet(); };
 const ctx = () => ({
-  t: T(), send, setSheet, closeSheet: () => setSheet(sheet && sheet.back ? sheet.back : null), endGame, fullscreen,
+  t: T(), send, setSheet, pickHost: (id) => { picking = id; render(); }, closeSheet: () => setSheet(sheet && sheet.back ? sheet.back : null), endGame, fullscreen,
   lang: state.lang, dark: document.body.classList.contains('dark'),
   setLang: (l) => { state.lang = store.lang = l; render(); },
   setTheme: (m) => { state.theme = store.theme = m; render(); },
@@ -194,14 +200,17 @@ function startDrag(p, e) {
   moveDrag(p, e);
 }
 
-function dropAt(x, y) {
-  const el = document.elementFromPoint(x, y);
+// an aura or equipment let go over a battlefield card attaches to it; anything else lands on the zone under it
+function dropAt(p, x, y) {
+  const el = document.elementFromPoint(x, y), host = el && el.closest('.bf [data-card]');
+  const h = host && host.dataset.card !== p.id && attachable(p.hit.card) && cardAt(host.dataset.card);
+  if (h && h.zone === 'battlefield') return host;
   return el && el.closest('[data-drop]');
 }
 
 function moveDrag(p, e) {
   p.ghost.style.transform = `translate(${e.clientX - p.ghost.offsetWidth / 2}px,${e.clientY - p.ghost.offsetHeight * 0.6}px) rotate(-3deg)`;
-  const tgt = dropAt(e.clientX, e.clientY);
+  const tgt = dropAt(p, e.clientX, e.clientY);
   if (tgt !== p.over) { if (p.over) p.over.classList.remove('drop-on'); p.over = tgt; if (tgt) tgt.classList.add('drop-on'); }
 }
 
@@ -215,7 +224,8 @@ function endPress(e) {
     p.ghost.remove(); document.body.classList.remove('dragging');
     if (p.over) p.over.classList.remove('drop-on');
     swallow = true;
-    if (e && e.type === 'pointerup' && p.over) {
+    if (e && e.type === 'pointerup' && p.over && p.over.dataset.card) send({ type: 'attach', card: p.id, to: p.over.dataset.card });
+    else if (e && e.type === 'pointerup' && p.over) {
       const [s, zone] = p.over.dataset.drop.split(':'), seat = Number(s);
       const { card } = p.hit, from = p.hit;
       if (!(from.seat === seat && from.zone === zone)) send({ type: 'move', cards: [card.id], to: { seat, zone }, ...(zone === 'library' ? { pos: 'top' } : {}) });
@@ -280,16 +290,23 @@ function hoverCard(e) {
 document.addEventListener('pointerout', (e) => { if (!e.relatedTarget) hov.hidden = true; });
 
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-preview-close]');
+  const el = e.target.closest('[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-preview-close]');
   if (!el) return;
   if (swallow) { swallow = false; return; }
   hov.hidden = true;
   const d = el.dataset;
+  if (picking) { // choosing the host for an aura or equipment: a battlefield card, or cancel
+    const h = 'card' in d && cardAt(d.card);
+    if (h && h.zone === 'battlefield' && d.card !== picking) send({ type: 'attach', card: picking, to: d.card });
+    else if (!('unpick' in d)) return;
+    picking = null; render(); return;
+  }
   if ('i' in d) items[d.i]();
   else if ('close' in d) setSheet(null);
   else if ('back' in d) setSheet(sheet && sheet.back);
   else if ('zoom' in d) preview(d.zoom);
   else if ('previewClose' in d) $('preview').hidden = true;
+  else if ('card' in d && sheet && sheet.k === 'search' && el.closest('#sheet')) setSheet({ ...sheet, sel: sheet.sel === d.card ? null : d.card });
   else if ('card' in d) {
     const hit = cardAt(d.card);
     if (!hit) return;
@@ -313,6 +330,7 @@ document.addEventListener('input', (e) => { if (e.target.id === 'sq') filterSear
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (press) { endPress(null); return; }
+  if (picking) { picking = null; render(); return; }
   if (!$('preview').hidden) $('preview').hidden = true; else setSheet(null);
 });
 document.addEventListener('fullscreenchange', () => { if (sheet && sheet.k === 'menu') renderSheet(); });

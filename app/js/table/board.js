@@ -37,6 +37,15 @@ export function visibleNames(view) {
   return [...out];
 }
 
+// host id -> the auras and equipment on it, across both battlefields (an aura can sit on the other player's creature)
+export function attachments(view) {
+  const on = new Set(), m = new Map();
+  for (const s of [1, 2]) for (const c of view.zones[s].battlefield) on.add(c.id);
+  for (const s of [1, 2]) for (const c of view.zones[s].battlefield) if (c.attached && on.has(c.attached)) m.set(c.attached, [...(m.get(c.attached) || []), c]);
+  return m;
+}
+export const attachable = (c) => !!c.name && !c.face_down && /\b(Aura|Equipment|Fortification)\b/.test((cardCache[c.name] || {}).type_line || '');
+
 const counters = (c) => Object.entries(c.counters || {}).map(([k, v]) => k + ' ' + v).join(' ');
 const isLand = (c) => !c.face_down && c.name && /\bLand\b/.test((cardCache[c.name] || {}).type_line || '');
 export const art = (c, big = false) => {
@@ -64,8 +73,16 @@ function slot(s, zone, t, view) {
 
 function seat(view, s, t) {
   const p = view.players[s], z = view.zones[s], me = s === view.you, o = view.players[other(s)];
-  const lands = z.battlefield.filter(isLand), rest = z.battlefield.filter((c) => !isLand(c));
-  const row = (cards, cls) => cards.length ? `<div class="bfr ${cls}">${cards.map((c) => tile(c, t)).join('')}</div>` : '';
+  // attached cards are drawn tucked behind their host, wherever the host is
+  const att = attachments(view), on = new Set([...att.values()].flat().map((c) => c.id));
+  const free = z.battlefield.filter((c) => !on.has(c.id));
+  const lands = free.filter(isLand), rest = free.filter((c) => !isLand(c));
+  const stack = (c) => {
+    const under = att.get(c.id);
+    if (!under) return tile(c, t);
+    return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t)}</div>`;
+  };
+  const row = (cards, cls) => cards.length ? `<div class="bfr ${cls}">${cards.map(stack).join('')}</div>` : '';
   const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${(p.cmd_damage || {})[name] || 0}</b></button>`).join('');
   const lead = me ? `<button class="chip ico" data-top="untap" title="${t.tbUntapAll}" aria-label="${t.tbUntapAll}">${ICON.untap}</button>`
     : `<button class="chip" data-pile="${s}:hand" data-drop="${s}:hand" title="${t.tbZhand}" aria-label="${t.tbZhand}: ${z.hand.length}">${ICON.hand}<b>${z.hand.length}</b></button>`;

@@ -3,6 +3,8 @@
 Hidden information: view() never sends a name the viewer may not see, and every zone change
 or shuffle issues a new card id, so an id cannot be followed into a hidden zone.
 library[0] is the top of the library. state["seq"] counts applied actions.
+An aura or equipment on the battlefield points at its host with "attached" (the host's id); the pointer follows
+the host across a change of control and is dropped when either card leaves the battlefield.
 """
 import copy
 import secrets
@@ -30,7 +32,7 @@ def _new_id():
 
 def _card(name, owner, token=False, known_by=()):
     return {"id": _new_id(), "name": name, "owner": owner, "tapped": False, "face_down": False,
-            "counters": {}, "token": token, "known_by": sorted(known_by)}
+            "counters": {}, "token": token, "known_by": sorted(known_by), "attached": None}
 
 
 def _draw(state, seat, n):
@@ -85,6 +87,8 @@ def _visible(card, zone, viewer):
 def _view_card(card, zone, viewer):
     out = {"id": card["id"], "owner": card["owner"], "tapped": card["tapped"],
            "face_down": card["face_down"], "counters": dict(card["counters"])}
+    if zone == "battlefield" and card.get("attached"):
+        out["attached"] = card["attached"]
     if _visible(card, zone, viewer):
         out.update(name=card["name"], token=card["token"], shared=_visible(card, zone, 3 - viewer))
     return out
@@ -156,6 +160,14 @@ def _locate(state, ids):
         raise ActionError("stale") from None
 
 
+def _reattach(state, renamed):
+    """Point attachments at their host's new id, or drop them when the host left the battlefield."""
+    for zs in state["zones"].values():
+        for c in zs["battlefield"]:
+            if c.get("attached") in renamed:
+                c["attached"] = renamed[c["attached"]]
+
+
 def _remove(state, ids):
     gone = set(ids)
     for zs in state["zones"].values():
@@ -166,7 +178,7 @@ def _remove(state, ids):
 # ---- actions ----
 
 def _move(state, seat, a):
-    _fields(a, ("cards", "to"), ("pos", "face_down"), typed=True)
+    _fields(a, ("cards", "to"), ("pos", "face_down", "shuffle"), typed=True)
     ids = _ids(a["cards"])
     _fields(a["to"], ("seat", "zone"))
     dest_seat, zone = _seat(a["to"]["seat"]), _zone(a["to"]["zone"])
@@ -175,22 +187,29 @@ def _move(state, seat, a):
         _bad()
     face_down = _bool(a["face_down"]) if "face_down" in a else False
     face_down = face_down and zone in ("battlefield", "exile")
+    shuffle = _bool(a["shuffle"]) if "shuffle" in a else False  # a tutor's "shuffle, then put it on top"
+    if shuffle and zone != "library":
+        _bad()
     found = _locate(state, ids)
     _remove(state, ids)
-    moved = []
+    moved, renamed = [], {}
     for c, src in found:
         before = {s for s in (1, 2) if _visible(c, src, s)}
         if src == "battlefield" and zone != "battlefield":
-            c["tapped"], c["counters"] = False, {}
-        c["id"] = _new_id()
+            c["tapped"], c["counters"], c["attached"] = False, {}, None
+        old, c["id"] = c["id"], _new_id()
+        renamed[old] = c["id"] if src == zone == "battlefield" else None
         c["face_down"] = face_down
         c["known_by"] = sorted(before | ({dest_seat} if zone == "hand" else set()))
         moved.append(c)
+    if shuffle:
+        _shuffle(state, dest_seat)
     dest = state["zones"][str(dest_seat)][zone]
     if zone == "library" and pos != "bottom":
         dest[0:0] = moved
     else:
         dest.extend(moved)
+    _reattach(state, renamed)
 
 
 def _tap(state, seat, a):
@@ -244,6 +263,27 @@ def _delete(state, seat, a):
     if not _locate(state, [cid])[0][0]["token"]:
         _bad()
     _remove(state, [cid])
+    _reattach(state, {cid: None})
+
+
+def _attach(state, seat, a):
+    """Attach `card` to the battlefield card `to`, or detach it with to=None. A card from any other zone
+    enters the actor's battlefield first. No nesting: the host cannot itself be attached, and whatever
+    was attached to the card falls off."""
+    _fields(a, ("card", "to"), typed=True)
+    cid = _str(a["card"], 1, 32)
+    c, zone = _locate(state, [cid])[0]
+    if a["to"] is None:
+        c["attached"] = None
+        return
+    host, hzone = _locate(state, [_str(a["to"], 1, 32)])[0]
+    if hzone != "battlefield" or host is c or host.get("attached"):
+        _bad()
+    if zone != "battlefield":
+        _move(state, seat, {"type": "move", "cards": [cid], "to": {"seat": seat, "zone": "battlefield"}})
+        c = state["zones"][str(seat)]["battlefield"][-1]
+    _reattach(state, {c["id"]: None})
+    c["attached"] = host["id"]
 
 
 def _look(state, seat, a):
@@ -297,7 +337,7 @@ def _roll(state, seat, a):
 _ACTIONS = {"move": _move, "tap": _tap, "untap_all": _untap_all, "flip": _flip, "counter": _counter,
             "token": _token, "delete": _delete, "look": _look, "reveal": _reveal,
             "shuffle": _shuffle_action, "mulligan": _mulligan, "life": _life,
-            "cmd_damage": _cmd_damage, "roll": _roll}
+            "cmd_damage": _cmd_damage, "roll": _roll, "attach": _attach}
 
 
 def apply(state, seat, action):
