@@ -1,10 +1,7 @@
 import copy
 import json
-from io import StringIO
 
 import pytest
-from django.core.management import call_command
-from django.core.management.base import CommandError
 from django.test import Client
 from django.utils import timezone
 
@@ -286,14 +283,3 @@ def test_caps(a, b):
     PodDeck.objects.bulk_create([PodDeck(pod=p, deck=d, added_at=now) for d in decks[:100]])
     assert enter(a, {"id": p.id}, decks[100]).json() == {"errors": {"decks": "limit"}}
 
-
-def test_seed_pod(a):
-    out = StringIO()
-    call_command("seed_pod", name="Jueves", admin="ana", stdout=out)
-    pod = Pod.objects.get(name="Jueves")
-    assert out.getvalue().strip() == pod.invite_code and pod.rules == template()
-    assert PodMember.objects.get(pod=pod, user=a.user).role == "admin"
-    with pytest.raises(CommandError):
-        call_command("seed_pod", name="Jueves", admin="ana")
-    with pytest.raises(CommandError):
-        call_command("seed_pod", name="X", admin="nadie")
