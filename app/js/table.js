@@ -3,7 +3,7 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON } from './table/board.js';
+import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, other } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 
@@ -15,6 +15,15 @@ const BACKOFF = [500, 1000, 2000, 4000, 8000];
 let view = null, lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
 let gone = gameId ? null : 'tbNoGame'; // message key once the game is unreachable for good
 let sheet = null, items = [], handOpen = true, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, rollSeen;
+// the active board: one at a time on phones, highlighted where both fit. Yours unless you look at theirs
+let focus = 0, focusTimer = null;
+// card size, per viewer: a multiplier on the fitted card width
+const SIZES = { s: 0.8, m: 1, l: 1.25 };
+let size = 'm';
+try { size = SIZES[localStorage.getItem('pdc_table_size')] ? localStorage.getItem('pdc_table_size') : 'm'; } catch (err) { /* storage blocked: normal size */ }
+// keep in sync with the table.css media queries that show both boards
+const BOTH = matchMedia('(min-width:900px), (orientation:landscape) and (min-width:640px) and (max-height:560px)');
+const SHORT = matchMedia('(orientation:landscape) and (min-width:640px) and (max-height:560px)');
 const open = () => sock && sock.readyState === WebSocket.OPEN;
 
 // ---- connection ----
@@ -81,6 +90,7 @@ function render() {
   const hand = $('hand'), row = $('handRow'), sl = row ? row.scrollLeft : 0;
   hand.innerHTML = active ? handHtml(view, t, handOpen) : '';
   if (active) hand.dataset.drop = view.you + ':hand'; else delete hand.dataset.drop;
+  if (active) applyFocus(false);
   if ($('handRow')) $('handRow').scrollLeft = sl;
   const pc = picking && active && cardAt(picking);
   if (!pc) picking = null;
@@ -128,7 +138,74 @@ const ctx = () => ({
   lang: state.lang, dark: document.body.classList.contains('dark'),
   setLang: (l) => { state.lang = store.lang = l; render(); },
   setTheme: (m) => { state.theme = store.theme = m; render(); },
+  size, setSize: (k) => { size = k; try { localStorage.setItem('pdc_table_size', k); } catch (err) { /* kept for this visit only */ } render(); },
 });
+
+// ---- the active board ----
+const RETURN = 10000;
+function setFocus(s) {
+  if (!view || !view.zones) return;
+  clearTimeout(focusTimer);
+  const was = focus || view.you;
+  focus = s;
+  if (s !== view.you) focusTimer = setTimeout(comeBack, RETURN);
+  applyFocus(s !== was);
+}
+// yours comes back after a while without touching theirs, but never from under a sheet, a held card or a host pick
+function comeBack() {
+  if (!$('sheet').hidden || press || picking) focusTimer = setTimeout(comeBack, RETURN);
+  else setFocus(view.you);
+}
+// classes only, no re-render: a press that started on a card keeps its element
+function applyFocus(swap) {
+  if (!view || !view.zones) return;
+  const f = focus || view.you, away = f !== view.you;
+  for (const el of document.querySelectorAll('.seat')) {
+    const on = Number(el.dataset.seat) === f;
+    el.classList.toggle('on', on);
+    el.classList.toggle('swap', on && swap);
+  }
+  const tuck = away && !BOTH.matches; // on phones the hand tucks away while theirs is open
+  document.body.classList.toggle('away', tuck);
+  const hb = document.querySelector('.hand-bar');
+  if (hb) hb.setAttribute('aria-expanded', String(handOpen && !tuck));
+  fit();
+}
+
+// ---- card size: the largest width at which every card of a battlefield fits without scrolling ----
+// shortcut: the gaps are table.css constants (card gap 6, section gap 8 + 8 padding + 1 rule); change both together
+const GAP = 6, SEC = 17;
+function fitsAt(cw, rows, W, H) {
+  const ch = cw * 1.4;
+  let h = 0;
+  for (const row of rows) {
+    let x = 0, line = 0;
+    for (const it of row) {
+      const w = it.tapped ? ch : cw, ih = ch + it.n * cw * 0.28;
+      if (x && x + GAP + w > W) { h += line + GAP; x = 0; line = 0; }
+      x += (x ? GAP : 0) + w; line = Math.max(line, ih);
+    }
+    h += line;
+  }
+  return h + Math.max(0, rows.length - 1) * SEC <= H;
+}
+function fit() {
+  const m = SIZES[size];
+  document.body.style.setProperty('--size', m);
+  const [lo, hi] = (SHORT.matches ? [32, 72] : BOTH.matches ? [44, 128] : [44, 96]).map((x) => Math.round(x * m));
+  for (const bf of document.querySelectorAll('.seat .bf')) {
+    if (!bf.offsetParent) continue;
+    const cs = getComputedStyle(bf);
+    const W = bf.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), H = bf.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const rows = [...bf.querySelectorAll(':scope>.bfr')].map((r) => [...r.children].map((it) => ({
+      tapped: (it.matches('.stk') ? it.lastElementChild : it).classList.contains('tapped'), n: it.matches('.stk') ? it.childElementCount - 1 : 0 })));
+    let cw = hi;
+    while (cw > lo && !fitsAt(cw, rows, W, H)) cw--;
+    bf.style.setProperty('--cw', cw + 'px');
+  }
+}
+new ResizeObserver(() => fit()).observe($('board'));
+BOTH.addEventListener('change', () => applyFocus(false));
 
 function fullscreen() {
   if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
@@ -241,6 +318,7 @@ function openCard(id) {
 
 document.addEventListener('pointerdown', (e) => {
   if (e.button !== 0) return;
+  noteBoard(e);
   const life = e.target.closest('[data-life]');
   if (life) { // hold a life button to step by 5
     const [s, d] = life.dataset.life.split(':').map(Number);
@@ -276,6 +354,29 @@ document.addEventListener('contextmenu', (e) => {
   if (e.pointerType !== 'touch' && !(press && !press.mouse) && cardAt(el.dataset.card)) openCard(el.dataset.card);
 });
 
+// touching theirs keeps it open; touching your hand brings yours back; where both show, touching one makes it active
+function noteBoard(e) {
+  if (!view || !view.zones || view.status !== 'active') return;
+  const f = focus || view.you, st = e.target.closest('.seat');
+  if (e.target.closest('#hand') && !e.target.closest('.hand-bar')) { if (f !== view.you) setFocus(view.you); }
+  else if (st && st.classList.contains('on') && f !== view.you) setFocus(f);
+  else if (st && BOTH.matches && !st.classList.contains('on')) setFocus(Number(st.dataset.seat));
+  if (!BOTH.matches && e.pointerType !== 'mouse' && e.target.closest('.sides')) swipe = { x: e.clientX, y: e.clientY, t: e.timeStamp };
+}
+
+// a sideways swipe across the board (not a card being dragged) turns to the other board
+let swipe = null;
+document.addEventListener('pointerup', (e) => {
+  const w = swipe;
+  swipe = null;
+  if (!w || BOTH.matches || document.body.classList.contains('dragging')) return;
+  const dx = e.clientX - w.x, dy = e.clientY - w.y;
+  if (Math.abs(dx) < 56 || Math.abs(dx) < 1.5 * Math.abs(dy) || e.timeStamp - w.t > 800) return;
+  swallow = true; setTimeout(() => { swallow = false; }, 400);
+  setFocus(other(focus || view.you));
+}, true);
+document.addEventListener('pointercancel', () => { swipe = null; });
+
 // a mouse resting on a card shows it large beside the card
 function hoverCard(e) {
   const el = e.target.closest && e.target.closest('[data-card]');
@@ -290,11 +391,12 @@ function hoverCard(e) {
 document.addEventListener('pointerout', (e) => { if (!e.relatedTarget) hov.hidden = true; });
 
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-preview-close]');
+  const el = e.target.closest('[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-preview-close]');
   if (!el) return;
   if (swallow) { swallow = false; return; }
   hov.hidden = true;
   const d = el.dataset;
+  if ('focus' in d) { setFocus(Number(d.focus)); return; } // also while picking a host: it may be on the other board
   if (picking) { // choosing the host for an aura or equipment: a battlefield card, or cancel
     const h = 'card' in d && cardAt(d.card);
     if (h && h.zone === 'battlefield' && d.card !== picking) send({ type: 'attach', card: picking, to: d.card });
@@ -312,7 +414,7 @@ document.addEventListener('click', (e) => {
     if (!hit) return;
     // your own battlefield card: a tap taps it (a keyboard press opens it instead)
     if (e.detail && $('sheet').hidden && hit.zone === 'battlefield' && hit.seat === view.you) {
-      el.classList.toggle('tapped');
+      if (!d.n) el.classList.toggle('tapped'); // a stack waits for the server: one of its cards moves to the tapped stack
       send({ type: 'tap', cards: [hit.card.id], tapped: !hit.card.tapped });
     } else openCard(d.card);
   }
@@ -320,7 +422,7 @@ document.addEventListener('click', (e) => {
   else if ('life' in d) { const [s, dl] = d.life.split(':').map(Number); send({ type: 'life', seat: s, delta: dl }); }
   else if ('cmd' in d) { const [s, i] = d.cmd.split(':').map(Number); setSheet({ k: 'cmd', seat: s, i }); }
   else if ('token' in d) setSheet({ k: 'token' });
-  else if ('hand' in d) { handOpen = !handOpen; render(); }
+  else if ('hand' in d) { if (document.body.classList.contains('away')) setFocus(view.you); else { handOpen = !handOpen; render(); } }
   else if ('pick' in d) pickDeck();
   else if (d.top === 'menu') setSheet({ k: 'menu' });
   else if (d.top === 'full') fullscreen();

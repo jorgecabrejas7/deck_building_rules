@@ -19,6 +19,9 @@ tbDice:'Dados',tbCoin:'Moneda',tbCustom:'Otro dado (caras)',tbRoll:'Tirar',tbHea
 tbMulligan:'Mulligan',tbUntapAll:'Enderezar todo',tbMenu:'Menú',tbEndGame:'Terminar partida',tbEndAsk:'¿Terminar y borrar la partida?',tbYes:'Sí',tbCancel:'Cancelar',
 tbEndErr:'No se pudo terminar la partida.',tbLang:'Idioma',tbTheme:'Tema',tbLight:'Claro',tbDark:'Oscuro',tbClose:'Cerrar',
 tbLife:'Vida',tbMinus:'Restar',tbPlus:'Sumar',tbCmdDmg:'Daño de comandante',tbHandBar:'Mano (%n)',
+tbCopies:'%n copias',tbSeccreatures:'Criaturas',tbSecother:'Otros permanentes',tbSeclands:'Tierras',tbShowBoard:'Ver el campo de %n',tbPermanents:'%n permanentes',
+tbSize:'Tamaño de las cartas',tbSizeS:'Pequeñas',tbSizeM:'Normales',tbSizeL:'Grandes',
+tbHow4:'Toca la barra de un jugador o desliza a los lados para ver su campo. El tuyo vuelve a los 10 segundos o al tocar tu mano.',
 },
 en: {
 tbTapped:'tapped',tbDropHere:'Drag your cards here',tbFullscreen:'Full screen',tbExitFullscreen:'Exit full screen',tbPlay:'Play',tbToField:'To the battlefield',tbSendTo:'Send to',
@@ -39,5 +42,8 @@ tbDice:'Dice',tbCoin:'Coin',tbCustom:'Other die (sides)',tbRoll:'Roll',tbHeads:'
 tbMulligan:'Mulligan',tbUntapAll:'Untap all',tbMenu:'Menu',tbEndGame:'End game',tbEndAsk:'End and delete the game?',tbYes:'Yes',tbCancel:'Cancel',
 tbEndErr:'The game could not be ended.',tbLang:'Language',tbTheme:'Theme',tbLight:'Light',tbDark:'Dark',tbClose:'Close',
 tbLife:'Life',tbMinus:'Subtract',tbPlus:'Add',tbCmdDmg:'Commander damage',tbHandBar:'Hand (%n)',
+tbCopies:'%n copies',tbSeccreatures:'Creatures',tbSecother:'Other permanents',tbSeclands:'Lands',tbShowBoard:'Show %n\'s battlefield',tbPermanents:'%n permanents',
+tbSize:'Card size',tbSizeS:'Small',tbSizeM:'Normal',tbSizeL:'Large',
+tbHow4:'Tap a player\'s bar or swipe sideways to see their battlefield. Yours comes back after 10 seconds or when you touch your hand.',
 },
 };

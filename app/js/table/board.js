@@ -47,19 +47,25 @@ export function attachments(view) {
 export const attachable = (c) => !!c.name && !c.face_down && /\b(Aura|Equipment|Fortification)\b/.test((cardCache[c.name] || {}).type_line || '');
 
 const counters = (c) => Object.entries(c.counters || {}).map(([k, v]) => k + ' ' + v).join(' ');
-const isLand = (c) => !c.face_down && c.name && /\bLand\b/.test((cardCache[c.name] || {}).type_line || '');
+// a permanent's section, from its front face; face-down and not-yet-loaded cards go to "other"
+const section = (c) => {
+  const tl = !c.face_down && c.name && ((cardCache[c.name] || {}).type_line || '').split(' // ')[0];
+  return !tl ? 'other' : /\bCreature\b/.test(tl) ? 'creatures' : /\bLand\b/.test(tl) ? 'lands' : 'other';
+};
 export const art = (c, big = false) => {
   const info = c.name && !c.face_down && !c.token && cardCache[c.name];
   return info ? (big ? info.img_normal : info.img_small) || '' : '';
 };
 
-// a card is its image; the name is written only while there is no image to show
-export function tile(c, t, big = false) {
+// a card is its image; the name is written only while there is no image to show.
+// n > 1: a stack of identical cards drawn as one, acting on its first card
+export function tile(c, t, big = false, n = 1) {
   const back = c.face_down || !c.name, src = art(c, big);
-  const cls = ['tc', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big'].filter(Boolean).join(' ');
+  const cls = ['tc', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
   const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : `<span class="tn">${c.name ? esc(c.name) : ''}</span>`;
   const cn = counters(c);
-  return `<button class="${cls}" data-card="${c.id}" aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${c.tapped ? ' · ' + t.tbTapped : ''}">${face}${cn ? `<b class="cn">${esc(cn)}</b>` : ''}</button>`;
+  return `<button class="${cls}" data-card="${c.id}"${n > 1 ? ` data-n="${n}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}">`
+    + `${face}${cn ? `<b class="cn">${esc(cn)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
 }
 
 // a pile drawn as a card slot: the top card when it is public, a back for the library, a dashed outline when empty
@@ -71,30 +77,57 @@ function slot(s, zone, t, view) {
     + `${src ? `<img src="${esc(src)}" alt="" draggable="false">` : ''}<span class="sc">${ICON[zone]}<b>${n}</b></span></button>`;
 }
 
+// a battlefield in sections, each a list of groups: identical plain cards (same name and tapped state, no counters,
+// nothing attached either way, face up) share one group; any other card is a group of one
+function sections(view, s, att) {
+  const on = new Set([...att.values()].flat().map((c) => c.id)), out = { creatures: [], other: [], lands: [] }, seen = new Map();
+  for (const c of view.zones[s].battlefield) {
+    if (on.has(c.id)) continue; // drawn tucked behind its host
+    const plain = c.name && !c.face_down && !c.attached && !att.has(c.id) && !Object.keys(c.counters || {}).length;
+    const k = plain && [c.name, c.tapped, c.token].join('|'), g = k && seen.get(k);
+    if (g) g.push(c);
+    else { const ng = [c]; if (k) seen.set(k, ng); out[section(c)].push(ng); }
+  }
+  return out;
+}
+
+const PILES = ['graveyard', 'exile', 'library']; // the bar's order: the library count is the first to give way
+
+// one player's side. Rendered whole every time: the full board (rail + battlefield + piles) and the collapsed bar.
+// Which one shows is client state (table.js applyFocus toggles .seat.on); CSS shows both boards on wide screens.
 function seat(view, s, t) {
   const p = view.players[s], z = view.zones[s], me = s === view.you, o = view.players[other(s)];
-  // attached cards are drawn tucked behind their host, wherever the host is
-  const att = attachments(view), on = new Set([...att.values()].flat().map((c) => c.id));
-  const free = z.battlefield.filter((c) => !on.has(c.id));
-  const lands = free.filter(isLand), rest = free.filter((c) => !isLand(c));
-  const stack = (c) => {
+  const att = attachments(view), secs = sections(view, s, att);
+  const stack = ([c, ...more]) => {
     const under = att.get(c.id);
-    if (!under) return tile(c, t);
+    if (!under) return tile(c, t, false, more.length + 1);
     return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t)}</div>`;
   };
-  const row = (cards, cls) => cards.length ? `<div class="bfr ${cls}">${cards.map(stack).join('')}</div>` : '';
+  // mine reads creatures, other, lands down towards me; theirs mirrors it, lands at their edge
+  const order = me ? ['creatures', 'other', 'lands'] : ['lands', 'other', 'creatures'];
+  const rows = order.filter((k) => secs[k].length).map((k) => `<div class="bfr" role="group" aria-label="${t['tbSec' + k]}">${secs[k].map(stack).join('')}</div>`).join('');
   const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${(p.cmd_damage || {})[name] || 0}</b></button>`).join('');
   const lead = me ? `<button class="chip ico" data-top="untap" title="${t.tbUntapAll}" aria-label="${t.tbUntapAll}">${ICON.untap}</button>`
     : `<button class="chip" data-pile="${s}:hand" data-drop="${s}:hand" title="${t.tbZhand}" aria-label="${t.tbZhand}: ${z.hand.length}">${ICON.hand}<b>${z.hand.length}</b></button>`;
+  const menu = `<button class="chip ico menu-btn" data-top="menu" title="${t.tbMenu}" aria-label="${t.tbMenu}">${ICON.menu}</button>`;
   // the opponent's rail opens the table's own controls: the menu (with the connection dot) and full screen
-  const ctl = me ? '' : `<button class="chip ico menu-btn" data-top="menu" title="${t.tbMenu}" aria-label="${t.tbMenu}">${ICON.menu}</button>`
-    + (document.fullscreenEnabled ? `<button class="chip ico fs-btn" data-top="full" title="${t.tbFullscreen}" aria-label="${t.tbFullscreen}">${ICON.full}</button>` : '');
-  const strip = `<div class="strip">${ctl}<b class="who">${esc(p.name || '?')}</b>${lead}${cmds}`
-    + `<div class="life" role="group" aria-label="${t.tbLife}"><button data-life="${s}:-1" aria-label="${t.tbMinus}">−</button><output aria-label="${t.tbLife}">${p.life}</output><button data-life="${s}:1" aria-label="${t.tbPlus}">+</button></div></div>`;
-  const order = me ? ['command', 'exile', 'graveyard', 'library'] : ['library', 'graveyard', 'exile', 'command'];
-  const area = `<div class="area"><div class="bf" data-drop="${s}:battlefield" data-empty="${me ? t.tbDropHere : t.tbZbattlefield}">${row(rest, 'other')}${row(lands, 'lands')}</div>`
-    + `<div class="piles">${order.map((zone) => slot(s, zone, t, view)).join('')}</div></div>`;
-  return `<section class="seat ${me ? 'me' : 'opp'}" aria-label="${esc(p.name || '?')}">${me ? area + strip : strip + area}</section>`;
+  const ctl = me ? '' : menu + (document.fullscreenEnabled ? `<button class="chip ico fs-btn" data-top="full" title="${t.tbFullscreen}" aria-label="${t.tbFullscreen}">${ICON.full}</button>` : '');
+  const life = `<div class="life" role="group" aria-label="${t.tbLife}"><button data-life="${s}:-1" aria-label="${t.tbMinus}">−</button><output aria-label="${t.tbLife}">${p.life}</output><button data-life="${s}:1" aria-label="${t.tbPlus}">+</button></div>`;
+  const strip = `<div class="strip">${ctl}<b class="who">${esc(p.name || '?')}</b>${lead}${cmds}${life}</div>`;
+  const piles = (me ? ['command', 'exile', 'graveyard', 'library'] : ['library', 'graveyard', 'exile', 'command']).map((zone) => slot(s, zone, t, view)).join('');
+  // the page dots: the opponent's board is the left page, yours the right
+  const dots = `<div class="dots" aria-hidden="true"><i${me ? '' : ' class="on"'}></i><i${me ? ' class="on"' : ''}></i></div>`;
+  const area = `<div class="area"><div class="bf" data-drop="${s}:battlefield" data-empty="${me ? t.tbDropHere : t.tbZbattlefield}">${rows}</div><div class="piles">${piles}</div>${dots}</div>`;
+  // the collapsed bar: tap it to open this board, drop a card on it to put the card onto this battlefield
+  const minis = ['creatures', 'other', 'lands'].flatMap((k) => secs[k]).map(([c, ...more]) => {
+    const src = art(c);
+    return `<span class="mini${c.tapped ? ' tapped' : ''}${c.face_down || !c.name ? ' back' : c.token ? ' tok' : ''}">${src ? `<img src="${esc(src)}" alt="" draggable="false">` : ''}${more.length ? `<b>×${more.length + 1}</b>` : ''}</span>`;
+  }).join('');
+  const counts = [['hand', z.hand.length], ...PILES.map((k) => [k, z[k].length])].map(([k, n]) => `<span class="pk-n">${ICON[k]}${n}</span>`).join('');
+  const label = [fill(t.tbShowBoard, { n: esc(p.name || '?') }), `${t.tbZhand}: ${z.hand.length}`, ...PILES.map((k) => `${t['tbZ' + k]}: ${z[k].length}`), fill(t.tbPermanents, { n: z.battlefield.length })].join(', ');
+  const peek = `<div class="peek" data-drop="${s}:battlefield">${me ? '' : menu}`
+    + `<button class="peek-open" data-focus="${s}" aria-expanded="false" aria-label="${label}"><span class="pk-top"><b class="who">${esc(p.name || '?')}</b>${counts}</span><span class="pk-row">${minis}</span></button>${life}</div>`;
+  return `<section class="seat ${me ? 'me' : 'opp'}" data-seat="${s}" aria-label="${esc(p.name || '?')}">${me ? area + strip + peek : peek + strip + area}</section>`;
 }
 
 export const boardHtml = (view, t) => `<div class="sides">${seat(view, other(view.you), t)}${seat(view, view.you, t)}</div>`;
