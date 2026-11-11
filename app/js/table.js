@@ -3,10 +3,12 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, other } from './table/board.js';
+import { boardHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, other } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 import { buildBar } from './table/bar.js';
+import { handHtml, layoutHand, cardAtX, raise } from './table/hand.js';
+import { firstRun, startHints, placeCoach } from './table/coach.js';
 
 const $ = (id) => document.getElementById(id);
 const API = '../api/';
@@ -88,11 +90,11 @@ function render() {
   else if (!view) board.textContent = t.tbConnecting;
   else if (view.status === 'lobby') { keepInputs(board, () => { board.innerHTML = `<button class="chip ico menu-btn lobby-menu" data-top="menu" aria-label="${t.tbMenu}">${ICON.menu}</button>` + lobbyHtml(view, t, decks, lobbyErr); }); if (decks === null) loadDecks(); }
   else board.innerHTML = boardHtml(view, t);
-  const hand = $('hand'), row = $('handRow'), sl = row ? row.scrollLeft : 0;
+  const hand = $('hand');
   hand.innerHTML = active ? handHtml(view, t, handOpen) : '';
   if (active) hand.dataset.drop = view.you + ':hand'; else delete hand.dataset.drop;
+  layoutHand(handRow());
   if (active) applyFocus(false);
-  if ($('handRow')) $('handRow').scrollLeft = sl;
   const pc = picking && active && cardAt(picking);
   if (!pc) picking = null;
   document.body.classList.toggle('picking', !!pc);
@@ -101,7 +103,11 @@ function render() {
   renderSheet();
   applySel();
   if (view && view.status === 'active') loadImages();
+  if (active) firstRun(T, fullscreen);
+  placeCoach();
 }
+const handRow = () => $('hand').querySelector('.hand-row');
+new ResizeObserver(() => layoutHand(handRow())).observe($('hand'));
 
 function renderSheet() {
   const el = $('sheet');
@@ -137,6 +143,7 @@ function filterSearch() {
 const setSheet = (s) => { sheet = s; renderSheet(); };
 const ctx = () => ({
   t: T(), send, setSheet, pickHost: (id) => { picking = id; render(); }, closeSheet: () => setSheet(sheet && sheet.back ? sheet.back : null), endGame, fullscreen,
+  hints: () => { setSheet(null); startHints(); },
   lang: state.lang, dark: document.body.classList.contains('dark'),
   setLang: (l) => { state.lang = store.lang = l; render(); },
   setTheme: (m) => { state.theme = store.theme = m; render(); },
@@ -227,6 +234,7 @@ function fit() {
     }
   }
   placeBar();
+  placeCoach();
 }
 new ResizeObserver(() => fit()).observe($('board'));
 BOTH.addEventListener('change', () => applyFocus(false));
@@ -359,13 +367,16 @@ function placeBar() {
   bar.style.top = Math.round(Math.max(m, top)) + 'px';
   bar.dataset.side = above ? 'above' : 'below';
 }
-addEventListener('scroll', () => placeBar(), true);
-addEventListener('resize', () => placeBar());
+addEventListener('scroll', () => { placeBar(); placeCoach(); }, true);
+addEventListener('resize', () => { placeBar(); placeCoach(); });
 
 // ---- gestures ----
 // A card on the table or in the hand:
 //   tap: one of yours on the battlefield taps or untaps; any other card is selected and its bar opens. Double tap: full view
 //   hold still: selection mode (taps then add or remove cards). Hold and move: drag it, with the rest of the selection
+// The hand (touch): the card under the finger rises. Slide along the fan to move it; let go after sliding to select
+// that card, as a tap would. Moving up out of the hand drags the card at once (no hold needed): drop it on your
+// battlefield to play it, or flick it up to play it from the hand. Holding still on a card still enters selection mode.
 // A pile: tap opens it; hold and move drags its top card. Mouse: click is a tap, drag straight away, right-click
 // selects, shift/ctrl/cmd-click adds to a selection, resting on a card shows it large. Keyboard: Enter opens the bar.
 const HOLD = 320, SLOP = 8, DOUBLE = 350;
@@ -417,17 +428,23 @@ function endPress(e) {
   if (!p) return;
   clearTimeout(p.timer);
   p.el.classList.remove('lifted');
+  if (p.hand) raise(handRow(), null);
   if (p.drag) {
     p.ghost.remove(); document.body.classList.remove('dragging');
     if (p.over) p.over.classList.remove('drop-on');
     swallow = true;
+    // a short quick flick up out of the hand, let go before it reaches a zone: played
+    const flick = up && p.hand && (!p.over || p.over.id === 'hand') && p.y0 - e.clientY > 2 * OUT && e.timeStamp - p.t0 < 400;
     if (up && p.over && p.over.dataset.card) send({ type: 'attach', card: p.id, to: p.over.dataset.card });
-    else if (up && p.over) {
-      const [s, zone] = p.over.dataset.drop.split(':'), seat = Number(s), idx = index(view);
+    else if (up && (p.over || flick)) {
+      const [s, zone] = flick ? [view.you, 'battlefield'] : p.over.dataset.drop.split(':'), seat = Number(s), idx = index(view);
       const ids = p.ids.filter((id) => { const h = idx.get(id); return h && !(h.seat === seat && h.zone === zone); });
       for (let i = 0; i < ids.length; i += 100) send({ type: 'move', cards: ids.slice(i, i + 100), to: { seat, zone }, ...(zone === 'library' ? { pos: 'top' } : {}) });
       if (p.ids.length > 1) clearSel();
     }
+  } else if (p.scrub && !p.lifted && up) { // slid along the hand and let go: that card, as a tap
+    swallow = true;
+    select(p.el, selMode);
   } else if (p.lifted && up) { // held still and let go
     swallow = true;
     if (p.pile) openPile(p.pile);
@@ -462,15 +479,30 @@ document.addEventListener('pointerdown', (e) => {
   const el = e.target.closest('[data-card],[data-lift]');
   const hit = el && cardAt(el.dataset.card || el.dataset.lift);
   if (!hit) return;
-  press = { el, id: hit.card.id, hit, pile: el.dataset.card ? null : el.dataset.pile, x: e.clientX, y: e.clientY, mouse: e.pointerType === 'mouse' };
-  if (!press.mouse) press.timer = setTimeout(() => lift(press), HOLD);
+  const p = press = { el, id: hit.card.id, hit, pile: el.dataset.card ? null : el.dataset.pile, x: e.clientX, y: e.clientY, mouse: e.pointerType === 'mouse',
+    y0: e.clientY, t0: e.timeStamp };
+  p.hand = !p.mouse && !!el.closest('#hand .hand-row');
+  if (p.hand) raise(el.parentElement, el);
+  if (!p.mouse) p.timer = setTimeout(() => lift(p), HOLD);
 });
 
+// a finger in the hand: up drags the card out; sideways moves the raised card, and the hold starts over on it
+const OUT = 24;
+function handMove(p, e) {
+  if (p.y0 - e.clientY > OUT) { clearTimeout(p.timer); return startDrag(p, e); }
+  if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < SLOP) return;
+  const row = p.el.parentElement, el = cardAtX(row, e.clientX), hit = el && cardAt(el.dataset.card);
+  p.x = e.clientX; p.y = e.clientY; p.scrub = true;
+  clearTimeout(p.timer); p.timer = setTimeout(() => lift(p), HOLD);
+  if (hit && el !== p.el) { p.el = el; p.id = hit.card.id; p.hit = hit; raise(row, el); }
+}
+
 document.addEventListener('pointermove', (e) => {
-  if (e.pointerType === 'mouse' && !press) hoverCard(e);
+  if (e.pointerType === 'mouse' && !press) { hoverCard(e); const r = handRow(); if (r) raise(r, e.target.closest && e.target.closest('.hand-row') ? cardAtX(r, e.clientX) : null); }
   const p = press;
   if (!p) return;
   if (p.drag) return moveDrag(p, e);
+  if (p.hand && !p.lifted) return handMove(p, e);
   if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < SLOP) return;
   if (p.mouse || p.lifted) startDrag(p, e);
   else { clearTimeout(p.timer); press = null; } // a finger that moves before the hold is a scroll

@@ -172,8 +172,14 @@ body.dragging [data-drop]{transition:background .12s,box-shadow .12s}
 .hand-head .tbtn{flex:none;min-height:36px}
 .hand-bar .ic{transition:transform var(--dur) var(--ease);color:var(--muted)}
 .hand-bar[aria-expanded=true] .ic{transform:rotate(180deg)}
-.hand-row{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:8px var(--sp-3) var(--sp-2);scroll-snap-type:x proximity;scroll-padding-inline:var(--sp-3);overscroll-behavior-x:contain;scrollbar-width:thin}
-.hand-row .tc{--cw:calc(var(--hw) * var(--size));scroll-snap-align:start}
+/* held as a fan: hand.js layoutHand sets each card's --x, --r (tilt) and --y (arc); the raised card (.up: under the
+   finger or mouse, or focused) stands upright above its neighbours. The row never scrolls: a finger on it is table.js's */
+.hand-row{position:relative;height:calc(var(--hw) * var(--size) * 1.4 + 26px);touch-action:none}
+.hand-row .tc,.hand-row .tc:active,.hand-row .tc.lifted{--cw:calc(var(--hw) * var(--size));position:absolute;left:var(--x,0);bottom:12px;z-index:var(--i);touch-action:none;transform-origin:50% 100%;
+  transform:translateY(calc(var(--y,0px) - var(--lift,0px))) rotate(var(--r,0deg)) scale(var(--k,1))}
+.hand-row .tc.sel{--lift:10px;box-shadow:0 0 0 2.5px var(--accent),0 14px 26px -10px oklch(0 0 0 / .5)}
+.hand-row .tc.up,.hand-row .tc:focus-visible,.hand-row .tc.lifted{--lift:16px;--r:0deg;--k:1.05;z-index:99;box-shadow:0 0 0 1px oklch(0 0 0 / .2),0 16px 30px -10px oklch(0 0 0 / .5)}
+.hand-row .tc.sel.up,.hand-row .tc.sel:focus-visible,.hand-row .tc.lifted{box-shadow:0 0 0 2.5px var(--accent),0 16px 30px -10px oklch(0 0 0 / .5)}
 body.away .hand-row{display:none}
 .add{color:var(--accent)}
 .add .ic{width:16px;height:16px}
@@ -315,7 +321,7 @@ body.dragging .slot.lifted{opacity:.5;transform:none}
 .ghost.many img{border-radius:6%}
 
 /* selected cards rise; in selection mode they also carry a check */
-.bf .tc.sel,.hand-row .tc.sel{transform:translateY(-6px);box-shadow:0 0 0 2.5px var(--accent),0 14px 26px -10px oklch(0 0 0 / .5);z-index:2}
+.bf .tc.sel{transform:translateY(-6px);box-shadow:0 0 0 2.5px var(--accent),0 14px 26px -10px oklch(0 0 0 / .5);z-index:2}
 .bf .tc.tapped.sel{transform:translateY(-6px) rotate(90deg)}
 body.selecting .tc.sel::after{content:"";position:absolute;left:4px;top:4px;z-index:3;width:20px;height:20px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 1px 4px oklch(0 0 0 / .4);
   background:var(--accentBtn) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
@@ -359,3 +365,20 @@ body.dragging .tb-bar,body.picking .tb-bar,body:has(#sheet:not([hidden])) .tb-ba
 .bs:hover{background:var(--fill-hover)}
 .bs:active{transform:scale(.93)}
 .bs:disabled{opacity:.35;cursor:default;transform:none}
+
+/* first run: the full screen offer, a pill at the top; the coach marks, a bubble beside a ringed element */
+.tb-tip{position:fixed;left:50%;top:calc(var(--sp-2) + env(safe-area-inset-top));z-index:47;transform:translateX(-50%);box-sizing:border-box;width:min(360px,calc(100% - 2*var(--sp-3)));
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--sp-2);padding:6px 6px 8px var(--sp-4);border-radius:var(--r-lg);background:var(--panel);color:var(--text);box-shadow:0 0 0 1px var(--border),var(--shadow-2);font-size:var(--fs-caption);line-height:1.35}
+.tb-tip:not([hidden]){animation:tb-drop .32s cubic-bezier(.16,1,.3,1)}
+.tb-tip .sb.on{grid-column:1/-1;margin-right:2px}
+.tb-tip .sb:not(.on){background:transparent}
+@keyframes tb-drop{from{opacity:0;translate:0 -12px}}
+.coach-ring{position:fixed;z-index:47;box-sizing:border-box;border-radius:var(--r-md);pointer-events:none;box-shadow:0 0 0 2px var(--accent),0 0 0 100vmax oklch(0.12 0.005 260 / .3);
+  transition:left .3s var(--ease),top .3s var(--ease),width .3s var(--ease),height .3s var(--ease)}
+.coach{position:fixed;left:0;top:0;z-index:48;box-sizing:border-box;width:min(320px,calc(100% - 24px));padding:var(--sp-3) var(--sp-4) var(--sp-3);border-radius:var(--r-lg);background:var(--panel);color:var(--text);
+  box-shadow:0 0 0 1px var(--border),var(--shadow-2);font-size:var(--fs-body);line-height:1.45}
+.coach:focus{outline:none}
+.coach:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.coach.enter{animation:tb-pop .2s cubic-bezier(.2,.8,.2,1)}
+.coach-n{margin-bottom:var(--sp-1);font-size:var(--fs-caption);font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.coach-b{display:flex;justify-content:flex-end;gap:var(--sp-2);margin-top:var(--sp-3)}

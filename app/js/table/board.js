@@ -143,13 +143,6 @@ function seat(view, s, t) {
 
 export const boardHtml = (view, t) => `<div class="sides">${seat(view, other(view.you), t)}${seat(view, view.you, t)}</div>`;
 
-export function handHtml(view, t, open) {
-  const hand = view.zones[view.you].hand;
-  return `<div class="hand-head"><button class="hand-bar" data-hand aria-expanded="${open}">${fill(t.tbHandBar, { n: hand.length })}${ICON.up}</button>`
-    + `<button class="tbtn add" data-token>${ICON.plus}${t.tbToken}</button></div>`
-    + (open ? `<div class="hand-row" id="handRow">${hand.map((c) => tile(c, t)).join('')}</div>` : '');
-}
-
 export function lobbyHtml(view, t, decks, err) {
   const st = (s) => `<li class="${view.picked[s] ? 'ready' : ''}"><span>${s === view.you ? t.tbYou : t.tbOpp}</span><b>${view.picked[s] ? t.tbReady : t.tbWaiting}</b></li>`;
   const pick = decks === null ? ''

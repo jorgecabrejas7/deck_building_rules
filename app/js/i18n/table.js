@@ -24,6 +24,10 @@ tbLife:'Vida',tbMinus:'Restar',tbPlus:'Sumar',tbCmdDmg:'Daño de comandante',tbH
 tbCopies:'%n copias',tbSeccreatures:'Criaturas',tbSecother:'Otros permanentes',tbSeclands:'Tierras',tbShowBoard:'Ver el campo de %n',tbPermanents:'%n permanentes',
 tbSize:'Tamaño de las cartas',tbSizeS:'Pequeñas',tbSizeM:'Normales',tbSizeL:'Grandes',
 tbHow4:'Toca la barra de un jugador o desliza a los lados para ver su campo. El tuyo vuelve a los 10 segundos o al tocar tu mano.',
+tbHow6:'Desliza el dedo por tu mano para ver cada carta. Arrastra una hacia arriba y suéltala en tu campo para jugarla.',tbHintsAgain:'Ver los consejos otra vez',
+tbHintN:'Consejo %n de %m',tbHintTap:'Toca una carta tuya del campo para girarla. Tócala otra vez para enderezarla.',tbHintHold:'Mantén pulsada una carta para seleccionar varias. Mantenla y muévela para arrastrarla a otra zona.',
+tbHintBoard:'Toca esta barra o desliza a los lados para ver el campo de tu rival.',tbHintHand:'Arrastra una carta de tu mano hacia arriba y suéltala en tu campo para jugarla. Desliza el dedo por la mano para ver cada carta.',
+tbNext:'Siguiente',tbSkip:'Saltar',tbDone:'Entendido',tbFsAsk:'La pantalla completa deja más sitio a la mesa.',tbIosAsk:'Para jugar a pantalla completa, añade esta página a tu pantalla de inicio: Compartir → Añadir a pantalla de inicio.',
 },
 en: {
 tbTapped:'tapped',tbDropHere:'Drag your cards here',tbFullscreen:'Full screen',tbExitFullscreen:'Exit full screen',tbPlay:'Play',tbToField:'To the battlefield',tbSendTo:'Send to',
@@ -49,5 +53,9 @@ tbLife:'Life',tbMinus:'Subtract',tbPlus:'Add',tbCmdDmg:'Commander damage',tbHand
 tbCopies:'%n copies',tbSeccreatures:'Creatures',tbSecother:'Other permanents',tbSeclands:'Lands',tbShowBoard:'Show %n\'s battlefield',tbPermanents:'%n permanents',
 tbSize:'Card size',tbSizeS:'Small',tbSizeM:'Normal',tbSizeL:'Large',
 tbHow4:'Tap a player\'s bar or swipe sideways to see their battlefield. Yours comes back after 10 seconds or when you touch your hand.',
+tbHow6:'Slide your finger along your hand to see each card. Drag one up and let go on your battlefield to play it.',tbHintsAgain:'Show the tips again',
+tbHintN:'Tip %n of %m',tbHintTap:'Tap one of your cards on the battlefield to tap it. Tap it again to untap it.',tbHintHold:'Press and hold a card to select several. Hold it and move to drag it to another zone.',
+tbHintBoard:'Tap this bar or swipe sideways to see your opponent\'s battlefield.',tbHintHand:'Drag a card up from your hand and let go on your battlefield to play it. Slide your finger along the hand to see each card.',
+tbNext:'Next',tbSkip:'Skip',tbDone:'Got it',tbFsAsk:'Full screen gives the table more room.',tbIosAsk:'To play full screen, add this page to your Home Screen: Share → Add to Home Screen.',
 },
 };

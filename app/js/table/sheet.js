@@ -116,7 +116,7 @@ export function buildSheet(sh, view, c) {
         b(t.tbMulligan, () => send({ type: 'mulligan' })))
       + `<h3>${t.tbDice}</h3>` + row(b('d6', r(6)), b('d20', r(20)), b(t.tbCoin, r(2)))
       + row(input('sn', 10, `type="number" min="2" max="100" inputmode="numeric" aria-label="${t.tbCustom}"`), b(t.tbRoll, () => send({ type: 'roll', sides: num('sn', 2, 100, 10) })))
-      + `<h3>${t.tbHow}</h3><ul class="how"><li>${t.tbHow1}</li><li>${t.tbHow2}</li><li>${t.tbHow3}</li><li>${t.tbHow4}</li><li>${t.tbHow5}</li></ul>` : '')
+      + `<h3>${t.tbHow}</h3><ul class="how"><li>${t.tbHow1}</li><li>${t.tbHow2}</li><li>${t.tbHow3}</li><li>${t.tbHow4}</li><li>${t.tbHow5}</li><li>${t.tbHow6}</li></ul>` + row(b(t.tbHintsAgain, c.hints, 'quiet')) : '')
       + `<h3>${t.tbSize}</h3>` + row(...[['s', t.tbSizeS], ['m', t.tbSizeM], ['l', t.tbSizeL]].map(([k, l]) => b(l, () => c.setSize(k), c.size === k ? 'on' : '', true)))
       + `<h3>${t.tbLang}</h3>` + row(b('Español', () => c.setLang('es'), c.lang === 'es' ? 'on' : '', true), b('English', () => c.setLang('en'), c.lang === 'en' ? 'on' : '', true))
       + `<h3>${t.tbTheme}</h3>` + row(b(t.tbLight, () => c.setTheme('light'), c.dark ? '' : 'on', true), b(t.tbDark, () => c.setTheme('dark'), c.dark ? 'on' : '', true))
