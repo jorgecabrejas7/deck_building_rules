@@ -82,5 +82,5 @@ export const state = {
   near: null,        // {key, status, groups, all}: combos one card away, for this deck and commander
   cmpView: 'all',    // side-by-side card comparison: 'all' | 'diff'
 };
-export const TAB_KEYS = ['load', 'decks', 'informe', 'pod', 'guide'];
+export const TAB_KEYS = ['load', 'build', 'decks', 'informe', 'pod', 'games', 'guide'];
 export const VIEW_KEYS = ['summary', 'deck', 'points', 'bracket', 'combos', 'power', 'mana', 'web'];

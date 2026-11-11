@@ -13,6 +13,8 @@ export function renderInput() {
   $('heroNotice').hidden = !state.shareBad;
   $('heroNotice').textContent = t.shareBad;
   $('heroCta').textContent = t.heroCta;
+  $('heroBuild').textContent = t.heroBuild;
+  $('heroPlay').textContent = t.heroPlay;
   $('heroScroll').textContent = t.heroScroll;
   $('deckText').placeholder = t.inputPh;
   $('deckText').setAttribute('aria-label', t.inputAria);

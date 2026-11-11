@@ -202,12 +202,12 @@ async function loadGames() {
   if (!state.pod || state.pod.id !== id) return;
   if (res.status === 200) games = { podId: id, list: res.data.games, busy: false };
   else { games = { podId: id, list: [], busy: false }; gMsg = 'pdGErr'; }
-  if (state.tab === 'pod') renderPod();
+  paint();
 }
 function gamesHtml(t) {
   const others = state.pod.members.filter(m => !m.me);
   const invite = others.length
-    ? '<form class="dk-form" data-gameform><select name="opponent" aria-label="' + esc(t.pdGWho) + '">' +
+    ? '<form class="dk-form" data-gameform><select name="opponent" class="arch-select" aria-label="' + esc(t.pdGWho) + '">' +
       others.map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select>' +
       '<button class="btn-primary">' + esc(t.pdGInvite) + '</button></form>'
     : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
@@ -221,9 +221,9 @@ function gamesHtml(t) {
       ? '<span class="dk-confirm">' + esc(t.pdGAsk) + '</span><button class="btn-ghost-sm btn-danger" data-act="game-end-yes" data-game="' + g.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
       : '<button class="btn-ghost-sm" data-act="game-end" data-game="' + g.id + '">' + esc(lobby ? t.pdGDecline : t.pdGEnd) + '</button>';
     return '<li class="pod-member"><span class="pod-mname">' + esc(who) + ' <span class="lbl-muted">' + esc(st) + '</span></span><span class="dk-actions">' +
-      '<a class="btn-ghost-sm" href="table.html?game=' + g.id + '">' + esc(t.pdGOpen) + '</a>' + end + '</span></li>';
+      '<a class="btn-primary dk-login" href="table.html?game=' + g.id + '">' + esc(t.pdGOpen) + '</a>' + end + '</span></li>';
   }).join('');
-  return '<h3 class="pod-sub">' + esc(t.pdGames) + '</h3>' + invite + (gMsg ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') +
+  return invite + (gMsg ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') +
     (li ? '<ul class="pod-members">' + li + '</ul>' : games && !games.busy ? '<p class="note-sm">' + esc(t.pdGNone) + '</p>' : '');
 }
 async function gameAct(method, path, body, ok) {
@@ -242,6 +242,34 @@ function createHtml(t) {
     '<button class="btn-primary">' + esc(t.pdCreateGo) + '</button></form></details>';
 }
 
+const pickHtml = (t) => '<label class="arch-field"><span class="lbl-muted">' + esc(t.pdPicker) + '</span><select id="podSelTab" class="arch-select">' + pickerOptions() + '</select></label>';
+const paint = () => { if (state.tab === 'pod') renderPod(); else if (state.tab === 'games') renderGames(); };
+function ensureDetail() {
+  if (!state.activeId || state.pod || loadingDetail || status === 'error') return;
+  loadingDetail = true;
+  loadDetail(state.activeId).then(p => { state.pod = p; status = p ? 'idle' : 'error'; }).finally(() => { loadingDetail = false; paint(); });
+}
+
+// The Partidas tab: the active pod's games, with the same picker as the Pod tab.
+export function renderGames() {
+  const t = T(), el = $('gamesPanel');
+  const note = (k) => '<p class="note-sm">' + esc(t[k]) + '</p>';
+  let body;
+  if (!state.pods) body = note('pdSignInNote') + '<a class="btn-primary dk-login" href="account.html">' + esc(t.sdSignIn) + '</a>';
+  else {
+    ensureDetail();
+    const flash = msg ? '<p class="note-bad" role="status">' + esc(t[msg]) + '</p>' : '';
+    if (!state.activeId) body = pickHtml(t) + flash + note('pdGNeedPod') + '<button class="btn-primary" data-act="to-pod">' + esc(t.pdGToPod) + '</button>';
+    else if (!state.pod) body = pickHtml(t) + flash + note(status === 'error' ? 'pdErr' : 'pdLoading');
+    else {
+      if (!games || games.podId !== state.pod.id) loadGames();
+      body = pickHtml(t) + flash + '<div class="panel pod-card">' + gamesHtml(t) + '</div>';
+    }
+  }
+  el.innerHTML = '<div class="stack-16"><div class="part-head"><div><h2 class="part-title">' + esc(t.pdGames) + '</h2><p class="part-sub">' + esc(t.pdGIntro) + '</p></div></div>' + body + '</div>';
+  el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange;
+}
+
 export function renderPod() {
   const t = T(), el = $('podPanel');
   loadStudy();
@@ -250,14 +278,8 @@ export function renderPod() {
   let body;
   if (!state.pods) body = note('pdSignInNote') + '<a class="btn-primary dk-login" href="account.html">' + esc(t.sdSignIn) + '</a>';
   else {
-    if (state.activeId && !state.pod && !loadingDetail && status !== 'error') {
-      loadingDetail = true;
-      loadDetail(state.activeId).then(p => { state.pod = p; status = p ? 'idle' : 'error'; }).finally(() => {
-        loadingDetail = false;
-        if (state.tab === 'pod') renderPod();
-      });
-    }
-    const pick = '<label class="arch-field"><span class="lbl-muted">' + esc(t.pdPicker) + '</span><select id="podSelTab" class="arch-select">' + pickerOptions() + '</select></label>';
+    ensureDetail();
+    const pick = pickHtml(t);
     const flash = msg ? '<p class="note-bad" role="status">' + esc(t[msg]) + '</p>' : '';
     if (!state.activeId) body = pick + flash + note('pdNoPod') + createHtml(t);
     else if (!state.pod) body = pick + flash + note(status === 'error' ? 'pdErr' : 'pdLoading');
@@ -266,7 +288,7 @@ export function renderPod() {
       body = pick + flash + '<p class="note-sm">' + esc(p.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + ' · ' + esc(count(p.members.length, t.pdMember1, t.pdMemberN) + ' · ' + count(p.decks.length, t.pdDeck1, t.pdDeckN)) + '</p>' +
         '<div class="panel pod-card">' + deckTable(t) + '<div class="dk-actions">' + addHtml(t) + '</div></div>' +
         '<div class="panel pod-card">' + membersHtml(t) + (p.role === 'admin' ? adminHtml(t) : '') + '</div>' +
-        '<div class="panel pod-card">' + gamesHtml(t) + '</div>' + createHtml(t);
+        createHtml(t);
     }
   }
   el.innerHTML = '<div class="stack-16">' + head + body + '</div>';
@@ -278,7 +300,6 @@ export function renderPod() {
     }
     host.replaceWith(editorEl);
   }
-  if (state.pod && (!games || games.podId !== state.pod.id)) loadGames();
   const stale = state.pod && !progress && !failed && state.pod.decks.some(d => d.list && !rows.has(keyOf(d)));
   if (stale) compute();
   el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange;
@@ -319,14 +340,15 @@ async function onClick(e) {
   const b = e.target.closest('[data-act]');
   if (!b || b.tagName === 'SELECT') return;
   const a = b.dataset.act, entry = state.pod && state.pod.decks.find(d => d.id === Number(b.dataset.deck)), user = Number(b.dataset.user);
-  if (a === 'cancel') { asking = null; adding = null; renaming = false; return renderPod(); }
+  if (a === 'cancel') { asking = null; adding = null; renaming = false; return paint(); }
+  if (a === 'to-pod') return $('tabbtn-pod').click();
   if (a === 'analyze') return openDeck(entry);
   if (a === 'compare') {
     state.tableTexts = [deckToText(state.deck), deckToText(entry.list), '', ''];
     state.tableOpen = true; state.tableResults = null; state.tab = 'load';
     renderAll(); return runTableMode();
   }
-  if (a === 'game-end') { asking = 'g' + b.dataset.game; return renderPod(); }
+  if (a === 'game-end') { asking = 'g' + b.dataset.game; return paint(); }
   if (a === 'game-end-yes') { await gameAct('DELETE', 'games/' + b.dataset.game, undefined, 204); return; }
   if (a === 'add-open') {
     const res = await api(API + 'decks');

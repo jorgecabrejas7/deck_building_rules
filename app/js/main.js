@@ -30,7 +30,7 @@ import { renderHand } from './ui/hand.js';
 import { renderTableMode } from './ui/table.js';
 import { renderCurve } from './ui/curve.js';
 import { renderGuide } from './ui/guide.js';
-import { renderPod, renderPodPicker, selectPod, joinPod } from './ui/pod.js';
+import { renderPod, renderGames, renderPodPicker, selectPod, joinPod } from './ui/pod.js';
 import { renderDecks, saveDeck, openLinked } from './ui/decks.js';
 import { openHow, closeHow } from './ui/how.js';
 import { copyReport, copyShareLink } from './ui/report.js';
@@ -123,6 +123,7 @@ export function renderAll() {
   }
   if (state.tab === 'decks') renderDecks();
   if (state.tab === 'pod') renderPod();
+  if (state.tab === 'games') renderGames();
   restoreFocus(focus);
   saveSession();
 }

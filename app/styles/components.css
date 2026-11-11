@@ -449,9 +449,7 @@ body.modal-open{overflow:hidden}
 .dk-import-list{display:flex;flex-direction:column;gap:var(--sp-1)}
 .dk-pick{display:flex;align-items:center;gap:var(--sp-3);min-height:44px}
 .dk-pick input{width:20px;height:20px;flex:none}
-.new-deck{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-4)}
-.new-deck-t{margin:0;font-size:var(--fs-body);font-weight:600;color:var(--text)}
-.new-deck p{margin:0}
+.new-deck{display:flex;flex-direction:column;gap:var(--sp-2)}
 .new-deck .cmd-search{flex:none;width:100%}
 #ndPicked{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2)}
 #ndPicked:empty{display:none}

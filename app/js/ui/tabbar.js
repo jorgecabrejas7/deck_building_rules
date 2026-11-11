@@ -5,12 +5,12 @@ import { startCheapest } from '../pipeline.js';
 import { renderAll } from '../main.js';
 import { podOpened } from './pod.js';
 
-const TAB_LABEL = { load: 'tabLoad', decks: 'tabDecks', informe: 'tabInforme', pod: 'tabPod', guide: 'tabGuide' };
+const TAB_LABEL = { load: 'tabLoad', build: 'tabBuild', decks: 'tabDecks', informe: 'tabInforme', pod: 'tabPod', games: 'tabGames', guide: 'tabGuide' };
 
 export function renderTabbar() {
   const t = T();
   $('tabbar').innerHTML = TAB_KEYS.map(k => {
-    const enabled = k === 'load' || k === 'decks' || k === 'guide' || k === 'pod' || !!state.result;
+    const enabled = k !== 'informe' || !!state.result;
     const active = state.tab === k;
     return '<button id="tabbtn-' + k + '" data-tab="' + k + '" ' + (enabled ? '' : 'disabled') +
       ' role="tab" aria-selected="' + active + '" aria-controls="tab-' + k + '" tabindex="' + (active ? 0 : -1) + '"' +
@@ -21,7 +21,7 @@ export function renderTabbar() {
       if (b.disabled) return;
       const changed = state.tab !== b.dataset.tab;
       state.tab = b.dataset.tab;
-      if (changed && state.tab === 'pod') podOpened();
+      if (changed && (state.tab === 'pod' || state.tab === 'games')) podOpened();
       renderAll();
       // a tab change is a new page: don't land mid-way down an unrelated panel
       if (changed) $('stickySentinel').scrollIntoView();

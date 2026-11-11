@@ -85,7 +85,11 @@ window.addEventListener('error', function (e) {
         <h1 id="inputTitle" class="hero-title"></h1>
         <p id="heroX" class="hero-sub"></p>
         <p id="heroNotice" class="hero-notice" role="alert" hidden></p>
-        <button id="heroCta" type="button" class="hero-cta"></button>
+        <div class="hero-ctas">
+          <button id="heroCta" type="button" class="hero-cta"></button>
+          <button id="heroBuild" type="button" class="hero-cta hero-cta-alt"></button>
+          <button id="heroPlay" type="button" class="hero-cta hero-cta-alt"></button>
+        </div>
       </div>
       <div class="hero-scene" aria-hidden="true"><div id="heroRing" class="hero-ring"></div></div>
       <p id="heroScroll" class="hero-scroll" aria-hidden="true"></p>
@@ -116,13 +120,6 @@ window.addEventListener('error', function (e) {
       <div class="chips-row">
         <span id="tryLabel" class="lbl-muted"></span>
         <span id="samples" class="chip-row"></span>
-      </div>
-      <div id="newDeck" class="new-deck">
-        <h3 id="ndT" class="new-deck-t"></h3>
-        <p id="ndX" class="lbl-muted"></p>
-        <input id="ndSearch" type="search" class="cmd-search" autocomplete="off">
-        <div id="ndPicked"></div>
-        <ul id="ndHits" class="dk-hits" aria-live="polite"></ul>
       </div>
       <div class="controls-row">
         <button id="tableModeBtn" type="button" class="link-btn"></button>
@@ -184,12 +181,27 @@ window.addEventListener('error', function (e) {
     <section id="editBar" class="edit-bar panel" hidden></section>
   </div>
 
+  <div id="tab-build" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-build">
+    <div class="load">
+      <div id="newDeck" class="new-deck">
+        <div class="part-head"><div><h2 id="ndT" class="part-title"></h2><p id="ndX" class="part-sub"></p></div></div>
+        <input id="ndSearch" type="search" class="cmd-search" autocomplete="off">
+        <div id="ndPicked"></div>
+        <ul id="ndHits" class="dk-hits" aria-live="polite"></ul>
+      </div>
+    </div>
+  </div>
+
   <div id="tab-decks" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-decks">
     <div id="decksPanel"></div>
   </div>
 
   <div id="tab-pod" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-pod">
     <div id="podPanel"></div>
+  </div>
+
+  <div id="tab-games" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-games">
+    <div id="gamesPanel"></div>
   </div>
 
   <div id="tab-guide" class="tab-pane" role="tabpanel" aria-labelledby="tabbtn-guide">

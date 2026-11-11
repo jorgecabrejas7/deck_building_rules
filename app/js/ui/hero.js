@@ -79,6 +79,8 @@ export function initHero() {
   if (matchMedia('(hover:hover)').matches && !still)
     stage.addEventListener('pointermove', (e) => { aimX = (0.5 - e.clientY / innerHeight) * 5; aimY = (e.clientX / innerWidth - 0.5) * 2.5; });
 
+  $('heroBuild').onclick = () => $('tabbtn-build').click();
+  $('heroPlay').onclick = () => $('tabbtn-games').click();
   $('heroCta').onclick = () => {
     $('deckText').scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
     $('deckText').focus({ preventScroll: true });
