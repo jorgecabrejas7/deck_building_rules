@@ -489,10 +489,11 @@ s1:'Tier 1 · Precon (Family Matters)',s2:'Tier 2 · Precon (Animated Army)',s3:
 import account from './i18n/account.js';
 import decks from './i18n/decks.js';
 import pods from './i18n/pods.js';
+import friends from './i18n/friends.js';
 import podrules from './i18n/podrules.js';
 import builder from './i18n/builder.js';
 import table from './i18n/table.js';
-for (const dict of [account, decks, pods, podrules, builder, table]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
+for (const dict of [account, decks, pods, friends, podrules, builder, table]) for (const lang of ['es', 'en']) for (const [k, v] of Object.entries(dict[lang])) {
   if (k in L[lang]) throw new Error('i18n key clash: ' + k);
   L[lang][k] = v;
 }

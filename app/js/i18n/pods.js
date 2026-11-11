@@ -24,6 +24,8 @@ pdGNeedPod:'Las partidas se juegan dentro de un pod. Elige uno arriba, o crea un
 pdGames:'Partidas',pdGWho:'Oponente',pdGInvite:'Invitar a una partida',pdGNoOthers:'Aún no hay nadie más en este pod. Invita a alguien con el enlace de la pestaña Pod.',pdGNone:'No tienes partidas abiertas en este pod.',
 pdGDeleted:'cuenta borrada',pdGActive:'en juego',pdGWait:'esperando mazos · tú: %a · rival: %b',pdGPicked:'elegido',pdGNotPicked:'sin elegir',
 pdGOpen:'Abrir',pdGEnd:'Terminar',pdGDecline:'Rechazar',pdGAsk:'¿Terminar la partida? Se borra para los dos.',
+pdAddFriend:'Añadir al pod',pdAddFriendGo:'Añadir',pdAddFriendNone:'No tienes amigos que añadir a este pod. Busca a alguien en la pestaña Amigos.',
+pdDemote:'Quitar admin',pdErrFriend:'No se pudo añadir: esa persona ya no es tu amiga o no puede unirse a más pods.',
 pdGLimit:'Límite alcanzado: 5 partidas abiertas por persona.',pdGErr:'No se pudo completar la acción con las partidas. Inténtalo de nuevo.',
 },
 en: {
@@ -50,6 +52,8 @@ pdGNeedPod:'Games are played inside a pod. Pick one above, or create one in the 
 pdGames:'Games',pdGWho:'Opponent',pdGInvite:'Invite to a game',pdGNoOthers:'Nobody else is in this pod yet. Invite someone with the link in the Pod tab.',pdGNone:'You have no open games in this pod.',
 pdGDeleted:'deleted account',pdGActive:'in play',pdGWait:'waiting for decks · you: %a · opponent: %b',pdGPicked:'picked',pdGNotPicked:'not picked',
 pdGOpen:'Open',pdGEnd:'End',pdGDecline:'Decline',pdGAsk:'End the game? It is deleted for both players.',
+pdAddFriend:'Add to the pod',pdAddFriendGo:'Add',pdAddFriendNone:'You have no friends to add to this pod. Find someone in the Friends tab.',
+pdDemote:'Remove admin',pdErrFriend:'Could not add them: that person is no longer your friend or cannot join more pods.',
 pdGLimit:'Limit reached: 5 open games per person.',pdGErr:'The games action could not be completed. Try again.',
 },
 };
