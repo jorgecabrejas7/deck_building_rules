@@ -102,6 +102,9 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 .bf{position:relative;flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2);transition:background var(--dur) var(--ease)}
 .bf:not(:has(.tc))::after{content:attr(data-empty);position:absolute;inset:0;display:grid;place-items:center;padding:var(--sp-3);text-align:center;color:var(--muted);font-size:var(--fs-caption);pointer-events:none}
 .bfr{display:flex;flex-wrap:wrap;gap:6px}
+/* a battlefield too full for the smallest cards scrolls, resting on a whole line of cards */
+.bf{scroll-snap-type:y proximity;scroll-padding-block:var(--sp-2)}
+.bfr>*{scroll-snap-align:start}
 /* sections (creatures, other permanents, lands) split by a hairline; table.js fit() counts on these gaps */
 .bfr+.bfr{padding-top:var(--sp-2);border-top:1px solid var(--feltLine)}
 .seat.me .bfr:first-child{margin-top:auto}
@@ -140,7 +143,10 @@ body.dragging .tc.lifted{opacity:.3;transform:none;box-shadow:none}
 .tc.back{background:repeating-linear-gradient(45deg,var(--accentBtn) 0 5px,color-mix(in oklab,var(--accentBtn) 70%,black) 5px 10px)}
 .tc.back .tn{inset:auto 3px 3px;padding:1px 4px;border-radius:3px;background:var(--panel);color:var(--text)}
 .tc.back .tn:empty{display:none}
-.cn{position:absolute;right:3px;bottom:3px;z-index:2;max-width:90%;padding:1px 6px;border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px oklch(0 0 0 / .3)}
+/* counters: one pill each, bottom right, sized with the card so they read at a glance */
+.cns{position:absolute;right:3px;bottom:3px;z-index:2;max-width:calc(100% - 6px);display:flex;flex-direction:column;align-items:flex-end;gap:2px;pointer-events:none}
+.cn{max-width:100%;padding:1px 6px;border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:clamp(10px,calc(var(--cw) * .2),15px);font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 0 0 1.5px oklch(1 0 0 / .85),0 1px 4px oklch(0 0 0 / .4)}
+.tc.big .cn{font-size:var(--fs-ui);padding:2px 10px}
 /* a stack of identical cards: one card with an edge behind it and its count */
 .tc.many{box-shadow:4px -4px 0 -1px var(--panel),4px -4px 0 0 var(--feltLine),0 0 0 1px oklch(0 0 0 / .14),0 4px 10px -4px oklch(0 0 0 / .25)}
 .nx{position:absolute;top:3px;right:3px;z-index:2;padding:1px 6px;border-radius:var(--r-pill);background:var(--badgeBg);color:var(--badgeFg);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;line-height:16px}
@@ -166,7 +172,7 @@ body.dragging [data-drop]{transition:background .12s,box-shadow .12s}
 .hand-head .tbtn{flex:none;min-height:36px}
 .hand-bar .ic{transition:transform var(--dur) var(--ease);color:var(--muted)}
 .hand-bar[aria-expanded=true] .ic{transform:rotate(180deg)}
-.hand-row{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:2px var(--sp-3) var(--sp-2);scroll-snap-type:x proximity;scroll-padding-inline:var(--sp-3);overscroll-behavior-x:contain;scrollbar-width:thin}
+.hand-row{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:8px var(--sp-3) var(--sp-2);scroll-snap-type:x proximity;scroll-padding-inline:var(--sp-3);overscroll-behavior-x:contain;scrollbar-width:thin}
 .hand-row .tc{--cw:calc(var(--hw) * var(--size));scroll-snap-align:start}
 body.away .hand-row{display:none}
 .add{color:var(--accent)}
@@ -255,6 +261,7 @@ body.away .hand-row{display:none}
   .piles{width:calc(2 * var(--pw) + var(--sp-2));display:grid;grid-template-columns:repeat(2,var(--pw));align-content:start;padding:var(--sp-3) var(--sp-4) var(--sp-3) 0;gap:var(--sp-2)}
   .seat.me .piles{align-content:end}
   .slot{height:calc(var(--pw) * 1.4)}
+  .area{min-height:max(calc(var(--ch) + var(--sp-5)),calc(var(--pw) * 2.8 + 32px))} /* the piles' two rows */
   .tc{font-size:12px}
   .sc{font-size:13px}
 }
@@ -300,3 +307,55 @@ body.picking .tb-hand,body.picking .piles,body.picking .strip>:not(.life){opacit
 .sgrid .tc.sel{box-shadow:0 0 0 3px var(--accent),0 8px 18px -6px oklch(0 0 0 / .35);transform:translateY(-2px)}
 .sfoot .pick{margin:0 0 var(--sp-2);color:var(--text);font-weight:600;font-size:var(--fs-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sfoot .srow+.srow{margin-top:var(--sp-2)}
+
+/* a pile's top card picked up to drag out */
+.slot.lifted{transform:scale(1.08);box-shadow:0 0 0 2px var(--accent),0 12px 28px -8px oklch(0 0 0 / .5);z-index:2}
+body.dragging .slot.lifted{opacity:.5;transform:none}
+.ghost.many{overflow:visible;box-shadow:6px -6px 0 -1px var(--panel),6px -6px 0 1px var(--accent),0 20px 40px -10px oklch(0 0 0 / .55),0 0 0 2px var(--accent)}
+.ghost.many img{border-radius:6%}
+
+/* selected cards rise; in selection mode they also carry a check */
+.bf .tc.sel,.hand-row .tc.sel{transform:translateY(-6px);box-shadow:0 0 0 2.5px var(--accent),0 14px 26px -10px oklch(0 0 0 / .5);z-index:2}
+.bf .tc.tapped.sel{transform:translateY(-6px) rotate(90deg)}
+body.selecting .tc.sel::after{content:"";position:absolute;left:4px;top:4px;z-index:3;width:20px;height:20px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 1px 4px oklch(0 0 0 / .4);
+  background:var(--accentBtn) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+
+/* the action bar: beside one card, or docked at the top in selection mode */
+.tb-bar{position:fixed;left:0;top:0;z-index:46;box-sizing:border-box;max-width:calc(100% - 16px);padding:6px;border-radius:var(--r-lg);background:var(--panel);color:var(--text);
+  box-shadow:0 0 0 1px var(--border),var(--shadow-2);-webkit-user-select:none;user-select:none}
+/* docked: a toolbar in the page's flow between the board and the hand, so it covers no card (the board refits) */
+.tb-hand{order:2}
+.tb-bar.dock{position:relative;order:1;flex:none;max-width:none;padding:6px var(--sp-2);border-radius:0;box-shadow:0 -1px 0 var(--border),0 -8px 24px -16px oklch(0 0 0 / .25)}
+.tb-bar.dock>*{max-width:640px;margin-inline:auto}
+/* wider screens: one line, count and cancel first */
+@media (min-width:640px){
+  .tb-bar.dock{display:flex;align-items:center;justify-content:center;gap:var(--sp-3)}
+  .tb-bar.dock>*{margin:0}
+  .tb-bar.dock .bh{padding:0}
+  .tb-bar.dock .bcs{margin:0;padding:0 0 0 var(--sp-3);border-top:none;border-left:1px solid var(--border)}
+}
+.tb-bar.enter{animation:tb-pop .16s cubic-bezier(.2,.8,.2,1)}
+.tb-bar[data-side=above]{transform-origin:50% 100%}
+.tb-bar[data-side=below]{transform-origin:50% 0}
+.tb-bar.dock.enter{animation:tb-up .2s cubic-bezier(.2,.8,.2,1)}
+@keyframes tb-pop{from{opacity:0;scale:.94}}
+@keyframes tb-up{from{opacity:0;translate:0 12px}}
+body.dragging .tb-bar,body.picking .tb-bar,body:has(#sheet:not([hidden])) .tb-bar,body:has(#preview:not([hidden])) .tb-bar{display:none}
+.bas{display:grid;grid-template-columns:repeat(var(--cols),minmax(max-content,1fr));gap:2px}
+.ba{box-sizing:border-box;min-width:48px;min-height:52px;padding:6px 6px 5px;border:none;border-radius:var(--r-md);background:transparent;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:11px;font-weight:500;line-height:1.1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform .12s var(--ease)}
+.ba .ic{width:20px;height:20px}
+.ba span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ba:hover{background:var(--fill)}
+.ba:active{transform:scale(.93);background:var(--fill-hover)}
+.bh{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);padding:0 0 4px 10px;font-size:var(--fs-body)}
+.bh b{font-weight:600;font-variant-numeric:tabular-nums}
+.bh .sb{min-height:40px}
+.bcs{display:flex;flex-direction:column;gap:2px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+.bc{display:flex;align-items:center;gap:var(--sp-2)}
+.bv{flex:1;text-align:center;font-size:var(--fs-body);font-weight:500;font-variant-numeric:tabular-nums}
+.bv b{margin-left:4px;font-weight:700}
+.bs{flex:none;width:44px;height:40px;border:none;border-radius:var(--r-pill);background:var(--fill);color:var(--text);font-size:20px;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform .12s var(--ease)}
+.bs:hover{background:var(--fill-hover)}
+.bs:active{transform:scale(.93)}
+.bs:disabled{opacity:.35;cursor:default;transform:none}

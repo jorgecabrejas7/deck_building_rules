@@ -22,6 +22,11 @@ export const ICON = {
   exile: svg('M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM4.1 4.1l7.8 7.8'),
   command: svg('M2.5 12.5h11M3.2 10.5 2.5 5l3 2.5L8 3.5l2.5 4 3-2.5-.7 5.5z'),
   hand: svg('M3 5.2 7.5 4l1.8 8.3-4.5 1.2zM9.5 3.5H14V12H10.6'),
+  tap: svg('M2.5 7.5h8v6h-8zM6.5 2.5h2a4 4 0 0 1 4 4V9M11 7.5l1.5 1.5L14 7.5'),
+  play: svg('M8 13.5v-9M4.5 8 8 4.5 11.5 8M3 2.5h10'),
+  attach: svg('M10.5 5 6 9.5a1.4 1.4 0 0 0 2 2L13 6.5a2.8 2.8 0 0 0-4-4L4 7.5a4.2 4.2 0 0 0 6 6l3-3'),
+  view: svg('M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8zM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z'),
+  more: svg('M3.5 8h.01M8 8h.01M12.5 8h.01'),
 };
 
 export function index(view) {
@@ -46,7 +51,12 @@ export function attachments(view) {
 }
 export const attachable = (c) => !!c.name && !c.face_down && /\b(Aura|Equipment|Fortification)\b/.test((cardCache[c.name] || {}).type_line || '');
 
-const counters = (c) => Object.entries(c.counters || {}).map(([k, v]) => k + ' ' + v).join(' ');
+// a counter as it reads on the card: +2/+2 for two +1/+1 counters, otherwise its name and number
+export const counterText = (k, v) => {
+  if (k !== '+1/+1' && k !== '-1/-1') return `${k} ${v}`;
+  const sg = (k[0] === '+') === (v > 0) ? '+' : '−', n = Math.abs(v);
+  return `${sg}${n}/${sg}${n}`;
+};
 // a permanent's section, from its front face; face-down and not-yet-loaded cards go to "other"
 const section = (c) => {
   const tl = !c.face_down && c.name && ((cardCache[c.name] || {}).type_line || '').split(' // ')[0];
@@ -58,22 +68,23 @@ export const art = (c, big = false) => {
 };
 
 // a card is its image; the name is written only while there is no image to show.
-// n > 1: a stack of identical cards drawn as one, acting on its first card
-export function tile(c, t, big = false, n = 1) {
-  const back = c.face_down || !c.name, src = art(c, big);
+// group: a stack of identical cards drawn as one. A tap acts on its first card (data-card); a selection takes them all (data-ids)
+export function tile(c, t, big = false, group = [c]) {
+  const back = c.face_down || !c.name, src = art(c, big), n = group.length;
   const cls = ['tc', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
   const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : `<span class="tn">${c.name ? esc(c.name) : ''}</span>`;
-  const cn = counters(c);
-  return `<button class="${cls}" data-card="${c.id}"${n > 1 ? ` data-n="${n}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}">`
-    + `${face}${cn ? `<b class="cn">${esc(cn)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
+  const cn = Object.entries(c.counters || {}).map(([k, v]) => counterText(k, v));
+  return `<button class="${cls}" data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
+    + `${face}${cn.length ? `<span class="cns" aria-hidden="true">${cn.map((x) => `<b class="cn">${esc(x)}</b>`).join('')}</span>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
 }
 
 // a pile drawn as a card slot: the top card when it is public, a back for the library, a dashed outline when empty
 function slot(s, zone, t, view) {
   const cards = view.zones[s][zone], n = cards.length;
   const face = zone === 'library' ? null : zone === 'command' ? cards[0] : cards[n - 1];
-  const src = face ? art(face) : '';
-  return `<button class="slot ${zone}${n ? '' : ' empty'}" data-pile="${s}:${zone}" data-drop="${s}:${zone}" title="${t['tbZ' + zone]}" aria-label="${t['tbZ' + zone]}: ${n}">`
+  const src = face ? art(face) : '', top = zone === 'library' || zone === 'command' ? cards[0] : cards[n - 1];
+  // data-lift: the card a drag out of this pile takes (the library's top card, the last card into the others)
+  return `<button class="slot ${zone}${n ? '' : ' empty'}" data-pile="${s}:${zone}" data-drop="${s}:${zone}"${top ? ` data-lift="${top.id}"` : ''} title="${t['tbZ' + zone]}" aria-label="${t['tbZ' + zone]}: ${n}">`
     + `${src ? `<img src="${esc(src)}" alt="" draggable="false">` : ''}<span class="sc">${ICON[zone]}<b>${n}</b></span></button>`;
 }
 
@@ -100,7 +111,7 @@ function seat(view, s, t) {
   const att = attachments(view), secs = sections(view, s, att);
   const stack = ([c, ...more]) => {
     const under = att.get(c.id);
-    if (!under) return tile(c, t, false, more.length + 1);
+    if (!under) return tile(c, t, false, [c, ...more]);
     return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t)}</div>`;
   };
   // mine reads creatures, other, lands down towards me; theirs mirrors it, lands at their edge
