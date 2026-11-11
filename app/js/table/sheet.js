@@ -1,7 +1,7 @@
-// Bottom sheets: every action a player can take on a card, a pile, a commander, the dice or the menu.
-// buildSheet returns {title, body, items}: buttons carry data-i, the index of their handler in items.
-import { ZONES, other, esc, index, tile } from './board.js';
-import { cardCache } from '../state.js';
+// Bottom sheets: every action a player can take on a card, a pile, a commander or the menu.
+// buildSheet returns {title, body, items, art}: buttons carry data-i, the index of their handler in items.
+// A sheet opened from another one carries `back`; acting in it returns there instead of closing.
+import { ZONES, other, esc, index, tile, art, ICON } from './board.js';
 
 const val = (id) => (document.getElementById(id) || {}).value || '';
 const num = (id, lo, hi, d) => Math.min(hi, Math.max(lo, parseInt(val(id), 10) || d));
@@ -12,15 +12,17 @@ export function buildSheet(sh, view, c) {
   const { t, send } = c, items = [];
   // keep: the sheet stays open after the click (it changes sheet itself, or shows a live value)
   const b = (label, fn, cls = '', keep = false) => { items.push(() => { fn(); if (!keep) c.closeSheet(); }); return `<button class="sb ${cls}" data-i="${items.length - 1}">${label}</button>`; };
-  const row = (...x) => `<div class="srow">${x.join('')}</div>`;
+  const row = (...x) => `<div class="srow">${x.filter(Boolean).join('')}</div>`;
   const name = (s) => esc(view.players[s].name || '?');
-  let title = '', body = '';
+  const grid = (cards) => `<div class="sgrid">${cards.map((x) => tile(x, t)).join('')}</div>`;
+  let title = '', body = '', big = '';
 
   if (sh.k === 'card') {
     const hit = index(view).get(sh.id);
     if (!hit) return null;
     const { card, seat, zone } = hit, ids = [card.id], bf = zone === 'battlefield';
     title = card.name ? esc(card.name) : card.face_down ? t.tbCardDown : t.tbHiddenCard;
+    big = art(card, true);
     if (sh.move) {
       for (const s of [view.you, other(view.you)]) {
         body += `<h3>${name(s)}</h3>`;
@@ -30,16 +32,24 @@ export function buildSheet(sh, view, c) {
           : mv(t['tbZ' + z], z) + (z === 'battlefield' || z === 'exile' ? mv(`${t['tbZ' + z]} · ${t.tbFaceDown}`, z, { face_down: true }) : '')));
       }
     } else {
-      const info = card.name && !card.face_down && cardCache[card.name];
-      const art = info && info.img_normal ? `<button class="sh-art" data-zoom="${card.id}" aria-label="${esc(card.name)}"><img src="${esc(info.img_normal)}" alt=""></button>` : '';
+      // a card goes to its owner's zones, except the battlefield, which is yours: you play it
+      const go = (label, z, extra = {}, cls = '') => b(label, () => send({ type: 'move', cards: ids, to: { seat: z === 'battlefield' ? view.you : card.owner, zone: z }, ...extra }), cls);
       body += row(
-        bf ? b(card.tapped ? t.tbUntap : t.tbTap, () => send({ type: 'tap', cards: ids, tapped: !card.tapped })) : '',
-        bf || zone === 'exile' ? b(t.tbFlip, () => send({ type: 'flip', cards: ids, face_down: !card.face_down })) : '',
-        !card.name ? b(t.tbLook, () => send({ type: 'look', cards: ids })) : '',
-        card.name && !card.shared ? b(t.tbReveal, () => send({ type: 'reveal', cards: ids })) : '',
-        b(t.tbMove, () => c.setSheet({ ...sh, move: true }), '', true),
-        bf ? b(t.tbGive, () => send({ type: 'move', cards: ids, to: { seat: other(seat), zone: 'battlefield' } })) : '',
-        card.token ? b(t.tbDelete, () => send({ type: 'delete', card: card.id }), 'danger') : '');
+        bf && b(card.tapped ? t.tbUntap : t.tbTap, () => send({ type: 'tap', cards: ids, tapped: !card.tapped }), 'on'),
+        zone !== 'battlefield' && go(zone === 'hand' ? t.tbPlay : t.tbToField, 'battlefield', {}, 'on'),
+        (bf || zone === 'exile') && b(t.tbFlip, () => send({ type: 'flip', cards: ids, face_down: !card.face_down })),
+        !card.name && b(t.tbLook, () => send({ type: 'look', cards: ids })),
+        card.name && !card.shared && b(t.tbReveal, () => send({ type: 'reveal', cards: ids })),
+        bf && b(t.tbGive, () => send({ type: 'move', cards: ids, to: { seat: other(seat), zone: 'battlefield' } })),
+        card.token && b(t.tbDelete, () => send({ type: 'delete', card: card.id }), 'danger'));
+      body += `<h3>${t.tbSendTo}</h3>` + row(
+        zone !== 'hand' && go(t.tbZhand, 'hand'),
+        zone !== 'graveyard' && go(t.tbZgraveyard, 'graveyard'),
+        zone !== 'exile' && go(t.tbZexile, 'exile'),
+        go(`${t.tbZlibrary} · ${t.tbTop}`, 'library', { pos: 'top' }),
+        go(`${t.tbZlibrary} · ${t.tbBottom}`, 'library', { pos: 'bottom' }),
+        zone !== 'command' && go(t.tbZcommand, 'command'),
+        b(t.tbMove, () => c.setSheet({ ...sh, move: true }), 'quiet', true));
       if (bf) {
         const cn = (n, d) => b(d > 0 ? '+' : '−', () => send({ type: 'counter', card: card.id, name: n, delta: d }), '', true);
         body += `<h3>${t.tbCounters}</h3>`;
@@ -47,47 +57,61 @@ export function buildSheet(sh, view, c) {
         body += row(input('sn', '', `maxlength="30" placeholder="${t.tbCounterNew}" aria-label="${t.tbCounterName}"`),
           b(t.tbAdd, () => { const n = val('sn').trim().slice(0, 30); if (n) send({ type: 'counter', card: card.id, name: n, delta: 1 }); }, '', true));
       }
-      if (art) body = `<div class="sh-card">${art}<div class="sh-acts">${body}</div></div>`;
     }
   } else if (sh.k === 'pile') {
     // either library: the owner draws, the other player can take, mill, exile or look at the top N
     const s = sh.seat, mine = s === view.you, lib = view.zones[s].library, top = (k) => lib.slice(0, k).map((x) => x.id);
     const n = () => num('sn', 1, 100, 3);
     const mv = (zone, extra = {}, to = s) => () => { const ids = top(n()); if (ids.length) send({ type: 'move', cards: ids, to: { seat: to, zone }, ...extra }); };
+    // searching looks at every card first (the server lets 100 ids through per action), then lists the ones now known
+    const search = () => {
+      const hidden = lib.filter((x) => !x.name).map((x) => x.id);
+      for (let i = 0; i < hidden.length; i += 100) send({ type: 'look', cards: hidden.slice(i, i + 100) });
+      c.setSheet({ k: 'search', seat: s });
+    };
     title = `${t.tbZlibrary} · ${name(s)} (${lib.length})`;
-    body += row(mine ? b(t.tbDraw1, () => { if (lib.length) send({ type: 'move', cards: top(1), to: { seat: s, zone: 'hand' } }); }, 'on') : '',
-      b(t.tbShuffle, () => send({ type: 'shuffle', seat: s })), b(t.tbKnown, () => c.setSheet({ k: 'list', seat: s, zone: 'library' }), '', true));
+    body += row(mine && b(t.tbDraw1, () => { if (lib.length) send({ type: 'move', cards: top(1), to: { seat: s, zone: 'hand' } }); }, 'on'),
+      b(ICON.search + t.tbSearch, search, mine ? '' : 'on', true), b(t.tbShuffle, () => send({ type: 'shuffle', seat: s })));
     body += `<h3><label for="sn">${t.tbN}</label></h3>` + row(input('sn', 3, 'type="number" min="1" max="100" inputmode="numeric"'));
     body += row(mine ? b(t.tbDrawN, mv('hand')) : b(t.tbTakeN, mv('hand', {}, view.you)), b(t.tbMillN, mv('graveyard')),
       b(t.tbExileN, mv('exile')), b(t.tbExileDownN, mv('exile', { face_down: true })),
       b(t.tbLookN, () => { if (lib.length) send({ type: 'look', cards: top(n()) }); c.setSheet({ k: 'list', seat: s, zone: 'library' }); }, '', true),
       b(t.tbRevealN, () => { if (lib.length) send({ type: 'reveal', cards: top(n()) }); }));
+    body += row(b(t.tbKnown, () => c.setSheet({ k: 'list', seat: s, zone: 'library' }), 'quiet', true));
+  } else if (sh.k === 'search') {
+    // sorted by name so the search shows nothing of the library's order; table.js filters the grid as you type
+    const s = sh.seat, lib = view.zones[s].library, known = lib.filter((x) => x.name).sort((a, b2) => a.name.localeCompare(b2.name));
+    title = `${t.tbSearch} · ${name(s)} (${lib.length})`;
+    body = row(`<input class="si" id="sq" type="search" autocomplete="off" placeholder="${t.tbSearchFilter}" aria-label="${t.tbSearchFilter}">`)
+      + (known.length ? grid(known) : `<p>${t.tbEmpty}</p>`)
+      + `<div class="sfoot">${row(b(t.tbShuffleClose, () => send({ type: 'shuffle', seat: s }), 'on'))}</div>`;
   } else if (sh.k === 'list') {
     const all = view.zones[sh.seat][sh.zone], cards = sh.zone === 'library' ? all.filter((x) => x.name) : all;
     title = `${t['tbZ' + sh.zone]} · ${name(sh.seat)} (${all.length})`;
-    body = cards.length ? `<div class="slist">${cards.map((x) => tile(x, t)).join('')}</div>` : `<p>${sh.zone === 'library' && all.length ? t.tbNoneKnown : t.tbEmpty}</p>`;
+    body = cards.length ? grid(sh.zone === 'graveyard' || sh.zone === 'exile' ? [...cards].reverse() : cards) : `<p>${sh.zone === 'library' && all.length ? t.tbNoneKnown : t.tbEmpty}</p>`;
   } else if (sh.k === 'cmd') {
     const cmd = view.players[other(sh.seat)].commanders[sh.i];
     if (cmd === undefined) return null;
     const d = (n) => b(n > 0 ? '+1' : '−1', () => send({ type: 'cmd_damage', seat: sh.seat, commander: cmd, delta: n }), '', true);
     title = `${t.tbCmdDmg} · ${name(sh.seat)}`;
     body = `<p class="cl">${esc(cmd)}: <b>${(view.players[sh.seat].cmd_damage || {})[cmd] || 0}</b></p>` + row(d(-1), d(1));
-  } else if (sh.k === 'dice') {
-    const r = (sides) => () => send({ type: 'roll', sides });
-    title = t.tbDice;
-    body = row(b('d6', r(6)), b('d20', r(20)), b(t.tbCoin, r(2)))
-      + row(input('sn', 10, `type="number" min="2" max="100" inputmode="numeric" aria-label="${t.tbCustom}"`), b(t.tbRoll, () => send({ type: 'roll', sides: num('sn', 2, 100, 10) })));
   } else if (sh.k === 'token') {
     title = t.tbTokenNew;
     body = row(input('sn', '', `maxlength="100" placeholder="${t.tbTokenName}" aria-label="${t.tbTokenName}"`))
       + row(`<label class="cl">${t.tbTokenCount} ${input('sc', 1, 'type="number" min="1" max="20" inputmode="numeric"')}</label>`,
-        b(t.tbAdd, () => { const n = val('sn').trim().slice(0, 100); if (n) send({ type: 'token', seat: view.you, name: n, count: num('sc', 1, 20, 1) }); }));
+        b(t.tbAdd, () => { const n = val('sn').trim().slice(0, 100); if (n) send({ type: 'token', seat: view.you, name: n, count: num('sc', 1, 20, 1) }); }, 'on'));
   } else if (sh.k === 'menu') {
+    const live = view && view.status === 'active', r = (sides) => () => send({ type: 'roll', sides });
     title = t.tbMenu;
-    body = `<h3>${t.tbLang}</h3>` + row(b('Español', () => c.setLang('es'), c.lang === 'es' ? 'on' : '', true), b('English', () => c.setLang('en'), c.lang === 'en' ? 'on' : '', true))
+    body = (live ? row(document.fullscreenEnabled && b(ICON.full + (document.fullscreenElement ? t.tbExitFullscreen : t.tbFullscreen), c.fullscreen),
+        b(t.tbMulligan, () => send({ type: 'mulligan' })))
+      + `<h3>${t.tbDice}</h3>` + row(b('d6', r(6)), b('d20', r(20)), b(t.tbCoin, r(2)))
+      + row(input('sn', 10, `type="number" min="2" max="100" inputmode="numeric" aria-label="${t.tbCustom}"`), b(t.tbRoll, () => send({ type: 'roll', sides: num('sn', 2, 100, 10) })))
+      + `<h3>${t.tbHow}</h3><ul class="how"><li>${t.tbHow1}</li><li>${t.tbHow2}</li><li>${t.tbHow3}</li></ul>` : '')
+      + `<h3>${t.tbLang}</h3>` + row(b('Español', () => c.setLang('es'), c.lang === 'es' ? 'on' : '', true), b('English', () => c.setLang('en'), c.lang === 'en' ? 'on' : '', true))
       + `<h3>${t.tbTheme}</h3>` + row(b(t.tbLight, () => c.setTheme('light'), c.dark ? '' : 'on', true), b(t.tbDark, () => c.setTheme('dark'), c.dark ? 'on' : '', true))
       + (sh.ask ? `<p>${t.tbEndAsk}</p>` + row(b(t.tbYes, () => c.endGame(), 'danger'), b(t.tbCancel, () => c.setSheet({ k: 'menu' }), '', true))
         : row(b(t.tbEndGame, () => c.setSheet({ k: 'menu', ask: true }), 'danger', true)));
   }
-  return { title, body, items };
+  return { title, body, items, art: big };
 }

@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>La guía del Yoryi · Mesa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,8 +19,7 @@
 <body class="tbl">
 <script>/* pre-paint theme: keep in sync with js/ui/header.js applyTheme() */
 if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');</script>
-<header id="top" class="tb-top"></header>
-<div id="roll" class="tb-roll" aria-live="polite"></div>
+<div id="stat" class="tb-stat" role="status" aria-live="polite"></div>
 <main id="board" class="tb-board"></main>
 <div id="toast" class="tb-toast" role="status" aria-live="polite"></div>
 <div id="hand" class="tb-hand"></div>
