@@ -1,6 +1,7 @@
 // Bottom sheets: every action a player can take on a card, a pile, a commander, the dice or the menu.
 // buildSheet returns {title, body, items}: buttons carry data-i, the index of their handler in items.
 import { ZONES, other, esc, index, tile } from './board.js';
+import { cardCache } from '../state.js';
 
 const val = (id) => (document.getElementById(id) || {}).value || '';
 const num = (id, lo, hi, d) => Math.min(hi, Math.max(lo, parseInt(val(id), 10) || d));
@@ -29,6 +30,8 @@ export function buildSheet(sh, view, c) {
           : mv(t['tbZ' + z], z) + (z === 'battlefield' || z === 'exile' ? mv(`${t['tbZ' + z]} · ${t.tbFaceDown}`, z, { face_down: true }) : '')));
       }
     } else {
+      const info = card.name && !card.face_down && cardCache[card.name];
+      const art = info && info.img_normal ? `<button class="sh-art" data-zoom="${card.id}" aria-label="${esc(card.name)}"><img src="${esc(info.img_normal)}" alt=""></button>` : '';
       body += row(
         bf ? b(card.tapped ? t.tbUntap : t.tbTap, () => send({ type: 'tap', cards: ids, tapped: !card.tapped })) : '',
         bf || zone === 'exile' ? b(t.tbFlip, () => send({ type: 'flip', cards: ids, face_down: !card.face_down })) : '',
@@ -44,17 +47,21 @@ export function buildSheet(sh, view, c) {
         body += row(input('sn', '', `maxlength="30" placeholder="${t.tbCounterNew}" aria-label="${t.tbCounterName}"`),
           b(t.tbAdd, () => { const n = val('sn').trim().slice(0, 30); if (n) send({ type: 'counter', card: card.id, name: n, delta: 1 }); }, '', true));
       }
+      if (art) body = `<div class="sh-card">${art}<div class="sh-acts">${body}</div></div>`;
     }
   } else if (sh.k === 'pile') {
-    const s = sh.seat, lib = view.zones[s].library, top = (k) => lib.slice(0, k).map((x) => x.id);
-    const mv = (zone) => (k) => { const ids = top(k); if (ids.length) send({ type: 'move', cards: ids, to: { seat: s, zone } }); };
+    // either library: the owner draws, the other player can take, mill, exile or look at the top N
+    const s = sh.seat, mine = s === view.you, lib = view.zones[s].library, top = (k) => lib.slice(0, k).map((x) => x.id);
+    const n = () => num('sn', 1, 100, 3);
+    const mv = (zone, extra = {}, to = s) => () => { const ids = top(n()); if (ids.length) send({ type: 'move', cards: ids, to: { seat: to, zone }, ...extra }); };
     title = `${t.tbZlibrary} · ${name(s)} (${lib.length})`;
-    body += row(b(t.tbDraw1, () => mv('hand')(1)), b(t.tbShuffle, () => send({ type: 'shuffle', seat: s })),
-      b(t.tbRevealTop, () => { if (lib.length) send({ type: 'reveal', cards: top(1) }); }),
-      b(t.tbKnown, () => c.setSheet({ k: 'list', seat: s, zone: 'library' }), '', true));
-    body += row(`<label class="cl">${t.tbN} ${input('sn', 3, 'type="number" min="1" max="100" inputmode="numeric"')}</label>`);
-    body += row(b(t.tbDrawN, () => mv('hand')(num('sn', 1, 100, 3))), b(t.tbMillN, () => mv('graveyard')(num('sn', 1, 100, 3))),
-      b(t.tbLookN, () => { const k = num('sn', 1, 100, 3); if (lib.length) send({ type: 'look', cards: top(k) }); c.setSheet({ k: 'list', seat: s, zone: 'library' }); }, '', true));
+    body += row(mine ? b(t.tbDraw1, () => { if (lib.length) send({ type: 'move', cards: top(1), to: { seat: s, zone: 'hand' } }); }, 'on') : '',
+      b(t.tbShuffle, () => send({ type: 'shuffle', seat: s })), b(t.tbKnown, () => c.setSheet({ k: 'list', seat: s, zone: 'library' }), '', true));
+    body += `<h3><label for="sn">${t.tbN}</label></h3>` + row(input('sn', 3, 'type="number" min="1" max="100" inputmode="numeric"'));
+    body += row(mine ? b(t.tbDrawN, mv('hand')) : b(t.tbTakeN, mv('hand', {}, view.you)), b(t.tbMillN, mv('graveyard')),
+      b(t.tbExileN, mv('exile')), b(t.tbExileDownN, mv('exile', { face_down: true })),
+      b(t.tbLookN, () => { if (lib.length) send({ type: 'look', cards: top(n()) }); c.setSheet({ k: 'list', seat: s, zone: 'library' }); }, '', true),
+      b(t.tbRevealN, () => { if (lib.length) send({ type: 'reveal', cards: top(n()) }); }));
   } else if (sh.k === 'list') {
     const all = view.zones[sh.seat][sh.zone], cards = sh.zone === 'library' ? all.filter((x) => x.name) : all;
     title = `${t['tbZ' + sh.zone]} · ${name(sh.seat)} (${all.length})`;

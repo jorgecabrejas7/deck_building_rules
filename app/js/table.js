@@ -3,7 +3,7 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, ICON } from './table/board.js';
+import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, esc, ICON } from './table/board.js';
 import { buildSheet } from './table/sheet.js';
 
 const $ = (id) => document.getElementById(id);
@@ -13,7 +13,7 @@ const BACKOFF = [500, 1000, 2000, 4000, 8000];
 
 let view = null, lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
 let gone = gameId ? null : 'tbNoGame'; // message key once the game is unreachable for good
-let sheet = null, items = [], handOpen = false, decks = null, lobbyErr = '', toastTimer = null;
+let sheet = null, items = [], handOpen = true, decks = null, lobbyErr = '', toastTimer = null;
 const open = () => sock && sock.readyState === WebSocket.OPEN;
 
 // ---- connection ----
@@ -95,7 +95,7 @@ function renderSheet() {
   }
   items = built.items;
   const entering = el.hidden;
-  if (entering) opener = document.activeElement;
+  if (entering) { opener = document.activeElement; hov.hidden = true; }
   keepInputs(el, () => {
     el.innerHTML = `<div class="sh-back" data-close></div><div class="sh-pane" role="dialog" aria-modal="true" aria-labelledby="shTitle" tabindex="-1"><div class="sh-grab" aria-hidden="true"></div><div class="sh-head"><h2 id="shTitle">${built.title}</h2><button class="sb ico" data-close aria-label="${T().tbClose}">${ICON.close}</button></div>${built.body}</div>`;
   });
@@ -149,6 +149,21 @@ function preview(id) {
 }
 
 // ---- events ----
+// a mouse resting on a card shows it large beside the card; touch uses the long press below
+const hov = $('hover');
+document.addEventListener('pointerover', (e) => {
+  const el = e.pointerType === 'mouse' && view && view.zones && e.target.closest('[data-card]');
+  const hit = el && index(view).get(el.dataset.card);
+  const info = hit && hit.card.name && !hit.card.face_down && cardCache[hit.card.name];
+  if (!info || !info.img_normal) { hov.hidden = true; return; }
+  if (hov.dataset.id !== el.dataset.card) { hov.dataset.id = el.dataset.card; hov.innerHTML = `<img src="${esc(info.img_normal)}" alt="">`; }
+  hov.hidden = false;
+  const r = el.getBoundingClientRect(), w = hov.offsetWidth, h = hov.offsetHeight;
+  hov.style.left = (r.right + 12 + w < innerWidth ? r.right + 12 : Math.max(8, r.left - 12 - w)) + 'px';
+  hov.style.top = Math.max(8, Math.min(r.top + r.height / 2 - h / 2, innerHeight - h - 8)) + 'px';
+});
+document.addEventListener('pointerout', (e) => { if (!e.relatedTarget) hov.hidden = true; });
+
 let pressTimer = null, swallow = false;
 const LONG = 450;
 document.addEventListener('pointerdown', (e) => {
@@ -167,12 +182,14 @@ for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) document.addEve
 document.addEventListener('contextmenu', (e) => { if (e.target.closest('[data-card]')) e.preventDefault(); });
 
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-i],[data-close],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-preview-close]');
+  const el = e.target.closest('[data-i],[data-close],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-preview-close]');
   if (!el) return;
   if (swallow) { swallow = false; return; }
+  hov.hidden = true;
   const d = el.dataset;
   if ('i' in d) items[d.i]();
   else if ('close' in d) setSheet(null);
+  else if ('zoom' in d) preview(d.zoom);
   else if ('previewClose' in d) $('preview').hidden = true;
   else if ('card' in d) setSheet({ k: 'card', id: d.card });
   else if ('pile' in d) { const [s, zone] = d.pile.split(':'); setSheet({ k: zone === 'library' ? 'pile' : 'list', seat: Number(s), zone }); }
