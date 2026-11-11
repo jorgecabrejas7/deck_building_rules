@@ -5,6 +5,7 @@ from django.urls import include, path
 
 from accounts import views
 from decks import views as decks
+from friends import views as friends
 from games import views as games
 from pods import views as pods
 
@@ -24,12 +25,16 @@ urlpatterns = [
     path("pod/api/decks/<int:id>", decks.deck),
     path("pod/api/decks/<int:id>/versions", decks.versions),
     path("pod/api/decks/link/<str:token>", decks.link),
+    path("pod/api/friends", friends.friends),
+    path("pod/api/friends/<int:user_id>/accept", friends.accept),
+    path("pod/api/friends/<int:user_id>", friends.remove),
     path("pod/api/pods", pods.pods),
     path("pod/api/pods/join", pods.join),
     path("pod/api/pods/active", pods.active),
     path("pod/api/pods/<int:id>", pods.pod),
     path("pod/api/pods/<int:id>/invite", pods.invite),
     path("pod/api/pods/<int:id>/leave", pods.leave),
+    path("pod/api/pods/<int:id>/members", pods.add_member),
     path("pod/api/pods/<int:id>/members/<int:user_id>", pods.member),
     path("pod/api/pods/<int:id>/games", games.pod_games),
     path("pod/api/pods/<int:id>/decks", pods.add_deck),

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "accounts",
     "decks",
     "pods",
+    "friends",
     "games",
 ]
 

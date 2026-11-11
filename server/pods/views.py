@@ -3,8 +3,10 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
+from accounts.models import User
 from decks.models import Deck
 from decks.views import bad, body, clean_name, signed_in
+from friends.models import are_friends
 
 from .models import Pod, PodDeck, PodMember, new_code
 from .rules import apply_edits, template
@@ -234,3 +236,22 @@ def remove_deck(request, id, deck_id):
         return denied
     entry.delete()
     return HttpResponse(status=204)
+
+
+@require_http_methods(["POST"])
+@signed_in
+def add_member(request, id):
+    m = membership(request, id)
+    if denied := admin_only(m):
+        return denied
+    data = body(request)
+    uid = data.get("user") if data else None
+    friend = User.objects.filter(pk=uid, is_active=True).first() if type(uid) is int else None
+    if friend is None or not are_friends(request.user.id, friend.id):
+        return bad({"user": "invalid"})
+    if m.pod.members.filter(user=friend).exists():
+        return detail_response(m, request)
+    if friend.pod_memberships.count() >= MAX_PODS:
+        return bad({"pods": "limit"})
+    PodMember.objects.create(pod=m.pod, user=friend, role="member")
+    return detail_response(m, request, 201)
