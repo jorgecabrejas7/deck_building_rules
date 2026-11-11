@@ -114,8 +114,9 @@ def test_delete(client, active):
 def test_admin_superuser_only(client):
     staff = User.objects.create_user("st", is_staff=True, password="pw-staff-123")
     client.force_login(staff)
-    r = client.get("/pod/api/admin/", follow=True)
-    assert r.redirect_chain[-1][0] == ACCOUNT
+    assert client.get("/pod/api/admin/", follow=True).redirect_chain[-1][0] == "/pod/app/"
+    client.logout()
+    assert client.get("/pod/api/admin/", follow=True).redirect_chain[-1][0] == ACCOUNT + "?next=admin"
     root = User.objects.create_superuser("root", "r@x.com", "pw-root-12345")
     client.force_login(root)
     assert client.get("/pod/api/admin/").status_code == 200

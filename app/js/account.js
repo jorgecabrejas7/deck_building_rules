@@ -48,7 +48,8 @@ function onSubmit(formId, fn) {
   };
 }
 
-const goApp = () => location.assign('./' + location.hash);
+// only the admin console may be a return target, so the parameter can't send anyone off-site
+const goApp = () => location.assign(params.get('next') === 'admin' ? '../api/admin/' : './' + location.hash);
 const goSignin = () => { location.assign('account.html'); };
 const wipeCaches = async () => { if (window.caches) for (const k of await caches.keys()) await caches.delete(k); };
 

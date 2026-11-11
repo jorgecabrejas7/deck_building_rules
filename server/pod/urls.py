@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.urls import include, path
 
 from accounts import views
@@ -8,7 +9,9 @@ from games import views as games
 from pods import views as pods
 
 admin.site.has_permission = lambda request: request.user.is_active and request.user.is_superuser
-admin.site.login = lambda request, extra_context=None: views.redirect_to_account()
+# signed out: sign in, then come back here; signed in without admin rights: the app (sending them back would loop)
+admin.site.login = lambda request, extra_context=None: HttpResponseRedirect(
+    "/pod/app/" if request.user.is_authenticated else views.ACCOUNT_PAGE + "?next=admin")
 
 urlpatterns = [
     path("pod/api/_allauth/", include("allauth.headless.urls")),
