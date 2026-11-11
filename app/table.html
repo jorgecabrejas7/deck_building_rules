@@ -16,13 +16,13 @@
 <body class="tbl">
 <script>/* pre-paint theme: keep in sync with js/ui/header.js applyTheme() */
 if (localStorage.getItem('pdc_theme') ? localStorage.getItem('pdc_theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');</script>
-<div id="top" class="tb-top"></div>
+<header id="top" class="tb-top"></header>
 <div id="roll" class="tb-roll" aria-live="polite"></div>
 <main id="board" class="tb-board"></main>
 <div id="toast" class="tb-toast" role="status" aria-live="polite"></div>
 <div id="hand" class="tb-hand"></div>
 <div id="sheet" class="sheet" hidden></div>
-<div id="preview" class="preview" data-preview-close hidden></div>
+<div id="preview" class="preview" data-preview-close tabindex="-1" hidden></div>
 <script type="module" src="js/table.js"></script>
 </body>
 </html>

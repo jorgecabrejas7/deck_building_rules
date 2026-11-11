@@ -13,9 +13,11 @@
   .main{gap:var(--sp-4)}
   .tab-pane{gap:var(--sp-4)}
 
-  /* the control fills the width, so all five tabs show without scrolling */
-  .tabbar{display:flex;width:100%;box-sizing:border-box}
-  .tab-btn{flex:1 1 auto;padding-inline:var(--sp-1)}
+  /* eight tabs never fit a phone: the control scrolls inside its own width, with a fade where more tabs wait */
+  .tabbar{display:flex;width:100%;box-sizing:border-box;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:var(--sp-5)}
+  .tabbar::-webkit-scrollbar{display:none}
+  .tab-btn{flex:none;padding-inline:14px;scroll-snap-align:start}
+  @supports (animation-timeline:scroll()){.tabbar{animation:edge-fade linear both;animation-timeline:scroll(self inline)}}
 
   /* the strip floats under the section links, so appearing never moves the page */
   .main>.sticky-wrap{min-height:44px;padding-block:0}
@@ -85,6 +87,12 @@
 }
 
 @media (max-width: 480px) {
+  /* a field and its button stack, so neither gets squeezed */
+  .dk-form,.gm-invite{flex-direction:column;align-items:stretch}
+  .dk-form>*,.gm-invite>*{width:100%;justify-content:center}
+  .dk-form .dk-vis select{flex:1;min-width:0}
+  .gm-row{flex-direction:column;align-items:stretch}
+  .gm-act{justify-content:flex-start}
   /* header: one row, icon-only controls; aria-labels carry the words */
   .header-actions{gap:0}
   .header-actions .btn-txt{display:none}
@@ -105,4 +113,19 @@
 }
 @media (max-width:700px){
   .nd-chip,.nd-start{min-height:44px}
+}
+
+/* a fade on whichever edge still hides content; only runs where the row scrolls */
+@keyframes edge-fade{
+  from{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent)}
+  2%,98%{-webkit-mask-image:linear-gradient(90deg,transparent,#000 32px,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(90deg,transparent,#000 32px,#000 calc(100% - 32px),transparent)}
+  to{-webkit-mask-image:linear-gradient(90deg,transparent,#000 32px);mask-image:linear-gradient(90deg,transparent,#000 32px)}
+}
+
+/* the smallest phones: the header keeps to one row while no report adds its three buttons */
+@media (max-width: 400px) {
+  .hero-inner{padding-inline:12px;column-gap:var(--sp-1)}
+  .brand{flex:0 1 auto;min-width:0}
+  .brand-title{overflow:hidden;text-overflow:ellipsis}
+  .seg-toggle button{min-width:36px;padding-inline:6px}
 }

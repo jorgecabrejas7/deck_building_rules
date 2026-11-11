@@ -1,12 +1,12 @@
 // The two-player table (F5). Merged into the app dictionary by i18n.js. Pod words stay Spanish in both languages.
 export default {
 es: {
-tbConnecting:'Conectando…',tbOffline:'Sin conexión',tbNotSent:'Sin conexión: no se envió',
+tbConnecting:'Conectando…',tbLive:'Conectado',tbOffline:'Sin conexión',tbNotSent:'Sin conexión: no se envió',
 tbStale:'No se aplicó: la mesa cambió',tbRate:'Demasiado rápido: espera un momento',tbInvalid:'Acción no válida',tbLobbyErr:'La partida aún no ha empezado',
 tbDenied:'No tienes acceso a esta partida.',tbEnded:'La partida ha terminado.',tbNoGame:'Falta la partida en el enlace.',tbBack:'Volver a la guía',
 tbLobbyT:'Elige tu mazo',tbLobbyX:'La partida empieza cuando los dos hayáis elegido mazo.',tbPickGo:'Elegir',tbDeckNone:'No tienes mazos guardados. Guarda uno en la guía.',
 tbDeckErr:'No se pudieron cargar tus mazos.',tbPickErr:'No se pudo elegir el mazo.',tbReady:'listo',tbWaiting:'esperando',tbYou:'Tú',tbOpp:'Rival',
-tbZlibrary:'Biblioteca',tbZhand:'Mano',tbZbattlefield:'Campo',tbZgraveyard:'Cementerio',tbZexile:'Exilio',tbZcommand:'Zona de mando',
+tbZlibrary:'Biblioteca',tbZhand:'Mano',tbZbattlefield:'Campo',tbZgraveyard:'Cementerio',tbZexile:'Exilio',tbZcommand:'Zona de mando',tbZcommandShort:'Mando',
 tbTap:'Girar',tbUntap:'Enderezar',tbFlip:'Dar la vuelta',tbLook:'Mirar',tbReveal:'Revelar',tbMove:'Mover a…',tbGive:'Dar el control',tbDelete:'Borrar ficha',
 tbCounters:'Contadores',tbCounterNew:'Otro contador',tbCounterName:'Nombre',tbAdd:'Añadir',tbTop:'arriba',tbBottom:'abajo',tbFaceDown:'boca abajo',
 tbCardDown:'Carta boca abajo',tbHiddenCard:'Carta oculta',tbToken:'Ficha',tbTokenNew:'Crear ficha',tbTokenName:'Nombre de la ficha',tbTokenCount:'Cantidad',
@@ -18,12 +18,12 @@ tbEndErr:'No se pudo terminar la partida.',tbLang:'Idioma',tbTheme:'Tema',tbLigh
 tbLife:'Vida',tbMinus:'Restar',tbPlus:'Sumar',tbCmdDmg:'Daño de comandante',tbHandBar:'Mano (%n)',
 },
 en: {
-tbConnecting:'Connecting…',tbOffline:'Offline',tbNotSent:'Offline: not sent',
+tbConnecting:'Connecting…',tbLive:'Connected',tbOffline:'Offline',tbNotSent:'Offline: not sent',
 tbStale:'Not applied: the table changed',tbRate:'Too fast: wait a moment',tbInvalid:'Invalid action',tbLobbyErr:'The game has not started yet',
 tbDenied:'You do not have access to this game.',tbEnded:'The game is over.',tbNoGame:'The link has no game.',tbBack:'Back to the guide',
 tbLobbyT:'Pick your deck',tbLobbyX:'The game starts when you both have picked a deck.',tbPickGo:'Pick',tbDeckNone:'You have no saved decks. Save one in the guide.',
 tbDeckErr:'Your decks could not be loaded.',tbPickErr:'The deck could not be picked.',tbReady:'ready',tbWaiting:'waiting',tbYou:'You',tbOpp:'Opponent',
-tbZlibrary:'Library',tbZhand:'Hand',tbZbattlefield:'Battlefield',tbZgraveyard:'Graveyard',tbZexile:'Exile',tbZcommand:'Command zone',
+tbZlibrary:'Library',tbZhand:'Hand',tbZbattlefield:'Battlefield',tbZgraveyard:'Graveyard',tbZexile:'Exile',tbZcommand:'Command zone',tbZcommandShort:'Command',
 tbTap:'Tap',tbUntap:'Untap',tbFlip:'Flip',tbLook:'Look',tbReveal:'Reveal',tbMove:'Move to…',tbGive:'Give control',tbDelete:'Delete token',
 tbCounters:'Counters',tbCounterNew:'Other counter',tbCounterName:'Name',tbAdd:'Add',tbTop:'top',tbBottom:'bottom',tbFaceDown:'face down',
 tbCardDown:'Face-down card',tbHiddenCard:'Hidden card',tbToken:'Token',tbTokenNew:'Create token',tbTokenName:'Token name',tbTokenCount:'Count',

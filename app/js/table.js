@@ -3,7 +3,7 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile } from './table/board.js';
+import { boardHtml, handHtml, lobbyHtml, index, visibleNames, tile, ICON } from './table/board.js';
 import { buildSheet } from './table/sheet.js';
 
 const $ = (id) => document.getElementById(id);
@@ -66,13 +66,14 @@ function render() {
   document.documentElement.lang = state.lang;
   applyTheme();
   document.body.classList.toggle('offline', !open() && !gone);
-  const top = (k, label) => `<button class="tbtn" data-top="${k}">${label}</button>`;
-  $('top').innerHTML = (active ? top('dice', t.tbDice) + top('mull', t.tbMulligan) + top('untap', t.tbUntapAll) : '') + top('menu', t.tbMenu)
-    + (open() || gone ? '' : `<span class="stat">${sock ? t.tbConnecting : t.tbOffline}</span>`);
+  const conn = gone ? '' : open() ? `<span class="stat live"><i></i><span>${t.tbLive}</span></span>`
+    : `<span class="stat ${sock ? 'wait' : 'off'}"><i></i>${sock ? t.tbConnecting : t.tbOffline}</span>`;
+  $('top').innerHTML = `<button class="tbtn ico" data-top="menu" aria-label="${t.tbMenu}" title="${t.tbMenu}">${ICON.menu}</button>` + conn
+    + (active ? `<button class="tbtn" data-top="dice" aria-label="${t.tbDice}">${ICON.die}<span class="lbl">${t.tbDice}</span></button><button class="tbtn" data-top="untap">${ICON.untap}${t.tbUntapAll}</button>` : '');
   const roll = active && view.roll;
   $('roll').textContent = roll ? `${view.players[roll.seat].name || '?'}: ` + (roll.sides === 2 ? (roll.result % 2 === 1 ? t.tbHeads : t.tbTails) : `d${roll.sides} → ${roll.result}`) : '';
   const board = $('board');
-  if (gone) { board.innerHTML = `<div class="lobby"><p>${t[gone]}</p><a class="sb" href="./">${t.tbBack}</a></div>`; sheet = null; }
+  if (gone) { board.innerHTML = `<div class="lobby gone"><p>${t[gone]}</p><a class="sb on" href="./">${t.tbBack}</a></div>`; sheet = null; }
   else if (!view) board.textContent = t.tbConnecting;
   else if (view.status === 'lobby') { keepInputs(board, () => { board.innerHTML = lobbyHtml(view, t, decks, lobbyErr); }); if (decks === null) loadDecks(); }
   else board.innerHTML = boardHtml(view, t);
@@ -87,13 +88,21 @@ function renderSheet() {
   const el = $('sheet');
   if (sheet && el.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return; // do not steal the keyboard
   const built = sheet && buildSheet(sheet, view, ctx());
-  if (!built) { sheet = null; el.hidden = true; el.innerHTML = ''; return; }
+  if (!built) {
+    sheet = null;
+    if (!el.hidden) { el.hidden = true; el.innerHTML = ''; if (opener && opener.isConnected) opener.focus(); }
+    return;
+  }
   items = built.items;
+  const entering = el.hidden;
+  if (entering) opener = document.activeElement;
   keepInputs(el, () => {
-    el.innerHTML = `<div class="sh-back" data-close></div><div class="sh-pane" role="dialog" aria-modal="true"><div class="sh-head"><h2>${built.title}</h2><button class="sb" data-close aria-label="${T().tbClose}">×</button></div>${built.body}</div>`;
+    el.innerHTML = `<div class="sh-back" data-close></div><div class="sh-pane" role="dialog" aria-modal="true" aria-labelledby="shTitle" tabindex="-1"><div class="sh-grab" aria-hidden="true"></div><div class="sh-head"><h2 id="shTitle">${built.title}</h2><button class="sb ico" data-close aria-label="${T().tbClose}">${ICON.close}</button></div>${built.body}</div>`;
   });
   el.hidden = false;
+  if (entering) { el.classList.add('enter'); setTimeout(() => el.classList.remove('enter'), 400); el.querySelector('.sh-pane').focus({ preventScroll: true }); }
 }
+let opener = null;
 
 const setSheet = (s) => { sheet = s; renderSheet(); };
 const ctx = () => ({
@@ -136,6 +145,7 @@ function preview(id) {
   if (!hit) return;
   $('preview').innerHTML = tile(hit.card, T(), true).replace('data-card', 'data-x');
   $('preview').hidden = false;
+  $('preview').focus();
 }
 
 // ---- events ----

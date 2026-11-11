@@ -217,8 +217,8 @@ async function loadGames() {
 function gamesHtml(t) {
   const others = state.pod.members.filter(m => !m.me);
   const invite = others.length
-    ? '<form class="dk-form" data-gameform><select name="opponent" class="arch-select" aria-label="' + esc(t.pdGWho) + '">' +
-      others.map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select>' +
+    ? '<form class="gm-invite" data-gameform><label class="arch-field"><span>' + esc(t.pdGWho) + '</span><select name="opponent" class="arch-select">' +
+      others.map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select></label>' +
       '<button class="btn-primary">' + esc(t.pdGInvite) + '</button></form>'
     : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
   const li = (games ? games.list : []).map(g => {
@@ -230,11 +230,11 @@ function gamesHtml(t) {
     const end = asking === 'g' + g.id
       ? '<span class="dk-confirm">' + esc(t.pdGAsk) + '</span><button class="btn-ghost-sm btn-danger" data-act="game-end-yes" data-game="' + g.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
       : '<button class="btn-ghost-sm" data-act="game-end" data-game="' + g.id + '">' + esc(lobby ? t.pdGDecline : t.pdGEnd) + '</button>';
-    return '<li class="pod-member"><span class="pod-mname">' + esc(who) + ' <span class="lbl-muted">' + esc(st) + '</span></span><span class="dk-actions">' +
+    return '<li class="gm-row"><span class="gm-who"><b>' + esc(who) + '</b><span class="gm-st' + (lobby ? '' : ' live') + '">' + esc(st) + '</span></span><span class="gm-act">' +
       '<a class="btn-primary dk-login" href="table.html?game=' + g.id + '">' + esc(t.pdGOpen) + '</a>' + end + '</span></li>';
   }).join('');
   return invite + (gMsg ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') +
-    (li ? '<ul class="pod-members">' + li + '</ul>' : games && !games.busy ? '<p class="note-sm">' + esc(t.pdGNone) + '</p>' : '');
+    (li ? '<ul class="gm-list">' + li + '</ul>' : games && !games.busy ? '<p class="note-sm">' + esc(t.pdGNone) + '</p>' : '');
 }
 async function gameAct(method, path, body, ok) {
   const res = await api(API + path, method, body);
