@@ -14,7 +14,7 @@
   .tab-pane{gap:var(--sp-4)}
 
   /* eight tabs never fit a phone: the control scrolls inside its own width, with a fade where more tabs wait */
-  .tabbar{display:flex;width:100%;box-sizing:border-box;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:var(--sp-5)}
+  .tabbar{display:flex;width:100%;box-sizing:border-box;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:40px}
   .tabbar::-webkit-scrollbar{display:none}
   .tab-btn{flex:none;padding-inline:14px;scroll-snap-align:start}
   @supports (animation-timeline:scroll()){.tabbar{animation:edge-fade linear both;animation-timeline:scroll(self inline)}}

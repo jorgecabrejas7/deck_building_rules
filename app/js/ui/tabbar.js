@@ -43,7 +43,7 @@ export function renderTabbar() {
   for (const k of TAB_KEYS) $('tab-' + k).style.display = state.tab === k ? 'flex' : 'none';
   // on a phone the bar scrolls: keep the active tab in view
   const active = $('tabbtn-' + state.tab), bar = $('tabbar');
-  if (active.offsetLeft + active.offsetWidth > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = active.offsetLeft;
+  if (active.offsetLeft + active.offsetWidth > bar.scrollLeft + bar.clientWidth - 40) bar.scrollLeft = active.offsetLeft - 40; // clear of the edge fade
 }
 
 // The report is one view at a time, so a change of view starts at the top of the page.

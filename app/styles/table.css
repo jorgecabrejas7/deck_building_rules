@@ -56,7 +56,7 @@ body.offline .tbtn:not([data-top=menu]),body.offline .sb,body.offline .life butt
 .life button{width:44px;height:44px;border:none;border-radius:50%;background:var(--fill);color:var(--text);font-size:22px;line-height:1;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
 .life button:hover{background:var(--fill-hover)}
 .life output{min-width:2.6ch;text-align:center;font-size:var(--fs-display);font-weight:600;letter-spacing:var(--track-tight);line-height:1;font-variant-numeric:tabular-nums}
-.zones{grid-column:1/-1;display:flex;gap:var(--sp-1);margin-inline:calc(-1 * var(--sp-3));padding-inline:var(--sp-3);overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+.zones{grid-column:1/-1;display:flex;gap:var(--sp-1);margin:-3px calc(-1 * var(--sp-3));padding:3px var(--sp-3);overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
 .zones::-webkit-scrollbar{display:none}
 /* a fade at the edge while more piles wait off-screen; no fade when the row fits */
 @supports (animation-timeline:scroll()){.zones{animation:tb-more linear both;animation-timeline:scroll(self inline)}}
