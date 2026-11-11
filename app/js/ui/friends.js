@@ -13,13 +13,14 @@ let msg = null;       // i18n key of the last answer worth showing
 let bad = false;      // the last answer is a refusal
 
 export const friendsBadge = () => data ? data.incoming.length : null;
+export const friendList = () => data ? data.friends : [];
 
 // Asks the server again: when a tab that needs friends opens and after every action.
 export async function loadFriends() {
   const res = await api(API + 'friends');
   status = res.status === 200 ? 'idle' : res.status === 403 ? 'out' : 'error';
   data = res.status === 200 ? res.data : null;
-  if (data && me === null) { const u = await api(API + 'me'); if (u.status === 200) me = u.data.username; }
+  if (data && me === null) { const u = await api(API + 'me'); if (u.status === 200) me = u.data.user.username; }
   renderAll();
   return data;
 }
