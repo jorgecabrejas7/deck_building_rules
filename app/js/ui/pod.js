@@ -229,7 +229,7 @@ function gamesHtml(t) {
     const lobby = g.status === 'lobby';
     const end = asking === 'g' + g.id
       ? '<span class="dk-confirm">' + esc(t.pdGAsk) + '</span><button class="btn-ghost-sm btn-danger" data-act="game-end-yes" data-game="' + g.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
-      : '<button class="btn-ghost-sm" data-act="game-end" data-game="' + g.id + '">' + esc(lobby ? t.pdGDecline : t.pdGEnd) + '</button>';
+      : '<button class="btn-ghost-sm" data-act="game-end" data-game="' + g.id + '">' + esc(!lobby ? t.pdGEnd : g.seat === 1 ? t.pdCancel : t.pdGDecline) + '</button>';
     return '<li class="pod-member"><span class="pod-mname">' + esc(who) + ' <span class="lbl-muted">' + esc(st) + '</span></span><span class="dk-actions">' +
       '<a class="btn-primary dk-login" href="table.html?game=' + g.id + '">' + esc(t.pdGOpen) + '</a>' + end + '</span></li>';
   }).join('');
