@@ -160,7 +160,7 @@ function render() {
   else patch(board, boardHtml(view, t));
   const hand = $('hand'), hf = hand.contains(document.activeElement) && document.activeElement.dataset.top; // the head is re-templated: keep focus on its button
   if (!(active && view.turn && view.turn.seat === view.you)) disarmPass();
-  if (active) patch(hand, handHtml(view, t, handOpen, passAt && performance.now() - passAt)); else hand.innerHTML = '';
+  if (active) patch(hand, handHtml(view, t, handOpen || SHORT.matches, passAt && performance.now() - passAt)); else hand.innerHTML = '';
   if (hf) { const f = hand.querySelector(`[data-top="${hf}"]`); if (f) f.focus({ preventScroll: true }); }
   if (active) hand.dataset.drop = view.you + ':hand'; else delete hand.dataset.drop;
   layoutHand(handRow());
@@ -260,11 +260,12 @@ function applyFocus(swap) {
 }
 
 // ---- card size: the largest width at which every card of a battlefield fits without scrolling ----
-// Where both boards stack (desktop) they share one size and split the height by what each holds, so a crowded side
-// never squeezes the other. Past the smallest size a battlefield scrolls inside itself.
-// shortcut: the gaps are table.css constants (card gap 6, section gap 8 + 8 padding + 1 rule); change both together
-const GAP = 6, SEC = 17;
-function heightAt(cw, rows, W) {
+// Where both boards show (desktop, phone landscape) they share one size and split the height by what each holds, so a crowded
+// side never squeezes the other. Past the smallest size a battlefield scrolls inside itself.
+// shortcut: the gaps are table.css constants (card gap 6, section gap 8 + 8 padding + 1 rule; short landscape: 4 + 3 + 1, groups 16 apart); change both together
+const GAP = 6, SEC = 17, SEC_SHORT = 8, GROUP = 16;
+const OPP = 0.88; // short landscape: their cards a little smaller, so yours (which you tap) can be bigger
+function heightAt(cw, rows, W, sec = SEC) {
   const ch = cw * 1.4;
   let h = 0;
   for (const row of rows) {
@@ -276,38 +277,47 @@ function heightAt(cw, rows, W) {
     }
     h += line;
   }
-  return h + Math.max(0, rows.length - 1) * SEC;
+  return h + Math.max(0, rows.length - 1) * sec;
+}
+// short landscape: creatures in front; lands and other behind them on one line when both groups fit, else one under the other
+function stackedAt(cw, { front, back }, W) {
+  const line = (r) => r.reduce((x, it) => x + (x ? GAP : 0) + (it.tapped ? cw * 1.4 : cw), 0);
+  const one = back.length < 2 || line(back[0]) + GROUP + line(back[1]) <= W;
+  return heightAt(cw, [...front, ...(one ? [back.flat()] : back)], W, SEC_SHORT);
 }
 function fit() {
   const m = SIZES[size];
   document.body.style.setProperty('--size', m);
-  const [lo, hi] = (SHORT.matches ? [32, 72] : BOTH.matches ? [36, 128] : [44, 96]).map((x) => Math.round(x * m));
-  const shared = BOTH.matches && !SHORT.matches;
+  const [lo, hi] = (SHORT.matches ? [32, 84] : BOTH.matches ? [36, 128] : [44, 96]).map((x) => Math.round(x * m));
+  const shared = BOTH.matches;
   if (!shared) for (const s of document.querySelectorAll('.seat')) s.style.flex = s.style.minHeight = '';
   const boards = [...document.querySelectorAll('.seat .bf')].filter((bf) => bf.offsetParent).map((bf) => {
     const cs = getComputedStyle(bf), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom), area = bf.parentElement, seat = area.parentElement, H = bf.clientHeight - padY;
-    // fixed: the seat's height besides its battlefield's cards (rails, paddings), summed from its parts
-    const rails = [...seat.children].reduce((x, c) => x + (c === area ? 0 : c.offsetHeight), 0);
+    // fixed: the seat's height besides its battlefield's cards (rails, paddings), summed from its parts; a short landscape rail stands beside the area
+    const rails = SHORT.matches ? 0 : [...seat.children].reduce((x, c) => x + (c === area ? 0 : c.offsetHeight), 0);
+    const groups = [...bf.querySelectorAll('.bfr')].map((r) => ({ front: r.classList.contains('creatures'), items: [...r.children].map((it) => ({
+      tapped: (it.matches('.stk') ? it.lastElementChild : it).classList.contains('tapped'), n: it.matches('.stk') ? it.childElementCount - 1 : 0 })) }));
     return { bf, seat, H, W: bf.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), fixed: rails + area.offsetHeight - H,
-      min: parseFloat(getComputedStyle(area).minHeight) - padY || 0,
-      rows: [...bf.querySelectorAll(':scope>.bfr')].map((r) => [...r.children].map((it) => ({
-        tapped: (it.matches('.stk') ? it.lastElementChild : it).classList.contains('tapped'), n: it.matches('.stk') ? it.childElementCount - 1 : 0 }))) };
+      min: parseFloat(getComputedStyle(area).minHeight) - padY || 0, rows: groups.map((g) => g.items),
+      stack: { front: groups.filter((g) => g.front).map((g) => g.items), back: groups.filter((g) => !g.front).map((g) => g.items) },
+      scale: SHORT.matches && seat.classList.contains('opp') ? OPP : 1 };
   });
+  const tall = (b, cw) => SHORT.matches ? stackedAt(cw, b.stack, b.W) : heightAt(cw, b.rows, b.W);
   if (shared && boards.length === 2) {
     const free = boards[0].seat.parentElement.clientHeight - boards[0].fixed - boards[1].fixed;
-    const need = (cw) => boards.map((b) => Math.max(heightAt(cw, b.rows, b.W), b.min, cw * 1.4));
+    const need = (cw) => boards.map((b) => { const c = Math.round(cw * b.scale); return Math.max(tall(b, c), b.min, c * 1.4); });
     let cw = hi;
     while (cw > lo && need(cw).reduce((x, y) => x + y) > free) cw--;
     // each seat keeps its rails and takes the free height in proportion to what its battlefield needs, never less than
     // its piles need: on a screen too short for both, the board scrolls instead of one side covering the other
     need(cw).forEach((n, i) => {
       const b = boards[i];
-      b.seat.style.flex = `${n} 1 ${b.fixed}px`; b.seat.style.minHeight = b.fixed + b.min + 'px'; b.bf.style.setProperty('--cw', cw + 'px');
+      b.seat.style.flex = `${n} 1 ${b.fixed}px`; b.seat.style.minHeight = b.fixed + b.min + 'px'; b.bf.style.setProperty('--cw', Math.round(cw * b.scale) + 'px');
     });
   } else {
     for (const b of boards) {
       let cw = hi;
-      while (cw > lo && heightAt(cw, b.rows, b.W) > b.H) cw--;
+      while (cw > lo && tall(b, cw) > b.H) cw--;
       b.bf.style.setProperty('--cw', cw + 'px');
     }
   }
@@ -318,6 +328,7 @@ function fit() {
 }
 new ResizeObserver(() => fit()).observe($('board'));
 BOTH.addEventListener('change', () => applyFocus(false));
+SHORT.addEventListener('change', render); // the hand's toggle exists only outside it
 
 function fullscreen() {
   if (!document.fullscreenEnabled) explainFs();
@@ -498,7 +509,7 @@ function startDrag(p, e) {
   document.body.classList.add('dragging');
   p.el.classList.add('lifted');
   // shortcut: the tray serves the owner of the card under the finger, not of every card in a multi-selection; split it if mixed drags matter
-  showTray(p.hit.card.owner, p.hit.zone, p.y0 > innerHeight / 2, T());
+  showTray(p.hit.card.owner, p.hit.zone, SHORT.matches || p.y0 > innerHeight / 2, T()); // short landscape: always the top, the hand peeks at the bottom
   moveDrag(p, e);
 }
 

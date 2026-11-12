@@ -126,9 +126,12 @@ function seat(view, s, t) {
     if (!under) return tile(c, t, false, [c, ...more]);
     return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t)}</div>`;
   };
-  // mine reads creatures, other, lands down towards me; theirs mirrors it, lands at their edge
-  const order = me ? ['creatures', 'other', 'lands'] : ['lands', 'other', 'creatures'];
-  const rows = order.filter((k) => secs[k].length).map((k) => `<div class="bfr" role="group" aria-label="${t['tbSec' + k]}">${secs[k].map(stack).join('')}</div>`).join('');
+  // mine reads creatures, then other and lands, down towards me; theirs mirrors it. Other and lands share one .bfb: two rows
+  // stacked, or (phone landscape) two groups on one line behind the creatures
+  const group = (k) => `<div class="bfr ${k}" role="group" aria-label="${t['tbSec' + k]}">${secs[k].map(stack).join('')}</div>`;
+  const part = (ks) => ks.filter((k) => secs[k].length).map(group).join('');
+  const back = (ks) => { const h = part(ks); return h && `<div class="bfb">${h}</div>`; };
+  const rows = me ? part(['creatures']) + back(['other', 'lands']) : back(['lands', 'other']) + part(['creatures']);
   const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${(p.cmd_damage || {})[name] || 0}</b></button>`).join('');
   const lead = me ? `<button class="chip ico" data-top="untap" title="${t.tbUntapAll}" aria-label="${t.tbUntapAll}">${ICON.untap}</button>`
     : `<button class="chip" data-pile="${s}:hand" data-drop="${s}:hand" title="${t.tbZhand}" aria-label="${t.tbZhand}: ${z.hand.length}">${ICON.hand}<b>${z.hand.length}</b></button>`;

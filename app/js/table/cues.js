@@ -62,7 +62,7 @@ function bubble(s, d, settle) {
   b.d += d;
   b.el.textContent = sign(b.d);
   b.el.classList.toggle('gain', b.d > 0);
-  const r = at.getBoundingClientRect(), below = r.top < 56; // a number at the screen's top edge: below it
+  const r = at.getBoundingClientRect(), below = r.top < 32; // a number at the screen's top edge: below it
   b.el.classList.toggle('below', below);
   b.el.style.left = Math.round(r.left + r.width / 2) + 'px';
   b.el.style.top = Math.round(below ? r.bottom : r.top) + 'px';

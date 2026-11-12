@@ -14,8 +14,8 @@ export function handHtml(view, t, open, armed) {
     + `<button class="tbtn add" data-token>${ICON.plus}<span>${t.tbToken}</span></button>`
     // on your turn, passing it is one tap away; the menu passes on the other player's turn, or without a draw
     + (view.turn && view.turn.seat === view.you
-      ? `<button class="tbtn pass${armed ? ' armed' : ''}" data-top="pass"${armed ? ` style="--wait:-${Math.round(armed)}ms"` : ''}>${armed ? t.tbCancel : t.tbPass + ICON.pass}</button>` : '') + `</div>`
-    + (open ? `<div class="hand-row">${hand.map((c, i) => tile(c, t).replace('<button ', `<button style="--i:${i}" `)).join('')}</div>` : '');
+      ? `<button class="tbtn pass${armed ? ' armed' : ''}" data-top="pass"${armed ? ` style="--wait:-${Math.round(armed)}ms"` : ''}><span>${armed ? t.tbCancel : t.tbPass}</span>${armed ? '' : ICON.pass}</button>` : '') + `</div>`
+    + (open ? `<div class="hand-row" role="group" aria-label="${fill(t.tbHandBar, { n: hand.length })}">${hand.map((c, i) => tile(c, t).replace('<button ', `<button style="--i:${i}" `)).join('')}</div>` : '');
 }
 
 // GAP mirrors the battlefield's card gap in table.css

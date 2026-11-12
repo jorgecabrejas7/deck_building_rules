@@ -138,8 +138,9 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 .bf{scroll-snap-type:y proximity;scroll-padding-block:var(--sp-2)}
 .bfr>*{scroll-snap-align:start}
 /* sections (creatures, other permanents, lands) split by a hairline; table.js fit() counts on these gaps */
-.bfr+.bfr{padding-top:var(--sp-2);border-top:1px solid var(--feltLine)}
-.seat.me .bfr:first-child{margin-top:auto}
+.bfb{display:flex;flex-direction:column;gap:var(--sp-2)} /* other + lands: two rows here, one line in short landscape */
+.bfr+.bfb,.bfb+.bfr,.bfb>.bfr+.bfr{padding-top:var(--sp-2);border-top:1px solid var(--feltLine)}
+.seat.me .bf>:first-child{margin-top:auto}
 
 /* piles as card slots beside the battlefield: the top card when it is public. On a short half the slots get shorter (the image crops) before they scroll */
 .piles{flex:none;contain:size;width:var(--pw);display:flex;flex-direction:column;gap:6px;padding:var(--sp-2) var(--sp-2) var(--sp-2) 0;overflow-y:auto;scrollbar-width:none}
@@ -360,19 +361,6 @@ body.away .hand-row{display:none}
   .sc{font-size:13px}
 }
 
-/* short landscape (a phone on its side): the two halves sit side by side, each rail on top */
-@media (orientation:landscape) and (min-width:640px) and (max-height:560px){
-  body.tbl{--cw:44px;--hw:52px;--pw:34px}
-  .sides{display:grid;grid-template-columns:1fr 1fr}
-  .seat.opp{border-right:1px solid var(--feltLine)}
-  .seat.opp .area{border-bottom:none}
-  .seat.me{flex-direction:column-reverse}
-  .seat.me .piles{justify-content:flex-start}
-  .seat.me .strip{border-top:none;border-bottom:1px solid var(--border)}
-  .strip{min-height:44px}
-  .life button{width:36px;height:36px}
-  .sc .ic{display:none}
-}
 /* wide and short-landscape screens: both boards; the active one is ringed. Keep in sync with BOTH in table.js */
 @media (min-width:900px),(orientation:landscape) and (min-width:640px) and (max-height:560px){
   .seat:not(.on){flex:1 1 0}
@@ -470,3 +458,78 @@ body.dragging .tb-bar,body.picking .tb-bar,body:has(#sheet:not([hidden])) .tb-ba
 .coach.enter{animation:tb-pop .2s cubic-bezier(.2,.8,.2,1)}
 .coach-n{margin-bottom:var(--sp-1);font-size:var(--fs-caption);font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
 .coach-b{display:flex;justify-content:flex-end;gap:var(--sp-2);margin-top:var(--sp-3)}
+
+/* short landscape (a phone on its side), like a game table: their seat across the top, yours across the bottom, each a rail
+   column (--lc) beside its battlefield and piles (--rc). Both rails scroll inside themselves; yours leaves room for the hand's
+   buttons, which stand at the bottom of that column. Keep the query in sync with SHORT in table.js */
+@media (orientation:landscape) and (min-width:640px) and (max-height:560px){
+  body.tbl{--cw:44px;--hw:56px;--pw:40px;--lc:92px;--hh:86px;--rc:calc(2 * var(--pw) + 8px);--peek:44px;padding-bottom:env(safe-area-inset-bottom)}
+  .seat,.seat:not(.on){display:grid;grid-template-columns:var(--lc) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  .strip,.seat:not(.on)>.strip{grid-area:1/1;display:grid;grid-template-columns:repeat(2,40px);grid-auto-rows:min-content;align-content:start;justify-content:center;gap:2px 4px;min-height:0;padding:2px 4px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;border-right:1px solid var(--border)}
+  .strip::-webkit-scrollbar{display:none}
+  .seat.opp .strip{padding-left:4px}
+  .seat.me .strip{border-top:none;margin-bottom:var(--hh)} /* the hand's buttons stand under it */
+  .area{grid-area:1/2;min-height:calc(2 * var(--pw) + 12px)}
+  .strip>.who-c{grid-column:1/-1;order:1}
+  .strip>.life{order:2}
+  .strip>.menu-btn{order:3}
+  .strip>[data-top=full]{order:4}
+  .strip>[data-pile],.strip>[data-top=untap]{order:5}
+  .strip>.log-btn{order:6;display:inline-flex}
+  .strip>.cmd{order:7}
+  .strip .chip,.strip .chip.ico{width:40px;padding:0;gap:2px}
+  .life{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,40px);grid-template-areas:"n n" "m p";justify-content:center;gap:0 4px}
+  .life .lv{grid-area:n;min-width:0;height:28px;padding:0;font-size:26px;line-height:1}
+  .life button:first-child{grid-area:m}
+  .life button:last-child{grid-area:p}
+  .life button{width:40px;height:40px}
+  .strip .trn{overflow:visible}
+  .strip>.who-c{line-height:1.1}
+  .seat.turn .bf{background:color-mix(in oklab,var(--accent) 7%,transparent);box-shadow:inset 3px 0 0 var(--accent)}
+  .seat.on .area{box-shadow:none}
+  /* the battlefield: creatures in front (towards the middle), lands left and other right behind them, nearest the edge */
+  .bf{padding:5px 4px 1px 6px} /* the top room keeps a stack's raised edge */
+  .seat.me .bf{padding-bottom:calc(var(--peek) + 1px)} /* the hand peeks over it */
+  .bfb{flex-direction:row;flex-wrap:wrap;gap:6px 16px}
+  .bfb>.bfr{flex:0 1 auto}
+  .bfb>.bfr.lands{order:-1}
+  .bfr+.bfb,.bfb+.bfr{padding-top:3px;margin-top:0}
+  .bfb>.bfr+.bfr{padding:0;border:none}
+  .bf{gap:4px}
+  .seat.me .bf>:first-child{margin-top:0}
+  .seat.me .bfb{margin-top:auto}
+  .seat.opp .bfb{margin-bottom:auto}
+  .seat.opp .bfr.creatures{margin-top:auto}
+  .piles{width:var(--rc);display:grid;grid-template-columns:repeat(2,var(--pw));grid-template-rows:repeat(2,minmax(0,calc(var(--pw) * 1.4)));align-content:start;gap:4px;padding:4px 4px 4px 0}
+  .seat.me .piles{align-content:end}
+  .slot{height:auto;min-height:40px}
+  .sc .ic{display:none}
+  /* the hand: a fan peeking over the bottom edge of your battlefield, rising under a finger or the mouse; its buttons are the rail's */
+  .tb-hand{position:fixed;left:calc(env(safe-area-inset-left) + var(--lc));right:calc(env(safe-area-inset-right) + var(--rc));bottom:env(safe-area-inset-bottom);padding:0;border:none;background:none;box-shadow:none;pointer-events:none}
+  .hand-head{position:fixed;left:env(safe-area-inset-left);bottom:env(safe-area-inset-bottom);box-sizing:border-box;width:var(--lc);height:var(--hh);display:grid;grid-template-columns:repeat(2,40px);align-content:center;justify-content:center;gap:2px 4px;padding:0 4px;background:var(--mine);border-right:1px solid var(--border);border-top:1px solid var(--border);pointer-events:auto}
+  .hand-bar{display:none}
+  .hand-head .tbtn,.hand-head .tbtn.ico{width:40px;padding:0}
+  .draw span,.add span,.tbtn.pass span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .tbtn.pass .ic{display:block}
+  .tbtn.pass.armed .ic{display:none}
+  .tbtn.pass.armed::before{content:"\00d7";font-size:26px;font-weight:400;line-height:1}
+  .hand-row{height:calc(var(--hw) * var(--size) * 1.4 - 8px);pointer-events:none;transform:translateY(calc(100% - 8px - var(--peek)));transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+  .hand-row .tc,.hand-row .tc:active,.hand-row .tc.lifted{bottom:-16px;pointer-events:auto} /* a raised card still reaches the screen's edge, under the pointer that raised it */
+  .hand-row:has(.up,.sel,.tc:hover,:focus-visible){transform:none}
+  body.dragging .tb-hand .hand-row{transform:translateY(calc(100% - 8px - var(--peek)))}
+  .tb-hand.drop-on{box-shadow:none;background:none}
+  .tb-hand.drop-on .hand-row{background:color-mix(in oklab,var(--accent) 14%,transparent);box-shadow:inset 0 2px 0 var(--accent)}
+  /* dragging: the quick zones go between the rails, at the top */
+  .tray{left:calc(env(safe-area-inset-left) + var(--lc) + 8px);right:calc(env(safe-area-inset-right) + var(--rc) + 8px)}
+  .tz{min-height:48px}
+  /* the docked selection bar floats between the rails at the top (the hand is not in the page flow here) */
+  .tb-bar.dock{position:fixed;order:0;left:calc(env(safe-area-inset-left) + var(--lc));right:calc(env(safe-area-inset-right) + var(--rc));top:env(safe-area-inset-top);width:auto;border-radius:0 0 var(--r-lg) var(--r-lg)}
+  .sh-card{grid-template-columns:150px minmax(0,1fr)}
+  .pad{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);grid-template-areas:"v k" "n k" "a k";align-content:start;column-gap:var(--sp-5)}
+  .pad .pad-v{grid-area:v}
+  .pad .pad-now{grid-area:n}
+  .pad .pad-k{grid-area:k;margin:0;gap:6px}
+  .pad .pad-k .sb{min-height:44px}
+  .pad>.srow{grid-area:a;align-self:start}
+}
+@media (orientation:landscape) and (min-width:640px) and (max-height:560px) and (prefers-reduced-motion:reduce){.hand-row{transition:none}}
