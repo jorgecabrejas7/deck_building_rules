@@ -39,7 +39,7 @@ export const standalone = () => navigator.standalone === true || matchMedia('(di
 export const fsShown = () => !!document.fullscreenEnabled || !standalone();
 export const fsButton = (t, cls) => {
   const on = !!document.fullscreenElement, label = on ? t.tbExitFullscreen : t.tbFullscreen;
-  return `<button class="${cls}" data-top="full" title="${label}" aria-label="${label}">${on ? ICON.fullOff : ICON.full}</button>`;
+  return `<button class="${cls}" data-k="full" data-top="full" aria-label="${label}">${on ? ICON.fullOff : ICON.full}<span>${t.tbFullscreen}</span></button>`;
 };
 
 export function index(view) {
@@ -99,19 +99,18 @@ export function tile(c, t, big = false, group = [c], wide = false) {
   const cls = ['tc', wide && 'w', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
   const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : `<span class="tn">${c.name ? esc(c.name) : ''}</span>`;
   const cn = Object.entries(c.counters || {}).map(([k, v]) => counterText(k, v));
-  const cns = cn.length ? `<span class="cns" aria-hidden="true">${cn.map((x) => `<b class="cn">${esc(x)}</b>`).join('')}</span>` : '';
+  // a named counter writes its number last and gives its name the ellipsis, so "charge 3" shrinks to "cha… 3" and never loses the 3
+  const pill = ([k, v]) => k === '+1/+1' || k === '-1/-1' ? `<b class="cn">${counterText(k, v)}</b>` : `<b class="cn"><i>${esc(k)}</i><span>${v}</span></b>`;
+  const cns = cn.length ? `<span class="cns" aria-hidden="true">${Object.entries(c.counters).map(pill).join('')}</span>` : '';
   return `<button class="${cls}"${wide ? ` data-c="${frame(c)}"` : ''} data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${st ? ' · ' + st : ''}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
-    + `${face}${wide && (cn.length || st) ? `<span class="ft">${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}</span>` : cns}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
+    + `${face}${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
 }
 
-// a pile drawn as a card slot: the top card when it is public, a back for the library, a dashed outline when empty
-function slot(s, zone, t, view) {
-  const cards = view.zones[s][zone], n = cards.length;
-  const face = zone === 'library' ? null : zone === 'command' ? cards[0] : cards[n - 1];
-  const src = face ? art(face) : '', top = zone === 'library' || zone === 'command' ? cards[0] : cards[n - 1];
-  // data-lift: the card a drag out of this pile takes (the library's top card, the last card into the others)
-  return `<button class="slot ${zone}${n ? '' : ' empty'}" data-pile="${s}:${zone}" data-drop="${s}:${zone}"${top ? ` data-lift="${top.id}"` : ''} title="${t['tbZ' + zone]}" aria-label="${t['tbZ' + zone]}: ${n}">`
-    + `${src ? `<img src="${esc(src)}" alt="" draggable="false">` : ''}<span class="sc">${ICON[zone]}<b>${n}</b></span></button>`;
+// a pile as a zone chip: icon and count. Tap opens it, a card dropped on it goes there, and data-lift is the card a drag out of it takes
+// (the library's and the command zone's first card, the last card of the others); the hand has none
+function chip(s, zone, t, view) {
+  const cards = view.zones[s][zone], n = cards.length, top = zone === 'library' || zone === 'command' ? cards[0] : zone === 'hand' ? null : cards[n - 1];
+  return `<button class="chip pile ${zone}${n ? '' : ' empty'}" data-pile="${s}:${zone}" data-drop="${s}:${zone}"${top ? ` data-lift="${top.id}"` : ''} title="${t['tbZ' + zone]}" aria-label="${t['tbZ' + zone]}: ${n}">${ICON[zone]}<b>${n}</b></button>`;
 }
 
 // a battlefield in sections, each a list of groups: identical plain cards (same name and tapped state, no counters,
@@ -130,8 +129,8 @@ function sections(view, s, att) {
 
 const PILES = ['graveyard', 'exile', 'library']; // the bar's order: the library count is the first to give way
 
-// one player's side. Rendered whole every time: the full board (rail + battlefield + piles) and the collapsed bar.
-// Which one shows is client state (table.js applyFocus toggles .seat.on); CSS shows both boards on wide screens.
+// one player's side. Rendered whole every time: the battlefield with its floating pill and zone chips, and the collapsed bar.
+// Which one shows is client state (table.js applyFocus toggles .seat.on); CSS shows both boards on wide screens and one on tall ones.
 function seat(view, s, t) {
   const p = view.players[s], z = view.zones[s], me = s === view.you, o = view.players[other(s)], who = esc(p.name || '?');
   const att = attachments(view), secs = sections(view, s, att);
@@ -140,39 +139,33 @@ function seat(view, s, t) {
     if (!under) return tile(c, t, false, [c, ...more], true);
     return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t, false, [x], true).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t, false, [c], true)}</div>`;
   };
-  // mine reads creatures, then other and lands, down towards me; theirs mirrors it. Other and lands share one .bfb: two rows
-  // stacked, or (phone landscape) two groups on one line behind the creatures
+  // mine reads creatures, then other and lands, down towards me; theirs mirrors it. Other and lands share one .bfb: two groups on
+  // one line behind the creatures when they fit, else one under the other
   const group = (k) => `<div class="bfr ${k}" role="group" aria-label="${t['tbSec' + k]}">${secs[k].map(stack).join('')}</div>`;
   const part = (ks) => ks.filter((k) => secs[k].length).map(group).join('');
   const back = (ks) => { const h = part(ks); return h && `<div class="bfb">${h}</div>`; };
   const rows = me ? part(['creatures']) + back(['other', 'lands']) : back(['lands', 'other']) + part(['creatures']);
-  const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${(p.cmd_damage || {})[name] || 0}</b></button>`).join('');
-  const lead = me ? `<button class="chip ico" data-top="untap" title="${t.tbUntapAll}" aria-label="${t.tbUntapAll}">${ICON.untap}</button>`
-    : `<button class="chip" data-pile="${s}:hand" data-drop="${s}:hand" title="${t.tbZhand}" aria-label="${t.tbZhand}: ${z.hand.length}">${ICON.hand}<b>${z.hand.length}</b></button>`;
-  const menu = `<button class="chip ico menu-btn" data-top="menu" title="${t.tbMenu}" aria-label="${t.tbMenu}">${ICON.menu}</button>`;
-  // the opponent's rail opens the table's own controls: the menu (with the connection dot) and full screen
-  const ctl = me ? '' : menu + (fsShown() ? fsButton(t, 'chip ico') : '');
+  const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${(p.cmd_damage || {})[name] || 0}</b></button>`);
   // the number opens a pad to add, subtract or set any amount
   const life = `<div class="life" role="group" aria-label="${t.tbLife}"><button data-life="${s}:-1" aria-label="${t.tbMinus}">−</button>`
     + `<button class="lv" data-pad="${s}" aria-label="${fill(t.tbLifeEdit, { n: who, l: p.life })}">${p.life}</button><button data-life="${s}:1" aria-label="${t.tbPlus}">+</button></div>`;
-  // whose turn: a quiet tag beside the active player's name (and an accent edge on their rail, in table.css)
+  // whose turn: a tag beside the name (and the accent along the centre line on their half, in table.css)
   const turn = view.turn && view.turn.seat === s ? `<span class="trn">${fill(t.tbTurnN, { n: view.turn.number })}</span>` : '';
-  const log = me ? '' : `<button class="chip ico log-btn" data-top="log" title="${t.tbLog}" aria-label="${t.tbLog}">${ICON.log}</button>`;
-  const strip = `<div class="strip">${ctl}<span class="who-c"><b class="who">${who}</b>${turn}</span>${lead}${cmds}${log}${life}</div>`;
-  const piles = (me ? ['command', 'exile', 'graveyard', 'library'] : ['library', 'graveyard', 'exile', 'command']).map((zone) => slot(s, zone, t, view)).join('');
-  // the page dots: the opponent's board is the left page, yours the right
-  const dots = `<div class="dots" aria-hidden="true"><i${me ? '' : ' class="on"'}></i><i${me ? ' class="on"' : ''}></i></div>`;
-  const area = `<div class="area"><div class="bf" data-drop="${s}:battlefield" data-empty="${me ? t.tbDropHere : t.tbZbattlefield}">${rows}</div><div class="piles">${piles}</div>${dots}</div>`;
-  // the collapsed bar: tap it to open this board, drop a card on it to put the card onto this battlefield
+  const zones = (me ? ['library', 'graveyard', 'exile', 'command'] : ['hand', 'library', 'graveyard', 'exile', 'command']).map((zone) => chip(s, zone, t, view));
+  // the chips stand in a column from the pill towards the centre line, three to a column (table.css); mine count upwards from the pill
+  const chips = [...zones, ...cmds].map((c, i) => c.replace('<button ', `<button style="grid-row:${me ? 3 - (i % 3) : (i % 3) + 1}" `)).join('');
+  const hud = `<div class="hud"><div class="pill"><span class="who-c"><b class="who">${who}</b>${turn}</span>${life}</div><div class="chips">${chips}</div></div>`;
+  const bf = `<div class="bf" data-drop="${s}:battlefield" data-empty="${me ? t.tbDropHere : t.tbZbattlefield}">${rows}</div>`;
+  // the collapsed bar (tall screens): tap it to open this board, drop a card on it to put the card onto this battlefield
   const minis = ['creatures', 'other', 'lands'].flatMap((k) => secs[k]).map(([c, ...more]) => {
     const src = art(c, 'img_art');
     return `<span data-m="${[c, ...more].map((x) => x.id).join(' ')}" class="mini${c.tapped ? ' tapped' : ''}${c.face_down || !c.name ? ' back' : c.token ? ' tok' : ''}">${src ? `<img src="${esc(src)}" alt="" draggable="false">` : ''}${more.length ? `<b>×${more.length + 1}</b>` : ''}</span>`;
   }).join('');
   const counts = [['hand', z.hand.length], ...PILES.map((k) => [k, z[k].length])].map(([k, n]) => `<span class="pk-n" data-pk="${s}:${k}">${ICON[k]}${n}</span>`).join('');
   const label = [fill(t.tbShowBoard, { n: who }), turn && fill(t.tbTurnN, { n: view.turn.number }), `${t.tbZhand}: ${z.hand.length}`, ...PILES.map((k) => `${t['tbZ' + k]}: ${z[k].length}`), fill(t.tbPermanents, { n: z.battlefield.length })].filter(Boolean).join(', ');
-  const peek = `<div class="peek" data-drop="${s}:battlefield">${me ? '' : menu + (fsShown() ? fsButton(t, 'chip ico') : '')}`
-    + `<button class="peek-open" data-focus="${s}" aria-expanded="false" aria-label="${label}"><span class="pk-top"><b class="who">${who}</b>${turn}${counts}</span><span class="pk-row">${minis}</span></button>${log}${life}</div>`;
-  return `<section class="seat ${me ? 'me' : 'opp'}${turn ? ' turn' : ''}" data-seat="${s}" aria-label="${who}">${me ? area + strip + peek : peek + strip + area}</section>`;
+  const peek = `<div class="peek" data-drop="${s}:battlefield"><button class="peek-open" data-focus="${s}" aria-expanded="false" aria-label="${label}"><span class="pk-top"><b class="who">${who}</b>${turn}${counts}</span><span class="pk-row">${minis}</span></button>${life}</div>`;
+  const area = `<div class="area">${me ? bf + hud : hud + bf}</div>`;
+  return `<section class="seat ${me ? 'me' : 'opp'}${turn ? ' turn' : ''}" data-seat="${s}" aria-label="${who}">${me ? area + peek : peek + area}</section>`;
 }
 
 export const boardHtml = (view, t) => `<div class="sides">${seat(view, other(view.you), t)}${seat(view, view.you, t)}</div>`;

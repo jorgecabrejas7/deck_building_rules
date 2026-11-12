@@ -8,6 +8,7 @@ import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 import { buildBar } from './table/bar.js';
 import { handHtml, layoutHand, cardAtX, raise } from './table/hand.js';
+import { dialHtml, popIn } from './table/dial.js';
 import { firstRun, startHints, placeCoach, explainFs } from './table/coach.js';
 import { showZoom, hideZoom } from './table/zoom.js';
 import { showTray, hideTray } from './table/tray.js';
@@ -24,14 +25,14 @@ const BACKOFF = [500, 1000, 2000, 4000, 8000];
 // base: the last view the server sent; pending: actions sent and not yet answered; view (what is shown) is pending predicted over base
 let view = null, base = null, pending = [], lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
 let gone = gameId ? null : 'tbNoGame'; // message key once the game is unreachable for good
-let sheet = null, items = [], handOpen = true, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, logSeq = null;
+let sheet = null, items = [], dialOpen = false, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, logSeq = null;
 // the active board: one at a time on phones, highlighted where both fit. Yours unless you look at theirs
 let focus = 0, focusTimer = null;
 // card size, per viewer: a multiplier on the fitted card width
 const SIZES = { s: 0.8, m: 1, l: 1.25 };
 let size = 'm';
 try { size = SIZES[localStorage.getItem('pdc_table_size')] ? localStorage.getItem('pdc_table_size') : 'm'; } catch (err) { /* storage blocked: normal size */ }
-// keep in sync with the table.css media queries that show both boards
+// keep in sync with the table.css media queries: BOTH is the wide layout (both boards stacked), SHORT its hand-peeking variant
 const BOTH = matchMedia('(min-width:900px), (orientation:landscape) and (min-width:640px) and (max-height:560px)');
 const SHORT = matchMedia('(orientation:landscape) and (min-width:640px) and (max-height:560px)');
 const open = () => sock && sock.readyState === WebSocket.OPEN;
@@ -97,16 +98,16 @@ function tapPass() {
 // the page's one live region: errors, rolls, turns and settled life totals are spoken through it, nothing else
 const say = (text) => { $('live').textContent = text; };
 
-// a pill above the hand and your rail. Errors are red; info is neutral.
+// a pill: top centre on wide screens (the hand is down there), just above the hand on tall ones. Errors are red; info is neutral.
 // html: dictionary text, or a log line (names already escaped)
 function toast(html, info = false) {
   const el = $('toast');
   el.innerHTML = `<span>${html}</span>`;
   el.classList.toggle('info', info);
-  // above whatever is docked at the bottom: the hand, the docked bar, your rail on phones
-  const top = Math.min(innerHeight, ...[...document.querySelectorAll('#hand,#bar.dock,.seat.me>.strip,.seat.me>.peek')]
+  // tall: above whatever is docked at the bottom: the hand, the docked bar, your bar while theirs is open
+  const top = Math.min(innerHeight, ...[...document.querySelectorAll('#hand,#bar.dock,.seat.me>.peek')]
     .map((x) => x.getBoundingClientRect()).filter((r) => r.height && r.top > innerHeight / 2).map((r) => r.top));
-  el.style.bottom = Math.round(innerHeight - top + 10) + 'px';
+  el.style.bottom = BOTH.matches ? '' : Math.round(innerHeight - top + 10) + 'px';
   el.classList.add('on');
   say(el.firstChild.textContent);
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 3500);
@@ -126,7 +127,7 @@ function news(prev) {
   if (view.turn.seat === view.you && prev.turn.seat !== view.you && fresh.some((e) => e.type === 'pass_turn')) {
     if ((focus || view.you) !== view.you && $('sheet').hidden && !press && !picking && !sel.size) setFocus(view.you);
     toast(fill(t.tbYourTurn, { n: view.turn.number }), true);
-    glowOn([`.seat[data-seat="${view.you}"]>.strip`, `.seat[data-seat="${view.you}"]>.peek`]);
+    glowOn([`.seat[data-seat="${view.you}"] .pill`, `.seat[data-seat="${view.you}"]>.peek`]);
     if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate([18, 80, 18]);
   } else if (roll) toast(line(roll, view, t), true);
   else if (last.type === 'undo' && last.seat === view.you) say(new DOMParser().parseFromString(line(last, view, t), 'text/html').body.textContent);
@@ -158,12 +159,12 @@ function render() {
   else if (!view) board.textContent = t.tbConnecting;
   else if (view.status === 'lobby') { keepInputs(board, () => { board.innerHTML = `<button class="chip ico menu-btn lobby-menu" data-top="menu" aria-label="${t.tbMenu}">${ICON.menu}</button>` + lobbyHtml(view, t, decks, lobbyErr); }); if (decks === null) loadDecks(); }
   else patch(board, boardHtml(view, t));
-  const hand = $('hand'), hf = hand.contains(document.activeElement) && document.activeElement.dataset.top; // the head is re-templated: keep focus on its button
+  const hand = $('hand');
   if (!(active && view.turn && view.turn.seat === view.you)) disarmPass();
-  if (active) patch(hand, handHtml(view, t, handOpen || SHORT.matches, passAt && performance.now() - passAt)); else hand.innerHTML = '';
-  if (hf) { const f = hand.querySelector(`[data-top="${hf}"]`); if (f) f.focus({ preventScroll: true }); }
+  if (active) patch(hand, handHtml(view, t)); else hand.innerHTML = '';
   if (active) hand.dataset.drop = view.you + ':hand'; else delete hand.dataset.drop;
   layoutHand(handRow());
+  renderDial(active, t);
   if (active) applyFocus(false);
   const pc = picking && active && cardAt(picking);
   if (!pc) picking = null;
@@ -181,6 +182,23 @@ function render() {
 }
 const handRow = () => $('hand').querySelector('.hand-row');
 new ResizeObserver(() => layoutHand(handRow())).observe($('hand'));
+
+// ---- the floating controls: pass turn and the action button with its bubbles ----
+function renderDial(active, t) {
+  const el = $('dial'), k = el.contains(document.activeElement) && document.activeElement.dataset.k; // re-templated: keep focus on its button
+  if (!active) { dialOpen = false; el.innerHTML = ''; return; }
+  el.innerHTML = dialHtml(view, t, { open: dialOpen, armed: passAt && performance.now() - passAt });
+  const f = k && el.querySelector(`[data-k="${k}"]:not(:disabled)`);
+  if (f) f.focus({ preventScroll: true });
+}
+// focus goes to the first bubble on open and back to the button on close
+function toggleDial(open = !dialOpen) {
+  dialOpen = open;
+  render();
+  const el = $('dial');
+  if (open) { popIn(el); el.querySelector('.bub:not(:disabled)').focus({ preventScroll: true }); }
+  else el.querySelector('.dial-btn').focus({ preventScroll: true });
+}
 
 function renderSheet() {
   const el = $('sheet');
@@ -228,7 +246,7 @@ const ctx = () => ({
   size, setSize: (k) => { size = k; try { localStorage.setItem('pdc_table_size', k); } catch (err) { /* kept for this visit only */ } render(); },
 });
 
-// ---- the active board ----
+// ---- the open board (tall screens show one at a time) ----
 const RETURN = 10000;
 function setFocus(s) {
   if (!view || !view.zones) return;
@@ -252,82 +270,93 @@ function applyFocus(swap) {
     el.classList.toggle('on', on);
     el.classList.toggle('swap', on && swap);
   }
-  const tuck = away && !BOTH.matches; // on phones the hand tucks away while theirs is open
-  document.body.classList.toggle('away', tuck);
-  const hb = document.querySelector('.hand-bar');
-  if (hb) hb.setAttribute('aria-expanded', String(handOpen && !tuck));
+  document.body.classList.toggle('away', away && !BOTH.matches); // tall screens: the hand tucks away while theirs is open
   fit();
 }
 
 // ---- card size: the largest width at which every card of a battlefield fits without scrolling ----
-// Where both boards show (desktop, phone landscape) they share one size and split the height by what each holds, so a crowded
-// side never squeezes the other. Past the smallest size a battlefield scrolls inside itself.
-// shortcut: the gaps are table.css constants (card gap 6, section gap 8 + 8 padding + 1 rule; short landscape: 4 + 3 + 1, groups 16 apart;
-// a tile is RATIO wide for each unit of height, an attached card shows OFF of the width above its host); change both together
-const GAP = 6, SEC = 17, SEC_SHORT = 8, GROUP = 16, RATIO = 1.37, OFF = 0.28;
-const OPP = 0.88; // short landscape: their cards a little smaller, so yours (which you tap) can be bigger
-function heightAt(cw, rows, W, sec = SEC) {
+// Wide screens show both boards stacked, full width: they share one size and split the height by what each holds, so a crowded side
+// never squeezes the other. Tall screens size the one open board, at most so that four tiles fit across. Past the smallest size a
+// battlefield scrolls inside itself. Each board is a creatures row, then a back row (lands and other on one line when both fit, else
+// one under the other). The pill, its chip column and the pass button stand in corners: every row is inset equally on both sides by
+// what it needs to clear them at its distance from the player's edge, so rows stay centred on the screen.
+// shortcut: the gaps are table.css constants (card gap 6, row gap 4, groups 16 apart; a tile is RATIO wide for each unit of height,
+// an attached card shows OFF of the width above its host); change both together
+const GAP = 6, ROW = 4, GROUP = 16, RATIO = 1.37, OFF = 0.28;
+const OPP = 0.88; // wide: their cards a little smaller, so yours (which you tap) can be bigger
+const lineW = (cw, n) => n * cw + Math.max(0, n - 1) * GAP;
+function rowH(cw, items, W) {
   const ih = cw / RATIO;
-  let h = 0;
-  for (const row of rows) {
-    let x = 0, line = 0;
-    for (const it of row) {
-      if (x && x + GAP + cw > W) { h += line + GAP; x = 0; line = 0; }
-      x += (x ? GAP : 0) + cw; line = Math.max(line, ih + it.n * cw * OFF);
-    }
-    h += line;
+  let h = 0, x = 0, line = 0;
+  for (const it of items) {
+    if (x && x + GAP + cw > W) { h += line + GAP; x = 0; line = 0; }
+    x += (x ? GAP : 0) + cw; line = Math.max(line, ih + it.n * cw * OFF);
   }
-  return h + Math.max(0, rows.length - 1) * sec;
+  return h + line;
 }
-// short landscape: creatures in front; lands and other behind them on one line when both groups fit, else one under the other
-function stackedAt(cw, { front, back }, W) {
-  const line = (r) => r.length * cw + Math.max(0, r.length - 1) * GAP;
-  const one = back.length < 2 || line(back[0]) + GROUP + line(back[1]) <= W;
-  return heightAt(cw, [...front, ...(one ? [back.flat()] : back)], W, SEC_SHORT);
+// b: { W, front: creature items, back: [one items list per group, lands first], pillW, colW: widths of the pill and the chip column,
+// reachP, reachH: how far from the player's edge the pill and the whole corner block reach, pass: the pass button's room }
+// returns the height, and the inset of the creatures row and the [left, right] margins of each back group
+function plan(cw, b) {
+  const inset = (y0, y1, extra = 0) => Math.max(extra, y0 < b.reachP ? b.pillW : 0, y1 > b.reachP && y0 < b.reachH ? b.colW : 0);
+  const one1 = (items) => items.reduce((h, it) => Math.max(h, cw / RATIO + it.n * cw * OFF), 0), n = b.back.length;
+  const flat = b.back.flat(), i1 = inset(0, one1(flat)), w1 = b.back.reduce((x, g) => x + lineW(cw, g.length), GROUP * Math.max(0, n - 1));
+  let backH = 0, back = [];
+  if (n < 2 || w1 <= b.W - 2 * i1) { backH = n ? rowH(cw, flat, b.W - 2 * i1) : 0; back = b.back.map((g, i) => [n > 1 && i ? 0 : i1, n > 1 && i < n - 1 ? 0 : i1]); }
+  else for (const g of b.back) { // one under the other
+    const y = backH ? backH + ROW : 0, i = inset(y, y + one1(g));
+    backH = y + rowH(cw, g, b.W - 2 * i); back.push([i, i]);
+  }
+  const y = backH ? backH + ROW : 0, i = inset(y, y + one1(b.front), b.pass), frontH = b.front.length ? rowH(cw, b.front, b.W - 2 * i) : 0;
+  return { h: frontH + backH + (frontH && backH ? ROW : 0), front: i, back };
 }
 function fit() {
-  const m = SIZES[size];
+  const m = SIZES[size], wide = BOTH.matches, dial = $('dial');
   document.body.style.setProperty('--size', m);
-  const [lo, hi] = (SHORT.matches ? [44, 120] : BOTH.matches ? [52, 170] : [56, 130]).map((x) => Math.round(x * m));
-  const shared = BOTH.matches;
-  if (!shared) for (const s of document.querySelectorAll('.seat')) s.style.flex = s.style.minHeight = '';
+  const [lo, hi] = (SHORT.matches ? [44, 120] : wide ? [52, 170] : [56, 130]).map((x) => Math.round(x * m));
+  const tag = dial.querySelector('.pass,.turn-tag'), pass = tag ? tag.offsetWidth + 22 : 0;
+  if (!wide) for (const s of document.querySelectorAll('.seat')) s.style.flex = s.style.minHeight = '';
   const boards = [...document.querySelectorAll('.seat .bf')].filter((bf) => bf.offsetParent).map((bf) => {
-    const cs = getComputedStyle(bf), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom), area = bf.parentElement, seat = area.parentElement, H = bf.clientHeight - padY;
-    // fixed: the seat's height besides its battlefield's cards (rails, paddings), summed from its parts; a short landscape rail stands beside the area
-    const rails = SHORT.matches ? 0 : [...seat.children].reduce((x, c) => x + (c === area ? 0 : c.offsetHeight), 0);
-    const groups = [...bf.querySelectorAll('.bfr')].map((r) => ({ front: r.classList.contains('creatures'), items: [...r.children].map((it) => ({ n: it.matches('.stk') ? it.childElementCount - 1 : 0 })) }));
-    return { bf, seat, H, W: bf.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), fixed: rails + area.offsetHeight - H,
-      min: parseFloat(getComputedStyle(area).minHeight) - padY || 0, rows: groups.map((g) => g.items),
-      stack: { front: groups.filter((g) => g.front).map((g) => g.items), back: groups.filter((g) => !g.front).map((g) => g.items) },
-      scale: SHORT.matches && seat.classList.contains('opp') ? OPP : 1 };
+    const cs = getComputedStyle(bf), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom), seat = bf.closest('.seat'), me = seat.classList.contains('me');
+    const items = (r) => [...r.children].map((it) => ({ n: it.matches('.stk') ? it.childElementCount - 1 : 0 }));
+    const bg = [...bf.querySelectorAll('.bfb>.bfr')].sort((x, y) => y.classList.contains('lands') - x.classList.contains('lands')); // table.css puts lands first
+    const W = bf.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    // the corner block's reach from the player's edge (wide only: on tall screens the pill is a band at the edge, in the padding)
+    const a = seat.querySelector('.area').getBoundingClientRect(), pill = seat.querySelector('.pill'), chips = seat.querySelector('.chips');
+    const reach = (el) => { const r = el.getBoundingClientRect(); return me ? a.bottom - r.top : r.bottom - a.top; };
+    const corner = wide ? { pillW: pill.offsetWidth + 16, colW: chips.offsetWidth + 16, reachP: reach(pill) + 4, reachH: reach(chips) + 4 } : { pillW: 0, colW: 0, reachP: 0, reachH: 0 };
+    return { bf, seat, padY, H: bf.clientHeight - padY, W, ...corner, min: corner.reachH + 4, pass: wide ? pass : 0,
+      fe: bf.querySelector('.bfr.creatures'), bg, front: [...bf.querySelectorAll('.creatures')].flatMap(items), back: bg.map(items), scale: wide && !me ? OPP : 1,
+      hi: wide ? hi : Math.min(hi, Math.floor((W - 3 * GAP) / 4)) };
   });
-  const tall = (b, cw) => SHORT.matches ? stackedAt(cw, b.stack, b.W) : heightAt(cw, b.rows, b.W);
-  if (shared && boards.length === 2) {
-    const free = boards[0].seat.parentElement.clientHeight - boards[0].fixed - boards[1].fixed;
-    const need = (cw) => boards.map((b) => { const c = Math.round(cw * b.scale); return Math.max(tall(b, c), b.min, c / RATIO); });
-    let cw = hi;
+  const sized = (b, cw) => plan(Math.round(cw * b.scale), b);
+  let cw = hi;
+  if (wide && boards.length === 2) {
+    const need = (c) => boards.map((b) => Math.max(sized(b, c).h + b.padY, b.min));
+    const free = boards[0].seat.parentElement.clientHeight;
     while (cw > lo && need(cw).reduce((x, y) => x + y) > free) cw--;
-    // each seat keeps its rails and takes the free height in proportion to what its battlefield needs, never less than
-    // its piles need: on a screen too short for both, the board scrolls instead of one side covering the other
-    need(cw).forEach((n, i) => {
-      const b = boards[i];
-      b.seat.style.flex = `${n} 1 ${b.fixed}px`; b.seat.style.minHeight = b.fixed + b.min + 'px'; b.bf.style.setProperty('--cw', Math.round(cw * b.scale) + 'px');
-    });
-  } else {
-    for (const b of boards) {
-      let cw = hi;
-      while (cw > lo && tall(b, cw) > b.H) cw--;
-      b.bf.style.setProperty('--cw', cw + 'px');
-    }
+    // each seat takes the free height in proportion to what its battlefield needs; on a screen too short for both, the board scrolls
+    need(cw).forEach((n, i) => { boards[i].seat.style.flex = `${n} 1 0px`; boards[i].seat.style.minHeight = boards[i].min + 'px'; });
+  }
+  for (const b of boards) {
+    if (!(wide && boards.length === 2)) { cw = b.hi; while (cw > lo && sized(b, cw).h > b.H) cw--; }
+    const { front, back } = sized(b, cw);
+    b.bf.style.setProperty('--cw', Math.round(cw * b.scale) + 'px');
+    if (b.fe) b.fe.style.paddingInline = front + 'px';
+    b.bg.forEach((g, i) => [g.style.marginLeft, g.style.marginRight] = back[i].map((x) => x + 'px'));
   }
   // a battlefield scrolls under a vertical pan only while it overflows; otherwise the browser must not take a slide for a scroll (table.css .bf)
   for (const bf of document.querySelectorAll('.seat .bf')) bf.classList.toggle('over', bf.scrollHeight > bf.clientHeight + 1);
+  // where the floating pieces stand: pass at the centre line, the hand between the pill's and the action button's room on both sides
+  const mine = document.querySelector('.seat.me');
+  if (mine && wide) document.body.style.setProperty('--mid', Math.round(mine.getBoundingClientRect().top) + 'px');
+  const pill = mine && mine.querySelector('.pill');
+  if (pill && pill.offsetWidth) document.body.style.setProperty('--hx', Math.max(pill.offsetWidth + 16, 78) + 'px');
   placeBar();
   placeCoach();
 }
 new ResizeObserver(() => fit()).observe($('board'));
 BOTH.addEventListener('change', () => applyFocus(false));
-SHORT.addEventListener('change', render); // the hand's toggle exists only outside it
 
 function fullscreen() {
   if (!document.fullscreenEnabled) explainFs();
@@ -383,7 +412,7 @@ function closePreview() {
 // cards, the bar docks above the hand with the count, and its actions take every selected card.
 let sel = new Map(), selMode = false, barItems = [], barKey = '', said = '';
 const BOARD_CARD = '#board [data-card],#hand [data-card]';
-const CONTROL = '[data-b],[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-pad],[data-preview-close]';
+const CONTROL = '[data-b],[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-dial],[data-open],[data-top],[data-pick],[data-pad],[data-preview-close]';
 const idsOf = (el) => el.dataset.ids ? el.dataset.ids.split(' ') : [el.dataset.card];
 const selIds = () => [...new Set([...sel.values()].flat())];
 const elFor = (id) => document.querySelector(`#board [data-card="${id}"],#hand [data-card="${id}"]`) || document.querySelector(`#board [data-ids~="${id}"]`);
@@ -514,7 +543,7 @@ function startDrag(p, e) {
   document.body.classList.add('dragging');
   p.el.classList.add('lifted');
   // shortcut: the tray serves the owner of the card under the finger, not of every card in a multi-selection; split it if mixed drags matter
-  showTray(p.hit.card.owner, p.hit.zone, SHORT.matches || p.y0 > innerHeight / 2, T()); // short landscape: always the top, the hand peeks at the bottom
+  showTray(p.hit.card.owner, p.hit.zone, SHORT.matches || p.y0 > innerHeight / 2, T()); // short wide: always the top, the hand peeks at the bottom
   moveDrag(p, e);
 }
 
@@ -656,14 +685,13 @@ document.addEventListener('contextmenu', (e) => {
   if (el.closest('#sheet')) openCard(el.dataset.card); else select(el, selMode);
 });
 
-// touching theirs keeps it open; touching your hand brings yours back; where both show, touching one makes it active
+// tall screens: touching theirs keeps it open; touching your hand brings yours back; a sideways swipe turns to the other board
 function noteBoard(e) {
-  if (!view || !view.zones || view.status !== 'active') return;
+  if (BOTH.matches || !view || !view.zones || view.status !== 'active') return;
   const f = focus || view.you, st = e.target.closest('.seat');
-  if (e.target.closest('#hand') && !e.target.closest('.hand-bar')) { if (f !== view.you) setFocus(view.you); }
+  if (e.target.closest('#hand')) { if (f !== view.you) setFocus(view.you); }
   else if (st && st.classList.contains('on') && f !== view.you) setFocus(f);
-  else if (st && BOTH.matches && !st.classList.contains('on')) setFocus(Number(st.dataset.seat));
-  if (!BOTH.matches && e.pointerType !== 'mouse' && e.target.closest('.sides')) swipe = { x: e.clientX, y: e.clientY, t: e.timeStamp };
+  if (e.pointerType !== 'mouse' && e.target.closest('.sides')) swipe = { x: e.clientX, y: e.clientY, t: e.timeStamp };
 }
 
 // a sideways swipe across the board (not a card being dragged) turns to the other board
@@ -696,6 +724,8 @@ document.addEventListener('click', (e) => {
   if (swallow) { swallow = false; return; }
   hideZoom();
   const d = el.dataset;
+  if ('dial' in d) { toggleDial(); return; }
+  if (dialOpen && el.closest('#dial') && d.top !== 'draw') toggleDial(false); // every bubble but Draw closes them; Draw stays for the next one
   if ('b' in d) { barItems[d.b](); return; }
   if ('focus' in d) { setFocus(Number(d.focus)); return; } // also while picking a host: it may be on the other board
   if (picking) { // choosing the host for an aura or equipment: a battlefield card, or cancel
@@ -729,7 +759,7 @@ document.addEventListener('click', (e) => {
   else if ('pad' in d) setSheet({ k: 'pad', seat: Number(d.pad) });
   else if ('cmd' in d) { const [s, i] = d.cmd.split(':').map(Number); setSheet({ k: 'cmd', seat: s, i }); }
   else if ('token' in d) setSheet({ k: 'token' });
-  else if ('hand' in d) { if (document.body.classList.contains('away')) setFocus(view.you); else { handOpen = !handOpen; render(); } }
+  else if ('open' in d) openPile(d.open);
   else if ('pick' in d) pickDeck();
   else if (d.top === 'menu') setSheet({ k: 'menu' });
   else if (d.top === 'full') fullscreen();
@@ -752,6 +782,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key !== 'Escape') return;
   if (press) { endPress(null); return; }
+  if (dialOpen) { toggleDial(false); return; }
   if (disarmPass()) { render(); return; }
   if (picking) { picking = null; render(); return; }
   if (!$('preview').hidden) closePreview();

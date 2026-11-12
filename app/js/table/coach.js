@@ -9,14 +9,15 @@ const FS = 'pdc_table_fs', HINTS = 'pdc_table_hints', IGNORED = 6000;
 const $ = (id) => document.getElementById(id);
 const seen = (k) => { try { return !!localStorage.getItem(k); } catch (err) { return false; } };
 const remember = (k) => { try { localStorage.setItem(k, '1'); } catch (err) { /* storage blocked: offered again next visit */ } };
-const vis = (q) => [...document.querySelectorAll(q)].find((el) => el.getClientRects().length && el.offsetParent);
+const vis = (q) => [...document.querySelectorAll(q)].find((el) => el.getClientRects().length);
 
 // [text key, target, only when its target shows at the start]
 const STEPS = [
   ['tbHintTap', () => vis('.seat.me .bf .tc') || vis('.seat.me .bf')],
   ['tbHintPress', () => vis('#hand .hand-row .tc') || vis('.seat.me .bf .tc')],
   ['tbHintBoard', () => vis('.seat.opp .peek-open'), true], // phones only: where both boards show there is no bar
-  ['tbHintHand', () => vis('#hand .hand-row') || vis('#hand .hand-bar')],
+  ['tbHintHand', () => vis('#hand .hand-row')],
+  ['tbHintDial', () => vis('#dial .dial-btn')],
 ];
 
 let T = null, started = false, steps = [], at = -1, back = null;

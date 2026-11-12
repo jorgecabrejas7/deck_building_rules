@@ -1,30 +1,32 @@
-/* The table: phone first. One board at a time: the active one fills the screen, the other is a slim bar (theirs on top,
-   mine above the hand). Wide and short-landscape screens show both. Each battlefield has its piles beside it as card slots.
-   Colours come from tokens.css; the felt is the table's one own surface. */
-body.tbl{--felt:oklch(0.955 0.012 170);--feltLine:oklch(0.86 0.018 170);--mine:oklch(0.965 0.018 256);
-  --activeRing:color-mix(in oklab,var(--accent) 45%,transparent);--dotsBg:oklch(1 0 0 / .72);--dotOff:oklch(0.2 0.005 260 / .22);--badgeBg:oklch(0.16 0.004 260 / .78);--badgeFg:#fff;--glow:oklch(0.76 0.16 70);
-  --cw:56px;--ch:calc(var(--cw) / 1.37);--hw:72px;--pw:40px;--size:1;
+/* The table: a game board, landscape first. Wide screens (any landscape, any large screen) show both players stacked, each battlefield the
+   full width; tall ones (a phone upright) show one at a time, the other a slim bar. Everything else floats over the felt: each player's
+   pill (name, life, zone chips) in a corner of their half, Pass turn at the right edge, one action button with its bubbles, the hand.
+   Colours come from tokens.css; the felt is the table's one own surface. Keep the queries in sync with BOTH and SHORT in table.js */
+body.tbl{--felt:oklch(0.955 0.012 170);--tintOpp:oklch(0.93 0.015 170);--tintMe:oklch(0.972 0.014 170);--line:oklch(0.74 0.02 170);--feltLine:oklch(0.86 0.018 170);
+  --hudBg:oklch(1 0 0 / .8);--hudLine:oklch(0 0 0 / .09);--badgeBg:oklch(0.16 0.004 260 / .78);--badgeFg:#fff;--glow:oklch(0.76 0.16 70);
+  --cw:56px;--hw:72px;--size:1;--hh:calc(var(--hw) * var(--size) * 1.4 + 26px + env(safe-area-inset-bottom));
   height:100dvh;display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);background:var(--felt)}
-body.tbl.dark{--felt:oklch(0.19 0.012 170);--feltLine:oklch(0.31 0.016 170);--mine:oklch(0.235 0.03 256);--dotsBg:oklch(0.21 0.005 260 / .78);--dotOff:oklch(0.98 0.003 260 / .28);--glow:oklch(0.84 0.15 78)}
+body.tbl.dark{--felt:oklch(0.19 0.012 170);--tintOpp:oklch(0.165 0.012 170);--tintMe:oklch(0.225 0.014 170);--line:oklch(0.46 0.025 170);--feltLine:oklch(0.31 0.016 170);--hudBg:oklch(0.25 0.008 170 / .82);--hudLine:oklch(1 0 0 / .1);--glow:oklch(0.84 0.15 78)}
+@supports not (backdrop-filter:blur(1px)){body.tbl{--hudBg:oklch(1 0 0 / .94)}body.tbl.dark{--hudBg:oklch(0.25 0.008 170 / .96)}}
 html{scroll-behavior:auto}
 .ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 /* controls: one family. Quiet by default, filled when on, red text when it ends something */
-.tbtn,.sb,.chip,.hand-bar{box-sizing:border-box;min-height:44px;padding:0 var(--sp-3);border:none;border-radius:var(--r-pill);background:var(--fill);color:var(--text);font-size:var(--fs-caption);font-weight:500;line-height:1.2;text-decoration:none;
+.tbtn,.sb,.chip{box-sizing:border-box;min-height:44px;padding:0 var(--sp-3);border:none;border-radius:var(--r-pill);background:var(--fill);color:var(--text);font-size:var(--fs-caption);font-weight:500;line-height:1.2;text-decoration:none;
   display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
   transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
-.tbtn:hover,.sb:hover,.chip:hover,.hand-bar:hover{background:var(--fill-hover);opacity:1}
-.tbtn:active,.sb:active,.chip:active,.slot:active,.life button:active{transform:scale(.95)}
+.tbtn:hover,.sb:hover,.chip:hover{background:var(--fill-hover);opacity:1}
+.tbtn:active,.sb:active,.chip:active,.life button:active{transform:scale(.95)}
 .sb.on{background:var(--accentBtn);color:var(--accentFg)}
 .sb.danger{background:var(--badBg);color:var(--badFg)}
 .sb.quiet{background:transparent;box-shadow:inset 0 0 0 1px var(--border)}
 .ico{width:44px;padding:0}
-body.offline .tbtn,body.offline .sb:not([data-close]),body.offline .life button,body.offline .slot,body.offline .chip:not(.menu-btn){opacity:.45}
+body.offline .tbtn,body.offline .sb:not([data-close]),body.offline .life button,body.offline .chip:not(.menu-btn),body.offline .bub{opacity:.45}
 
-/* connection: a dot on the menu button while live, a pill at the top while not */
+/* connection: a dot on the action button (and the lobby's menu button) while live, a pill at the top while not */
 .menu-btn{position:relative}
-.menu-btn::after{content:"";position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 2px var(--panel)}
+.menu-btn::after{content:"";position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 2px var(--panel)}
 body[data-conn=wait] .menu-btn::after{background:var(--warnFg);animation:tb-pulse 1.2s ease-in-out infinite}
 body[data-conn=off] .menu-btn::after{background:var(--badFg)}
 .tb-stat{position:fixed;left:50%;top:calc(var(--sp-2) + env(safe-area-inset-top));z-index:40;transform:translateX(-50%);padding:6px var(--sp-4);border-radius:var(--r-pill);background:var(--warnBg);color:var(--warnFg);font-size:var(--fs-caption);font-weight:500;box-shadow:var(--shadow-1);pointer-events:none}
@@ -32,35 +34,38 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 .tb-stat:empty{display:none}
 @keyframes tb-pulse{50%{opacity:.25}}
 
-/* the toast: a pill just above the hand (table.js sets its bottom), near the thumb that acted */
+/* the toast: a pill just above the hand (table.js sets its bottom), near the thumb that acted; on wide screens at the top centre */
 .tb-toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,8px);z-index:42;display:flex;align-items:center;gap:var(--sp-3);width:max-content;max-width:calc(100% - 2*var(--sp-4));box-sizing:border-box;min-height:40px;padding:var(--sp-2) var(--sp-4);border-radius:var(--r-lg);
   background:var(--badBg);color:var(--badFg);border:1px solid var(--badBd);box-shadow:var(--shadow-2);font-size:var(--fs-caption);font-weight:500;line-height:1.35;opacity:0;visibility:hidden;pointer-events:none;
   transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease),visibility 0s linear var(--dur)}
 .tb-toast.info{background:var(--panel);color:var(--text);border-color:var(--border);font-size:var(--fs-body);font-variant-numeric:tabular-nums}
 .tb-toast b{font-weight:600}
 .tb-toast.on{opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:0s}
+@media (min-width:900px),(orientation:landscape) and (min-width:640px) and (max-height:560px){.tb-toast{top:calc(var(--sp-2) + env(safe-area-inset-top) + 40px);bottom:auto;transform:translate(-50%,-8px)}}
 
-/* the board: two halves of one felt; the rails never scroll away, each battlefield scrolls inside its half */
-.tb-board{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;background:var(--felt)}
+/* the board: two halves of one felt, a line between them; each half very slightly tinted, and the half whose turn it is carries the
+   accent along that line. Each battlefield scrolls inside its half */
+.tb-board{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:var(--felt)}
 .tb-board:not(:has(*)){align-items:center;justify-content:center;color:var(--muted);font-size:var(--fs-caption)}
 .sides{flex:1;min-height:0;display:flex;flex-direction:column;touch-action:pan-y} /* sideways moves are table.js swipes */
 .seat{flex:1 1 0;min-height:0;display:flex;flex-direction:column;min-width:0}
-.seat.opp .area{border-bottom:1px solid var(--feltLine)}
-/* the piles column never sets the height (contain:size); table.js fit() sizes the cards to the battlefield */
-.area{position:relative;flex:1;min-height:max(calc(var(--ch) + var(--sp-4)),calc(var(--pw) * 3.2 + 34px));display:flex}
-/* phones: the inactive side shows only its bar */
-.seat:not(.on){flex:none}
-.seat:not(.on)>.strip,.seat:not(.on)>.area,.seat.on>.peek{display:none}
-.seat.swap .area{animation:tb-swap .26s cubic-bezier(.16,1,.3,1)}
+.area{position:relative;flex:1;min-height:0;display:flex}
+.seat.opp>.area{background:var(--tintOpp);box-shadow:inset 0 -1px 0 var(--line)}
+.seat.me>.area{background:var(--tintMe)}
+.seat.turn>.area::after{content:"";position:absolute;left:0;right:0;z-index:1;height:46px;pointer-events:none;background:linear-gradient(var(--to),color-mix(in oklab,var(--accent) 24%,transparent),transparent)}
+.seat.opp.turn>.area::after{bottom:0;--to:to top}
+.seat.me.turn>.area::after{top:0;--to:to bottom}
+.seat.opp.turn>.area{box-shadow:inset 0 -2px 0 var(--accent)}
+.seat.me.turn>.area{box-shadow:inset 0 2px 0 var(--accent)}
 .seat.opp{--dx:-28px}
 .seat.me{--dx:28px}
 @keyframes tb-swap{from{opacity:0;transform:translateX(var(--dx))}}
 
-/* the collapsed bar: who, their counts and a strip of their permanents. The whole middle is one button that opens the board */
-.peek{flex:none;display:flex;align-items:center;gap:4px;min-height:64px;box-sizing:border-box;padding:4px var(--sp-2) 4px 4px;background:var(--panel);touch-action:pan-y;transition:background var(--dur) var(--ease)}
+/* the collapsed bar (tall screens): who, their counts and a strip of their permanents. The whole middle is one button that opens the board */
+.peek{display:none;flex:none;align-items:center;gap:4px;min-height:56px;box-sizing:border-box;padding:4px var(--sp-2) 4px 4px;background:var(--panel);touch-action:pan-y;transition:background var(--dur) var(--ease)}
 .seat.opp .peek{border-bottom:1px solid var(--border)}
-.seat.me .peek{border-top:1px solid var(--border);background:var(--mine)}
-.peek-open{flex:1;min-width:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:4px var(--sp-2);border:none;border-radius:var(--r-md);background:transparent;color:inherit;text-align:left;
+.seat.me .peek{border-top:1px solid var(--border);background:var(--tintMe)}
+.peek-open{flex:1;min-width:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:2px var(--sp-2);border:none;border-radius:var(--r-md);background:transparent;color:inherit;text-align:left;
   touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
 .peek-open:hover{background:var(--fill)}
 .peek-open:active{transform:scale(.98)}
@@ -69,7 +74,7 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 .pk-top .who{flex:0 1 auto;max-width:100%;font-size:var(--fs-body);line-height:20px}
 .pk-n{flex:none;display:inline-flex;align-items:center;gap:2px;line-height:20px;font-size:var(--fs-micro);color:var(--muted);font-variant-numeric:tabular-nums}
 .pk-n .ic{width:13px;height:13px}
-.pk-row{display:flex;align-items:center;gap:3px;height:28px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent)}
+.pk-row{display:flex;align-items:center;gap:3px;height:24px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent)}
 .pk-row:empty{display:none}
 .mini{position:relative;flex:none;width:30px;height:22px;border-radius:2px;overflow:hidden;background:var(--fill);box-shadow:0 0 0 1px var(--feltLine)}
 .mini img{display:block;width:100%;height:100%;object-fit:cover}
@@ -78,39 +83,36 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 .mini.tapped{transform:rotate(12deg);filter:saturate(.55) brightness(.78)}
 .mini b{position:absolute;inset:auto 0 0;background:var(--badgeBg);color:var(--badgeFg);font-size:9px;font-weight:600;line-height:12px;text-align:center}
 .peek.drop-on{background:color-mix(in oklab,var(--accent) 14%,var(--panel));box-shadow:inset 0 0 0 2px var(--accent)}
+.seat.turn>.peek{box-shadow:inset 3px 0 0 var(--accent)}
 
-/* the page dots: which board is open, left theirs, right yours */
-.dots{position:absolute;left:50%;bottom:6px;z-index:1;transform:translateX(-50%);display:flex;gap:5px;padding:5px 7px;border-radius:var(--r-pill);background:var(--dotsBg);box-shadow:0 0 0 1px var(--feltLine);pointer-events:none}
-.dots i{width:6px;height:6px;border-radius:3px;background:var(--dotOff)}
-.dots i.on{width:16px;background:var(--text)}
-
-/* a player's rail: one line. Name, then what matters about them, then life */
-.strip{flex:none;display:flex;align-items:center;gap:6px;min-height:48px;box-sizing:border-box;padding:4px var(--sp-2) 4px var(--sp-3);background:var(--panel)}
-.seat.opp .strip{border-bottom:1px solid var(--border);padding-left:4px}
-.seat.me .strip{border-top:1px solid var(--border);background:var(--mine)}
-/* whose turn: a quiet tag by the name, an accent edge on the rail */
-.trn{flex:none;display:inline-flex;align-items:center;gap:5px;padding:2px 8px 2px 7px;border-radius:var(--r-pill);background:var(--tipBg);color:var(--tipFg);font-size:var(--fs-micro);font-weight:600;line-height:16px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.trn::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
-/* on a rail the tag sits under the name, so it takes no width from the controls */
-.who-c{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
-.who-c>.who{flex:none}
-.strip .trn{align-self:flex-start;max-width:100%;padding:0;background:none;color:var(--accent);line-height:14px;overflow:hidden;text-overflow:ellipsis}
-.strip .trn::before{width:5px;height:5px}
-.seat.turn>.strip,.seat.turn>.peek{box-shadow:inset 3px 0 0 var(--accent)}
-.strip>.log-btn{display:none} /* phones show it on the opponent's bar; a short landscape rail has no room (the menu has it) */
-@media (min-width:900px){.strip>.log-btn{display:inline-flex}}
-.who{flex:1;min-width:0;font-size:var(--fs-ui);font-weight:600;letter-spacing:var(--track-snug);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.strip .chip,.peek .chip{flex:none;min-height:40px;padding-inline:10px;background:transparent;font-variant-numeric:tabular-nums}
-.strip .chip:hover,.peek .chip:hover{background:var(--fill)}
-.strip .chip.ico,.peek .chip.ico{width:40px;padding:0}
-.chip .ic{color:var(--muted)}
-.chip b{font-weight:600}
-.chip.cmd{box-shadow:inset 0 0 0 1px var(--border)}
+/* a player's pill and zone chips, floating in the corner of their half (opponent top left, you bottom left): the pill alone at the edge,
+   the chips in a column from it towards the centre line, three to a column. Translucent over the felt; only the pieces take touches,
+   the gaps between them are the battlefield's */
+.hud{position:absolute;z-index:4;left:var(--sp-2);display:flex;flex-direction:column;align-items:flex-start;gap:4px;pointer-events:none}
+.seat.opp .hud{top:6px}
+.seat.me .hud{bottom:6px;flex-direction:column-reverse}
+.pill,.chips .chip{pointer-events:auto;background:var(--hudBg);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 0 0 1px var(--hudLine),0 2px 8px -3px oklch(0 0 0 / .2)}
+.pill{position:relative;box-sizing:border-box;height:46px;padding:2px 5px 2px 9px;display:flex;flex-direction:column;justify-content:center;border-radius:var(--r-lg)}
+/* whose turn: a tag beside the name (and the accent along the centre line, above) */
+.who-c{min-width:0;display:flex;align-items:center;gap:6px;line-height:12px}
+.who{flex:0 1 auto;min-width:0;max-width:8em;font-size:11px;font-weight:600;letter-spacing:var(--track-snug);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trn{flex:none;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;line-height:12px;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
+.trn::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent)}
 .life{flex:none;display:flex;align-items:center;gap:2px}
-.life button{width:40px;height:40px;border:none;border-radius:50%;background:var(--fill);color:var(--text);font-size:20px;line-height:1;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.life button{position:relative;width:26px;height:26px;padding:0;border:none;border-radius:50%;background:var(--fill);color:var(--text);font-size:18px;line-height:1;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.life button::after{content:"";position:absolute;inset:-7px} /* a 40px target for a 26px button */
 .life button:hover{background:var(--fill-hover)}
-.life .lv{width:auto;min-width:44px;padding:0 4px;border-radius:var(--r-md);background:transparent;font-size:var(--fs-title);font-weight:600;letter-spacing:var(--track-tight);font-variant-numeric:tabular-nums}
+.life .lv{width:auto;min-width:34px;height:30px;padding:0 2px;border-radius:var(--r-md);background:transparent;font-size:24px;font-weight:600;letter-spacing:var(--track-tight);font-variant-numeric:tabular-nums}
+.life .lv::after{inset:-5px 0}
 .life .lv:hover{background:var(--fill)}
+/* zone chips: icon and count on one line, 28px tall, a 40px target (they overlap by a few px; the later one wins) */
+.chips{display:grid;grid-auto-flow:column dense;grid-template-rows:repeat(3,28px);gap:3px}
+.chips .chip{position:relative;min-height:28px;min-width:48px;padding:0 8px;gap:4px;border-radius:var(--r-md);font-size:13px;font-variant-numeric:tabular-nums}
+.chips .chip::after{content:"";position:absolute;inset:-6px -3px}
+.chips .chip:hover{background:var(--hudBg);filter:brightness(.96)}
+.chip .ic{width:15px;height:15px;color:var(--muted)}
+.chip b{font-weight:600}
+.chip.empty b{color:var(--muted);font-weight:500}
 
 /* a life total that moves: its running change floats above it (cues.js) */
 .tb-bub{position:fixed;left:0;top:0;z-index:41;transform:translate(-50%,calc(-100% - 4px));padding:1px 10px;border-radius:var(--r-pill);background:var(--badBg);color:var(--badFg);border:1px solid var(--badBd);box-shadow:var(--shadow-1);
@@ -123,39 +125,26 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 
 /* the opponent's last move: what it touched glows for a moment (cues.js); still, under reduced motion, until it ends */
 .glow::before{content:"";position:absolute;inset:0;z-index:3;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 3px var(--glow),inset 0 0 14px color-mix(in oklab,var(--glow) 70%,transparent)}
-.chip.glow,.strip.glow,.peek.glow,.pk-n.glow{position:relative}
+.chip.glow,.pill.glow,.peek.glow,.pk-n.glow{position:relative}
 .pk-n.glow::before{inset:-1px -4px;border-radius:var(--r-pill)}
 .mini.glow::before{box-shadow:inset 0 0 0 2px var(--glow)}
-.strip.glow::before,.peek.glow::before{box-shadow:inset 0 0 0 2px var(--accent),inset 0 0 24px color-mix(in oklab,var(--accent) 35%,transparent)}
+.pill.glow::before,.peek.glow::before{box-shadow:inset 0 0 0 2px var(--accent),inset 0 0 24px color-mix(in oklab,var(--accent) 35%,transparent)}
 @media (prefers-reduced-motion:no-preference){.glow::before{animation:tb-glow 2.6s cubic-bezier(.3,0,.2,1) var(--gd,0ms) both}}
 @keyframes tb-glow{0%{opacity:0}6%,60%{opacity:1}to{opacity:0}}
 
-/* battlefield: creatures and the rest, lands in their own row nearest the rail */
-.bf{touch-action:none;position:relative;flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2);transition:background var(--dur) var(--ease)}
+/* battlefield: creatures towards the centre line, lands and other at the player's own edge (two groups on one line when they fit);
+   table.js fit() counts on these gaps and narrows a row to the room beside a corner control */
+.bf{touch-action:none;position:relative;flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:6px 10px;display:flex;flex-direction:column;gap:4px;transition:background var(--dur) var(--ease)}
 .bf:not(:has(.tc))::after{content:attr(data-empty);position:absolute;inset:0;display:grid;place-items:center;padding:var(--sp-3);text-align:center;color:var(--muted);font-size:var(--fs-caption);pointer-events:none}
-.bfr{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.bfr{box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
 /* a battlefield too full for the smallest cards scrolls, resting on a whole line of cards */
 .bf{scroll-snap-type:y proximity;scroll-padding-block:var(--sp-2)}
 .bfr>*{scroll-snap-align:start}
-/* sections (creatures, other permanents, lands) split by a hairline; table.js fit() counts on these gaps */
-.bfb{display:flex;flex-direction:column;justify-content:center;gap:var(--sp-2)} /* other + lands: two rows here, one line in short landscape */
-.bfr+.bfb,.bfb+.bfr,.bfb>.bfr+.bfr{padding-top:var(--sp-2);border-top:1px solid var(--feltLine)}
-.seat.me .bf>:first-child{margin-top:auto}
-
-/* piles as card slots beside the battlefield: the top card when it is public. On a short half the slots get shorter (the image crops) before they scroll */
-.piles{flex:none;contain:size;width:var(--pw);display:flex;flex-direction:column;gap:6px;padding:var(--sp-2) var(--sp-2) var(--sp-2) 0;overflow-y:auto;scrollbar-width:none}
-.piles::-webkit-scrollbar{display:none}
-.seat.me .piles{justify-content:flex-end}
-.slot{position:relative;flex:0 1 calc(var(--pw) * 1.4);box-sizing:border-box;width:var(--pw);height:auto;min-height:calc(var(--pw) * .8);padding:0;border:none;border-radius:calc(var(--pw) * .08);background:var(--fill);color:var(--text);overflow:hidden;cursor:pointer;
-  box-shadow:0 0 0 1px oklch(0 0 0 / .12),0 1px 2px oklch(0 0 0 / .12);touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
-.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
-.slot.library{background:repeating-linear-gradient(45deg,var(--accentBtn) 0 4px,color-mix(in oklab,var(--accentBtn) 70%,black) 4px 8px)}
-.slot.empty{background:transparent;box-shadow:inset 0 0 0 1.5px var(--feltLine)}
-.sc{position:absolute;inset:auto 0 0;display:flex;align-items:center;justify-content:center;gap:2px;padding:10px 0 3px;background:linear-gradient(transparent,oklch(0 0 0 / .72));color:#fff;font-size:12px;font-variant-numeric:tabular-nums}
-.sc .ic{width:12px;height:12px;stroke-width:1.8}
-.sc b{font-weight:600}
-.slot.empty .sc{inset:0;flex-direction:column;padding:0;background:none;color:var(--muted)}
-.slot:hover{box-shadow:0 0 0 1px oklch(0 0 0 / .2),0 4px 12px -4px oklch(0 0 0 / .35)}
+.bfb{box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}
+.bfb>.bfr{flex:0 1 auto}
+.bfb>.bfr.lands{order:-1}
+.seat.me .bfb{margin-top:auto}
+.seat.opp .bfr.creatures{margin-top:auto}
 
 /* a card: its image. The name is written only while there is no image */
 .tc{position:relative;flex:none;box-sizing:border-box;width:var(--cw);height:var(--ch);padding:0;border:none;border-radius:calc(var(--cw) * .055);background:var(--panel);color:var(--text);overflow:hidden;font-size:10px;line-height:1.15;text-align:left;cursor:pointer;
@@ -183,11 +172,9 @@ body.tbl.dark{--f-w:oklch(0.95 0.03 92);--f-b:oklch(0.52 0.04 300);--f-n:oklch(0
 .tc.w.tapped:active{transform:rotate(12deg) scale(.96)}
 .tc.w.back{border-color:var(--f-n)}
 .tc.w>.tn{padding:2px 3px;font-size:clamp(9px,calc(var(--cw) * .16),13px);line-height:1.1}
-/* the foot of a permanent: counters on the left (they give way first), power/toughness or loyalty on the right */
-.ft{position:absolute;inset:auto 3px 3px;z-index:3;display:flex;align-items:flex-end;gap:3px;pointer-events:none}
-.ft .cns{position:static;flex:0 1 auto;min-width:0;overflow:hidden;align-items:flex-start}
-.pt{flex:none;margin-left:auto;padding:0 4px;border-radius:var(--r-pill);background:oklch(0.2 0.005 260);color:#fff;font-size:clamp(10px,calc(var(--cw) * .16),16px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;box-shadow:0 0 0 1.5px oklch(1 0 0 / .75)}
-.tc.lifted{transform:scale(1.08);box-shadow:0 0 0 2px var(--accent),0 12px 28px -8px oklch(0 0 0 / .5);z-index:2}
+/* a permanent's corners: counters top left (they give way first), power/toughness or loyalty bottom right; the stack count is top right */
+.pt{position:absolute;right:3px;bottom:3px;z-index:3;padding:0 4px;border-radius:var(--r-pill);background:oklch(0.2 0.005 260);color:#fff;font-size:clamp(10px,calc(var(--cw) * .16),16px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;pointer-events:none;box-shadow:0 0 0 1.5px oklch(1 0 0 / .75)}
+.tc.w .cns{left:3px;top:3px;right:auto;bottom:auto;align-items:flex-start;max-width:calc(100% - 6px)}
 body.dragging .tc.lifted{opacity:.3;transform:none;box-shadow:none}
 .tc.tok{background:var(--tipBg);color:var(--tipFg);box-shadow:inset 0 0 0 1px var(--tipBd),0 1px 2px oklch(0 0 0 / .1)}
 .tc.back{background:repeating-linear-gradient(45deg,var(--accentBtn) 0 5px,color-mix(in oklab,var(--accentBtn) 70%,black) 5px 10px)}
@@ -196,7 +183,8 @@ body.dragging .tc.lifted{opacity:.3;transform:none;box-shadow:none}
 /* counters: one pill each, bottom right, sized with the card so they read at a glance */
 .cns{position:absolute;right:3px;bottom:3px;z-index:2;max-width:calc(100% - 6px);display:flex;flex-direction:column;align-items:flex-end;gap:2px;pointer-events:none}
 .tc.w .cn{box-sizing:border-box;padding:0 4px;font-size:clamp(9px,calc(var(--cw) * .15),13px)}
-.cn{max-width:100%;padding:1px 6px;border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:clamp(10px,calc(var(--cw) * .2),15px);font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 0 0 1.5px oklch(1 0 0 / .85),0 1px 4px oklch(0 0 0 / .4)}
+.cn{display:inline-flex;gap:.3em;max-width:100%;padding:1px 6px;border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:clamp(10px,calc(var(--cw) * .2),15px);font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 0 0 1.5px oklch(1 0 0 / .85),0 1px 4px oklch(0 0 0 / .4)}
+.cn i{min-width:0;overflow:hidden;text-overflow:ellipsis;font-style:normal}
 .tc.big .cn{font-size:var(--fs-ui);padding:2px 10px}
 /* a stack of identical cards: one card with an edge behind it and its count */
 .tc.many{box-shadow:4px -4px 0 -1px var(--panel),4px -4px 0 0 var(--feltLine),0 0 0 1px oklch(0 0 0 / .14),0 4px 10px -4px oklch(0 0 0 / .25)}
@@ -214,53 +202,59 @@ body.dragging .tc.lifted{opacity:.3;transform:none;box-shadow:none}
 body.dragging,body.dragging *{cursor:grabbing!important}
 body.dragging [data-drop]{transition:background .12s,box-shadow .12s}
 .bf.drop-on{background:color-mix(in oklab,var(--accent) 12%,transparent);box-shadow:inset 0 0 0 2px var(--accent)}
-.slot.drop-on,.chip.drop-on{box-shadow:0 0 0 3px var(--accent);transform:scale(1.08)}
+.chip.drop-on{box-shadow:0 0 0 3px var(--accent);transform:scale(1.08)}
 .tb-hand.drop-on{box-shadow:inset 0 2px 0 var(--accent),0 -8px 24px -16px oklch(0 0 0 / .25);background:color-mix(in oklab,var(--accent) 8%,var(--panel))}
 
-/* the hand: against the bottom edge, open by default */
-.tb-hand{flex:none;background:var(--panel);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px -16px oklch(0 0 0 / .25)}
+/* the hand: centred at the bottom, a fan between your pill and the action button. Tall screens and tall wide ones have the room: it sits
+   in the page under the board, fully visible. The pass and tag buttons below stand at the centre line (wide) or just above it (tall) */
+.tb-hand{flex:none;order:2;box-sizing:border-box;padding:0 72px env(safe-area-inset-bottom);background:var(--tintMe)}
 .tb-hand:empty{display:none}
-.hand-head{display:flex;flex-wrap:nowrap;align-items:center;gap:var(--sp-2);padding:2px var(--sp-2) 0}
-.hand-head .hand-bar{min-width:0;overflow:hidden}
-/* narrow phones: the token button keeps its icon (its name stays for screen readers), the rail's chips draw closer */
-@media (max-width:399px){
-  .add{width:40px;padding:0}
-  .add span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-  .strip .chip:not(.ico){padding-inline:6px}
-  .hand-head{gap:4px;padding-inline:4px}
-  .hand-bar{padding-inline:4px;gap:2px}
-  .tbtn.pass .ic{display:none} /* Undo, Draw, Token and Pass share 360px with the hand's toggle */
-}
-/* Draw keeps its icon until its word fits beside the hand's toggle */
-@media (max-width:479px){
-  .draw{width:40px;padding:0}
-  .draw span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-}
-.hand-bar{flex:1;min-height:40px;justify-content:flex-start;background:transparent;font-size:var(--fs-body);font-weight:600;padding-inline:var(--sp-2)}
-.hand-head .tbtn{flex:none;min-height:40px}
-.hand-head .tbtn.ico{width:40px;padding:0}
+.tb-hand.drop-on{box-shadow:inset 0 2px 0 var(--accent);background:color-mix(in oklab,var(--accent) 10%,var(--tintMe))}
 .tbtn:disabled,.sb:disabled{opacity:.35;transform:none}
-.tbtn.pass{background:var(--accentBtn);color:var(--accentFg);font-weight:600}
-.tbtn.pass:hover{background:color-mix(in oklab,var(--accentBtn) 88%,black)}
-.tbtn.pass .ic{width:16px;height:16px}
-/* armed: the bar empties over the cancel window (table.js PASS_WAIT); reduced motion keeps the wait but shows the bar still */
-.tbtn.pass.armed{position:relative;overflow:hidden;isolation:isolate}
-.tbtn.pass.armed::after{content:"";position:absolute;inset:0;z-index:-1;background:color-mix(in oklab,var(--accentFg) 35%,transparent);transform-origin:left}
-@media (prefers-reduced-motion:no-preference){.tbtn.pass.armed::after{animation:tb-wait 1.5s linear var(--wait,0ms) both}}
-@keyframes tb-wait{to{transform:scaleX(0)}}
-.hand-bar .ic{transition:transform var(--dur) var(--ease);color:var(--muted)}
-.hand-bar[aria-expanded=true] .ic{transform:rotate(180deg)}
 /* held as a fan: hand.js layoutHand sets each card's --x, --r (tilt) and --y (arc); the raised card (.up: under the
    finger or mouse, or focused) stands upright above its neighbours. The row never scrolls: a finger on it is table.js's */
 .hand-row{position:relative;height:calc(var(--hw) * var(--size) * 1.4 + 26px);touch-action:none}
+.hand-row:empty{height:40px}
 .hand-row .tc,.hand-row .tc:active,.hand-row .tc.lifted{--cw:calc(var(--hw) * var(--size));position:absolute;left:var(--x,0);bottom:12px;z-index:var(--i);touch-action:none;transform-origin:50% 100%;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease);
   transform:translateY(calc(var(--y,0px) - var(--lift,0px))) rotate(var(--r,0deg)) scale(var(--k,1))}
 .hand-row .tc.sel{--lift:10px;box-shadow:0 0 0 2.5px var(--accent),0 14px 26px -10px oklch(0 0 0 / .5)}
 .hand-row .tc.up,.hand-row .tc:focus-visible,.hand-row .tc.lifted{--lift:16px;--r:0deg;--k:1.05;z-index:99;box-shadow:0 0 0 1px oklch(0 0 0 / .2),0 16px 30px -10px oklch(0 0 0 / .5)}
 .hand-row .tc.sel.up,.hand-row .tc.sel:focus-visible,.hand-row .tc.lifted{box-shadow:0 0 0 2.5px var(--accent),0 16px 30px -10px oklch(0 0 0 / .5)}
 body.away .hand-row{display:none}
-.add{color:var(--accent)}
-.add .ic{width:16px;height:16px}
+
+/* the floating controls (table.js #dial): pass turn, the action button and its bubbles */
+.dial{position:fixed;inset:0;z-index:12;pointer-events:none}
+.dial>*{pointer-events:auto}
+.dial>.turn-tag{pointer-events:none}
+.pass,.turn-tag{position:fixed;z-index:1;right:max(10px,env(safe-area-inset-right));top:var(--mid,50%);translate:0 -50%}
+.tbtn.pass{min-height:40px;padding:0 var(--sp-4);background:var(--accentBtn);color:var(--accentFg);font-weight:600;box-shadow:0 2px 10px -2px oklch(0 0 0 / .35)}
+.tbtn.pass:hover{background:color-mix(in oklab,var(--accentBtn) 88%,black)}
+.tbtn.pass .ic{width:16px;height:16px}
+/* armed: the bar empties over the cancel window (table.js PASS_WAIT); reduced motion keeps the wait but shows the bar still */
+.tbtn.pass.armed{overflow:hidden;isolation:isolate}
+.tbtn.pass.armed::after{content:"";position:absolute;inset:0;z-index:-1;background:color-mix(in oklab,var(--accentFg) 35%,transparent);transform-origin:left}
+@media (prefers-reduced-motion:no-preference){.tbtn.pass.armed::after{animation:tb-wait 1.5s linear var(--wait,0ms) both}}
+@keyframes tb-wait{to{transform:scaleX(0)}}
+.turn-tag{box-sizing:border-box;padding:7px 14px;border-radius:var(--r-pill);background:var(--hudBg);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 0 0 1px var(--hudLine);color:var(--muted);font-size:var(--fs-caption);font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+.scrim{position:fixed;inset:0;background:oklch(0.15 0.005 260 / .3)}
+.dial-btn{position:fixed;z-index:2;right:max(10px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));width:52px;height:52px;padding:0;border:none;border-radius:50%;display:grid;place-items:center;
+  background:var(--hudBg);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--text);box-shadow:0 0 0 1px var(--hudLine),0 4px 14px -4px oklch(0 0 0 / .35);touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.dial-btn .ic{width:22px;height:22px}
+.dial-btn:active{transform:scale(.94)}
+.dial-btn[aria-expanded=true]{background:var(--accentBtn);color:var(--accentFg)}
+.dial-btn::after{top:5px;right:5px}
+/* the bubbles grow up and left from the button: the first, nearest the thumb, bottom right */
+.bubs{position:fixed;z-index:2;right:max(10px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + 62px);width:min(306px,calc(100vw - 20px));display:flex;flex-flow:row-reverse wrap-reverse;align-content:flex-start;gap:6px}
+.bub{position:relative;box-sizing:border-box;width:72px;min-height:64px;padding:8px 4px 6px;border:none;border-radius:var(--r-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:color-mix(in oklab,var(--panel) 92%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--text);box-shadow:0 0 0 1px var(--hudLine),0 4px 14px -4px oklch(0 0 0 / .35);
+  font-size:11px;font-weight:500;line-height:1.1;text-align:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform .12s var(--ease)}
+.bub .ic{width:22px;height:22px}
+.bub span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-width:100%}
+.bub:hover{background:var(--panel)}
+.bub:active{transform:scale(.94)}
+.bub:disabled{opacity:.4;transform:none}
+.bn{position:absolute;top:4px;right:6px;font-size:10px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.bub:focus-visible,.dial-btn:focus-visible{outline-offset:3px}
 
 /* lobby and end states share one centred column */
 .lobby{box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:var(--sp-4);width:min(420px,100%);margin:auto;padding:var(--sp-6) var(--sp-4)}
@@ -353,9 +347,9 @@ body.away .hand-row{display:none}
 .tz.drop-on small{color:inherit}
 
 /* roomier screens: bigger cards */
-@media (min-width:380px){body.tbl{--cw:60px;--hw:78px;--pw:44px}}
+@media (min-width:380px){body.tbl{--hw:78px}}
 @media (min-width:640px){
-  body.tbl{--cw:72px;--hw:92px;--pw:52px}
+  body.tbl{--hw:92px}
   .sh-pane{border-radius:var(--r-lg);margin-bottom:var(--sp-4)}
   .sh-card{display:grid;grid-template-columns:220px minmax(0,1fr);gap:var(--sp-4);align-items:start}
   .sh-art{width:100%;margin:0;position:sticky;top:56px}
@@ -363,24 +357,32 @@ body.away .hand-row{display:none}
 }
 /* desktop: card size follows the screen's height so both battlefields stay in view */
 @media (min-width:900px){
-  body.tbl{--cw:clamp(64px,9.5dvh,112px);--hw:clamp(80px,12dvh,124px);--pw:clamp(52px,8dvh,84px)}
-  .strip{padding-inline:var(--sp-2) var(--sp-4)}
-  .bf{padding:var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-5)}
-  .piles{width:calc(2 * var(--pw) + var(--sp-2));display:grid;grid-template-columns:repeat(2,var(--pw));align-content:start;padding:var(--sp-3) var(--sp-4) var(--sp-3) 0;gap:var(--sp-2)}
-  .seat.me .piles{align-content:end}
-  .slot{height:calc(var(--pw) * 1.4)}
-  .area{min-height:max(calc(var(--ch) + var(--sp-5)),calc(var(--pw) * 2.8 + 32px))} /* the piles' two rows */
+  body.tbl{--hw:clamp(80px,12dvh,124px)}
+  .bf{padding:var(--sp-3) var(--sp-5)}
   .tc{font-size:12px}
-  .sc{font-size:13px}
 }
-
-/* wide and short-landscape screens: both boards; the active one is ringed. Keep in sync with BOTH in table.js */
-@media (min-width:900px),(orientation:landscape) and (min-width:640px) and (max-height:560px){
-  .seat:not(.on){flex:1 1 0}
-  .seat:not(.on)>.strip,.seat:not(.on)>.area{display:flex}
-  .peek,.dots{display:none}
-  .seat.swap .area{animation:none}
-  .seat.on .area{box-shadow:inset 0 0 0 2px var(--activeRing)}
+/* tall (a phone upright): one board at a time, the other a slim bar; pass stands just above the hand, hidden while theirs is open */
+@media not ((min-width:900px) or ((orientation:landscape) and (min-width:640px) and (max-height:560px))){
+  .seat:not(.on){flex:none}
+  .seat:not(.on)>.area,.seat:not(.on)>.peek{display:none}
+  .seat:not(.on)>.peek{display:flex}
+  .seat.swap .area{animation:tb-swap .26s cubic-bezier(.16,1,.3,1)}
+  /* the pill and chips are one line in a band at the player's edge: a phone is too narrow to put them beside the cards */
+  .seat.opp .bf{padding-top:58px}
+  .seat.me .bf{padding-bottom:58px}
+  .hud,.seat.me .hud{flex-direction:row;align-items:center;gap:6px;right:var(--sp-2)}
+  .pill{height:44px;padding:0 6px}
+  .who-c{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .chips{display:flex;gap:2px}
+  .chips .chip{min-width:32px;padding:0 2px;gap:1px;font-size:12px}
+  .chips .chip .ic{width:14px;height:14px}
+  /* the tag keeps only its number (the words stay for screen readers) */
+  .turn-tag{font-size:0;padding:6px 10px}
+  .turn-tag b{font-size:12px;font-weight:600}
+  .tb-hand{padding-inline:8px 72px}
+  .pass,.turn-tag{top:auto;bottom:calc(var(--hh) + 8px);translate:none}
+  body.away .pass,body.away .turn-tag{display:none}
+  .seat.me .peek{padding-right:72px}
 }
 /* three short choices (the dice) share one row */
 .srow:has(>.sb:nth-child(3):last-child)>.sb{flex-basis:0}
@@ -395,16 +397,16 @@ body.away .hand-row{display:none}
 .tb-pick span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tb-pick .sb{flex:none;min-height:36px;background:oklch(1 0 0 / .18);color:inherit}
 body.picking .bf .tc{box-shadow:0 0 0 2px color-mix(in oklab,var(--accent) 60%,transparent),0 4px 10px -4px oklch(0 0 0 / .25)}
-body.picking .tb-hand,body.picking .piles,body.picking .strip>:not(.life){opacity:.4;pointer-events:none}
+body.picking .tb-hand,body.picking .chips,body.picking .dial>*{opacity:.4;pointer-events:none}
 
 /* the search: the picked card stands out, the footer says what to do */
 .sgrid .tc.sel{box-shadow:0 0 0 3px var(--accent),0 8px 18px -6px oklch(0 0 0 / .35);transform:translateY(-2px)}
 .sfoot .pick{margin:0 0 var(--sp-2);color:var(--text);font-weight:600;font-size:var(--fs-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sfoot .srow+.srow{margin-top:var(--sp-2)}
 
-/* a pile's top card picked up to drag out */
-.slot.lifted{transform:scale(1.08);box-shadow:0 0 0 2px var(--accent),0 12px 28px -8px oklch(0 0 0 / .5);z-index:2}
-body.dragging .slot.lifted{opacity:.5;transform:none}
+/* a pile chip held still: its top card is picked up to drag out */
+.chip.lifted{transform:scale(1.08);box-shadow:0 0 0 2px var(--accent),0 12px 28px -8px oklch(0 0 0 / .5);z-index:2}
+body.dragging .chip.lifted{opacity:.5;transform:none}
 .ghost.many{overflow:visible;box-shadow:6px -6px 0 -1px var(--panel),6px -6px 0 1px var(--accent),0 20px 40px -10px oklch(0 0 0 / .55),0 0 0 2px var(--accent)}
 .ghost.many img{border-radius:6%}
 
@@ -414,11 +416,10 @@ body.dragging .slot.lifted{opacity:.5;transform:none}
 body.selecting .tc.sel::after{content:"";position:absolute;left:4px;top:4px;z-index:3;width:20px;height:20px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 1px 4px oklch(0 0 0 / .4);
   background:var(--accentBtn) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
 
-/* the action bar: beside one card, or docked at the top in selection mode */
+/* the action bar: beside one card, or docked in selection mode (above the hand on tall screens, at the top on wide ones) */
 .tb-bar{position:fixed;left:0;top:0;z-index:46;box-sizing:border-box;max-width:calc(100% - 16px);padding:6px;border-radius:var(--r-lg);background:var(--panel);color:var(--text);
   box-shadow:0 0 0 1px var(--border),var(--shadow-2);-webkit-user-select:none;user-select:none}
 /* docked: a toolbar in the page's flow between the board and the hand, so it covers no card (the board refits) */
-.tb-hand{order:2}
 .tb-bar.dock{position:relative;order:1;flex:none;max-width:none;padding:6px var(--sp-2);border-radius:0;box-shadow:0 -1px 0 var(--border),0 -8px 24px -16px oklch(0 0 0 / .25)}
 .tb-bar.dock>*{max-width:640px;margin-inline:auto}
 /* wider screens: one line, count and cancel first */
@@ -471,71 +472,21 @@ body.dragging .tb-bar,body.picking .tb-bar,body:has(#sheet:not([hidden])) .tb-ba
 .coach-n{margin-bottom:var(--sp-1);font-size:var(--fs-caption);font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
 .coach-b{display:flex;justify-content:flex-end;gap:var(--sp-2);margin-top:var(--sp-3)}
 
-/* short landscape (a phone on its side), like a game table: their seat across the top, yours across the bottom, each a rail
-   column (--lc) beside its battlefield and piles (--rc). Both rails scroll inside themselves; yours leaves room for the hand's
-   buttons, which stand at the bottom of that column. Keep the query in sync with SHORT in table.js */
+/* short wide (a phone on its side): the hand is a fan peeking over the bottom edge of your battlefield, between your pill and the
+   action button, rising under a finger or the mouse and sinking while a card is dragged so the battlefield below is a drop target */
 @media (orientation:landscape) and (min-width:640px) and (max-height:560px){
-  body.tbl{--cw:44px;--hw:56px;--pw:40px;--lc:92px;--hh:86px;--rc:calc(2 * var(--pw) + 8px);--peek:44px;padding-bottom:env(safe-area-inset-bottom)}
-  .seat,.seat:not(.on){display:grid;grid-template-columns:var(--lc) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
-  .strip,.seat:not(.on)>.strip{grid-area:1/1;display:grid;grid-template-columns:repeat(2,40px);grid-auto-rows:min-content;align-content:start;justify-content:center;gap:2px 4px;min-height:0;padding:2px 4px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;border-right:1px solid var(--border)}
-  .strip::-webkit-scrollbar{display:none}
-  .seat.opp .strip{padding-left:4px}
-  .seat.me .strip{border-top:none;margin-bottom:var(--hh)} /* the hand's buttons stand under it */
-  .area{grid-area:1/2;min-height:calc(2 * var(--pw) + 12px)}
-  .strip>.who-c{grid-column:1/-1;order:1}
-  .strip>.life{order:2}
-  .strip>.menu-btn{order:3}
-  .strip>[data-top=full]{order:4}
-  .strip>[data-pile],.strip>[data-top=untap]{order:5}
-  .strip>.log-btn{order:6;display:inline-flex}
-  .strip>.cmd{order:7}
-  .strip .chip,.strip .chip.ico{width:40px;padding:0;gap:2px}
-  .life{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,40px);grid-template-areas:"n n" "m p";justify-content:center;gap:0 4px}
-  .life .lv{grid-area:n;min-width:0;height:28px;padding:0;font-size:26px;line-height:1}
-  .life button:first-child{grid-area:m}
-  .life button:last-child{grid-area:p}
-  .life button{width:40px;height:40px}
-  .strip .trn{overflow:visible}
-  .strip>.who-c{line-height:1.1}
-  .seat.turn .bf{background:color-mix(in oklab,var(--accent) 7%,transparent);box-shadow:inset 3px 0 0 var(--accent)}
-  .seat.on .area{box-shadow:none}
-  /* the battlefield: creatures in front (towards the middle), lands left and other right behind them, nearest the edge */
-  .bf{padding:5px 4px 1px 6px} /* the top room keeps a stack's raised edge */
-  .seat.me .bf{padding-bottom:calc(var(--peek) + 1px)} /* the hand peeks over it */
-  .bfb{flex-direction:row;flex-wrap:wrap;gap:6px 16px}
-  .bfb>.bfr{flex:0 1 auto}
-  .bfb>.bfr.lands{order:-1}
-  .bfr+.bfb,.bfb+.bfr{padding-top:3px;margin-top:0}
-  .bfb>.bfr+.bfr{padding:0;border:none}
-  .bf{gap:4px}
-  .seat.me .bf>:first-child{margin-top:0}
-  .seat.me .bfb{margin-top:auto}
-  .seat.opp .bfb{margin-bottom:auto}
-  .seat.opp .bfr.creatures{margin-top:auto}
-  .piles{width:var(--rc);display:grid;grid-template-columns:repeat(2,var(--pw));grid-template-rows:repeat(2,minmax(0,calc(var(--pw) * 1.4)));align-content:start;gap:4px;padding:4px 4px 4px 0}
-  .seat.me .piles{align-content:end}
-  .slot{height:auto;min-height:40px}
-  .sc .ic{display:none}
-  /* the hand: a fan peeking over the bottom edge of your battlefield, rising under a finger or the mouse; its buttons are the rail's */
-  .tb-hand{position:fixed;left:calc(env(safe-area-inset-left) + var(--lc));right:calc(env(safe-area-inset-right) + var(--rc));bottom:env(safe-area-inset-bottom);padding:0;border:none;background:none;box-shadow:none;pointer-events:none}
-  .hand-head{position:fixed;left:env(safe-area-inset-left);bottom:env(safe-area-inset-bottom);box-sizing:border-box;width:var(--lc);height:var(--hh);display:grid;grid-template-columns:repeat(2,40px);align-content:center;justify-content:center;gap:2px 4px;padding:0 4px;background:var(--mine);border-right:1px solid var(--border);border-top:1px solid var(--border);pointer-events:auto}
-  .hand-bar{display:none}
-  .hand-head .tbtn,.hand-head .tbtn.ico{width:40px;padding:0}
-  .draw span,.add span,.tbtn.pass span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-  .tbtn.pass .ic{display:block}
-  .tbtn.pass.armed .ic{display:none}
-  .tbtn.pass.armed::before{content:"\00d7";font-size:26px;font-weight:400;line-height:1}
+  body.tbl{--hw:56px;--peek:52px}
+  .bf{padding-block:4px 2px}
+  .seat.me .bf{padding-bottom:calc(var(--peek) + env(safe-area-inset-bottom) + 8px)}
+  .seat.me .hud{bottom:calc(env(safe-area-inset-bottom) + 6px)}
+  .tb-hand{position:fixed;left:calc(env(safe-area-inset-left) + var(--hx,150px));right:calc(env(safe-area-inset-right) + var(--hx,150px));bottom:env(safe-area-inset-bottom);padding:0;background:none;pointer-events:none}
   .hand-row{height:calc(var(--hw) * var(--size) * 1.4 - 8px);pointer-events:none;transform:translateY(calc(100% - 8px - var(--peek)));transition:transform .18s cubic-bezier(.2,.8,.2,1)}
   .hand-row .tc,.hand-row .tc:active,.hand-row .tc.lifted{bottom:-16px;pointer-events:auto} /* a raised card still reaches the screen's edge, under the pointer that raised it */
   .hand-row:has(.up,.sel,.tc:hover,:focus-visible){transform:none}
   body.dragging .tb-hand .hand-row{transform:translateY(calc(100% - 8px - var(--peek)))}
   .tb-hand.drop-on{box-shadow:none;background:none}
   .tb-hand.drop-on .hand-row{background:color-mix(in oklab,var(--accent) 14%,transparent);box-shadow:inset 0 2px 0 var(--accent)}
-  /* dragging: the quick zones go between the rails, at the top */
-  .tray{left:calc(env(safe-area-inset-left) + var(--lc) + 8px);right:calc(env(safe-area-inset-right) + var(--rc) + 8px)}
   .tz{min-height:48px}
-  /* the docked selection bar floats between the rails at the top (the hand is not in the page flow here) */
-  .tb-bar.dock{position:fixed;order:0;left:calc(env(safe-area-inset-left) + var(--lc));right:calc(env(safe-area-inset-right) + var(--rc));top:env(safe-area-inset-top);width:auto;border-radius:0 0 var(--r-lg) var(--r-lg)}
   .sh-card{grid-template-columns:150px minmax(0,1fr)}
   .pad{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);grid-template-areas:"v k" "n k" "a k";align-content:start;column-gap:var(--sp-5)}
   .pad .pad-v{grid-area:v}
@@ -545,6 +496,17 @@ body.dragging .tb-bar,body.picking .tb-bar,body:has(#sheet:not([hidden])) .tb-ba
   .pad>.srow{grid-area:a;align-self:start}
 }
 @media (orientation:landscape) and (min-width:640px) and (max-height:560px) and (prefers-reduced-motion:reduce){.hand-row{transition:none}}
+/* narrow screens: Pass turn keeps its icon (its name stays for screen readers; armed, a cross) and the tag its number only */
+@media (max-width:459px){
+  .pass span,.tt-n{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .tbtn.pass{width:44px;padding:0}
+  .tbtn.pass.armed::before{content:"\00d7";font-size:26px;font-weight:400;line-height:1}
+}
 
 /* in selection mode the check sits bottom left of a wide tile */
 body.selecting .tc.w.sel::after{top:auto;bottom:3px;left:3px;width:18px;height:18px;background-size:13px}
+
+/* wide: the docked selection bar floats at the top centre instead of standing above the hand */
+@media (min-width:900px),(orientation:landscape) and (min-width:640px) and (max-height:560px){
+  .tb-bar.dock{position:fixed;order:0;left:50%;top:env(safe-area-inset-top);transform:translateX(-50%);width:max-content;border-radius:0 0 var(--r-lg) var(--r-lg)}
+}
