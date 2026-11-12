@@ -1,7 +1,7 @@
 // Bottom sheets: every action a player can take on a card, a pile, a commander or the menu.
 // buildSheet returns {title, body, items, art}: buttons carry data-i, the index of their handler in items.
 // A sheet opened from another one carries `back`; acting in it returns there instead of closing.
-import { ZONES, seats, facing, esc, index, tile, art, attachable, ICON, fsShown } from './board.js';
+import { ZONES, seats, esc, index, tile, art, attachable, ICON, fsShown } from './board.js';
 import { logHtml } from './log.js';
 import { fill } from '../i18n.js';
 
@@ -18,6 +18,8 @@ export function buildSheet(sh, view, c) {
   const name = (s) => esc(view.players[s].name || '?');
   const grid = (cards) => `<div class="sgrid">${cards.map((x) => tile(x, t)).join('')}</div>`;
   let title = '', body = '', big = '';
+  // with two players there is one other to give to; with more, a step to choose
+  const give = (from) => { const to = seats(view).filter((x) => x !== from); if (to.length === 1) send({ type: 'move', cards: [sh.id], to: { seat: to[0], zone: 'battlefield' } }); else c.setSheet({ k: 'give', id: sh.id }); };
 
   if (sh.k === 'card') {
     const hit = index(view).get(sh.id);
@@ -47,7 +49,7 @@ export function buildSheet(sh, view, c) {
         card.name && !card.shared && b(t.tbReveal, () => send({ type: 'reveal', cards: ids })),
         (bf || (zone === 'hand' && attachable(card))) && b(t.tbAttach, () => c.pickHost(card.id)),
         bf && card.attached && b(t.tbDetach, () => send({ type: 'attach', card: card.id, to: null })),
-        bf && b(t.tbGive, () => send({ type: 'move', cards: ids, to: { seat: facing(view, seat), zone: 'battlefield' } })),
+        bf && b(t.tbGive, () => give(seat), '', seats(view).length > 2),
         card.token && b(t.tbDelete, () => send({ type: 'delete', card: card.id }), 'danger'));
       body += `<h3>${t.tbSendTo}</h3>` + row(
         go(t.tbZhand, 'hand'),
@@ -104,11 +106,21 @@ export function buildSheet(sh, view, c) {
     title = `${t['tbZ' + sh.zone]} · ${name(sh.seat)} (${all.length})`;
     body = cards.length ? grid(sh.zone === 'graveyard' || sh.zone === 'exile' ? [...cards].reverse() : cards) : `<p>${sh.zone === 'library' && all.length ? t.tbNoneKnown : t.tbEmpty}</p>`;
   } else if (sh.k === 'cmd') {
-    const from = facing(view, sh.seat), cmd = view.players[from].commanders[sh.i];
-    if (cmd === undefined) return null;
-    const d = (n) => b(n > 0 ? '+1' : '−1', () => send({ type: 'cmd_damage', seat: sh.seat, from, commander: cmd, delta: n }), '', true);
+    // every other player's commanders, grouped by player, each with its own steppers
+    const hit = view.players[sh.seat].cmd_damage;
     title = `${t.tbCmdDmg} · ${name(sh.seat)}`;
-    body = `<p class="cl">${esc(cmd)}: <b>${view.players[sh.seat].cmd_damage[from][cmd] || 0}</b></p>` + row(d(-1), d(1));
+    for (const from of Object.keys(hit)) {
+      body += `<h3>${name(from)}</h3>`;
+      for (const [cmd, v] of Object.entries(hit[from])) {
+        const d = (n) => b(n > 0 ? '+1' : '−1', () => send({ type: 'cmd_damage', seat: sh.seat, from: Number(from), commander: cmd, delta: n }), '', true);
+        body += row(`<span class="cl">${esc(cmd)}: <b>${v}</b></span>`, d(-1), d(1));
+      }
+    }
+  } else if (sh.k === 'give') {
+    const hit = index(view).get(sh.id);
+    if (!hit) return null;
+    title = t.tbGive;
+    body = row(...seats(view).filter((x) => x !== hit.seat).map((s) => b(name(s), () => send({ type: 'move', cards: [sh.id], to: { seat: s, zone: 'battlefield' } }), 'on')));
   } else if (sh.k === 'token') {
     title = t.tbTokenNew;
     body = row(input('sn', '', `maxlength="100" placeholder="${t.tbTokenName}" aria-label="${t.tbTokenName}"`))
@@ -134,12 +146,13 @@ export function buildSheet(sh, view, c) {
     title = t.tbMenu;
     body = (live ? row(b(ICON.log + t.tbLog, () => c.setSheet({ k: 'log', back: sh }), '', true),
         fsShown() && b((document.fullscreenElement ? ICON.fullOff + t.tbExitFullscreen : ICON.full + t.tbFullscreen), c.fullscreen),
-        b(t.tbMulligan, () => send({ type: 'mulligan' })))
+        b(t.tbMulligan, () => send({ type: 'mulligan' })),
+        b(view.players[view.you].out ? t.tbBackIn : t.tbImOut, () => send({ type: 'out', out: !view.players[view.you].out }), 'quiet'))
       + `<h3>${fill(t.tbTurnOf, { n: view.turn.number, s: view.turn.seat === view.you ? t.lgYouLow : name(view.turn.seat) })}</h3>`
       + row(b(t.tbPass, pass(true), view.turn.seat === view.you ? 'on' : ''), b(t.tbPassNoDraw, pass(false)))
       + `<h3>${t.tbDice}</h3>` + row(b('d6', r(6)), b('d20', r(20)), b(t.tbCoin, r(2)))
       + row(input('sn', 10, `type="number" min="2" max="100" inputmode="numeric" aria-label="${t.tbCustom}"`), b(t.tbRoll, () => send({ type: 'roll', sides: num('sn', 2, 100, 10) })))
-      + `<h3>${t.tbHow}</h3><ul class="how"><li>${t.tbHow1}</li><li>${t.tbHow2}</li><li>${t.tbHow3}</li><li>${t.tbHow4}</li><li>${t.tbHow5}</li><li>${t.tbHow6}</li><li>${t.tbHow7}</li></ul>` + row(b(t.tbHintsAgain, c.hints, 'quiet')) : '')
+      + `<h3>${t.tbHow}</h3><ul class="how"><li>${t.tbHow1}</li><li>${t.tbHow2}</li><li>${t.tbHow3}</li><li>${t.tbHow4}</li><li>${t.tbHow5}</li><li>${t.tbHow6}</li><li>${t.tbHow7}</li>${seats(view).length > 2 ? `<li>${t.tbHow8}</li>` : ''}</ul>` + row(b(t.tbHintsAgain, c.hints, 'quiet')) : '')
       + `<h3>${t.tbSize}</h3>` + row(...[['s', t.tbSizeS], ['m', t.tbSizeM], ['l', t.tbSizeL]].map(([k, l]) => b(l, () => c.setSize(k), c.size === k ? 'on' : '', true)))
       + `<h3>${t.tbLang}</h3>` + row(b('Español', () => c.setLang('es'), c.lang === 'es' ? 'on' : '', true), b('English', () => c.setLang('en'), c.lang === 'en' ? 'on' : '', true))
       + `<h3>${t.tbTheme}</h3>` + row(b(t.tbLight, () => c.setTheme('light'), c.dark ? '' : 'on', true), b(t.tbDark, () => c.setTheme('dark'), c.dark ? 'on' : '', true))

@@ -5,10 +5,15 @@ import { fill } from '../i18n.js';
 
 export const ZONES = ['library', 'hand', 'battlefield', 'graveyard', 'exile', 'command'];
 export const seats = (view) => Object.keys(view.players).map(Number);
-// the screen shows two players: you at the bottom and one other on top (for now the next seat after yours)
-export const topSeat = (view) => (view.you % seats(view).length) + 1;
-// the shown seat that `s` faces: whose commanders damage s, and who gets a card given away
-export const facing = (view, s) => (s === view.you ? topSeat(view) : view.you);
+// the other players, in turn order after you
+export const others = (view) => { const n = seats(view).length; return seats(view).filter((s) => s !== view.you).sort((a, b) => ((a - view.you + n) % n) - ((b - view.you + n) % n)); };
+// the screen shows two battlefields: yours at the bottom and one other player's on top. table.js sets `chosen` (a tap on a player, or the
+// turn passing to someone); until then it is the next player who is not out
+let chosen = 0;
+export const setTop = (s) => { chosen = s; };
+export const topSeat = (view) => chosen && chosen !== view.you && view.players[chosen] ? chosen : others(view).find((s) => !view.players[s].out) || others(view)[0];
+// the most damage any single commander has done to this player: 21 kills
+export const cmdHigh = (p) => Math.max(0, ...Object.values(p.cmd_damage).flatMap((o) => Object.values(o)));
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // one stroke icon set for the table, 16px grid, drawn in currentColor
 const svg = (d) => `<svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
@@ -133,10 +138,21 @@ function sections(view, s, att) {
 
 const PILES = ['graveyard', 'exile', 'library']; // the bar's order: the library count is the first to give way
 
+// with three or more players: a pill per other player under the top bar, and a tap puts that player on top
+function strip(view, t) {
+  const top = topSeat(view), os = others(view);
+  if (os.length < 2) return '';
+  return `<nav class="strip" aria-label="${t.tbPlayers}">${os.map((s) => {
+    const p = view.players[s], who = esc(p.name || '?'), turn = view.turn && view.turn.seat === s;
+    const label = fill(t.tbShowP, { n: who, l: p.life }) + (turn ? ', ' + t.tbTheirTurn : '') + (p.out ? ', ' + t.tbOut : '');
+    return `<button class="sp${s === top ? ' on' : ''}${p.out ? ' out' : ''}${turn ? ' turn' : ''}" data-show="${s}" data-sp="${s}" aria-pressed="${s === top}" aria-label="${label}"><i class="dot"></i><b class="sn">${who}</b><span class="sl">${p.life}</span></button>`;
+  }).join('')}</nav>`;
+}
+
 // one player's side. Rendered whole every time: the battlefield with its floating pill and zone chips, and the collapsed bar.
 // Which one shows is client state (table.js applyFocus toggles .seat.on); CSS shows both boards on wide screens and one on tall ones.
 function seat(view, s, t) {
-  const p = view.players[s], z = view.zones[s], me = s === view.you, o = view.players[facing(view, s)], who = esc(p.name || '?');
+  const p = view.players[s], z = view.zones[s], me = s === view.you, who = esc(p.name || '?');
   const att = attachments(view), secs = sections(view, s, att);
   const stack = ([c, ...more]) => {
     const under = att.get(c.id);
@@ -149,17 +165,18 @@ function seat(view, s, t) {
   const part = (ks) => ks.filter((k) => secs[k].length).map(group).join('');
   const back = (ks) => { const h = part(ks); return h && `<div class="bfb">${h}</div>`; };
   const rows = me ? part(['creatures']) + back(['other', 'lands']) : back(['lands', 'other']) + part(['creatures']);
-  const hit = p.cmd_damage[facing(view, s)] || {};
-  const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${hit[name] || 0}</b></button>`);
+  // one chip with the highest commander damage taken; it opens the sheet with every commander
+  const cmds = Object.keys(p.cmd_damage).length ? [`<button class="chip cmd" data-cmd="${s}" title="${t.tbCmdDmg}" aria-label="${t.tbCmdDmg}: ${cmdHigh(p)}">${ICON.sword}<b>${cmdHigh(p)}</b></button>`] : [];
   // the number opens a pad to add, subtract or set any amount
   const life = `<div class="life" role="group" aria-label="${t.tbLife}"><button data-life="${s}:-1" aria-label="${t.tbMinus}">−</button>`
     + `<button class="lv" data-pad="${s}" aria-label="${fill(t.tbLifeEdit, { n: who, l: p.life })}">${p.life}</button><button data-life="${s}:1" aria-label="${t.tbPlus}">+</button></div>`;
   // whose turn: a tag beside the name (and the accent along the centre line on their half, in table.css)
   const turn = view.turn && view.turn.seat === s ? `<span class="trn">${fill(t.tbTurnN, { n: view.turn.number })}</span>` : '';
+  const gone = p.out ? `<span class="outm">${t.tbOut}</span>` : '';
   const zones = (me ? ['library', 'graveyard', 'exile', 'command'] : ['hand', 'library', 'graveyard', 'exile', 'command']).map((zone) => chip(s, zone, t, view));
   // the chips stand in a column from the pill towards the centre line, three to a column (table.css); mine count upwards from the pill
   const chips = [...zones, ...cmds].map((c, i) => c.replace('<button ', `<button style="grid-row:${me ? 3 - (i % 3) : (i % 3) + 1}" `)).join('');
-  const hud = `<div class="hud"><div class="pill"><span class="who-c"><b class="who">${who}</b>${turn}</span>${life}</div><div class="chips">${chips}</div></div>`;
+  const hud = `<div class="hud"><div class="pill"><span class="who-c"><b class="who">${who}</b>${turn}${gone}</span>${life}</div><div class="chips">${chips}</div></div>`;
   const bf = `<div class="bf" data-drop="${s}:battlefield" data-empty="${me ? t.tbDropHere : t.tbZbattlefield}">${rows}</div>`;
   // the collapsed bar (tall screens): tap it to open this board, drop a card on it to put the card onto this battlefield
   const minis = ['creatures', 'other', 'lands'].flatMap((k) => secs[k]).map(([c, ...more]) => {
@@ -168,9 +185,9 @@ function seat(view, s, t) {
   }).join('');
   const counts = [['hand', z.hand.length], ...PILES.map((k) => [k, z[k].length])].map(([k, n]) => `<span class="pk-n" data-pk="${s}:${k}">${ICON[k]}${n}</span>`).join('');
   const label = [fill(t.tbShowBoard, { n: who }), turn && fill(t.tbTurnN, { n: view.turn.number }), `${t.tbZhand}: ${z.hand.length}`, ...PILES.map((k) => `${t['tbZ' + k]}: ${z[k].length}`), fill(t.tbPermanents, { n: z.battlefield.length })].filter(Boolean).join(', ');
-  const peek = `<div class="peek" data-drop="${s}:battlefield"><button class="peek-open" data-focus="${s}" aria-expanded="false" aria-label="${label}"><span class="pk-top"><b class="who">${who}</b>${turn}${counts}</span><span class="pk-row">${minis}</span></button>${life}</div>`;
+  const peek = `<div class="peek" data-drop="${s}:battlefield"><button class="peek-open" data-focus="${s}" aria-expanded="false" aria-label="${label}"><span class="pk-top"><b class="who">${who}</b>${turn}${gone}${counts}</span><span class="pk-row">${minis}</span></button>${life}</div>`;
   const area = `<div class="area">${me ? bf + hud : hud + bf}</div>`;
-  return `<section class="seat ${me ? 'me' : 'opp'}${turn ? ' turn' : ''}" data-seat="${s}" aria-label="${who}">${me ? area + peek : peek + area}</section>`;
+  return `<section class="seat ${me ? 'me' : 'opp'}${turn ? ' turn' : ''}${p.out ? ' out' : ''}${!me && strip(view, t) ? ' str' : ''}" data-seat="${s}" aria-label="${who}">${me ? area + peek : peek + strip(view, t) + area}</section>`;
 }
 
 export const boardHtml = (view, t) => `<div class="sides">${seat(view, topSeat(view), t)}${seat(view, view.you, t)}</div>`;

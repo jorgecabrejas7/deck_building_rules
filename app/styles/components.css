@@ -426,6 +426,13 @@ body.modal-open{overflow:hidden}
 .gm-invite{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2)}
 .gm-invite .arch-field{box-sizing:border-box;min-height:48px}
 .gm-invite .btn-primary{min-height:48px;padding-block:0}
+.gm-pick{flex:1 1 100%;min-width:0;margin:0;padding:0;border:none;display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.gm-pick legend{padding:0 0 var(--sp-2);font-size:var(--fs-caption);color:var(--muted)}
+.gm-n{margin-left:var(--sp-2);font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.gm-opt{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-4);border-radius:var(--r-pill);background:var(--fill);cursor:pointer}
+.gm-opt:has(:checked){background:var(--accentBtn);color:var(--accentFg)}
+.gm-opt:has(:disabled){opacity:.45;cursor:default}
+.gm-opt input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
 .gm-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .gm-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2) var(--sp-4);padding:var(--sp-3) 0;border-top:1px solid var(--border2)}
 .gm-who{display:flex;flex-direction:column;gap:2px;min-width:0}

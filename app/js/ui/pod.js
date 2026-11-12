@@ -214,12 +214,13 @@ async function loadGames() {
   else { games = { podId: id, list: [], busy: false }; gMsg = 'pdGErr'; }
   paint();
 }
+const MAX_OPP = 5; // a table seats six
 function gamesHtml(t) {
   const others = state.pod.members.filter(m => !m.me);
   const invite = others.length
-    ? '<form class="gm-invite" data-gameform><label class="arch-field"><span>' + esc(t.pdGWho) + '</span><select name="opponents" class="arch-select">' +
-      others.map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select></label>' +
-      '<button class="btn-primary">' + esc(t.pdGInvite) + '</button></form>'
+    ? '<form class="gm-invite" data-gameform><fieldset class="gm-pick"><legend>' + esc(t.pdGWho) + ' <span class="gm-n" data-pickn>' + esc(fill(t.pdGCount, { n: 0, m: MAX_OPP })) + '</span></legend>' +
+      others.map(m => '<label class="gm-opt"><input type="checkbox" name="opponents" value="' + m.id + '"><span>' + esc(m.name) + '</span></label>').join('') + '</fieldset>' +
+      '<button class="btn-primary" disabled>' + esc(t.pdGInvite) + '</button></form>'
     : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
   const li = (games ? games.list : []).map(g => {
     const who = g.opponents.map(n => n === null ? t.pdGDeleted : n).join(', ');
@@ -387,7 +388,7 @@ async function onClick(e) {
 async function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
-  if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponents: [Number(f.opponents.value)] }, 201);
+  if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponents: [...f.querySelectorAll('input[name=opponents]:checked')].map(i => Number(i.value)) }, 201);
   else if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
   else if ('addfriendform' in f.dataset) { if (await act('POST', here('members'), { user: Number(f.user.value) }, [200, 201])) refresh(); }
   else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }
@@ -397,4 +398,12 @@ async function onSubmit(e) {
   }
 }
 
-function onChange(e) { if (e.target.id === 'podSelTab') selectPod(Number(e.target.value) || null); }
+function onChange(e) {
+  if (e.target.id === 'podSelTab') selectPod(Number(e.target.value) || null);
+  else if (e.target.name === 'opponents') { // the count, the submit with none picked, the boxes once five are
+    const f = e.target.form, boxes = [...f.querySelectorAll('input[name=opponents]')], n = boxes.filter(i => i.checked).length;
+    f.querySelector('[data-pickn]').textContent = fill(T().pdGCount, { n, m: MAX_OPP });
+    f.querySelector('button').disabled = !n;
+    for (const i of boxes) i.disabled = !i.checked && n >= MAX_OPP;
+  }
+}

@@ -16,6 +16,7 @@ const STEPS = [
   ['tbHintTap', () => vis('.seat.me .bf .tc') || vis('.seat.me .bf')],
   ['tbHintPress', () => vis('#hand .hand-row .tc') || vis('.seat.me .bf .tc')],
   ['tbHintBoard', () => vis('.seat.opp .peek-open'), true], // phones only: where both boards show there is no bar
+  ['tbHintStrip', () => vis('.strip .sp'), true], // only with three or more players
   ['tbHintHand', () => vis('#hand .hand-row')],
   ['tbHintDial', () => vis('#dial .dial-btn')],
 ];

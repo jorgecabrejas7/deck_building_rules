@@ -50,7 +50,8 @@ export function lifeMoved(prev, next, settle) {
   }
 }
 function bubble(s, d, settle) {
-  const at = [...document.querySelectorAll(`[data-pad="${s}"]`)].find((el) => el.getClientRects().length);
+  // a player who is not on top has no life number on screen: the bubble floats from their pill in the strip
+  const shown = (q) => [...document.querySelectorAll(q)].find((el) => el.getClientRects().length), at = shown(`[data-pad="${s}"]`) || shown(`[data-sp="${s}"]`);
   if (!at) return;
   let b = bub[s];
   if (!b) {

@@ -3,7 +3,7 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, facing } from './table/board.js';
+import { boardHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 import { buildBar } from './table/bar.js';
@@ -51,7 +51,10 @@ function connect() {
       const prev = view;
       base = m.view;
       if (m.ack != null) pending = pending.filter((p) => p.n > m.ack);
-      replay(); render(); news(prev);
+      replay();
+      // the top follows the turn to another player; when it comes to you the top stays
+      if (view.turn && view.turn.seat !== view.you && (!prev || !prev.turn || prev.turn.seat !== view.turn.seat)) setTop(view.turn.seat);
+      render(); news(prev);
     } else if (m.type === 'error') {
       pending = pending.filter((p) => p.n !== m.ack);
       replay(); render();
@@ -123,6 +126,10 @@ function news(prev) {
   if (!prev || !prev.zones || !fresh.length) return;
   lifeMoved(prev, view, lifeSay);
   if (fresh.every((e) => e.seat !== view.you)) glowOn(changed(prev, view));
+  // somebody off the top acted or changed life: their pill in the strip glows
+  const off = new Set([...fresh.map((e) => e.seat), ...Object.keys(view.players).filter((s) => view.players[s].life !== prev.players[s].life)].map(Number));
+  off.delete(view.you); off.delete(topSeat(view));
+  glowOn([...off].map((s) => `.sp[data-sp="${s}"]`));
   const roll = fresh.filter((e) => e.type === 'roll').pop();
   if (view.turn.seat === view.you && prev.turn.seat !== view.you && fresh.some((e) => e.type === 'pass_turn')) {
     if ((focus || view.you) !== view.you && $('sheet').hidden && !press && !picking && !sel.size) setFocus(view.you);
@@ -144,7 +151,7 @@ function applyTheme() {
   document.body.classList.toggle('dark', state.theme ? state.theme === 'dark' : state.sysDark);
 }
 
-let shown = null; // the view the last render drew: what motion animates from
+let shown = null, topShown = 0; // the view the last render drew: what motion animates from; the seat that was on top
 function render() {
   const before = snapshot(); // before any DOM change
   const t = T(), active = view && view.status === 'active' && !gone;
@@ -159,6 +166,10 @@ function render() {
   else if (!view) board.textContent = t.tbConnecting;
   else if (view.status === 'lobby') { keepInputs(board, () => { board.innerHTML = `<button class="chip ico menu-btn lobby-menu" data-top="menu" aria-label="${t.tbMenu}">${ICON.menu}</button>` + lobbyHtml(view, t, decks, lobbyErr); }); if (decks === null) loadDecks(); }
   else patch(board, boardHtml(view, t));
+  // a new top player: the battlefield fades in (play() sees no card as moved, since each stays in its own seat and zone)
+  const tp = active ? topSeat(view) : 0;
+  if (topShown && tp && tp !== topShown && !matchMedia('(prefers-reduced-motion: reduce)').matches) board.querySelector('.seat.opp .area').animate({ opacity: [0, 1] }, 160);
+  topShown = tp;
   const hand = $('hand');
   if (!(active && view.turn && view.turn.seat === view.you)) disarmPass();
   if (active) patch(hand, handHtml(view, t)); else hand.innerHTML = '';
@@ -266,7 +277,7 @@ function applyFocus(swap) {
   if (!view || !view.zones) return;
   const f = focus || view.you, away = f !== view.you;
   for (const el of document.querySelectorAll('.seat')) {
-    const on = Number(el.dataset.seat) === f;
+    const on = el.classList.contains(away ? 'opp' : 'me'); // theirs is whoever is on top
     el.classList.toggle('on', on);
     el.classList.toggle('swap', on && swap);
   }
@@ -283,6 +294,7 @@ function applyFocus(swap) {
 // shortcut: the gaps are table.css constants (card gap 6, row gap 4, groups 16 apart; a tile is RATIO wide for each unit of height,
 // an attached card shows OFF of the width above its host); change both together
 const GAP = 6, ROW = 4, GROUP = 16, RATIO = 1.37, OFF = 0.28;
+const BAND = 34; // wide: the extra top padding of a battlefield under the players strip (table.css .str)
 const OPP = 0.88; // wide: their cards a little smaller, so yours (which you tap) can be bigger
 const lineW = (cw, n) => n * cw + Math.max(0, n - 1) * GAP;
 function rowH(cw, items, W) {
@@ -323,7 +335,8 @@ function fit() {
     const W = bf.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     // the corner block's reach from the player's edge (wide only: on tall screens the pill is a band at the edge, in the padding)
     const a = seat.querySelector('.area').getBoundingClientRect(), pill = seat.querySelector('.pill'), chips = seat.querySelector('.chips');
-    const reach = (el) => { const r = el.getBoundingClientRect(); return me ? a.bottom - r.top : r.bottom - a.top; };
+    const band = wide && seat.classList.contains('str') ? BAND : 0; // the players strip floats over the top of their board: its rows start below it
+    const reach = (el) => { const r = el.getBoundingClientRect(); return (me ? a.bottom - r.top : r.bottom - a.top) - band; };
     const corner = wide ? { pillW: pill.offsetWidth + 16, colW: chips.offsetWidth + 16, reachP: reach(pill) + 4, reachH: reach(chips) + 4 } : { pillW: 0, colW: 0, reachP: 0, reachH: 0 };
     return { bf, seat, padY, H: bf.clientHeight - padY, W, ...corner, min: corner.reachH + 4, pass: wide ? pass : 0,
       fe: bf.querySelector('.bfr.creatures'), bg, front: [...bf.querySelectorAll('.creatures')].flatMap(items), back: bg.map(items), scale: wide && !me ? OPP : 1,
@@ -412,7 +425,7 @@ function closePreview() {
 // cards, the bar docks above the hand with the count, and its actions take every selected card.
 let sel = new Map(), selMode = false, barItems = [], barKey = '', said = '';
 const BOARD_CARD = '#board [data-card],#hand [data-card]';
-const CONTROL = '[data-b],[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-dial],[data-open],[data-top],[data-pick],[data-pad],[data-preview-close]';
+const CONTROL = '[data-b],[data-focus],[data-show],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-dial],[data-open],[data-top],[data-pick],[data-pad],[data-preview-close]';
 const idsOf = (el) => el.dataset.ids ? el.dataset.ids.split(' ') : [el.dataset.card];
 const selIds = () => [...new Set([...sel.values()].flat())];
 const elFor = (id) => document.querySelector(`#board [data-card="${id}"],#hand [data-card="${id}"]`) || document.querySelector(`#board [data-ids~="${id}"]`);
@@ -441,7 +454,7 @@ function clearSel() {
 
 // classes only: marks the selected cards after every render, drops the ones that left the table
 function applySel() {
-  const idx = view && view.zones ? index(view) : new Map();
+  const idx = view && view.status === 'active' ? index(view) : new Map(); // a lobby view has players but no zones
   for (const [k, v] of sel) { const live = v.filter((id) => idx.has(id)); if (live.length) sel.set(k, live); else sel.delete(k); }
   if (!sel.size) selMode = false;
   const all = new Set(selIds()), t = T();
@@ -703,7 +716,7 @@ document.addEventListener('pointerup', (e) => {
   const dx = e.clientX - w.x, dy = e.clientY - w.y;
   if (Math.abs(dx) < 56 || Math.abs(dx) < 1.5 * Math.abs(dy) || e.timeStamp - w.t > 800) return;
   swallow = true; setTimeout(() => { swallow = false; }, 400);
-  setFocus(facing(view, focus || view.you));
+  setFocus((focus || view.you) === view.you ? topSeat(view) : view.you);
 }, true);
 document.addEventListener('pointercancel', () => { swipe = null; });
 
@@ -726,6 +739,7 @@ document.addEventListener('click', (e) => {
   const d = el.dataset;
   if ('dial' in d) { toggleDial(); return; }
   if (dialOpen && el.closest('#dial') && d.top !== 'draw') toggleDial(false); // every bubble but Draw closes them; Draw stays for the next one
+  if ('show' in d) { setTop(Number(d.show)); render(); return; }
   if ('b' in d) { barItems[d.b](); return; }
   if ('focus' in d) { setFocus(Number(d.focus)); return; } // also while picking a host: it may be on the other board
   if (picking) { // choosing the host for an aura or equipment: a battlefield card, or cancel
@@ -757,7 +771,7 @@ document.addEventListener('click', (e) => {
   else if ('pile' in d) openPile(d.pile);
   else if ('life' in d) { const [s, dl] = d.life.split(':').map(Number); send({ type: 'life', seat: s, delta: dl }); }
   else if ('pad' in d) setSheet({ k: 'pad', seat: Number(d.pad) });
-  else if ('cmd' in d) { const [s, i] = d.cmd.split(':').map(Number); setSheet({ k: 'cmd', seat: s, i }); }
+  else if ('cmd' in d) setSheet({ k: 'cmd', seat: Number(d.cmd) });
   else if ('token' in d) setSheet({ k: 'token' });
   else if ('open' in d) openPile(d.open);
   else if ('pick' in d) pickDeck();
