@@ -18,7 +18,7 @@ phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (ph
 | Undo a step | `git revert <commit>` on `main` and push. The server follows `main` forward only, so never force-push. |
 | Checks | Seven commands, listed at the end. All pass at every commit below. |
 
-### What is live (after step 9)
+### What is live (after step 10)
 
 Games of 2 to 6 players; the pictures of that are under steps 6 and 7. The two-player table:
 
@@ -241,12 +241,47 @@ Not checked or weak in this step:
 - Whether the mat adds repaints while cards fly could not be told: the counts varied too much between runs.
   The drag loop's frame time did not change (16.7 ms on average).
 
-## What comes next, in this order
+## Step 10 — Token lookup (`f0e0e07`)
 
-1. Token lookup with art and power/toughness.
-2. Fixes from Jorge's and his testers' phone tests, as they arrive.
+- **A dataset of every token:** `data/tokens.json`, 1019 tokens from Scryfall, built by
+  `scripts/fetch_tokens.py`. 208 KB, 75 KB when compressed. It is loaded only when needed.
+- **Tokens look like permanents:** art, a frame in their colours, power/toughness, and a TOKEN mark so they are
+  never taken for a real card. They sort with creatures or other permanents and stack when identical.
+- **The token sheet:** search by name, type, colour or "2/2". The tokens your own visible cards make come first,
+  then the ones you made this visit. A count stepper. A custom name at the end for anything missing.
+  Creating keeps the sheet open, since making several kinds in a row is common.
+- **"One more"** in the action bar of a token already in play.
+- If the dataset cannot load, tokens are name panels as before and the sheet offers the custom name.
 
-New steps are added below as they are built.
+Games saved before this step keep working.
+
+![Searching](../../for_human_revision/09-token-lookup/token_search.gif)
+
+![Search results](img/10-token-search.jpg)
+![Tokens on the battlefield](img/10-tokens-on-board.jpg)
+
+The ones made this visit, "one more", and the sheet when the dataset cannot load:
+
+![Recent](img/10-token-recent.jpg)
+![One more](img/10-token-one-more.jpg)
+![Offline](img/10-token-offline.jpg)
+
+<img src="img/10-token-sheet-portrait.jpg" width="300" alt="Token sheet, portrait">
+
+Not checked or weak in this step:
+- Colour words in the search are English only ("green" works, "verde" does not).
+- Several tokens share a name and power/toughness and differ only by art.
+- The sheet is tight in landscape on a short phone: about two rows of tokens show at once.
+- A face-down card adds nothing to "from your cards".
+- A token whose image fails to load shows a blank tile.
+- No real keyboard or thumb has used the sheet yet.
+
+## What comes next
+
+Everything on the list is built. What remains is fixing what Jorge and his testers find on real phones, and the
+weak spots listed under each step above.
+
+New steps are added above this section as they are built.
 
 ## The checks
 
