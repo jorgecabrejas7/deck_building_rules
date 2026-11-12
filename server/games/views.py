@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db import transaction
@@ -13,6 +16,7 @@ from .models import Game, GamePlayer
 
 MAX_GAMES = 5
 MAX_CARDS = 250
+PRACTICE_DECK = json.loads((Path(__file__).parent / "practice_deck.json").read_text())
 
 
 def group_send(game_id, message):
@@ -92,3 +96,18 @@ def game(request, id):
     my_seat(request, id).game.delete()
     group_send(id, {"type": "ended"})
     return HttpResponse(status=204)
+
+
+@require_http_methods(["POST"])
+@signed_in
+def practice(request):
+    """A solo game with no pod: the practice deck against an empty seat. Starting one ends the last one."""
+    Game.objects.filter(pod=None, players__user=request.user).delete()
+    if GamePlayer.objects.filter(user=request.user).count() >= MAX_GAMES:
+        return bad({"games": "limit"})
+    with transaction.atomic():
+        g = Game.objects.create(status="active",
+                                state=table.new_game({1: PRACTICE_DECK, 2: {"entries": [], "commanders": []}}))
+        GamePlayer.objects.create(game=g, user=request.user, seat=1)
+        GamePlayer.objects.create(game=g, user=None, seat=2)
+    return JsonResponse({"id": g.id}, status=201)

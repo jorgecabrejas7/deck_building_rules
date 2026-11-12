@@ -284,3 +284,15 @@ def test_deleted_opponent_shows_null_name(setup):
         await c.disconnect()
 
     run(scenario)
+
+
+def test_practice_game_needs_no_pod_and_replaces_the_last_one(db):
+    a = login("ana")
+    first = post(a, "/pod/api/games/practice", {})
+    assert first.status_code == 201
+    gid = post(a, "/pod/api/games/practice", {}).json()["id"]
+    assert not Game.objects.filter(pk=first.json()["id"]).exists()
+    g = Game.objects.get(pk=gid)
+    assert g.pod is None and g.status == "active"
+    assert len(g.state["zones"]["1"]["hand"]) == 7 and g.state["zones"]["2"]["library"] == []
+    assert Client().post("/pod/api/games/practice").status_code == 403

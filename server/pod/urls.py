@@ -39,6 +39,7 @@ urlpatterns = [
     path("pod/api/pods/<int:id>/games", games.pod_games),
     path("pod/api/pods/<int:id>/decks", pods.add_deck),
     path("pod/api/pods/<int:id>/decks/<int:deck_id>", pods.remove_deck),
+    path("pod/api/games/practice", games.practice),
     path("pod/api/games/<int:id>/deck", games.game_deck),
     path("pod/api/games/<int:id>", games.game),
 ]

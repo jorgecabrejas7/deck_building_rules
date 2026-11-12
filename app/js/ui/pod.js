@@ -276,6 +276,7 @@ export function renderGames() {
       body = pickHtml(t) + flash + '<div class="panel pod-card">' + gamesHtml(t) + '</div>';
     }
   }
+  if (state.pods) body += '<div class="panel pod-card">' + note('pdGPracticeNote') + (gMsg && !state.pod ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') + '<button class="btn-primary" data-act="practice">' + esc(t.pdGPractice) + '</button></div>';
   el.innerHTML = '<div class="stack-16"><div class="part-head"><div><h2 class="part-title">' + esc(t.pdGames) + '</h2><p class="part-sub">' + esc(t.pdGIntro) + '</p></div></div>' + body + '</div>';
   el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange;
 }
@@ -352,6 +353,12 @@ async function onClick(e) {
   const a = b.dataset.act, entry = state.pod && state.pod.decks.find(d => d.id === Number(b.dataset.deck)), user = Number(b.dataset.user);
   if (a === 'cancel') { asking = null; adding = null; renaming = false; return paint(); }
   if (a === 'to-pod') return $('tabbtn-pod').click();
+  if (a === 'practice') {
+    const res = await api(API + 'games/practice', 'POST', {});
+    if (res.status === 201) return location.assign('table.html?game=' + res.data.id);
+    gMsg = res.data.errors && res.data.errors.games === 'limit' ? 'pdGLimit' : 'pdGErr';
+    return paint();
+  }
   if (a === 'analyze') return openDeck(entry);
   if (a === 'compare') {
     state.tableTexts = [deckToText(state.deck), deckToText(entry.list), '', ''];
