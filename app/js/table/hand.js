@@ -5,13 +5,15 @@
 import { tile, ICON } from './board.js';
 import { fill } from '../i18n.js';
 
-export function handHtml(view, t, open) {
+// armed: ms since the pass button was armed (0 when not); the bar resumes where it was, a render does not restart it
+export function handHtml(view, t, open, armed) {
   const hand = view.zones[view.you].hand;
   return `<div class="hand-head"><button class="hand-bar" data-hand aria-expanded="${open}">${fill(t.tbHandBar, { n: hand.length })}${ICON.up}</button>`
     + `<button class="tbtn ico" data-top="undo" title="${t.tbUndo}" aria-label="${t.tbUndo}"${view.can_undo ? '' : ' disabled'}>${ICON.undo}</button>`
     + `<button class="tbtn add" data-token>${ICON.plus}<span>${t.tbToken}</span></button>`
     // on your turn, passing it is one tap away; the menu passes on the other player's turn, or without a draw
-    + (view.turn && view.turn.seat === view.you ? `<button class="tbtn pass" data-top="pass">${t.tbPass}${ICON.pass}</button>` : '') + `</div>`
+    + (view.turn && view.turn.seat === view.you
+      ? `<button class="tbtn pass${armed ? ' armed' : ''}" data-top="pass"${armed ? ` style="--wait:-${Math.round(armed)}ms"` : ''}>${armed ? t.tbCancel : t.tbPass + ICON.pass}</button>` : '') + `</div>`
     + (open ? `<div class="hand-row">${hand.map((c, i) => tile(c, t).replace('<button ', `<button style="--i:${i}" `)).join('')}</div>` : '');
 }
 

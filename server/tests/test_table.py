@@ -101,14 +101,30 @@ def test_move_each_destination_and_ids(game):
                 kw = {"pos": pos} if pos else {}
                 g = apply(game, 1, mv(moving, seat, zone, **kw))
                 check(g)
-                assert not set(moving) & {c["id"] for c, _ in all_cards(g)}
+                assert set(moving) <= {c["id"] for c, _ in all_cards(g)}
 
 
-def test_library_move_reissues_ids_within_library(game):
+def test_library_move_keeps_ids_within_library(game):
     top = ids(game, 1, "library")[:3]
     g = apply(game, 1, mv(top, 1, "library", pos="bottom"))
-    assert not set(top) & set(ids(g, 1, "library"))
+    assert ids(g, 1, "library")[-3:] == top
     check(g)
+
+
+def test_ids_survive_moves_and_draws_but_not_shuffles(game):
+    c = ids(game, 1, "hand")[0]
+    g = game
+    for zone in ("battlefield", "graveyard", "hand"):
+        g = apply(g, 1, mv([c], 1, zone))
+        assert c in ids(g, 1, zone)
+    top = ids(g, 1, "library")[0]
+    g = apply(g, 1, mv([top], 1, "hand"))
+    assert top in ids(g, 1, "hand")
+    lib = set(ids(g, 1, "library"))
+    assert not lib & set(ids(apply(g, 1, {"type": "shuffle", "seat": 1}), 1, "library"))
+    mull = apply(g, 1, {"type": "mulligan", "n": 7})
+    before = lib | set(ids(g, 1, "hand"))
+    assert not before & (set(ids(mull, 1, "library")) | set(ids(mull, 1, "hand")))
 
 
 def test_library_top_order(game):
@@ -360,7 +376,7 @@ def test_attach_from_hand_enters_battlefield(game):
     host, equip = ids(g, 1, "battlefield")[0], ids(g, 1, "hand")[0]
     g = apply(g, 1, {"type": "attach", "card": equip, "to": host})
     entered = g["zones"]["1"]["battlefield"][-1]
-    assert entered["attached"] == host and entered["id"] != equip
+    assert entered["attached"] == host and entered["id"] == equip
     check(g)
 
 
@@ -425,10 +441,8 @@ def test_fuzz(game):
         assert len(g["log"]) <= 50 and len(g["history"]) <= 5 and g["log"][-1]["type"] == t
         on_bf = {c["id"] for zs in g["zones"].values() for c in zs["battlefield"]}
         assert all(c.get("attached") in on_bf | {None} for c, _z in all_cards(g))
-        if t in ("move", "shuffle", "mulligan"):
-            now = {c["id"] for c, _z in all_cards(g)}
-            old = set(a.get("cards", [])) if t == "move" else set()
-            assert not old & now
+        if t == "move":
+            assert set(a["cards"]) <= {c["id"] for c, _z in all_cards(g)}
     assert sum(len(c) for zs in g["zones"].values() for c in zs.values()) >= 1
 
 

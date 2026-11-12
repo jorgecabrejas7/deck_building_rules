@@ -6,14 +6,15 @@ import { index } from './board.js';
 const GLOW = 2600, glow = new Map(); // selector -> when it lit
 let glowTimer = null;
 
-// selectors for what differs between two views: cards with a new id (moved, drawn, created, put back by undo) or a
-// changed state, and the piles a card entered or left. Ids change on every zone move, so piles stand in for them
+// selectors for what differs between two views: cards with a new id (created, shuffled, put back by undo), cards that
+// changed place (same id, other seat or zone) or state, and the piles a card entered or left
 export function changed(prev, next) {
   const a = index(prev), b = index(next), out = new Set();
   const card = (id) => `[data-card="${id}"],[data-ids~="${id}"],[data-m~="${id}"]`, pile = (h) => `[data-pile="${h.seat}:${h.zone}"],[data-pk="${h.seat}:${h.zone}"]`;
   for (const [id, h] of b) {
     const o = a.get(id);
     if (!o) { out.add(card(id)); out.add(pile(h)); continue; }
+    if (o.seat !== h.seat || o.zone !== h.zone) { out.add(card(id)); out.add(pile(o)); out.add(pile(h)); }
     const x = o.card, y = h.card;
     if (x.tapped !== y.tapped || x.face_down !== y.face_down || x.name !== y.name || x.attached !== y.attached || JSON.stringify(x.counters) !== JSON.stringify(y.counters)) out.add(card(id));
   }

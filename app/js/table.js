@@ -10,6 +10,8 @@ import { buildBar } from './table/bar.js';
 import { handHtml, layoutHand, cardAtX, raise } from './table/hand.js';
 import { firstRun, startHints, placeCoach } from './table/coach.js';
 import { line } from './table/log.js';
+import { patch, snapshot, play } from './table/motion.js';
+import { predict } from './table/predict.js';
 import { changed, glowOn, applyGlow, lifeMoved } from './table/cues.js';
 
 const $ = (id) => document.getElementById(id);
@@ -17,7 +19,8 @@ const API = '../api/';
 const gameId = (new URLSearchParams(location.search).get('game') || '').match(/^\d+$/)?.[0];
 const BACKOFF = [500, 1000, 2000, 4000, 8000];
 
-let view = null, lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
+// base: the last view the server sent; pending: actions sent and not yet answered; view (what is shown) is pending predicted over base
+let view = null, base = null, pending = [], lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
 let gone = gameId ? null : 'tbNoGame'; // message key once the game is unreachable for good
 let sheet = null, items = [], handOpen = true, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, logSeq = null;
 // the active board: one at a time on phones, highlighted where both fit. Yours unless you look at theirs
@@ -39,13 +42,22 @@ function connect() {
   s.onopen = () => { attempt = 0; render(); };
   s.onmessage = (e) => {
     let m; try { m = JSON.parse(e.data); } catch (err) { return; }
-    if (m.type === 'state') { if (m.seq < lastSeq) return; lastSeq = m.seq; const prev = view; view = m.view; render(); news(prev); }
-    else if (m.type === 'error') toast(T()[{ stale: 'tbStale', rate: 'tbRate', invalid: 'tbInvalid', lobby: 'tbLobbyErr', undo: 'tbUndoErr' }[m.code] || 'tbInvalid']);
-    else if (m.type === 'ended') { gone = 'tbEnded'; render(); }
+    if (m.type === 'state') {
+      if (m.seq < lastSeq) return;
+      lastSeq = m.seq;
+      const prev = view;
+      base = m.view;
+      if (m.ack != null) pending = pending.filter((p) => p.n > m.ack);
+      replay(); render(); news(prev);
+    } else if (m.type === 'error') {
+      pending = pending.filter((p) => p.n !== m.ack);
+      replay(); render();
+      toast(T()[{ stale: 'tbStale', rate: 'tbRate', invalid: 'tbInvalid', lobby: 'tbLobbyErr', undo: 'tbUndoErr' }[m.code] || 'tbInvalid']);
+    } else if (m.type === 'ended') { gone = 'tbEnded'; render(); }
   };
   s.onclose = (e) => {
     if (sock !== s) return;
-    sock = null;
+    sock = null; pending = []; disarmPass(); replay(); // the server sends a fresh state on connect
     if (e.code === 4403) gone = 'tbDenied'; else if (e.code === 4000) gone = 'tbEnded';
     if (!gone) timer = setTimeout(connect, BACKOFF[Math.min(attempt++, BACKOFF.length - 1)]);
     render();
@@ -55,37 +67,58 @@ const retryNow = () => { if (!gone && !sock && document.visibilityState !== 'hid
 document.addEventListener('visibilitychange', retryNow);
 addEventListener('online', retryNow);
 
+// an action the server has not answered yet stays in pending; a not predictable one (predict returns null) just waits
+const replay = () => { view = pending.reduce((v, p) => predict(v, p.action) || v, base); };
 function send(action) {
   if (!open()) return toast(T().tbNotSent);
-  sock.send(JSON.stringify({ n: ++n, action }));
+  pending.push({ n: ++n, action });
+  sock.send(JSON.stringify({ n, action }));
+  const next = view && view.status === 'active' && predict(view, action), prev = view;
+  if (!next) return;
+  view = next;
+  render();
+  lifeMoved(prev, view, lifeSay);
+}
+
+// Pass turn draws a card, which cannot be undone: the button arms for PASS_WAIT and a second tap, Escape or a closing socket cancels
+const PASS_WAIT = 1500;
+let passAt = 0, passTimer = null;
+function disarmPass() { clearTimeout(passTimer); const was = passAt; passAt = 0; return !!was; }
+function tapPass() {
+  if (disarmPass()) return render();
+  passAt = performance.now();
+  passTimer = setTimeout(() => { disarmPass(); send({ type: 'pass_turn', draw: true }); render(); }, PASS_WAIT);
+  say(T().tbPassArmed);
+  render();
 }
 
 // the page's one live region: errors, rolls, turns and settled life totals are spoken through it, nothing else
 const say = (text) => { $('live').textContent = text; };
 
-// a pill above the hand and your rail. Errors are red; info is neutral and, after your own undoable action, carries Undo for 5 s.
+// a pill above the hand and your rail. Errors are red; info is neutral.
 // html: dictionary text, or a log line (names already escaped)
-function toast(html, info = false, undo = false, quiet = false) {
-  const el = $('toast'), t = T();
-  el.innerHTML = `<span>${html}</span>` + (undo ? `<button class="sb" data-top="undo">${ICON.undo}${t.tbUndo}</button>` : '');
+function toast(html, info = false) {
+  const el = $('toast');
+  el.innerHTML = `<span>${html}</span>`;
   el.classList.toggle('info', info);
   // above whatever is docked at the bottom: the hand, the docked bar, your rail on phones
   const top = Math.min(innerHeight, ...[...document.querySelectorAll('#hand,#bar.dock,.seat.me>.strip,.seat.me>.peek')]
     .map((x) => x.getBoundingClientRect()).filter((r) => r.height && r.top > innerHeight / 2).map((r) => r.top));
   el.style.bottom = Math.round(innerHeight - top + 10) + 'px';
   el.classList.add('on');
-  if (!quiet) say(el.firstChild.textContent);
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), undo ? 5000 : 3500);
+  say(el.firstChild.textContent);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 3500);
 }
 
-// what the log says happened since the last state: your own undoable action offers Undo, a roll shows its result,
+// what the log says happened since the last state: your own undo is spoken, a roll shows its result,
 // the opponent's move glows, a turn passed to you is announced once, and life changes float from their number
+const lifeSay = (s, d) => say(fill(T().tbLifeSay, { n: view.players[s].name || '?', d, l: view.players[s].life }));
 function news(prev) {
   if (!view || view.status !== 'active' || !view.log) return;
   const fresh = logSeq === null ? [] : view.log.filter((e) => e.seq > logSeq), t = T(), last = fresh[fresh.length - 1];
   logSeq = view.log.length ? view.log[view.log.length - 1].seq : logSeq === null ? 0 : logSeq;
   if (!prev || !prev.zones || !fresh.length) return;
-  lifeMoved(prev, view, (s, d) => say(fill(t.tbLifeSay, { n: view.players[s].name || '?', d, l: view.players[s].life })));
+  lifeMoved(prev, view, lifeSay);
   if (fresh.every((e) => e.seat !== view.you)) glowOn(changed(prev, view));
   const roll = fresh.filter((e) => e.type === 'roll').pop();
   if (view.turn.seat === view.you && prev.turn.seat !== view.you && fresh.some((e) => e.type === 'pass_turn')) {
@@ -94,7 +127,7 @@ function news(prev) {
     glowOn([`.seat[data-seat="${view.you}"]>.strip`, `.seat[data-seat="${view.you}"]>.peek`]);
     if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate([18, 80, 18]);
   } else if (roll) toast(line(roll, view, t), true);
-  else if (last.seat === view.you && (view.can_undo || last.type === 'undo')) toast(line(last, view, t), true, view.can_undo, true);
+  else if (last.type === 'undo' && last.seat === view.you) say(new DOMParser().parseFromString(line(last, view, t), 'text/html').body.textContent);
 }
 
 // ---- rendering ----
@@ -108,7 +141,9 @@ function applyTheme() {
   document.body.classList.toggle('dark', state.theme ? state.theme === 'dark' : state.sysDark);
 }
 
+let shown = null; // the view the last render drew: what motion animates from
 function render() {
+  const before = snapshot(); // before any DOM change
   const t = T(), active = view && view.status === 'active' && !gone;
   document.documentElement.lang = state.lang;
   applyTheme();
@@ -120,9 +155,11 @@ function render() {
   if (gone) { board.innerHTML = `<div class="lobby gone"><p>${t[gone]}</p><a class="sb on" href="./">${t.tbBack}</a></div>`; sheet = null; }
   else if (!view) board.textContent = t.tbConnecting;
   else if (view.status === 'lobby') { keepInputs(board, () => { board.innerHTML = `<button class="chip ico menu-btn lobby-menu" data-top="menu" aria-label="${t.tbMenu}">${ICON.menu}</button>` + lobbyHtml(view, t, decks, lobbyErr); }); if (decks === null) loadDecks(); }
-  else board.innerHTML = boardHtml(view, t);
-  const hand = $('hand');
-  hand.innerHTML = active ? handHtml(view, t, handOpen) : '';
+  else patch(board, boardHtml(view, t));
+  const hand = $('hand'), hf = hand.contains(document.activeElement) && document.activeElement.dataset.top; // the head is re-templated: keep focus on its button
+  if (!(active && view.turn && view.turn.seat === view.you)) disarmPass();
+  if (active) patch(hand, handHtml(view, t, handOpen, passAt && performance.now() - passAt)); else hand.innerHTML = '';
+  if (hf) { const f = hand.querySelector(`[data-top="${hf}"]`); if (f) f.focus({ preventScroll: true }); }
   if (active) hand.dataset.drop = view.you + ':hand'; else delete hand.dataset.drop;
   layoutHand(handRow());
   if (active) applyFocus(false);
@@ -137,6 +174,8 @@ function render() {
   if (active) firstRun(T, fullscreen);
   applyGlow();
   placeCoach();
+  play(before, shown, active ? view : null);
+  shown = active ? view : null;
 }
 const handRow = () => $('hand').querySelector('.hand-row');
 new ResizeObserver(() => layoutHand(handRow())).observe($('hand'));
@@ -328,6 +367,7 @@ function closePreview() {
 // cards, the bar docks above the hand with the count, and its actions take every selected card.
 let sel = new Map(), selMode = false, barItems = [], barKey = '', said = '';
 const BOARD_CARD = '#board [data-card],#hand [data-card]';
+const CONTROL = '[data-b],[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-pad],[data-preview-close]';
 const idsOf = (el) => el.dataset.ids ? el.dataset.ids.split(' ') : [el.dataset.card];
 const selIds = () => [...new Set([...sel.values()].flat())];
 const elFor = (id) => document.querySelector(`#board [data-card="${id}"],#hand [data-card="${id}"]`) || document.querySelector(`#board [data-ids~="${id}"]`);
@@ -399,7 +439,8 @@ function placeBar() {
   const a = elFor([...sel.values()][0][0]), r = a && a.getBoundingClientRect();
   if (!r || !r.width) { clearSel(); return; } // its board was turned away
   const w = bar.offsetWidth, h = bar.offsetHeight, m = 8, gap = 10;
-  const above = r.top - gap - h >= m, top = above ? r.top - gap - h : Math.min(r.bottom + gap, innerHeight - m - h);
+  const edge = a.closest('#hand') ? $('hand').getBoundingClientRect().top : r.top; // over a hand card, above the whole hand: its head keeps Undo and Pass reachable
+  const above = edge - gap - h >= m, top = above ? edge - gap - h : Math.min(r.bottom + gap, innerHeight - m - h);
   bar.style.left = Math.round(Math.min(Math.max(m, r.left + r.width / 2 - w / 2), innerWidth - m - w)) + 'px';
   bar.style.top = Math.round(Math.max(m, top)) + 'px';
   bar.dataset.side = above ? 'above' : 'below';
@@ -594,9 +635,9 @@ function hoverCard(e) {
 document.addEventListener('pointerout', (e) => { if (!e.relatedTarget) hov.hidden = true; });
 
 document.addEventListener('click', (e) => {
-  // a single card's bar closes on a tap anywhere else, and that tap does nothing more
-  if (sel.size && !selMode && !swallow && !e.target.closest('#bar') && !e.target.closest(BOARD_CARD)) { clearSel(); return; }
-  const el = e.target.closest('[data-b],[data-focus],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-hand],[data-top],[data-pick],[data-pad],[data-preview-close]');
+  const el = e.target.closest(CONTROL);
+  // a single card's bar closes on a tap anywhere else; a tap on empty space does nothing more, a control still runs
+  if (sel.size && !selMode && !swallow && !e.target.closest('#bar') && !e.target.closest(BOARD_CARD)) clearSel();
   if (!el) return;
   if (swallow) { swallow = false; return; }
   hov.hidden = true;
@@ -626,7 +667,6 @@ document.addEventListener('click', (e) => {
     else if (hit.zone === 'battlefield' && hit.seat === view.you) {
       if (dbl) return; // the second tap of a double tap must not untap it again
       clearSel();
-      if (!d.n) el.classList.toggle('tapped'); // a stack waits for the server: one of its cards moves to the tapped stack
       send({ type: 'tap', cards: [hit.card.id], tapped: !hit.card.tapped });
     } else if (dbl) { clearSel(); preview(d.card); }
     else select(el, false);
@@ -641,8 +681,8 @@ document.addEventListener('click', (e) => {
   else if (d.top === 'menu') setSheet({ k: 'menu' });
   else if (d.top === 'full') fullscreen();
   else if (d.top === 'untap') send({ type: 'untap_all', seat: view.you });
-  else if (d.top === 'undo') { $('toast').classList.remove('on'); send({ type: 'undo' }); }
-  else if (d.top === 'pass') send({ type: 'pass_turn', draw: true });
+  else if (d.top === 'undo') send({ type: 'undo' });
+  else if (d.top === 'pass') tapPass();
   else if (d.top === 'log') setSheet({ k: 'log' });
 });
 document.addEventListener('input', (e) => { if (e.target.id === 'sq') filterSearch(); });
@@ -658,6 +698,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key !== 'Escape') return;
   if (press) { endPress(null); return; }
+  if (disarmPass()) { render(); return; }
   if (picking) { picking = null; render(); return; }
   if (!$('preview').hidden) closePreview();
   else if (sel.size && $('sheet').hidden) clearSel();

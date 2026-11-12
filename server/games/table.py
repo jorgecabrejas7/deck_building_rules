@@ -1,7 +1,7 @@
 """Pure two-player table reducer: no Django, no I/O. State is plain JSON (seat keys are "1"/"2").
 
-Hidden information: view() never sends a name the viewer may not see, and every zone change
-or shuffle issues a new card id, so an id cannot be followed into a hidden zone.
+Hidden information: view() never sends a name the viewer may not see. A card keeps its id across moves and draws;
+only a shuffle (a mulligan shuffles too) issues new ids, so an id cannot be followed through a shuffle.
 library[0] is the top of the library. state["seq"] counts applied actions.
 An aura or equipment on the battlefield points at its host with "attached" (the host's id); the pointer follows
 the host across a change of control and is dropped when either card leaves the battlefield.
@@ -45,7 +45,6 @@ def _card(name, owner, token=False, known_by=()):
 def _draw(state, seat, n):
     z = state["zones"][str(seat)]
     for c in z["library"][:n]:
-        c["id"] = _new_id()
         c["known_by"] = [seat]
         z["hand"].append(c)
     del z["library"][:n]
@@ -189,12 +188,12 @@ def _locate(state, ids):
         raise ActionError("stale") from None
 
 
-def _reattach(state, renamed):
-    """Point attachments at their host's new id, or drop them when the host left the battlefield."""
+def _reattach(state, hosts):
+    """Drop the attachments whose host id is in `hosts` (the host left the battlefield)."""
     for zs in state["zones"].values():
         for c in zs["battlefield"]:
-            if c.get("attached") in renamed:
-                c["attached"] = renamed[c["attached"]]
+            if c.get("attached") in hosts:
+                c["attached"] = None
 
 
 def _seen(card, zone):
@@ -232,13 +231,12 @@ def _move(state, seat, a):
         _bad()
     found = _locate(state, ids)
     _remove(state, ids)
-    moved, renamed, refs, peek = [], {}, [], False
+    moved, left, refs, peek = [], set(), [], False
     for c, src, src_seat in found:
         before = _seen(c, src)
         if src == "battlefield" and zone != "battlefield":
             c["tapped"], c["counters"], c["attached"] = False, {}, None
-        old, c["id"] = c["id"], _new_id()
-        renamed[old] = c["id"] if src == zone == "battlefield" else None
+            left.add(c["id"])
         c["face_down"] = face_down
         c["known_by"] = sorted(before | ({dest_seat} if zone == "hand" else set()))
         after = _seen(c, zone)
@@ -252,7 +250,7 @@ def _move(state, seat, a):
         dest[0:0] = moved
     else:
         dest.extend(moved)
-    _reattach(state, renamed)
+    _reattach(state, left)
     return {"cards": refs, "to": {"seat": dest_seat, "zone": zone}, "pos": (pos or "top") if zone == "library" else None,
             "face_down": face_down, "shuffle": shuffle, "peek": peek}
 
@@ -321,7 +319,7 @@ def _delete(state, seat, a):
     if not c["token"]:
         _bad()
     _remove(state, [cid])
-    _reattach(state, {cid: None})
+    _reattach(state, {cid})
     return {"card": _ref(c, s, z, _seen(c, z))}
 
 
@@ -343,7 +341,7 @@ def _attach(state, seat, a):
     if zone != "battlefield":
         peek = _move(state, seat, {"type": "move", "cards": [cid], "to": {"seat": seat, "zone": "battlefield"}})["peek"]
         c = state["zones"][str(seat)]["battlefield"][-1]
-    _reattach(state, {c["id"]: None})
+    _reattach(state, {c["id"]})
     c["attached"] = host["id"]
     return {"card": _ref(c, cseat, zone, before | _seen(c, "battlefield")),
             "host": _ref(host, hseat, hzone, _seen(host, hzone)), "peek": peek}

@@ -9,6 +9,7 @@ const E = [
   { type: 'move', cards: [c('library', 'Island')], to: { seat: 1, zone: 'hand' }, pos: null, face_down: false, shuffle: false },
   { type: 'move', cards: [c('hand', 'Island')], to: { seat: 1, zone: 'battlefield' }, pos: null, face_down: true, shuffle: false },
   { type: 'move', cards: [c('battlefield', 'Sol Ring')], to: { seat: 2, zone: 'battlefield' }, pos: null, face_down: false, shuffle: false },
+  { type: 'move', cards: [{ seat: 2, zone: 'battlefield', name: 'Sol Ring' }], to: { seat: 1, zone: 'battlefield' }, pos: null, face_down: false, shuffle: false },
   { type: 'move', cards: [c('battlefield', 'Sol Ring')], to: { seat: 1, zone: 'battlefield' }, pos: null, face_down: false, shuffle: false },
   { type: 'move', cards: [c('graveyard', 'X')], to: { seat: 1, zone: 'battlefield' }, pos: null, face_down: false, shuffle: false },
   { type: 'move', cards: [c('library'), c('library'), c('library')], to: { seat: 1, zone: 'graveyard' }, pos: null, face_down: false, shuffle: false },
@@ -45,6 +46,8 @@ for (const lang of ['es', 'en']) for (const you of [1, 2]) {
     const s = line({ seq: i, turn: 1, seat: 1, ...e }, view, t);
     if (!s || /%[a-z]|⟦|undefined/.test(s)) errs.push(`${lang} you=${you} ${e.type}: ${s}`);
   });
+  const ctl = /control/, [give, steal, same] = [2, 3, 4].map((i) => line({ seq: i, turn: 1, seat: 1, ...E[i] }, view, t));
+  if (!ctl.test(give) || !ctl.test(steal) || ctl.test(same)) errs.push(`${lang} you=${you}: control change sentences: ${give} | ${steal} | ${same}`);
   view.log = E.map((e, i) => ({ seq: i, turn: i < 20 ? 1 : 2, seat: 1 + (i % 2), ...e }));
   if (!logHtml(view, t).includes(fill(t.tbTurnN, { n: 1 }))) errs.push(`${lang}: no turn heading`);
 }

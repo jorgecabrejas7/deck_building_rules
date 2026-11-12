@@ -28,17 +28,20 @@ export function buildSheet(sh, view, c) {
     if (sh.move) {
       for (const s of [view.you, other(view.you)]) {
         body += `<h3>${name(s)}</h3>`;
-        const mv = (label, to, extra = {}) => b(label, () => send({ type: 'move', cards: ids, to: { seat: s, zone: to }, ...extra }));
+        const mv = (label, to, extra = {}) => !Object.keys(extra).length && s === seat && to === zone ? '' : b(label, () => send({ type: 'move', cards: ids, to: { seat: s, zone: to }, ...extra }));
         body += row(...ZONES.map((z) => z === 'library'
           ? mv(`${t.tbZlibrary} · ${t.tbTop}`, z, { pos: 'top' }) + mv(`${t.tbZlibrary} · ${t.tbBottom}`, z, { pos: 'bottom' })
           : mv(t['tbZ' + z], z) + (z === 'battlefield' || z === 'exile' ? mv(`${t['tbZ' + z]} · ${t.tbFaceDown}`, z, { face_down: true }) : '')));
       }
     } else {
       // a card goes to its owner's zones, except the battlefield, which is yours: you play it
-      const go = (label, z, extra = {}, cls = '') => b(label, () => send({ type: 'move', cards: ids, to: { seat: z === 'battlefield' ? view.you : card.owner, zone: z }, ...extra }), cls);
+      const go = (label, z, extra = {}, cls = '') => {
+        const s = z === 'battlefield' ? view.you : card.owner;
+        return !Object.keys(extra).length && s === seat && z === zone ? '' : b(label, () => send({ type: 'move', cards: ids, to: { seat: s, zone: z }, ...extra }), cls); // a card already there has nowhere to go
+      };
       body += row(
         bf && b(card.tapped ? t.tbUntap : t.tbTap, () => send({ type: 'tap', cards: ids, tapped: !card.tapped }), 'on'),
-        zone !== 'battlefield' && go(zone === 'hand' ? t.tbPlay : t.tbToField, 'battlefield', {}, 'on'),
+        go(zone === 'hand' ? t.tbPlay : t.tbToField, 'battlefield', {}, 'on'),
         (bf || zone === 'exile') && b(t.tbFlip, () => send({ type: 'flip', cards: ids, face_down: !card.face_down })),
         !card.name && b(t.tbLook, () => send({ type: 'look', cards: ids })),
         card.name && !card.shared && b(t.tbReveal, () => send({ type: 'reveal', cards: ids })),
@@ -47,12 +50,12 @@ export function buildSheet(sh, view, c) {
         bf && b(t.tbGive, () => send({ type: 'move', cards: ids, to: { seat: other(seat), zone: 'battlefield' } })),
         card.token && b(t.tbDelete, () => send({ type: 'delete', card: card.id }), 'danger'));
       body += `<h3>${t.tbSendTo}</h3>` + row(
-        zone !== 'hand' && go(t.tbZhand, 'hand'),
-        zone !== 'graveyard' && go(t.tbZgraveyard, 'graveyard'),
-        zone !== 'exile' && go(t.tbZexile, 'exile'),
+        go(t.tbZhand, 'hand'),
+        go(t.tbZgraveyard, 'graveyard'),
+        go(t.tbZexile, 'exile'),
         go(`${t.tbZlibrary} · ${t.tbTop}`, 'library', { pos: 'top' }),
         go(`${t.tbZlibrary} · ${t.tbBottom}`, 'library', { pos: 'bottom' }),
-        zone !== 'command' && go(t.tbZcommand, 'command'),
+        go(t.tbZcommand, 'command'),
         b(t.tbMove, () => c.setSheet({ ...sh, move: true }), 'quiet', true));
       if (bf) {
         const cn = (n, d) => b(d > 0 ? '+' : '−', () => send({ type: 'counter', card: card.id, name: n, delta: d }), '', true);

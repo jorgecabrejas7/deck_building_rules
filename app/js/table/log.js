@@ -13,7 +13,7 @@ function cards(list, t) {
 function moveKey(e) {
   const from = (e.cards[0] || {}).zone, to = e.to.zone;
   if (to === 'hand') return from === 'library' ? 'lgDraw' : 'lgToHand';
-  if (to === 'battlefield') return from === 'hand' ? 'lgPlay' : from === 'battlefield' ? (e.to.seat === e.seat ? 'lgSteal' : 'lgGive') : 'lgToField';
+  if (to === 'battlefield') return from === 'hand' ? 'lgPlay' : from === 'battlefield' && e.cards[0].seat !== e.to.seat ? (e.to.seat === e.seat ? 'lgSteal' : 'lgGive') : 'lgToField';
   if (to === 'graveyard') return from === 'library' ? 'lgMill' : from === 'hand' ? 'lgDiscard' : 'lgToGrave';
   if (to === 'exile') return 'lgExile';
   if (to === 'command') return 'lgToCmd';
