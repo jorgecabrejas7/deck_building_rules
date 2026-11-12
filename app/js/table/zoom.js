@@ -5,7 +5,15 @@ import { tile } from './board.js';
 const el = document.getElementById('hover'), still = matchMedia('(prefers-reduced-motion: reduce)');
 const M = 8, R = 40; // screen margin; clearance around a finger
 
-export const hideZoom = () => { el.hidden = true; };
+// it fades out over FADE ms; showing again cancels that at once, so sliding from card to card never waits
+const FADE = 90;
+let fading = null;
+export function hideZoom() {
+  if (el.hidden || fading) return;
+  if (still.matches) { el.hidden = true; return; }
+  const a = fading = el.animate({ opacity: [1, 0] }, { duration: FADE, easing: 'ease-in', fill: 'forwards' });
+  a.onfinish = () => { if (fading === a) { el.hidden = true; fading = null; } a.cancel(); };
+}
 
 // at: {rect} a mouse on the card with that rect (shown beside it), or {x, y, side} a finger
 // (shown on the screen's far side, 'left' or 'right', fixed for the whole gesture). Returns whether a card is shown.
@@ -13,6 +21,7 @@ export function showZoom(card, t, at) {
   if (card.face_down || !card.name) { hideZoom(); return false; }
   const html = tile(card, t, true).replace('data-card', 'data-x').replace(/^<button/, '<div').replace(/<\/button>$/, '</div>'); // not focusable, not a hit target
   if (el.dataset.h !== html) { el.dataset.h = html; el.innerHTML = html; }
+  if (fading) { fading.cancel(); fading = null; }
   const was = el.hidden;
   el.hidden = false;
   const portrait = innerHeight > innerWidth;

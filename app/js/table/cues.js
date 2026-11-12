@@ -38,6 +38,13 @@ export function applyGlow() {
   for (const [s, t0] of glow) for (const el of document.querySelectorAll(s)) { el.classList.add('glow'); el.style.setProperty('--gd', Math.round(t0 - now) + 'ms'); }
 }
 
+// a shuffled library: its chip riffles, three quick offsets and a settle
+export function riffle(seat) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const chip = [...document.querySelectorAll(`[data-pile="${seat}:library"]`)].find((el) => el.getClientRects().length);
+  if (chip) chip.animate({ translate: ['0 0', '-4px 0', '4px 0', '-3px 0', '3px 0', '0 0'], rotate: ['0deg', '-5deg', '5deg', '-4deg', '4deg', '0deg'] }, { duration: 360, easing: 'ease-in-out' });
+}
+
 // one bubble per seat above its life number: rapid changes add up into one running delta, which floats away once
 // they stop; settle(seat, delta) is told the total then (table.js announces it)
 const bub = {}, REST = 1100;

@@ -3,7 +3,7 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
+import { boardHtml, lobbyHtml, index, visibleNames, tile, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 import { buildBar } from './table/bar.js';
@@ -14,8 +14,10 @@ import { showZoom, hideZoom } from './table/zoom.js';
 import { showTray, hideTray } from './table/tray.js';
 import { line } from './table/log.js';
 import { patch, snapshot, play } from './table/motion.js';
+import { pickUp } from './table/drag.js';
+import { tumble } from './table/dice.js';
 import { predict } from './table/predict.js';
-import { changed, glowOn, applyGlow, lifeMoved } from './table/cues.js';
+import { changed, glowOn, applyGlow, lifeMoved, riffle } from './table/cues.js';
 
 const $ = (id) => document.getElementById(id);
 const API = '../api/';
@@ -103,7 +105,7 @@ const say = (text) => { $('live').textContent = text; };
 
 // a pill: top centre on wide screens (the hand is down there), just above the hand on tall ones. Errors are red; info is neutral.
 // html: dictionary text, or a log line (names already escaped)
-function toast(html, info = false) {
+function toast(html, info = false, quiet = false) {
   const el = $('toast');
   el.innerHTML = `<span>${html}</span>`;
   el.classList.toggle('info', info);
@@ -112,8 +114,9 @@ function toast(html, info = false) {
     .map((x) => x.getBoundingClientRect()).filter((r) => r.height && r.top > innerHeight / 2).map((r) => r.top));
   el.style.bottom = BOTH.matches ? '' : Math.round(innerHeight - top + 10) + 'px';
   el.classList.add('on');
-  say(el.firstChild.textContent);
+  if (!quiet) say(el.firstChild.textContent);
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 3500);
+  return el;
 }
 
 // what the log says happened since the last state: your own undo is spoken, a roll shows its result,
@@ -130,14 +133,20 @@ function news(prev) {
   const off = new Set([...fresh.map((e) => e.seat), ...Object.keys(view.players).filter((s) => view.players[s].life !== prev.players[s].life)].map(Number));
   off.delete(view.you); off.delete(topSeat(view));
   glowOn([...off].map((s) => `.sp[data-sp="${s}"]`));
+  for (const e of fresh) { const s = e.type === 'shuffle' ? e.target : e.type === 'mulligan' ? e.seat : e.type === 'move' && e.shuffle ? e.to.seat : 0; if (s) riffle(s); }
   const roll = fresh.filter((e) => e.type === 'roll').pop();
   if (view.turn.seat === view.you && prev.turn.seat !== view.you && fresh.some((e) => e.type === 'pass_turn')) {
     if ((focus || view.you) !== view.you && $('sheet').hidden && !press && !picking && !sel.size) setFocus(view.you);
     toast(fill(t.tbYourTurn, { n: view.turn.number }), true);
     glowOn([`.seat[data-seat="${view.you}"] .pill`, `.seat[data-seat="${view.you}"]>.peek`]);
     if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate([18, 80, 18]);
-  } else if (roll) toast(line(roll, view, t), true);
-  else if (last.type === 'undo' && last.seat === view.you) say(new DOMParser().parseFromString(line(last, view, t), 'text/html').body.textContent);
+  } else if (roll) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) toast(line(roll, view, t), true);
+    else { // the die tumbles first; its result is shown, and spoken, when it lands
+      const el = toast(`<i class="die${roll.sides === 2 ? ' coin' : ''}" aria-hidden="true"></i><span class="dl wait">${line(roll, view, t)}</span>`, true, true), text = el.querySelector('.dl');
+      tumble(el.querySelector('.die'), roll, t, () => { text.classList.remove('wait'); say(text.textContent); });
+    }
+  } else if (last.type === 'undo' && last.seat === view.you) say(new DOMParser().parseFromString(line(last, view, t), 'text/html').body.textContent);
 }
 
 // ---- rendering ----
@@ -249,7 +258,7 @@ function filterSearch() {
 
 const setSheet = (s) => { sheet = s; renderSheet(); };
 const ctx = () => ({
-  t: T(), send, setSheet, pickHost: (id) => { picking = id; render(); }, closeSheet: () => setSheet(sheet && sheet.back ? sheet.back : null), endGame, fullscreen,
+  t: T(), send, setSheet, pickHost: (id) => { picking = id; render(); }, closeSheet: () => setSheet(sheet && sheet.back ? sheet.back : null), endGame,
   hints: () => { setSheet(null); startHints(); },
   lang: state.lang, dark: document.body.classList.contains('dark'),
   setLang: (l) => { state.lang = store.lang = l; render(); },
@@ -546,18 +555,12 @@ function startDrag(p, e) {
   // a selected card takes the whole selection along; any other card goes alone and ends a single card's bar
   p.ids = !p.pile && idsOf(p.el).some((id) => selIds().includes(id)) ? selIds() : [p.id];
   if (p.ids.length === 1 && !selMode) clearSel();
-  const r = p.el.getBoundingClientRect(), src = art(p.hit.card);
-  const g = p.ghost = document.createElement('div');
-  g.className = 'ghost' + (p.ids.length > 1 ? ' many' : '');
-  g.style.width = Math.min(Math.max(r.width, 72), 110) + 'px';
-  g.innerHTML = (src ? `<img src="${esc(src)}" alt="">` : '') + (p.ids.length > 1 ? `<b class="nx">×${p.ids.length}</b>` : '');
-  if (!src) g.classList.add('blank');
-  document.body.append(g);
+  p.d = pickUp(p.el, { card: p.hit.card, t: T(), id: p.id, n: p.ids.length, hosts: p.ids.length === 1 && attachable(p.hit.card), hit: (x, y) => dropAt(p, x, y), x: e.clientX, y: e.clientY });
   document.body.classList.add('dragging');
-  p.el.classList.add('lifted');
+  p.lifts = [p.el, ...p.ids.map(elFor)].filter(Boolean); // each card's slot shows a faint placeholder
+  for (const el of p.lifts) el.classList.add('lifted');
   // shortcut: the tray serves the owner of the card under the finger, not of every card in a multi-selection; split it if mixed drags matter
   showTray(p.hit.card.owner, p.hit.zone, SHORT.matches || p.y0 > innerHeight / 2, T()); // short wide: always the top, the hand peeks at the bottom
-  moveDrag(p, e);
 }
 
 // an aura or equipment let go over a battlefield card attaches to it; anything else lands on the zone under it
@@ -568,10 +571,10 @@ function dropAt(p, x, y) {
   return el && el.closest('[data-drop]');
 }
 
-function moveDrag(p, e) {
-  p.ghost.style.transform = `translate(${e.clientX - p.ghost.offsetWidth / 2}px,${e.clientY - p.ghost.offsetHeight * 0.6}px) rotate(-3deg)`;
-  const tgt = dropAt(p, e.clientX, e.clientY);
-  if (tgt !== p.over) { if (p.over) p.over.classList.remove('drop-on'); p.over = tgt; if (tgt) tgt.classList.add('drop-on'); }
+// the placeholders fill again at once, not fading in under the card that lands on them
+function settle(els) {
+  for (const el of els) { el.style.transition = 'none'; el.classList.remove('lifted'); }
+  requestAnimationFrame(() => { for (const el of els) el.style.transition = ''; });
 }
 
 function endPress(e) {
@@ -579,32 +582,42 @@ function endPress(e) {
   press = null;
   if (!p) return;
   clearTimeout(p.timer);
-  p.el.classList.remove('lifted');
-  if (p.hand) raise(handRow(), null);
   if (p.hand || p.held) hideZoom();
-  if (p.drag) {
-    p.ghost.remove(); document.body.classList.remove('dragging');
-    if (p.over) p.over.classList.remove('drop-on');
-    swallow = true;
-    // a short quick flick up out of the hand, let go before it reaches a zone (the tray's targets count as none): played
-    const flick = up && p.hand && (!p.over || p.over.id === 'hand' || p.over.closest('#tray')) && p.y0 - e.clientY > 2 * OUT && e.timeStamp - p.t0 < 400;
-    if (up && p.over && p.over.dataset.card) send({ type: 'attach', card: p.id, to: p.over.dataset.card });
-    else if (up && (p.over || flick)) {
-      const [s, zone] = flick ? [view.you, 'battlefield'] : p.over.dataset.drop.split(':'), seat = Number(s), idx = index(view);
-      const ids = p.ids.filter((id) => { const h = idx.get(id); return h && !(h.seat === seat && h.zone === zone); });
-      const pos = !flick && zone === 'library' ? { pos: p.over.dataset.pos || 'top' } : {};
-      for (let i = 0; i < ids.length; i += 100) send({ type: 'move', cards: ids.slice(i, i + 100), to: { seat, zone }, ...pos });
-      if (p.ids.length > 1) clearSel();
+  if (!p.drag) {
+    p.el.classList.remove('lifted');
+    if (p.hand) raise(handRow(), null);
+    if (p.scrub && up) { swallow = true; select(p.el, selMode); } // slid along the hand and let go: that card, as a tap
+    else if (p.held && up) swallow = true; // it was shown large: lifting only closes that
+    else if (p.lifted && up) { // a pile or a sheet card, held still and let go
+      swallow = true;
+      if (p.pile) openPile(p.pile);
+      else openCard(p.id);
     }
+  } else {
+    swallow = true;
+    const d = p.d;
+    if (up) d.settle(e.clientX, e.clientY);
+    const over = up ? d.over : null;
+    // a short quick flick up out of the hand, let go before it reaches a zone (the tray's targets count as none): played
+    const flick = up && p.hand && (!over || over.id === 'hand' || over.closest('#tray')) && p.y0 - e.clientY > 2 * OUT && e.timeStamp - p.t0 < 400;
+    const was = view;
+    let go = null;
+    if (over && over.dataset.card) go = () => send({ type: 'attach', card: p.id, to: over.dataset.card });
+    else if (over || flick) {
+      const [s, zone] = flick ? [view.you, 'battlefield'] : over.dataset.drop.split(':'), seat = Number(s), idx = index(view);
+      const ids = p.ids.filter((id) => { const h = idx.get(id); return h && !(h.seat === seat && h.zone === zone); });
+      const pos = !flick && zone === 'library' ? { pos: over.dataset.pos || 'top' } : {};
+      if (ids.length) go = () => { for (let i = 0; i < ids.length; i += 100) send({ type: 'move', cards: ids.slice(i, i + 100), to: { seat, zone }, ...pos }); };
+    }
+    if (go) {
+      d.drop(); // upright where it was let go: motion.js flies the card on from there
+      settle(p.lifts); document.body.classList.remove('dragging');
+      go();
+    }
+    if ((over || flick) && p.ids.length > 1) clearSel();
     hideTray(); // after the flick test above: it asks whether the target was in the tray
-  } else if (p.scrub && up) { // slid along the hand and let go: that card, as a tap
-    swallow = true;
-    select(p.el, selMode);
-  } else if (p.held && up) swallow = true; // it was shown large: lifting only closes that
-  else if (p.lifted && up) { // a pile or a sheet card, held still and let go
-    swallow = true;
-    if (p.pile) openPile(p.pile);
-    else openCard(p.id);
+    if (view !== was) { tick(8); p.d.end(); raise(handRow(), null); } // a card moved: the ghost has been replaced by its flight
+    else p.d.back(() => { settle(p.lifts); document.body.classList.remove('dragging'); raise(handRow(), null); });
   }
   if (swallow) setTimeout(() => { swallow = false; }, 400);
 }
@@ -653,7 +666,7 @@ const OUT = 24;
 function handMove(p, e) {
   if (p.y0 - e.clientY > OUT) return startDrag(p, e);
   if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < SLOP) return;
-  const row = p.el.parentElement, el = cardAtX(row, e.clientX), hit = el && cardAt(el.dataset.card);
+  const row = p.el.parentElement, el = cardAtX(row, e.clientX, p.el), hit = el && cardAt(el.dataset.card);
   p.x = e.clientX; p.y = e.clientY; p.scrub = true;
   if (hit && el !== p.el) { p.el = el; p.id = hit.card.id; p.hit = hit; raise(row, el); }
   showZoom(p.hit.card, T(), { x: e.clientX, y: e.clientY, side: p.side });
@@ -672,12 +685,14 @@ function endBrowse(e) {
   zb = null; hideZoom();
 }
 
+// on a card, or in the gap between two (the row itself takes no pointer in the peeking hand): the raised card stays raised
+const inRow = (row, e) => { const r = row.getBoundingClientRect(); return !!(e.target.closest && e.target.closest('.hand-row')) || (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom); };
 document.addEventListener('pointermove', (e) => {
-  if (e.pointerType === 'mouse' && !press) { hoverCard(e); const r = handRow(); if (r) raise(r, e.target.closest && e.target.closest('.hand-row') ? cardAtX(r, e.clientX) : null); }
+  if (e.pointerType === 'mouse' && !press) { hoverCard(e); const r = handRow(); if (r) raise(r, inRow(r, e) ? cardAtX(r, e.clientX, r.querySelector('.up')) : null); }
   if (zb && e.pointerId === zb.id) return browse(e);
   const p = press;
   if (!p) return;
-  if (p.drag) return moveDrag(p, e);
+  if (p.drag) return p.d.move(e.clientX, e.clientY);
   if (p.hand) return handMove(p, e);
   if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < SLOP) return;
   if (p.mouse || p.lifted || p.now) startDrag(p, e);
@@ -803,7 +818,7 @@ document.addEventListener('keydown', (e) => {
   else if (sel.size && $('sheet').hidden) clearSel();
   else setSheet(null);
 });
-document.addEventListener('fullscreenchange', render); // the buttons and the menu item show which way it toggles
+document.addEventListener('fullscreenchange', render); // the buttons show which way it toggles
 
 render();
 connect();

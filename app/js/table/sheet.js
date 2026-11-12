@@ -1,7 +1,7 @@
 // Bottom sheets: every action a player can take on a card, a pile, a commander or the menu.
 // buildSheet returns {title, body, items, art}: buttons carry data-i, the index of their handler in items.
 // A sheet opened from another one carries `back`; acting in it returns there instead of closing.
-import { ZONES, seats, esc, index, tile, art, attachable, ICON, fsShown } from './board.js';
+import { ZONES, seats, esc, index, tile, art, attachable, ICON } from './board.js';
 import { logHtml } from './log.js';
 import { fill } from '../i18n.js';
 
@@ -144,9 +144,7 @@ export function buildSheet(sh, view, c) {
     const live = view && view.status === 'active', r = (sides) => () => send({ type: 'roll', sides });
     const pass = (draw) => () => send({ type: 'pass_turn', ...(draw ? { draw } : {}) });
     title = t.tbMenu;
-    body = (live ? row(b(ICON.log + t.tbLog, () => c.setSheet({ k: 'log', back: sh }), '', true),
-        fsShown() && b((document.fullscreenElement ? ICON.fullOff + t.tbExitFullscreen : ICON.full + t.tbFullscreen), c.fullscreen),
-        b(t.tbMulligan, () => send({ type: 'mulligan' })),
+    body = (live ? row(b(t.tbMulligan, () => send({ type: 'mulligan' })),
         b(view.players[view.you].out ? t.tbBackIn : t.tbImOut, () => send({ type: 'out', out: !view.players[view.you].out }), 'quiet'))
       + `<h3>${fill(t.tbTurnOf, { n: view.turn.number, s: view.turn.seat === view.you ? t.lgYouLow : name(view.turn.seat) })}</h3>`
       + row(b(t.tbPass, pass(true), view.turn.seat === view.you ? 'on' : ''), b(t.tbPassNoDraw, pass(false)))

@@ -4,7 +4,7 @@
 import { index } from './board.js';
 
 const SEL = '.bf [data-card], .hand-row [data-card]';
-const MOVE = 240, TAP = 180, POP = 160;
+const MOVE = 240, TAP = 180, POP = 160, FLIP = 320, RIPPLE = 25;
 const OVERSHOOT = 'cubic-bezier(.3,1.3,.5,1)', EASE = 'ease-out';
 const idsOf = (el) => (el.dataset.ids ? el.dataset.ids.split(' ') : [el.dataset.card]);
 const mid = (r) => [r.left + r.width / 2, r.top + r.height / 2];
@@ -55,7 +55,7 @@ export function snapshot() {
   for (const el of document.querySelectorAll('#board .bf [data-card], #hand .hand-row [data-card]')) {
     const id0 = el.dataset.card, fly = document.querySelector(`[data-fly="${id0}"]`), r = (fly || el).getBoundingClientRect();
     if (!r.width) continue; // on a collapsed board: not drawn
-    const tapped = el.classList.contains('tapped');
+    const ghost = fly && fly.classList.contains('ghost'), tapped = el.classList.contains('tapped') && !ghost; // a ghost is drawn upright
     const e = { c: mid(r), w: fly ? (tapped ? r.height : r.width) : el.offsetWidth, tapped, el };
     for (const id of idsOf(el)) cards.set(id, e);
   }
@@ -79,7 +79,7 @@ export function play(before, prev, next) {
     const e = { el, c: mid(r), w: el.offsetWidth, tapped: el.classList.contains('tapped'), box: el.closest('.bf, .hand-row').getBoundingClientRect() };
     for (const id of idsOf(el)) now.set(id, e);
   }
-  const jobs = [], kept = new Set();
+  const jobs = [], taps = [], kept = new Set();
   for (const [id, s] of before.resume) {
     const n = now.get(id), here = b.get(id);
     const ok = s.to ? n && Math.abs(n.c[0] - s.to.c[0]) < 1 && Math.abs(n.c[1] - s.to.c[1]) < 1 && Math.abs(n.w - s.to.w) < 1 && n.tapped === s.to.tapped
@@ -93,21 +93,31 @@ export function play(before, prev, next) {
     if (!o) { if (real) jobs.push(() => pop(n.el)); continue; }
     if (!was) { // was not drawn: it comes from its old pile, or fades in
       if (same(o, here)) continue;
-      const from = before.anchors.get(`${o.seat}:${o.zone}`);
-      jobs.push(() => from ? fly(id, n, mid(from), from.width, false, MOVE, OVERSHOOT, real) : fade(n, real));
+      const from = before.anchors.get(`${o.seat}:${o.zone}`), draw = o.zone === 'library' && here.zone === 'hand' && here.seat === next.you;
+      jobs.push(() => from ? fly(id, n, mid(from), from.width, false, draw ? FLIP : MOVE, OVERSHOOT, real, { flip: draw, arc: o.zone === 'hand' && here.zone === 'battlefield' }) : fade(n, real));
       continue;
     }
     const [dx, dy] = [was.c[0] - n.c[0], was.c[1] - n.c[1]], tapChange = was.tapped !== n.tapped, away = !same(o, here);
     if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(was.w - n.w) < 1 && !tapChange) continue;
     const out = was.c[0] < n.box.left || was.c[0] > n.box.right || was.c[1] < n.box.top || was.c[1] > n.box.bottom;
     const [ms, ease] = away ? [MOVE, OVERSHOOT] : tapChange ? [TAP, OVERSHOOT] : [MOVE, EASE];
-    jobs.push(() => (away || out || !real) ? fly(id, n, was.c, was.w, was.tapped, ms, ease, real) : glide(id, was, n, ms, ease));
+    const arc = o.zone === 'hand' && here.zone === 'battlefield'; // a played card rises in a curve
+    const go = (delay) => (away || out || !real) ? fly(id, n, was.c, was.w, was.tapped, ms, ease, real, { arc, delay }) : glide(id, was, n, ms, ease, delay);
+    if (tapChange && !away) taps.push({ n, go }); else jobs.push(() => go(0));
   }
+  // three or more untapping (or tapping) at once ripple in reading order, top row first
+  const row = (t) => Math.round(t.n.c[1] / (t.n.w / 2));
+  taps.sort((p, q) => row(p) - row(q) || p.n.c[0] - q.n.c[0]);
+  taps.forEach((t, i) => jobs.push(() => t.go(taps.length > 2 ? i * RIPPLE : 0)));
   for (const [id, was] of before.cards) { // drawn before, in another place now that is not drawn
     const o = a.get(id), here = b.get(id);
     if (kept.has(id) || now.has(id) || !o || !here || same(o, here)) continue;
     const pile = `${here.seat}:${here.zone}`;
     jobs.push(() => leave(id, was, before.anchors.get(pile), pile));
+  }
+  for (const [id, h] of b) { // another player's draw: a card back from their library chip to their hand chip (their hand is not drawn)
+    const o = a.get(id), from = before.anchors.get(`${h.seat}:library`), to = before.anchors.get(`${h.seat}:hand`);
+    if (o && o.zone === 'library' && h.zone === 'hand' && h.seat !== next.you && from && to) jobs.push(() => flyBack(from, to));
   }
   for (const j of jobs) j();
 }
@@ -124,17 +134,29 @@ const keyframes = (dx, dy, s, rot) => [{ translate: `${dx}px ${dy}px`, rotate: `
 const TILT = 12;
 const turn = (was, n) => (was === n ? 0 : n ? -TILT : TILT);
 
-function glide(id, was, n, ms, easing, at) {
-  const anim = n.el.animate(keyframes(was.c[0] - n.c[0], was.c[1] - n.c[1], was.w / n.w, turn(was.tapped, n.tapped)), { duration: ms, easing });
-  track(anim, () => {}, { id, to: n, redo: (t) => glide(id, was, n, ms, easing, t) }, at);
+function glide(id, was, n, ms, easing, delay = 0, at) {
+  const anim = n.el.animate(keyframes(was.c[0] - n.c[0], was.c[1] - n.c[1], was.w / n.w, turn(was.tapped, n.tapped)), { duration: ms, easing, delay, fill: 'backwards' });
+  track(anim, () => {}, { id, to: n, redo: (t) => glide(id, was, n, ms, easing, delay, t) }, at);
 }
 
-// a clone flies where the real card cannot go (clipped by its box, or coming from a pile); the real one waits hidden
-function fly(id, n, from, fromW, fromTapped, ms, easing, hide, at) {
-  const el = n.el, c = clone(el, n.c, n.w, id);
+// a clone flies where the real card cannot go (clipped by its box, or coming from a pile); the real one waits hidden.
+// opt.arc: the path bows upward; opt.flip: it leaves as a card back and turns face up halfway; opt.delay: ms before it starts
+function fly(id, n, from, fromW, fromTapped, ms, easing, hide, opt = {}, at) {
+  const el = n.el, c = clone(el, n.c, n.w, id), [dx, dy] = [from[0] - n.c[0], from[1] - n.c[1]];
   if (hide) el.style.visibility = 'hidden';
-  const anim = c.animate(keyframes(from[0] - n.c[0], from[1] - n.c[1], fromW / n.w, turn(fromTapped, n.tapped)), { duration: ms, easing });
-  track(anim, () => { c.remove(); if (hide) el.style.visibility = ''; }, hide && { id, to: n, redo: (t) => fly(id, n, from, fromW, fromTapped, ms, easing, hide, t) }, at);
+  // it lands at its resting tilt (a hand card's fan angle), so the real card replaces it without a snap
+  const rest = parseFloat(el.style.getPropertyValue('--r')) || 0, [start, end] = keyframes(dx, dy, fromW / n.w, turn(fromTapped, n.tapped));
+  end.rotate = `${rest}deg`;
+  const frames = opt.arc ? [start, { translate: `${dx / 2}px ${dy / 2 - 0.12 * Math.hypot(dx, dy)}px`, rotate: `${rest / 2}deg`, scale: (fromW / n.w + 1) / 2, offset: 0.5 }, end] : [start, end];
+  const timing = { duration: ms, easing, delay: opt.delay || 0, fill: 'backwards' }, anims = [c.animate(frames, timing)];
+  if (opt.flip) { // scaleX through 0 with the back drawn over the face until the middle
+    const back = document.createElement('i');
+    back.className = 'fb';
+    c.append(back);
+    anims.push(c.animate({ transform: ['scaleX(1)', 'scaleX(0)', 'scaleX(1)'] }, timing), back.animate({ opacity: [1, 1, 0, 0], offset: [0, 0.49, 0.5, 1] }, timing));
+  }
+  if (at) for (const x of anims.slice(1)) x.currentTime = at;
+  track(anims[0], () => { c.remove(); if (hide) el.style.visibility = ''; }, hide && { id, to: n, redo: (t) => fly(id, n, from, fromW, fromTapped, ms, easing, hide, opt, t) }, at);
 }
 
 function leave(id, was, to, pile, at) {
@@ -144,13 +166,23 @@ function leave(id, was, to, pile, at) {
   track(anim, () => c.remove(), { id, pile, redo: (t) => leave(id, was, to, pile, t) }, at);
 }
 
+function flyBack(from, to) {
+  const w = from.width * 0.8, c = document.createElement('i');
+  c.className = 'tc back fly';
+  c.setAttribute('aria-hidden', 'true');
+  c.style.cssText = `--cw:${w}px;left:${from.left + (from.width - w) / 2}px;top:${from.top + from.height / 2 - w * 0.7}px`;
+  document.body.append(c);
+  const anim = c.animate([{ translate: '0 0', scale: 1 }, { translate: `${to.left + to.width / 2 - from.left - from.width / 2}px ${to.top + to.height / 2 - from.top - from.height / 2}px`, scale: 0.5, opacity: 0.6 }], { duration: FLIP, easing: EASE });
+  track(anim, () => c.remove());
+}
+
 function pop(el) { track(el.animate([{ scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: POP, easing: EASE }), () => {}); }
 function fade(n, real) {
   if (real) track(n.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: POP }), () => {});
 }
 
 // a fixed copy of a tile centred on c, at its width w (a tapped tile's CSS tilts it)
-function clone(el, c, w, id) {
+export function clone(el, c, w, id) {
   const f = el.cloneNode(true);
   f.classList.remove('lifted', 'up', 'sel', 'glow', 'drop-on');
   f.classList.add('fly');

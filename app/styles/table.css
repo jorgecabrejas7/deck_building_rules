@@ -40,6 +40,11 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
   transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease),visibility 0s linear var(--dur)}
 .tb-toast.info{background:var(--panel);color:var(--text);border-color:var(--border);font-size:var(--fs-body);font-variant-numeric:tabular-nums}
 .tb-toast b{font-weight:600}
+.tb-toast>span{display:flex;align-items:center;gap:var(--sp-3)}
+.die{display:grid;place-items:center;flex:none;width:34px;height:34px;box-sizing:border-box;border-radius:9px;background:var(--accentBtn);color:var(--accentFg);font-size:16px;font-weight:700;line-height:1;box-shadow:0 2px 6px -2px oklch(0 0 0 / .45)}
+.die.coin{border-radius:50%;font-size:10px}
+.dl{transition:opacity .15s}
+.dl.wait{opacity:0}
 .tb-toast.on{opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:0s}
 @media (min-width:900px),(orientation:landscape) and (min-width:640px) and (max-height:560px){.tb-toast{top:calc(var(--sp-2) + env(safe-area-inset-top) + 40px);bottom:auto;transform:translate(-50%,-8px)}}
 
@@ -194,7 +199,8 @@ body.tbl.dark{--f-w:oklch(0.95 0.03 92);--f-b:oklch(0.52 0.04 300);--f-n:oklch(0
 /* a permanent's corners: counters top left (they give way first), power/toughness or loyalty bottom right; the stack count is top right */
 .pt{position:absolute;right:3px;bottom:3px;z-index:3;padding:0 4px;border-radius:var(--r-pill);background:oklch(0.2 0.005 260);color:#fff;font-size:clamp(10px,calc(var(--cw) * .16),16px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;pointer-events:none;box-shadow:0 0 0 1.5px oklch(1 0 0 / .75)}
 .tc.w .cns{left:3px;top:3px;right:auto;bottom:auto;align-items:flex-start;max-width:calc(100% - 6px)}
-body.dragging .tc.lifted{opacity:.3;transform:none;box-shadow:none}
+body.dragging .tc.lifted{opacity:.22;box-shadow:none}
+body.dragging .bf .tc.lifted{transform:none}
 .tc.tok{background:var(--tipBg);color:var(--tipFg);box-shadow:inset 0 0 0 1px var(--tipBd),0 1px 2px oklch(0 0 0 / .1)}
 .tc.back{background:repeating-linear-gradient(45deg,var(--accentBtn) 0 5px,color-mix(in oklab,var(--accentBtn) 70%,black) 5px 10px)}
 .tc.back .tn{inset:auto 3px 3px;padding:1px 4px;border-radius:3px;background:var(--panel);color:var(--text)}
@@ -215,9 +221,11 @@ body.dragging .tc.lifted{opacity:.3;transform:none;box-shadow:none}
 
 /* dragging: the card follows the finger, the zone under it lights up */
 .tc.fly{position:fixed;z-index:59;margin:0;pointer-events:none;will-change:translate}
-.ghost{position:fixed;left:0;top:0;z-index:60;aspect-ratio:63/88;border-radius:6%;overflow:hidden;pointer-events:none;box-shadow:0 20px 40px -10px oklch(0 0 0 / .55),0 0 0 2px var(--accent);will-change:transform}
-.ghost img{display:block;width:100%;height:100%}
-.ghost.blank{background:repeating-linear-gradient(45deg,var(--accentBtn) 0 5px,color-mix(in oklab,var(--accentBtn) 70%,black) 5px 10px)}
+.tc.fly.ghost{z-index:60;will-change:transform;box-shadow:0 22px 38px -10px oklch(0 0 0 / .55),0 0 0 2px var(--accent);animation:tb-lift .1s ease-out}
+@keyframes tb-lift{from{box-shadow:0 1px 2px oklch(0 0 0 / .12),0 0 0 2px var(--accent)}}
+.tc.fly.ghost.many{overflow:visible;box-shadow:6px -6px 0 -1px var(--panel),6px -6px 0 1px var(--accent),0 22px 38px -10px oklch(0 0 0 / .55),0 0 0 2px var(--accent)}
+/* a drawn card leaves as a card back that turns face up (motion.js fly) */
+.tc.fly .fb{position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(45deg,var(--accentBtn) 0 5px,color-mix(in oklab,var(--accentBtn) 70%,black) 5px 10px)}
 body.dragging,body.dragging *{cursor:grabbing!important}
 body.dragging [data-drop]{transition:background .12s,box-shadow .12s}
 .bf.drop-on{background:color-mix(in oklab,var(--accent) 12%,transparent);box-shadow:inset 0 0 0 2px var(--accent)}
@@ -234,11 +242,11 @@ body.dragging [data-drop]{transition:background .12s,box-shadow .12s}
    finger or mouse, or focused) stands upright above its neighbours. The row never scrolls: a finger on it is table.js's */
 .hand-row{position:relative;height:calc(var(--hw) * var(--size) * 1.4 + 26px);touch-action:none}
 .hand-row:empty{height:40px}
-.hand-row .tc,.hand-row .tc:active,.hand-row .tc.lifted{--cw:calc(var(--hw) * var(--size));position:absolute;left:var(--x,0);bottom:12px;z-index:var(--i);touch-action:none;transform-origin:50% 100%;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease);
-  transform:translateY(calc(var(--y,0px) - var(--lift,0px))) rotate(var(--r,0deg)) scale(var(--k,1))}
+.hand-row .tc,.hand-row .tc:active,.hand-row .tc.lifted{--cw:calc(var(--hw) * var(--size));position:absolute;left:var(--x,0);bottom:12px;z-index:var(--i);touch-action:none;transform-origin:50% 100%;transition:transform .14s cubic-bezier(.2,.8,.2,1),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease);
+  transform:translate(var(--p,0px),calc(var(--y,0px) - var(--lift,0px))) rotate(var(--r,0deg)) scale(var(--k,1))}
 .hand-row .tc.sel{--lift:10px;box-shadow:0 0 0 2.5px var(--accent),0 14px 26px -10px oklch(0 0 0 / .5)}
-.hand-row .tc.up,.hand-row .tc:focus-visible,.hand-row .tc.lifted{--lift:16px;--r:0deg;--k:1.05;z-index:99;box-shadow:0 0 0 1px oklch(0 0 0 / .2),0 16px 30px -10px oklch(0 0 0 / .5)}
-.hand-row .tc.sel.up,.hand-row .tc.sel:focus-visible,.hand-row .tc.lifted{box-shadow:0 0 0 2.5px var(--accent),0 16px 30px -10px oklch(0 0 0 / .5)}
+.hand-row .tc.up,.hand-row .tc:focus-visible{--lift:16px;--r:0deg;--k:1.12;z-index:99;box-shadow:0 0 0 1px oklch(0 0 0 / .2),0 16px 30px -10px oklch(0 0 0 / .5)}
+.hand-row .tc.sel.up,.hand-row .tc.sel:focus-visible{box-shadow:0 0 0 2.5px var(--accent),0 16px 30px -10px oklch(0 0 0 / .5)}
 body.away .hand-row{display:none}
 
 /* the floating controls (table.js #dial): pass turn, the action button and its bubbles */
@@ -442,8 +450,6 @@ body.picking .tb-hand,body.picking .chips,body.picking .dial>*{opacity:.4;pointe
 /* a pile chip held still: its top card is picked up to drag out */
 .chip.lifted{transform:scale(1.08);box-shadow:0 0 0 2px var(--accent),0 12px 28px -8px oklch(0 0 0 / .5);z-index:2}
 body.dragging .chip.lifted{opacity:.5;transform:none}
-.ghost.many{overflow:visible;box-shadow:6px -6px 0 -1px var(--panel),6px -6px 0 1px var(--accent),0 20px 40px -10px oklch(0 0 0 / .55),0 0 0 2px var(--accent)}
-.ghost.many img{border-radius:6%}
 
 /* selected cards rise; in selection mode they also carry a check */
 .bf .tc.sel{transform:translateY(-6px);box-shadow:0 0 0 2.5px var(--accent),0 14px 26px -10px oklch(0 0 0 / .5);z-index:2}
@@ -542,9 +548,10 @@ body.dragging .tb-bar,body.picking .tb-bar,body:has(#sheet:not([hidden])) .tb-ba
 /* in selection mode the check sits bottom left of a wide tile */
 body.selecting .tc.w.sel::after{top:auto;bottom:3px;left:3px;width:18px;height:18px;background-size:13px}
 
-/* wide: the docked selection bar floats at the top centre instead of standing above the hand */
+/* wide: the docked selection bar floats at the top, right of the opponent's life pill (and under the players strip) instead of standing above the hand */
 @media (min-width:900px),(orientation:landscape) and (min-width:640px) and (max-height:560px){
-  .tb-bar.dock{position:fixed;order:0;left:50%;top:env(safe-area-inset-top);transform:translateX(-50%);width:max-content;border-radius:0 0 var(--r-lg) var(--r-lg)}
+  .tb-bar.dock{position:fixed;order:0;left:124px;top:env(safe-area-inset-top);max-width:calc(100% - 132px);width:max-content;border-radius:0 0 var(--r-lg) var(--r-lg)}
+  body:has(.strip) .tb-bar.dock{top:calc(env(safe-area-inset-top) + 36px)}
 }
 
 /* wide: the players strip floats at the top right of the top battlefield, beside their pill; the rows start below it (table.js BAND) */
