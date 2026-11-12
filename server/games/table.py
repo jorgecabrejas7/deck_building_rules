@@ -24,6 +24,7 @@ MAX_SEATS = 6
 MAX_TOKENS = 600  # per game, bounds token spam
 UNDO_DEPTH = 5  # the whole state, snapshots included, is written on every action
 LOG_SIZE = 50
+_REF_CHARS = set("0123456789abcdef-")
 _NO_UNDO = {"shuffle", "mulligan", "look", "reveal", "roll"}  # random or informative: undo would cheat
 
 
@@ -41,9 +42,9 @@ def _new_id():
     return secrets.token_hex(6)
 
 
-def _card(name, owner, token=False, known_by=()):
+def _card(name, owner, token=False, known_by=(), ref=None):
     return {"id": _new_id(), "uid": _new_id(), "name": name, "owner": owner, "tapped": False, "face_down": False,
-            "counters": {}, "token": token, "known_by": sorted(known_by), "attached": None}
+            "counters": {}, "token": token, "known_by": sorted(known_by), "attached": None, "ref": ref}
 
 
 def _draw(state, seat, n):
@@ -107,6 +108,8 @@ def _view_card(card, zone, viewer, seats):
         out["attached"] = card["attached"]
     if _visible(card, zone, viewer):
         out.update(name=card["name"], token=card["token"], shared=all(_visible(card, zone, s) for s in seats if s != viewer))
+        if card.get("ref"):
+            out["ref"] = card["ref"]
     return out
 
 
@@ -317,11 +320,15 @@ def _counter(state, seat, a):
 
 
 def _token(state, seat, a):
-    _fields(a, ("seat", "name", "count"), typed=True)
+    """`ref` is the client's token dataset key (a Scryfall oracle id); only its shape is checked here."""
+    _fields(a, ("seat", "name", "count"), ("ref",), typed=True)
     s, name, count = _seat(state, a["seat"]), _str(a["name"], 1, 100), _int(a["count"], 1, 20)
+    ref = _str(a["ref"], 1, 40) if "ref" in a else None
+    if ref is not None and not set(ref) <= _REF_CHARS:
+        _bad()
     if sum(c["token"] for zs in state["zones"].values() for cs in zs.values() for c in cs) + count > MAX_TOKENS:
         _bad()
-    state["zones"][str(s)]["battlefield"] += [_card(name, s, token=True, known_by=_seats(state)) for _ in range(count)]
+    state["zones"][str(s)]["battlefield"] += [_card(name, s, token=True, known_by=_seats(state), ref=ref) for _ in range(count)]
     return {"target": s, "name": name, "count": count}
 
 

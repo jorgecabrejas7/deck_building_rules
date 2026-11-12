@@ -6,6 +6,8 @@ import { fetchCards } from './engine/scryfall.js';
 import { boardHtml, lobbyHtml, index, visibleNames, tile, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
+import { paintTokens, pickToken, pickCustom, stepCount } from './table/tokenpick.js';
+import { loadTokens } from './table/tokens.js';
 import { buildBar } from './table/bar.js';
 import { handHtml, layoutHand, cardAtX, raise } from './table/hand.js';
 import { dialHtml, popIn } from './table/dial.js';
@@ -228,6 +230,8 @@ function toggleDial(open = !dialOpen) {
 
 function renderSheet() {
   const el = $('sheet');
+  // the token sheet paints its own body: a rebuild would take the focus off the list being worked down
+  if (sheet && sheet.k === 'token' && !el.hidden && $('tkbody')) return;
   if (sheet && el.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return; // do not steal the keyboard
   let built = sheet && buildSheet(sheet, view, ctx());
   while (!built && sheet && sheet.back) { sheet = sheet.back; built = buildSheet(sheet, view, ctx()); } // the card moved: back to where it was picked
@@ -254,6 +258,17 @@ function renderSheet() {
     const f = fi && el.querySelector(`[data-i="${fi}"]:not(:disabled)`);
     if (f) f.focus({ preventScroll: true }); else if (had) el.querySelector('.sh-pane').focus({ preventScroll: true });
   }
+  if (sheet.k === 'token') openTokens(entering);
+}
+
+// the dataset loads when a card with `ref` is on the table or the sheet opens; the table and the sheet draw again when it arrives
+const afterTokens = () => { render(); repaintTokens(); };
+const repaintTokens = () => { if (sheet && sheet.k === 'token') paintTokens(view, ctx()); };
+function openTokens(entering) {
+  const load = loadTokens(true);
+  if (load) load.then(afterTokens);
+  repaintTokens();
+  if (entering && !matchMedia('(pointer:coarse)').matches) $('tq').focus(); // on a phone the keyboard would cover the list
 }
 
 function filterSearch() {
@@ -266,6 +281,7 @@ const setSheet = (s) => { sheet = s; renderSheet(); };
 const ctx = () => ({
   t: T(), send, setSheet, pickHost: (id) => { picking = id; render(); }, closeSheet: () => setSheet(sheet && sheet.back ? sheet.back : null), endGame,
   hints: () => { setSheet(null); startHints(); },
+  repaint: () => repaintTokens(),
   lang: state.lang, dark: document.body.classList.contains('dark'),
   setLang: (l) => { state.lang = store.lang = l; render(); },
   setTheme: (m) => { state.theme = store.theme = m; render(); },
@@ -415,10 +431,11 @@ async function pickDeck() {
 // card images: one Scryfall batch for the names on the table that are not cached yet
 const asked = new Set();
 function loadImages() {
+  if ([...index(view).values()].some((h) => h.card.ref)) { const load = loadTokens(); if (load) load.then(afterTokens); }
   const need = visibleNames(view).filter((x) => !cardCache[x] && !asked.has(x));
   if (!need.length) return;
   need.forEach((x) => asked.add(x));
-  fetchCards(need, cardCache).then(() => { persistCache(); render(); }).catch(() => {});
+  fetchCards(need, cardCache).then(() => { persistCache(); afterTokens(); }).catch(() => {});
 }
 
 let previewFrom = null;
@@ -441,7 +458,7 @@ function closePreview() {
 // cards, the bar docks above the hand with the count, and its actions take every selected card.
 let sel = new Map(), selMode = false, barItems = [], barKey = '', said = '';
 const BOARD_CARD = '#board [data-card],#hand [data-card]';
-const CONTROL = '[data-b],[data-focus],[data-show],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-dial],[data-open],[data-top],[data-pick],[data-pad],[data-preview-close]';
+const CONTROL = '[data-b],[data-focus],[data-show],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-dial],[data-open],[data-top],[data-pick],[data-pad],[data-preview-close],[data-tk],[data-step],[data-tkadd]';
 const idsOf = (el) => el.dataset.ids ? el.dataset.ids.split(' ') : [el.dataset.card];
 const selIds = () => [...new Set([...sel.values()].flat())];
 const elFor = (id) => document.querySelector(`#board [data-card="${id}"],#hand [data-card="${id}"]`) || document.querySelector(`#board [data-ids~="${id}"]`);
@@ -795,6 +812,9 @@ document.addEventListener('click', (e) => {
   else if ('pad' in d) setSheet({ k: 'pad', seat: Number(d.pad) });
   else if ('cmd' in d) setSheet({ k: 'cmd', seat: Number(d.cmd) });
   else if ('token' in d) setSheet({ k: 'token' });
+  else if ('tk' in d) pickToken(d.tk, view, ctx());
+  else if ('step' in d) stepCount(Number(d.step));
+  else if ('tkadd' in d) pickCustom(view, ctx());
   else if ('open' in d) openPile(d.open);
   else if ('pick' in d) pickDeck();
   else if (d.top === 'menu') setSheet({ k: 'menu' });
@@ -805,7 +825,7 @@ document.addEventListener('click', (e) => {
   else if (d.top === 'pass') tapPass();
   else if (d.top === 'log') setSheet({ k: 'log' });
 });
-document.addEventListener('input', (e) => { if (e.target.id === 'sq') filterSearch(); });
+document.addEventListener('input', (e) => { if (e.target.id === 'sq') filterSearch(); else if (e.target.id === 'tq') repaintTokens(); });
 document.addEventListener('keydown', (e) => {
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
   // ctrl/cmd+Z undoes your last action; the life pad takes digits and backspace from the keyboard
@@ -816,6 +836,7 @@ document.addEventListener('keydown', (e) => {
     setSheet({ ...sheet, v: e.key === 'Backspace' ? v.slice(0, -1) : (v + e.key).replace(/^0+/, '').slice(0, 3) });
     return;
   }
+  if (e.key === 'Enter' && e.target.id === 'tkc') { pickCustom(view, ctx()); return; }
   if (e.key !== 'Escape') return;
   if (press) { endPress(null); return; }
   if (dialOpen) { toggleDial(false); return; }

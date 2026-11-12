@@ -4,6 +4,7 @@
 import { ZONES, seats, esc, index, tile, art, attachable, ICON } from './board.js';
 import { logHtml } from './log.js';
 import { fill } from '../i18n.js';
+import { tokenSheet } from './tokenpick.js';
 
 const val = (id) => (document.getElementById(id) || {}).value || '';
 const num = (id, lo, hi, d) => Math.min(hi, Math.max(lo, parseInt(val(id), 10) || d));
@@ -122,10 +123,7 @@ export function buildSheet(sh, view, c) {
     title = t.tbGive;
     body = row(...seats(view).filter((x) => x !== hit.seat).map((s) => b(name(s), () => send({ type: 'move', cards: [sh.id], to: { seat: s, zone: 'battlefield' } }), 'on')));
   } else if (sh.k === 'token') {
-    title = t.tbTokenNew;
-    body = row(input('sn', '', `maxlength="100" placeholder="${t.tbTokenName}" aria-label="${t.tbTokenName}"`))
-      + row(`<label class="cl">${t.tbTokenCount} ${input('sc', 1, 'type="number" min="1" max="20" inputmode="numeric"')}</label>`,
-        b(t.tbAdd, () => { const n = val('sn').trim().slice(0, 100); if (n) send({ type: 'token', seat: view.you, name: n, count: num('sc', 1, 20, 1) }); }, 'on'));
+    ({ title, body } = tokenSheet(t));
   } else if (sh.k === 'pad') {
     // any amount: type it, then subtract, add or set. sh.v is what has been typed (up to 3 digits)
     const s = sh.seat, life = view.players[s].life, v = sh.v || '', n = Number(v);

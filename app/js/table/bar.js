@@ -33,6 +33,8 @@ export function buildBar(ids, view, c) {
     away('graveyard') && b('graveyard', t.tbZgraveyard, go('graveyard')),
     away('exile') && b('exile', t.tbZexile, go('exile')),
     away('library') && b('library', t.tbZlibrary, go('library', { pos: 'top' }), `${t.tbZlibrary} · ${t.tbTop}`),
+    // another of the same token for whoever controls it
+    lead && lead.card.token && lead.zone === 'battlefield' && b('plus', t.tbTkOne, () => send({ type: 'token', seat: lead.seat, name: lead.card.name, count: 1, ...(lead.card.ref ? { ref: lead.card.ref } : {}) })),
     lead && attachable(lead.card) && (lead.zone === 'battlefield' || lead.zone === 'hand') && b('attach', t.tbAttachShort, () => c.pickHost(lead.card.id), t.tbAttach),
     // the selection stays: the bar docks and the card is the first of several
     lead && !c.multi && `<button class="ba" data-b="${items.push(c.selectMany) - 1}">${ICON.multi}<span>${t.tbSelectMany}</span></button>`,

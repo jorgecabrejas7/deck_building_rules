@@ -2,6 +2,7 @@
 // data-drop="<seat>:<zone>" marks where a dragged card can land.
 import { cardCache } from '../state.js';
 import { fill } from '../i18n.js';
+import { tokenInfo } from './tokens.js';
 
 export const ZONES = ['library', 'hand', 'battlefield', 'graveyard', 'exile', 'command'];
 export const seats = (view) => Object.keys(view.players).map(Number);
@@ -57,7 +58,7 @@ export function index(view) {
   return m;
 }
 
-// names worth an image: face-up named cards that are not tokens
+// names worth an image: face-up named cards that are not tokens (those come from the dataset)
 export function visibleNames(view) {
   const out = new Set();
   for (const { card } of index(view).values()) if (card.name && !card.token && !card.face_down) out.add(card.name);
@@ -85,7 +86,8 @@ const section = (c) => {
   return !tl ? 'other' : /\bCreature\b/.test(tl) ? 'creatures' : /\bLand\b/.test(tl) ? 'lands' : 'other';
 };
 // key: which cached image: img_small (a pile, the drag ghost), img_normal (the full view), img_art (a permanent's tile)
-const known = (c) => c.name && !c.face_down && !c.token && cardCache[c.name];
+// a token with `ref` is looked up in the token dataset, anything else by name
+const known = (c) => c.name && !c.face_down && (c.token ? tokenInfo(c.ref) : cardCache[c.name]);
 export const art = (c, key = 'img_small') => (known(c) || {})[key] || '';
 // a permanent's frame colour: one letter per colour, m for two or more, n for colourless and lands
 const frame = (c) => {
@@ -107,12 +109,13 @@ export function tile(c, t, big = false, group = [c], wide = false) {
   const back = c.face_down || !c.name, src = art(c, wide ? 'img_art' : big ? 'img_normal' : 'img_small'), n = group.length, st = wide ? stat(c) : '';
   const cls = ['tc', wide && 'w', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
   const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : `<span class="tn">${c.name ? esc(c.name) : ''}</span>`;
+  const mark = c.token && src && !big ? `<b class="tkm" aria-hidden="true">${t.tbTkMark}</b>` : '';
   const cn = Object.entries(c.counters || {}).map(([k, v]) => counterText(k, v));
   // a named counter writes its number last and gives its name the ellipsis, so "charge 3" shrinks to "cha… 3" and never loses the 3
   const pill = ([k, v]) => k === '+1/+1' || k === '-1/-1' ? `<b class="cn">${counterText(k, v)}</b>` : `<b class="cn"><i>${esc(k)}</i><span>${v}</span></b>`;
   const cns = cn.length ? `<span class="cns" aria-hidden="true">${Object.entries(c.counters).map(pill).join('')}</span>` : '';
-  return `<button class="${cls}"${wide ? ` data-c="${frame(c)}"` : ''} data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${st ? ' · ' + st : ''}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
-    + `${face}${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
+  return `<button class="${cls}"${wide ? ` data-c="${frame(c)}"` : ''} data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${st ? ' · ' + st : ''}${c.token ? ' · ' + t.tbTkLow : ''}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
+    + `${face}${mark}${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
 }
 
 // a pile as a zone chip: icon and count. Tap opens it, a card dropped on it goes there, and data-lift is the card a drag out of it takes
@@ -129,7 +132,7 @@ function sections(view, s, att) {
   for (const c of view.zones[s].battlefield) {
     if (on.has(c.id)) continue; // drawn tucked behind its host
     const plain = c.name && !c.face_down && !c.attached && !att.has(c.id) && !Object.keys(c.counters || {}).length;
-    const k = plain && [c.name, c.tapped, c.token].join('|'), g = k && seen.get(k);
+    const k = plain && [c.name, c.tapped, c.token, c.ref].join('|'), g = k && seen.get(k);
     if (g) g.push(c);
     else { const ng = [c]; if (k) seen.set(k, ng); out[section(c)].push(ng); }
   }

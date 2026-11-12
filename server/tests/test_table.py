@@ -269,6 +269,18 @@ def test_counter(game):
     check(g)
 
 
+REF = "3c549374-6c37-42e0-8d88-a8555d46732d"
+
+
+def test_token_ref(game):
+    g = apply(game, 1, {"type": "token", "seat": 2, "name": "Treasure", "count": 2, "ref": REF})
+    g = apply(g, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 1})
+    for viewer in seats(g):
+        bf = view(g, viewer)["zones"]["2"]["battlefield"]
+        assert [c.get("ref") for c in bf] == [REF, REF, None] and "ref" not in bf[2]
+    check(g)
+
+
 def test_token_and_delete(game):
     g = apply(game, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 3})
     toks = g["zones"]["2"]["battlefield"]
@@ -357,6 +369,10 @@ def test_roll(game):
     (1, {"type": "token", "seat": 1, "name": "", "count": 1}, "invalid"),
     (1, {"type": "token", "seat": 1, "name": "x" * 101, "count": 1}, "invalid"),
     (1, {"type": "token", "seat": 1, "name": "x", "count": 21}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": "Not-Hex"}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": ""}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": "a" * 41}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": 7}, "invalid"),
     (1, {"type": "mulligan", "n": 8}, "invalid"),
     (1, {"type": "shuffle", "seat": "1"}, "invalid"),
     (1, {"type": "move", "cards": [], "to": {"seat": 1, "zone": "hand"}}, "invalid"),
@@ -472,7 +488,7 @@ def test_fuzz(n):
             "flip": lambda: {"cards": [c["id"] for c in g["zones"][str(seat)]["battlefield"]][:3] or ["x"],
                              "face_down": rnd.random() < .5},
             "counter": lambda: {"card": pick(1)[0], "name": rnd.choice(("a", "b", "c")), "delta": rnd.randint(-3, 3)},
-            "token": lambda: {"seat": seat, "name": "tok", "count": rnd.randint(1, 3)},
+            "token": lambda: {"seat": seat, "name": "tok", "count": rnd.randint(1, 3), **rnd.choice(({}, {"ref": REF}))},
             "delete": lambda: {"card": next((c["id"] for c in cs if c["token"]), "x")},
             "look": lambda: {"cards": pick()},
             "reveal": lambda: {"cards": pick(2)},

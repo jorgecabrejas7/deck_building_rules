@@ -52,6 +52,7 @@ lgOut:'%a está fuera de la partida',lgOutY:'Tú estás fuera de la partida',lgB
 lgTake:'%a tomó el turno',lgTakeY:'Tú tomaste el turno',lgPassToY:'%a te pasó el turno',lgPass:'%a pasó el turno a %s',lgPassY:'Tú pasaste el turno a %s',lgDrew:'; %s robó %c',lgDrewY:'; robaste %c',
 lgUndo:'%a deshizo %u',lgUndoY:'Tú deshiciste %u',lgUmove:'un movimiento',lgUtap:'un giro',lgUuntap_all:'un enderezado',lgUflip:'una vuelta',lgUcounter:'un contador',lgUtoken:'una ficha',
 lgUdelete:'un borrado',lgUattach:'un anexo',lgUlife:'un cambio de vida',lgUcmd_damage:'un daño de comandante',lgUpass_turn:'un pase de turno',lgUout:'una salida o vuelta',lgUany:'una acción',lgOther:'%a: %k',lgOtherY:'Tú: %k',
+tbTkMark:'FICHA',tbTkLow:'ficha',tbTkOne:'Una más',tbTkSearch:'Buscar ficha',tbTkCustom:'Otro nombre',tbTkFrom:'De tus cartas',tbTkRecent:'Recientes',tbTkMore:'Hay más: afina la búsqueda.',tbTkNone:'Ninguna ficha coincide.',tbTkHint:'Escribe para buscar entre %n fichas.',tbTkLoading:'Cargando fichas…',tbTkFail:'No se pudo cargar la lista de fichas. Puedes crear una con su nombre.',tbTkCreature:'criatura',tbColW:'blanca',tbColU:'azul',tbColB:'negra',tbColR:'roja',tbColG:'verde',
 },
 en: {
 tbTapped:'tapped',tbDropHere:'Drag your cards here',tbFullscreen:'Full screen',tbExitFullscreen:'Exit full screen',tbPlay:'Play',tbToField:'To the battlefield',tbSendTo:'Send to',
@@ -105,5 +106,6 @@ lgOut:'%a is out of the game',lgOutY:'You are out of the game',lgBack:'%a is bac
 lgTake:'%a took the turn',lgTakeY:'You took the turn',lgPassToY:'%a passed the turn to you',lgPass:'%a passed the turn to %s',lgPassY:'You passed the turn to %s',lgDrew:'; %s drew %c',lgDrewY:'; you drew %c',
 lgUndo:'%a undid %u',lgUndoY:'You undid %u',lgUmove:'a move',lgUtap:'a tap',lgUuntap_all:'an untap',lgUflip:'a flip',lgUcounter:'a counter',lgUtoken:'a token',
 lgUdelete:'a deletion',lgUattach:'an attachment',lgUlife:'a life change',lgUcmd_damage:'commander damage',lgUpass_turn:'a turn pass',lgUout:'leaving or rejoining',lgUany:'an action',lgOther:'%a: %k',lgOtherY:'You: %k',
+tbTkMark:'TOKEN',tbTkLow:'token',tbTkOne:'One more',tbTkSearch:'Search tokens',tbTkCustom:'Custom name',tbTkFrom:'From your cards',tbTkRecent:'Recent',tbTkMore:'More matches: refine your search.',tbTkNone:'No token matches.',tbTkHint:'Type to search %n tokens.',tbTkLoading:'Loading tokens…',tbTkFail:'The token list could not be loaded. You can still create one by its name.',tbTkCreature:'creature',tbColW:'white',tbColU:'blue',tbColB:'black',tbColR:'red',tbColG:'green',
 },
 };

@@ -68,6 +68,8 @@ for seed in range(6):
             a = {"type": t, "card": pick(1)[0], "to": host}
         elif t == "token":
             a = {"type": t, "seat": seat, "name": "Goblin", "count": rnd.randint(1, 3)}
+            if rnd.random() < .5:
+                a["ref"] = "3c549374-6c37-42e0-8d88-a8555d46732d"
         elif t == "flip":
             a = {"type": t, "cards": pick(2), "face_down": rnd.random() < .5}
         elif t == "delete":
