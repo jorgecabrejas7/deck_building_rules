@@ -10,6 +10,7 @@ function cardFromScryfall(c) {
   const imgs = c.image_uris || (faces && faces[0].image_uris) || {};
   const mana = c.mana_cost !== undefined && c.mana_cost !== "" ? c.mana_cost
     : faces ? (faces[0].mana_cost || "") : "";
+  const front = faces ? faces[0] : c; // power, toughness and loyalty are the front face's
   const eur = c.prices && (parseFloat(c.prices.eur) || parseFloat(c.prices.eur_foil)) || null;
   return {
     name: c.name, cmc: c.cmc, mana_cost: mana,
@@ -23,6 +24,7 @@ function cardFromScryfall(c) {
     produced_mana: c.produced_mana || (faces ? [...new Set(faces.flatMap(f => f.produced_mana || []))] : []),
     legal_commander: (c.legalities && c.legalities.commander) || "unknown",
     edhrec_rank: c.edhrec_rank || null,
+    power: front.power ?? null, toughness: front.toughness ?? null, loyalty: front.loyalty ?? null,
     img_art: imgs.art_crop || "", img_normal: imgs.normal || "", img_small: imgs.small || "",
   };
 }

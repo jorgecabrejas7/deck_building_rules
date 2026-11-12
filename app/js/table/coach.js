@@ -14,7 +14,7 @@ const vis = (q) => [...document.querySelectorAll(q)].find((el) => el.getClientRe
 // [text key, target, only when its target shows at the start]
 const STEPS = [
   ['tbHintTap', () => vis('.seat.me .bf .tc') || vis('.seat.me .bf')],
-  ['tbHintHold', () => vis('#hand .hand-row .tc') || vis('.seat.me .bf .tc')],
+  ['tbHintPress', () => vis('#hand .hand-row .tc') || vis('.seat.me .bf .tc')],
   ['tbHintBoard', () => vis('.seat.opp .peek-open'), true], // phones only: where both boards show there is no bar
   ['tbHintHand', () => vis('#hand .hand-row') || vis('#hand .hand-bar')],
 ];

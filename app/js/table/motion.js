@@ -37,7 +37,7 @@ export function patch(container, html) {
 }
 
 function sync(el, fresh) {
-  const lifted = el.classList.contains('lifted'); // a held card stays held through a render
+  const lifted = el.classList.contains('lifted'); // a card being dragged stays marked through a render
   for (const a of [...el.attributes]) if (!fresh.hasAttribute(a.name)) el.removeAttribute(a.name);
   for (const a of fresh.attributes) el.setAttribute(a.name, a.value);
   if (lifted) el.classList.add('lifted');
@@ -120,8 +120,9 @@ function track(anim, end, meta, at) {
   anim.finished.then(r.end, r.end);
 }
 const keyframes = (dx, dy, s, rot) => [{ translate: `${dx}px ${dy}px`, rotate: `${rot}deg`, scale: s }, { translate: '0 0', rotate: '0deg', scale: 1 }];
-// a tap is a quarter turn: the tile's own CSS rotation jumps, this animation runs from the old angle
-const turn = (was, n) => (was === n ? 0 : n ? -90 : 90);
+// a tap is a tilt: the tile's own CSS rotation jumps, this animation runs from the old angle. TILT mirrors .tc.w.tapped in table.css
+const TILT = 12;
+const turn = (was, n) => (was === n ? 0 : n ? -TILT : TILT);
 
 function glide(id, was, n, ms, easing, at) {
   const anim = n.el.animate(keyframes(was.c[0] - n.c[0], was.c[1] - n.c[1], was.w / n.w, turn(was.tapped, n.tapped)), { duration: ms, easing });
@@ -148,7 +149,7 @@ function fade(n, real) {
   if (real) track(n.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: POP }), () => {});
 }
 
-// a fixed copy of a tile centred on c, at its un-rotated width w (a tapped tile's CSS rotates it)
+// a fixed copy of a tile centred on c, at its width w (a tapped tile's CSS tilts it)
 function clone(el, c, w, id) {
   const f = el.cloneNode(true);
   f.classList.remove('lifted', 'up', 'sel', 'glow', 'drop-on');
@@ -156,7 +157,7 @@ function clone(el, c, w, id) {
   f.dataset.fly = id;
   f.removeAttribute('data-card'); f.removeAttribute('data-ids');
   f.setAttribute('aria-hidden', 'true'); f.tabIndex = -1;
-  const h = w * 1.4;
+  const h = el.classList.contains('w') ? w / 1.37 : w * 1.4; // the wide tile's ratio mirrors table.css .tc.w
   f.style.cssText = `--cw:${w}px;left:${c[0] - w / 2}px;top:${c[1] - h / 2}px`;
   document.body.append(f);
   return f;

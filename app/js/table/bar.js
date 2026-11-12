@@ -34,6 +34,8 @@ export function buildBar(ids, view, c) {
     away('exile') && b('exile', t.tbZexile, go('exile')),
     away('library') && b('library', t.tbZlibrary, go('library', { pos: 'top' }), `${t.tbZlibrary} · ${t.tbTop}`),
     lead && attachable(lead.card) && (lead.zone === 'battlefield' || lead.zone === 'hand') && b('attach', t.tbAttachShort, () => c.pickHost(lead.card.id), t.tbAttach),
+    // the selection stays: the bar docks and the card is the first of several
+    lead && !c.multi && `<button class="ba" data-b="${items.push(c.selectMany) - 1}">${ICON.multi}<span>${t.tbSelectMany}</span></button>`,
     lead && b('view', t.tbView, () => c.preview(lead.card.id), t.tbZoom),
     lead && b('more', t.tbMore, () => c.openSheet(lead.card.id)),
   ].filter(Boolean);

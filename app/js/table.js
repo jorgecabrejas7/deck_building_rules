@@ -262,18 +262,18 @@ function applyFocus(swap) {
 // ---- card size: the largest width at which every card of a battlefield fits without scrolling ----
 // Where both boards show (desktop, phone landscape) they share one size and split the height by what each holds, so a crowded
 // side never squeezes the other. Past the smallest size a battlefield scrolls inside itself.
-// shortcut: the gaps are table.css constants (card gap 6, section gap 8 + 8 padding + 1 rule; short landscape: 4 + 3 + 1, groups 16 apart); change both together
-const GAP = 6, SEC = 17, SEC_SHORT = 8, GROUP = 16;
+// shortcut: the gaps are table.css constants (card gap 6, section gap 8 + 8 padding + 1 rule; short landscape: 4 + 3 + 1, groups 16 apart;
+// a tile is RATIO wide for each unit of height, an attached card shows OFF of the width above its host); change both together
+const GAP = 6, SEC = 17, SEC_SHORT = 8, GROUP = 16, RATIO = 1.37, OFF = 0.28;
 const OPP = 0.88; // short landscape: their cards a little smaller, so yours (which you tap) can be bigger
 function heightAt(cw, rows, W, sec = SEC) {
-  const ch = cw * 1.4;
+  const ih = cw / RATIO;
   let h = 0;
   for (const row of rows) {
     let x = 0, line = 0;
     for (const it of row) {
-      const w = it.tapped ? ch : cw, ih = ch + it.n * cw * 0.28;
-      if (x && x + GAP + w > W) { h += line + GAP; x = 0; line = 0; }
-      x += (x ? GAP : 0) + w; line = Math.max(line, ih);
+      if (x && x + GAP + cw > W) { h += line + GAP; x = 0; line = 0; }
+      x += (x ? GAP : 0) + cw; line = Math.max(line, ih + it.n * cw * OFF);
     }
     h += line;
   }
@@ -281,22 +281,21 @@ function heightAt(cw, rows, W, sec = SEC) {
 }
 // short landscape: creatures in front; lands and other behind them on one line when both groups fit, else one under the other
 function stackedAt(cw, { front, back }, W) {
-  const line = (r) => r.reduce((x, it) => x + (x ? GAP : 0) + (it.tapped ? cw * 1.4 : cw), 0);
+  const line = (r) => r.length * cw + Math.max(0, r.length - 1) * GAP;
   const one = back.length < 2 || line(back[0]) + GROUP + line(back[1]) <= W;
   return heightAt(cw, [...front, ...(one ? [back.flat()] : back)], W, SEC_SHORT);
 }
 function fit() {
   const m = SIZES[size];
   document.body.style.setProperty('--size', m);
-  const [lo, hi] = (SHORT.matches ? [32, 84] : BOTH.matches ? [36, 128] : [44, 96]).map((x) => Math.round(x * m));
+  const [lo, hi] = (SHORT.matches ? [44, 120] : BOTH.matches ? [52, 170] : [56, 130]).map((x) => Math.round(x * m));
   const shared = BOTH.matches;
   if (!shared) for (const s of document.querySelectorAll('.seat')) s.style.flex = s.style.minHeight = '';
   const boards = [...document.querySelectorAll('.seat .bf')].filter((bf) => bf.offsetParent).map((bf) => {
     const cs = getComputedStyle(bf), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom), area = bf.parentElement, seat = area.parentElement, H = bf.clientHeight - padY;
     // fixed: the seat's height besides its battlefield's cards (rails, paddings), summed from its parts; a short landscape rail stands beside the area
     const rails = SHORT.matches ? 0 : [...seat.children].reduce((x, c) => x + (c === area ? 0 : c.offsetHeight), 0);
-    const groups = [...bf.querySelectorAll('.bfr')].map((r) => ({ front: r.classList.contains('creatures'), items: [...r.children].map((it) => ({
-      tapped: (it.matches('.stk') ? it.lastElementChild : it).classList.contains('tapped'), n: it.matches('.stk') ? it.childElementCount - 1 : 0 })) }));
+    const groups = [...bf.querySelectorAll('.bfr')].map((r) => ({ front: r.classList.contains('creatures'), items: [...r.children].map((it) => ({ n: it.matches('.stk') ? it.childElementCount - 1 : 0 })) }));
     return { bf, seat, H, W: bf.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), fixed: rails + area.offsetHeight - H,
       min: parseFloat(getComputedStyle(area).minHeight) - padY || 0, rows: groups.map((g) => g.items),
       stack: { front: groups.filter((g) => g.front).map((g) => g.items), back: groups.filter((g) => !g.front).map((g) => g.items) },
@@ -305,7 +304,7 @@ function fit() {
   const tall = (b, cw) => SHORT.matches ? stackedAt(cw, b.stack, b.W) : heightAt(cw, b.rows, b.W);
   if (shared && boards.length === 2) {
     const free = boards[0].seat.parentElement.clientHeight - boards[0].fixed - boards[1].fixed;
-    const need = (cw) => boards.map((b) => { const c = Math.round(cw * b.scale); return Math.max(tall(b, c), b.min, c * 1.4); });
+    const need = (cw) => boards.map((b) => { const c = Math.round(cw * b.scale); return Math.max(tall(b, c), b.min, c / RATIO); });
     let cw = hi;
     while (cw > lo && need(cw).reduce((x, y) => x + y) > free) cw--;
     // each seat keeps its rails and takes the free height in proportion to what its battlefield needs, never less than
@@ -380,7 +379,7 @@ function closePreview() {
 
 // ---- selection and the action bar ----
 // sel: the selected cards, as lead card id -> every id it stands for (a stack is selected whole).
-// One card selected by a tap: the bar floats beside it. selMode (entered by holding a card still): taps add and remove
+// One card selected by a tap: the bar floats beside it. selMode (entered with the bar's Select several): taps add and remove
 // cards, the bar docks above the hand with the count, and its actions take every selected card.
 let sel = new Map(), selMode = false, barItems = [], barKey = '', said = '';
 const BOARD_CARD = '#board [data-card],#hand [data-card]';
@@ -431,7 +430,7 @@ function applySel() {
 function renderBar() {
   const bar = $('bar'), units = [...sel.values()], lead = units.length === 1 ? units[0][0] : null;
   const built = units.length && view && view.zones && buildBar(selIds(), view, {
-    t: T(), send, multi: selMode, lead, done: clearSel, preview, openSheet: openCard, pickHost: (id) => { picking = id; render(); } });
+    t: T(), send, multi: selMode, lead, done: clearSel, selectMany: () => { selMode = true; applySel(); }, preview, openSheet: openCard, pickHost: (id) => { picking = id; render(); } });
   if (!built) { bar.hidden = true; bar.innerHTML = ''; barItems = []; barKey = ''; return; }
   const f = bar.contains(document.activeElement) ? document.activeElement.dataset.b : null;
   barItems = built.items;
@@ -466,10 +465,13 @@ addEventListener('scroll', () => { placeBar(); placeCoach(); }, true);
 addEventListener('resize', () => { placeBar(); placeCoach(); });
 
 // ---- gestures ----
-// A card on the table or in the hand:
-//   tap: one of yours on the battlefield taps or untaps; any other card is selected and its bar opens. Double tap: full view
-//   hold still: selection mode (taps then add or remove cards). Hold and move: drag it, with the rest of the selection
-// Touch (a finger or a pen) on a battlefield card: move past the slop and the drag starts at once, no hold needed.
+// A card on the battlefield:
+//   Touch (a finger or a pen): press it and, after PRESS ms, it is shown large and stays while the finger rests. Move past the slop
+//   and it is dragged instead (the zoom closes; the ghost and the quick zones appear; a selected card takes the whole selection).
+//   Lift without moving: a press shorter than PRESS is a tap, a longer one (the zoom was shown) only closes the zoom and does nothing else.
+//   Tap: one of yours taps or untaps at once; any other card is selected and its bar opens.
+//   Double tap: the bar opens, on any card. On one of yours both taps toggle it, which nets to no change.
+//   The bar's Select several starts selection mode: taps then add or remove cards, and a stack of identical cards counts whole.
 // Touch on anything else of the board (empty battlefield, the gaps, a seat's background): slide to see cards large. Once the
 // finger has been down ZOOM_WAIT ms, the card under it is shown large, sliding onto another card switches to it, sliding off all
 // of them hides it, and lifting ends it with nothing else done (no tap, no selection). A quick sideways swipe never reaches that
@@ -477,16 +479,18 @@ addEventListener('resize', () => { placeBar(); placeCoach(); });
 // gesture to scroll an overflowing battlefield (pointercancel), the zoom closes.
 // The hand (touch): the card under the finger rises and is shown large at once. Slide along the fan to move both; let go after
 // sliding to select that card, as a tap would. Moving up out of the hand closes the zoom and drags the card at once: drop it on
-// your battlefield to play it, or flick it up to play it from the hand. Holding still on a card still enters selection mode.
+// your battlefield to play it, or flick it up to play it from the hand.
 // Dragging (touch or mouse) shows the quick zones (tray.js) for the card's owner; they are drop targets like any [data-drop].
-// A pile: tap opens it; hold and move drags its top card. Mouse: click is a tap, drag straight away, right-click
-// selects, shift/ctrl/cmd-click adds to a selection, resting on a card shows it large. Keyboard: Enter opens the bar.
-const HOLD = 320, SLOP = 8, DOUBLE = 350, ZOOM_WAIT = 150;
+// A pile, or a card listed in a sheet: tap opens it; hold HOLD ms, then move, to drag it (its top card, for a pile). Moving before the hold scrolls.
+// Mouse: resting on a card shows it large, click is a tap, double click opens the bar, drag straight away, right-click
+// selects, shift/ctrl/cmd-click adds to a selection. Keyboard: Enter opens the bar.
+const HOLD = 320, PRESS = 120, SLOP = 8, DOUBLE = 350, ZOOM_WAIT = 150;
 let press = null, swallow = false, lastTap = null, zb = null; // zb: a finger sliding over the board to see cards large
 
 function cardAt(id) { return view && view.zones && index(view).get(id); }
 const tick = (ms) => { if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(ms); };
 
+// a pile or a sheet card held still: picked up, ready to drag
 function lift(p) {
   p.lifted = true;
   p.el.classList.add('lifted');
@@ -494,6 +498,7 @@ function lift(p) {
 }
 
 function startDrag(p, e) {
+  clearTimeout(p.timer);
   p.drag = true; hideZoom();
   if (!p.mouse) tick(8);
   // a selected card takes the whole selection along; any other card goes alone and ends a single card's bar
@@ -502,7 +507,7 @@ function startDrag(p, e) {
   const r = p.el.getBoundingClientRect(), src = art(p.hit.card);
   const g = p.ghost = document.createElement('div');
   g.className = 'ghost' + (p.ids.length > 1 ? ' many' : '');
-  g.style.width = Math.max(r.width, 72) + 'px';
+  g.style.width = Math.min(Math.max(r.width, 72), 110) + 'px';
   g.innerHTML = (src ? `<img src="${esc(src)}" alt="">` : '') + (p.ids.length > 1 ? `<b class="nx">×${p.ids.length}</b>` : '');
   if (!src) g.classList.add('blank');
   document.body.append(g);
@@ -533,7 +538,8 @@ function endPress(e) {
   if (!p) return;
   clearTimeout(p.timer);
   p.el.classList.remove('lifted');
-  if (p.hand) { raise(handRow(), null); hideZoom(); }
+  if (p.hand) raise(handRow(), null);
+  if (p.hand || p.held) hideZoom();
   if (p.drag) {
     p.ghost.remove(); document.body.classList.remove('dragging');
     if (p.over) p.over.classList.remove('drop-on');
@@ -549,14 +555,14 @@ function endPress(e) {
       if (p.ids.length > 1) clearSel();
     }
     hideTray(); // after the flick test above: it asks whether the target was in the tray
-  } else if (p.scrub && !p.lifted && up) { // slid along the hand and let go: that card, as a tap
+  } else if (p.scrub && up) { // slid along the hand and let go: that card, as a tap
     swallow = true;
     select(p.el, selMode);
-  } else if (p.lifted && up) { // held still and let go
+  } else if (p.held && up) swallow = true; // it was shown large: lifting only closes that
+  else if (p.lifted && up) { // a pile or a sheet card, held still and let go
     swallow = true;
     if (p.pile) openPile(p.pile);
-    else if (p.el.closest('#sheet')) openCard(p.id);
-    else select(p.el, true);
+    else openCard(p.id);
   }
   if (swallow) setTimeout(() => { swallow = false; }, 400);
 }
@@ -596,17 +602,17 @@ document.addEventListener('pointerdown', (e) => {
   p.now = !p.mouse && !p.hand && !!el.closest('.bf'); // a finger drags a battlefield card at once; piles and sheets scroll, so they wait for the hold
   p.side = e.clientX < innerWidth / 2 ? 'right' : 'left';
   if (p.hand) { raise(el.parentElement, el); showZoom(hit.card, T(), { x: e.clientX, y: e.clientY, side: p.side }); }
-  if (!p.mouse) p.timer = setTimeout(() => lift(p), HOLD);
+  else if (p.now) p.timer = setTimeout(() => { p.held = true; showZoom(hit.card, T(), { x: p.x, y: p.y, side: p.side }); }, PRESS);
+  else if (!p.mouse) p.timer = setTimeout(() => lift(p), HOLD);
 });
 
-// a finger in the hand: up drags the card out; sideways moves the raised card, and the hold starts over on it
+// a finger in the hand: up drags the card out; sideways moves the raised card
 const OUT = 24;
 function handMove(p, e) {
-  if (p.y0 - e.clientY > OUT) { clearTimeout(p.timer); return startDrag(p, e); }
+  if (p.y0 - e.clientY > OUT) return startDrag(p, e);
   if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < SLOP) return;
   const row = p.el.parentElement, el = cardAtX(row, e.clientX), hit = el && cardAt(el.dataset.card);
   p.x = e.clientX; p.y = e.clientY; p.scrub = true;
-  clearTimeout(p.timer); p.timer = setTimeout(() => lift(p), HOLD);
   if (hit && el !== p.el) { p.el = el; p.id = hit.card.id; p.hit = hit; raise(row, el); }
   showZoom(p.hit.card, T(), { x: e.clientX, y: e.clientY, side: p.side });
 }
@@ -630,7 +636,7 @@ document.addEventListener('pointermove', (e) => {
   const p = press;
   if (!p) return;
   if (p.drag) return moveDrag(p, e);
-  if (p.hand && !p.lifted) return handMove(p, e);
+  if (p.hand) return handMove(p, e);
   if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < SLOP) return;
   if (p.mouse || p.lifted || p.now) startDrag(p, e);
   else { clearTimeout(p.timer); press = null; } // a finger that moves on a pile or in a sheet before the hold is a scroll
@@ -713,11 +719,10 @@ document.addEventListener('click', (e) => {
     if (selMode || e.shiftKey || e.ctrlKey || e.metaKey) select(el, true);
     else if (!e.detail) { select(el, false); $('bar').querySelector('button').focus(); } // the keyboard: the bar, for any card
     else if (hit.zone === 'battlefield' && hit.seat === view.you) {
-      if (dbl) return; // the second tap of a double tap must not untap it again
-      clearSel();
-      send({ type: 'tap', cards: [hit.card.id], tapped: !hit.card.tapped });
-    } else if (dbl) { clearSel(); preview(d.card); }
-    else select(el, false);
+      if (!dbl) clearSel();
+      send({ type: 'tap', cards: [hit.card.id], tapped: !hit.card.tapped }); // both taps of a double tap toggle: it nets to no change
+      if (dbl) select(el, false);
+    } else select(el, false);
   }
   else if ('pile' in d) openPile(d.pile);
   else if ('life' in d) { const [s, dl] = d.life.split(':').map(Number); send({ type: 'life', seat: s, delta: dl }); }

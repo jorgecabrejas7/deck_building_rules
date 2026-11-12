@@ -24,7 +24,7 @@ export function buildSheet(sh, view, c) {
     if (!hit) return null;
     const { card, seat, zone } = hit, ids = [card.id], bf = zone === 'battlefield';
     title = card.name ? esc(card.name) : card.face_down ? t.tbCardDown : t.tbHiddenCard;
-    big = art(card, true);
+    big = art(card, 'img_normal');
     if (sh.move) {
       for (const s of [view.you, other(view.you)]) {
         body += `<h3>${name(s)}</h3>`;

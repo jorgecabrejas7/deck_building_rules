@@ -31,6 +31,7 @@ export const ICON = {
   undo: svg('M5 3 2 6l3 3M2 6h7.5a3.75 3.75 0 0 1 0 7.5H7'),
   log: svg('M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 5v3l2 1.5'),
   pass: svg('M2.5 8h10M9 4.5 12.5 8 9 11.5'),
+  multi: svg('M2.5 5.5h7v8h-7zM6.5 2.5h7v8M4.5 9.5l1.2 1.2 2-2.4'),
 };
 
 export const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
@@ -74,20 +75,33 @@ const section = (c) => {
   const tl = !c.face_down && c.name && ((cardCache[c.name] || {}).type_line || '').split(' // ')[0];
   return !tl ? 'other' : /\bCreature\b/.test(tl) ? 'creatures' : /\bLand\b/.test(tl) ? 'lands' : 'other';
 };
-export const art = (c, big = false) => {
-  const info = c.name && !c.face_down && !c.token && cardCache[c.name];
-  return info ? (big ? info.img_normal : info.img_small) || '' : '';
+// key: which cached image: img_small (a pile, the drag ghost), img_normal (the full view), img_art (a permanent's tile)
+const known = (c) => c.name && !c.face_down && !c.token && cardCache[c.name];
+export const art = (c, key = 'img_small') => (known(c) || {})[key] || '';
+// a permanent's frame colour: one letter per colour, m for two or more, n for colourless and lands
+const frame = (c) => {
+  const info = known(c);
+  if (!info || /\bLand\b/.test((info.type_line || '').split(' // ')[0])) return 'n';
+  const col = info.colors || [];
+  return col.length > 1 ? 'm' : col.length ? col[0].toLowerCase() : 'n';
+};
+// power/toughness for creatures and vehicles, loyalty for planeswalkers, else nothing
+const stat = (c) => {
+  const info = known(c);
+  return !info ? '' : info.power != null && info.toughness != null ? `${info.power}/${info.toughness}` : info.loyalty != null ? String(info.loyalty) : '';
 };
 
 // a card is its image; the name is written only while there is no image to show.
+// wide: a permanent on a battlefield, drawn as its art crop in a framed wide tile with its P/T or loyalty, no card text.
 // group: a stack of identical cards drawn as one. A tap acts on its first card (data-card); a selection takes them all (data-ids)
-export function tile(c, t, big = false, group = [c]) {
-  const back = c.face_down || !c.name, src = art(c, big), n = group.length;
-  const cls = ['tc', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
+export function tile(c, t, big = false, group = [c], wide = false) {
+  const back = c.face_down || !c.name, src = art(c, wide ? 'img_art' : big ? 'img_normal' : 'img_small'), n = group.length, st = wide ? stat(c) : '';
+  const cls = ['tc', wide && 'w', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
   const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : `<span class="tn">${c.name ? esc(c.name) : ''}</span>`;
   const cn = Object.entries(c.counters || {}).map(([k, v]) => counterText(k, v));
-  return `<button class="${cls}" data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
-    + `${face}${cn.length ? `<span class="cns" aria-hidden="true">${cn.map((x) => `<b class="cn">${esc(x)}</b>`).join('')}</span>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
+  const cns = cn.length ? `<span class="cns" aria-hidden="true">${cn.map((x) => `<b class="cn">${esc(x)}</b>`).join('')}</span>` : '';
+  return `<button class="${cls}"${wide ? ` data-c="${frame(c)}"` : ''} data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${st ? ' · ' + st : ''}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
+    + `${face}${wide && (cn.length || st) ? `<span class="ft">${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}</span>` : cns}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
 }
 
 // a pile drawn as a card slot: the top card when it is public, a back for the library, a dashed outline when empty
@@ -123,8 +137,8 @@ function seat(view, s, t) {
   const att = attachments(view), secs = sections(view, s, att);
   const stack = ([c, ...more]) => {
     const under = att.get(c.id);
-    if (!under) return tile(c, t, false, [c, ...more]);
-    return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t)}</div>`;
+    if (!under) return tile(c, t, false, [c, ...more], true);
+    return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t, false, [x], true).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t, false, [c], true)}</div>`;
   };
   // mine reads creatures, then other and lands, down towards me; theirs mirrors it. Other and lands share one .bfb: two rows
   // stacked, or (phone landscape) two groups on one line behind the creatures
@@ -151,7 +165,7 @@ function seat(view, s, t) {
   const area = `<div class="area"><div class="bf" data-drop="${s}:battlefield" data-empty="${me ? t.tbDropHere : t.tbZbattlefield}">${rows}</div><div class="piles">${piles}</div>${dots}</div>`;
   // the collapsed bar: tap it to open this board, drop a card on it to put the card onto this battlefield
   const minis = ['creatures', 'other', 'lands'].flatMap((k) => secs[k]).map(([c, ...more]) => {
-    const src = art(c);
+    const src = art(c, 'img_art');
     return `<span data-m="${[c, ...more].map((x) => x.id).join(' ')}" class="mini${c.tapped ? ' tapped' : ''}${c.face_down || !c.name ? ' back' : c.token ? ' tok' : ''}">${src ? `<img src="${esc(src)}" alt="" draggable="false">` : ''}${more.length ? `<b>×${more.length + 1}</b>` : ''}</span>`;
   }).join('');
   const counts = [['hand', z.hand.length], ...PILES.map((k) => [k, z[k].length])].map(([k, n]) => `<span class="pk-n" data-pk="${s}:${k}">${ICON[k]}${n}</span>`).join('');
