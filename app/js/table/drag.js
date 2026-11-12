@@ -72,6 +72,7 @@ export function pickUp(el, { card, t, id, n, hosts, hit, x, y }) {
     }
     pose = [cx - c0[0], cy - c0[1], s];
     g.style.transform = tf(pose[0], pose[1], rot0 * lift + tilt, lean, s);
+    g.style.setProperty('--sheen', (tilt / TILT).toFixed(2)); // the highlight slides with the tilt (table.css)
   };
   raf = requestAnimationFrame(frame);
 

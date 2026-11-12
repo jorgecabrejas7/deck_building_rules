@@ -18,6 +18,7 @@ import { pickUp } from './table/drag.js';
 import { tumble } from './table/dice.js';
 import { predict } from './table/predict.js';
 import { changed, glowOn, applyGlow, lifeMoved, riffle } from './table/cues.js';
+import { play as hear, setSound, soundOn, soundsFor, kindOf } from './table/sound.js';
 
 const $ = (id) => document.getElementById(id);
 const API = '../api/';
@@ -59,6 +60,7 @@ function connect() {
       render(); news(prev);
     } else if (m.type === 'error') {
       pending = pending.filter((p) => p.n !== m.ack);
+      hear('error');
       replay(); render();
       toast(T()[{ stale: 'tbStale', rate: 'tbRate', invalid: 'tbInvalid', lobby: 'tbLobbyErr', undo: 'tbUndoErr' }[m.code] || 'tbInvalid']);
     } else if (m.type === 'ended') { gone = 'tbEnded'; render(); }
@@ -80,6 +82,8 @@ const replay = () => { view = pending.reduce((v, p) => predict(v, p.action) || v
 function send(action) {
   if (!open()) return toast(T().tbNotSent);
   pending.push({ n: ++n, action });
+  const k = kindOf(action);
+  if (k) hear(k);
   sock.send(JSON.stringify({ n, action }));
   const next = view && view.status === 'active' && predict(view, action), prev = view;
   if (!next) return;
@@ -128,6 +132,7 @@ function news(prev) {
   logSeq = view.log.length ? view.log[view.log.length - 1].seq : logSeq === null ? 0 : logSeq;
   if (!prev || !prev.zones || !fresh.length) return;
   lifeMoved(prev, view, lifeSay);
+  for (const k of soundsFor(fresh, view.you)) hear(k);
   if (fresh.every((e) => e.seat !== view.you)) glowOn(changed(prev, view));
   // somebody off the top acted or changed life: their pill in the strip glows
   const off = new Set([...fresh.map((e) => e.seat), ...Object.keys(view.players).filter((s) => view.players[s].life !== prev.players[s].life)].map(Number));
@@ -138,6 +143,7 @@ function news(prev) {
   if (view.turn.seat === view.you && prev.turn.seat !== view.you && fresh.some((e) => e.type === 'pass_turn')) {
     if ((focus || view.you) !== view.you && $('sheet').hidden && !press && !picking && !sel.size) setFocus(view.you);
     toast(fill(t.tbYourTurn, { n: view.turn.number }), true);
+    hear('turn');
     glowOn([`.seat[data-seat="${view.you}"] .pill`, `.seat[data-seat="${view.you}"]>.peek`]);
     if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate([18, 80, 18]);
   } else if (roll) {
@@ -263,6 +269,7 @@ const ctx = () => ({
   lang: state.lang, dark: document.body.classList.contains('dark'),
   setLang: (l) => { state.lang = store.lang = l; render(); },
   setTheme: (m) => { state.theme = store.theme = m; render(); },
+  sound: soundOn(), setSound: (v) => { setSound(v); render(); },
   size, setSize: (k) => { size = k; try { localStorage.setItem('pdc_table_size', k); } catch (err) { /* kept for this visit only */ } render(); },
 });
 
