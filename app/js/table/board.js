@@ -4,7 +4,11 @@ import { cardCache } from '../state.js';
 import { fill } from '../i18n.js';
 
 export const ZONES = ['library', 'hand', 'battlefield', 'graveyard', 'exile', 'command'];
-export const other = (s) => 3 - s;
+export const seats = (view) => Object.keys(view.players).map(Number);
+// the screen shows two players: you at the bottom and one other on top (for now the next seat after yours)
+export const topSeat = (view) => (view.you % seats(view).length) + 1;
+// the shown seat that `s` faces: whose commanders damage s, and who gets a card given away
+export const facing = (view, s) => (s === view.you ? topSeat(view) : view.you);
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // one stroke icon set for the table, 16px grid, drawn in currentColor
 const svg = (d) => `<svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
@@ -44,7 +48,7 @@ export const fsButton = (t, cls) => {
 
 export function index(view) {
   const m = new Map();
-  for (const s of [1, 2]) for (const z of ZONES) for (const c of view.zones[s][z] || []) m.set(c.id, { card: c, seat: s, zone: z });
+  for (const s of seats(view)) for (const z of ZONES) for (const c of view.zones[s][z] || []) m.set(c.id, { card: c, seat: s, zone: z });
   return m;
 }
 
@@ -55,11 +59,11 @@ export function visibleNames(view) {
   return [...out];
 }
 
-// host id -> the auras and equipment on it, across both battlefields (an aura can sit on the other player's creature)
+// host id -> the auras and equipment on it, across every battlefield (an aura can sit on another player's creature)
 export function attachments(view) {
   const on = new Set(), m = new Map();
-  for (const s of [1, 2]) for (const c of view.zones[s].battlefield) on.add(c.id);
-  for (const s of [1, 2]) for (const c of view.zones[s].battlefield) if (c.attached && on.has(c.attached)) m.set(c.attached, [...(m.get(c.attached) || []), c]);
+  for (const s of seats(view)) for (const c of view.zones[s].battlefield) on.add(c.id);
+  for (const s of seats(view)) for (const c of view.zones[s].battlefield) if (c.attached && on.has(c.attached)) m.set(c.attached, [...(m.get(c.attached) || []), c]);
   return m;
 }
 export const attachable = (c) => !!c.name && !c.face_down && /\b(Aura|Equipment|Fortification)\b/.test((cardCache[c.name] || {}).type_line || '');
@@ -132,7 +136,7 @@ const PILES = ['graveyard', 'exile', 'library']; // the bar's order: the library
 // one player's side. Rendered whole every time: the battlefield with its floating pill and zone chips, and the collapsed bar.
 // Which one shows is client state (table.js applyFocus toggles .seat.on); CSS shows both boards on wide screens and one on tall ones.
 function seat(view, s, t) {
-  const p = view.players[s], z = view.zones[s], me = s === view.you, o = view.players[other(s)], who = esc(p.name || '?');
+  const p = view.players[s], z = view.zones[s], me = s === view.you, o = view.players[facing(view, s)], who = esc(p.name || '?');
   const att = attachments(view), secs = sections(view, s, att);
   const stack = ([c, ...more]) => {
     const under = att.get(c.id);
@@ -145,7 +149,8 @@ function seat(view, s, t) {
   const part = (ks) => ks.filter((k) => secs[k].length).map(group).join('');
   const back = (ks) => { const h = part(ks); return h && `<div class="bfb">${h}</div>`; };
   const rows = me ? part(['creatures']) + back(['other', 'lands']) : back(['lands', 'other']) + part(['creatures']);
-  const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${(p.cmd_damage || {})[name] || 0}</b></button>`);
+  const hit = p.cmd_damage[facing(view, s)] || {};
+  const cmds = o.commanders.map((name, i) => `<button class="chip cmd" data-cmd="${s}:${i}" title="${t.tbCmdDmg}: ${esc(name)}" aria-label="${t.tbCmdDmg}: ${esc(name)}">${ICON.sword}<b>${hit[name] || 0}</b></button>`);
   // the number opens a pad to add, subtract or set any amount
   const life = `<div class="life" role="group" aria-label="${t.tbLife}"><button data-life="${s}:-1" aria-label="${t.tbMinus}">−</button>`
     + `<button class="lv" data-pad="${s}" aria-label="${fill(t.tbLifeEdit, { n: who, l: p.life })}">${p.life}</button><button data-life="${s}:1" aria-label="${t.tbPlus}">+</button></div>`;
@@ -168,12 +173,12 @@ function seat(view, s, t) {
   return `<section class="seat ${me ? 'me' : 'opp'}${turn ? ' turn' : ''}" data-seat="${s}" aria-label="${who}">${me ? area + peek : peek + area}</section>`;
 }
 
-export const boardHtml = (view, t) => `<div class="sides">${seat(view, other(view.you), t)}${seat(view, view.you, t)}</div>`;
+export const boardHtml = (view, t) => `<div class="sides">${seat(view, topSeat(view), t)}${seat(view, view.you, t)}</div>`;
 
 export function lobbyHtml(view, t, decks, err) {
-  const st = (s) => `<li class="${view.picked[s] ? 'ready' : ''}"><span>${s === view.you ? t.tbYou : t.tbOpp}</span><b>${view.picked[s] ? t.tbReady : t.tbWaiting}</b></li>`;
+  const st = (s) => `<li class="${view.picked[s] ? 'ready' : ''}"><span>${s === view.you ? t.tbYou : esc(view.players[s].name || t.tbOpp)}</span><b>${view.picked[s] ? t.tbReady : t.tbWaiting}</b></li>`;
   const pick = decks === null ? ''
     : !decks.length ? `<p>${t.tbDeckNone}</p>`
     : `<select id="deckSel" class="f-in">${decks.map((d) => `<option value="${d.id}">${esc(d.name)}${d.commanders.length ? ' · ' + esc(d.commanders.join(' / ')) : ''}</option>`).join('')}</select><button class="sb on" data-pick>${t.tbPickGo}</button>`;
-  return `<div class="lobby"><h2>${t.tbLobbyT}</h2><p>${t.tbLobbyX}</p><ul class="ready-list">${st(1)}${st(2)}</ul>${pick}<p class="f-err">${err ? t[err] : ''}</p></div>`;
+  return `<div class="lobby"><h2>${t.tbLobbyT}</h2><p>${t.tbLobbyX}</p><ul class="ready-list">${seats(view).map(st).join('')}</ul>${pick}<p class="f-err">${err ? t[err] : ''}</p></div>`;
 }

@@ -1,6 +1,6 @@
 // The game log as sentences, the viewer as "you". Pure: view.log entries in, HTML out (names escaped, in <b>).
 // Every sentence key has a "Y" twin for when the viewer acted: Spanish conjugates the verb for "tú".
-import { esc, other } from './board.js';
+import { esc } from './board.js';
 import { fill } from '../i18n.js';
 
 // a card list: up to three known cards by name, else a count
@@ -41,7 +41,12 @@ export function line(e, view, t) {
     case 'shuffle': return S('lgShuffle', { z: own(t.lgLib, e.target) });
     case 'mulligan': return S('lgMull', { n: e.n });
     case 'life': return S(e.delta < 0 ? 'lgLifeDown' : 'lgLifeUp', { n: Math.abs(e.delta), z: own(t.lgLifeW, e.target), l: e.life });
-    case 'cmd_damage': return S(e.delta < 0 ? 'lgCmdDown' : 'lgCmdUp', { n: Math.abs(e.delta), k: `<b>${esc(e.commander)}</b>`, s: obj(e.target), v: e.value });
+    case 'cmd_damage': {
+      // with three or more players a commander name alone does not say whose it is
+      const k = `<b>${esc(e.commander)}</b>` + (Object.keys(view.players).length > 2 ? ` (${e.from === view.you ? t.lgYouLow : nm(e.from)})` : '');
+      return S(e.delta < 0 ? 'lgCmdDown' : 'lgCmdUp', { n: Math.abs(e.delta), k, s: obj(e.target), v: e.value });
+    }
+    case 'out': return S(e.out ? 'lgOut' : 'lgBack');
     case 'roll': return e.sides === 2 ? S('lgCoin', { r: e.result % 2 === 1 ? t.tbHeads : t.tbTails }) : S('lgRoll', { n: e.sides, r: e.result });
     case 'pass_turn': {
       const head = e.target === e.seat ? S('lgTake') : e.target === view.you ? fill(t.lgPassToY, { a: nm(e.seat) }) : S('lgPass', { s: nm(e.target) });
@@ -53,11 +58,11 @@ export function line(e, view, t) {
   }
 }
 
-// whose turn number n was: the current one, or the seat a pass gave it to (or took it from, for the turn before)
+// whose turn number n was: the current one, or the seat a pass gave it to (or the one that pass took it from, for the turn before)
 function whose(view, n) {
   if (view.turn && n === view.turn.number) return view.turn.seat;
   const to = view.log.find((e) => e.type === 'pass_turn' && e.turn === n), next = view.log.find((e) => e.type === 'pass_turn' && e.turn === n + 1);
-  return to ? to.target : next ? other(next.target) : null;
+  return to ? to.target : next ? next.prev : null;
 }
 
 // newest first, grouped by turn

@@ -3,7 +3,7 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, other } from './table/board.js';
+import { boardHtml, lobbyHtml, index, visibleNames, tile, art, attachable, esc, ICON, facing } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 import { buildBar } from './table/bar.js';
@@ -703,7 +703,7 @@ document.addEventListener('pointerup', (e) => {
   const dx = e.clientX - w.x, dy = e.clientY - w.y;
   if (Math.abs(dx) < 56 || Math.abs(dx) < 1.5 * Math.abs(dy) || e.timeStamp - w.t > 800) return;
   swallow = true; setTimeout(() => { swallow = false; }, 400);
-  setFocus(other(focus || view.you));
+  setFocus(facing(view, focus || view.you));
 }, true);
 document.addEventListener('pointercancel', () => { swipe = null; });
 

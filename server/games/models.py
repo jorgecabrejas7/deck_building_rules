@@ -14,7 +14,7 @@ class Game(models.Model):
 class GamePlayer(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="players")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
-    seat = models.IntegerField(choices=[(1, 1), (2, 2)])
+    seat = models.IntegerField(choices=[(i, i) for i in range(1, 7)])
     deck_version = models.ForeignKey("decks.DeckVersion", on_delete=models.SET_NULL, null=True, related_name="+")
 
     class Meta:

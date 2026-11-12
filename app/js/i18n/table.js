@@ -47,9 +47,10 @@ lgLook:'%a miró %c',lgLookY:'Tú miraste %c',lgReveal:'%a reveló %c',lgRevealY
 lgMull:'%a hizo mulligan a %n',lgMullY:'Tú hiciste mulligan a %n',lgLifeDown:'%a restó %n a %z (%l)',lgLifeDownY:'Tú restaste %n a %z (%l)',lgLifeUp:'%a sumó %n a %z (%l)',lgLifeUpY:'Tú sumaste %n a %z (%l)',
 lgCmdUp:'%a sumó %n de daño de %k a %s (%v)',lgCmdUpY:'Tú sumaste %n de daño de %k a %s (%v)',lgCmdDown:'%a restó %n de daño de %k a %s (%v)',lgCmdDownY:'Tú restaste %n de daño de %k a %s (%v)',
 lgCoin:'%a lanzó una moneda: %r',lgCoinY:'Tú lanzaste una moneda: %r',lgRoll:'%a tiró un d%n: %r',lgRollY:'Tú tiraste un d%n: %r',
+lgOut:'%a está fuera de la partida',lgOutY:'Tú estás fuera de la partida',lgBack:'%a vuelve a la partida',lgBackY:'Tú vuelves a la partida',
 lgTake:'%a tomó el turno',lgTakeY:'Tú tomaste el turno',lgPassToY:'%a te pasó el turno',lgPass:'%a pasó el turno a %s',lgPassY:'Tú pasaste el turno a %s',lgDrew:'; %s robó %c',lgDrewY:'; robaste %c',
 lgUndo:'%a deshizo %u',lgUndoY:'Tú deshiciste %u',lgUmove:'un movimiento',lgUtap:'un giro',lgUuntap_all:'un enderezado',lgUflip:'una vuelta',lgUcounter:'un contador',lgUtoken:'una ficha',
-lgUdelete:'un borrado',lgUattach:'un anexo',lgUlife:'un cambio de vida',lgUcmd_damage:'un daño de comandante',lgUpass_turn:'un pase de turno',lgUany:'una acción',lgOther:'%a: %k',lgOtherY:'Tú: %k',
+lgUdelete:'un borrado',lgUattach:'un anexo',lgUlife:'un cambio de vida',lgUcmd_damage:'un daño de comandante',lgUpass_turn:'un pase de turno',lgUout:'una salida o vuelta',lgUany:'una acción',lgOther:'%a: %k',lgOtherY:'Tú: %k',
 },
 en: {
 tbTapped:'tapped',tbDropHere:'Drag your cards here',tbFullscreen:'Full screen',tbExitFullscreen:'Exit full screen',tbPlay:'Play',tbToField:'To the battlefield',tbSendTo:'Send to',
@@ -98,8 +99,9 @@ lgLook:'%a looked at %c',lgLookY:'You looked at %c',lgReveal:'%a revealed %c',lg
 lgMull:'%a mulliganed to %n',lgMullY:'You mulliganed to %n',lgLifeDown:'%a took %n from %z (%l)',lgLifeDownY:'You took %n from %z (%l)',lgLifeUp:'%a added %n to %z (%l)',lgLifeUpY:'You added %n to %z (%l)',
 lgCmdUp:'%a added %n %k damage to %s (%v)',lgCmdUpY:'You added %n %k damage to %s (%v)',lgCmdDown:'%a removed %n %k damage from %s (%v)',lgCmdDownY:'You removed %n %k damage from %s (%v)',
 lgCoin:'%a flipped a coin: %r',lgCoinY:'You flipped a coin: %r',lgRoll:'%a rolled a d%n: %r',lgRollY:'You rolled a d%n: %r',
+lgOut:'%a is out of the game',lgOutY:'You are out of the game',lgBack:'%a is back in the game',lgBackY:'You are back in the game',
 lgTake:'%a took the turn',lgTakeY:'You took the turn',lgPassToY:'%a passed the turn to you',lgPass:'%a passed the turn to %s',lgPassY:'You passed the turn to %s',lgDrew:'; %s drew %c',lgDrewY:'; you drew %c',
 lgUndo:'%a undid %u',lgUndoY:'You undid %u',lgUmove:'a move',lgUtap:'a tap',lgUuntap_all:'an untap',lgUflip:'a flip',lgUcounter:'a counter',lgUtoken:'a token',
-lgUdelete:'a deletion',lgUattach:'an attachment',lgUlife:'a life change',lgUcmd_damage:'commander damage',lgUpass_turn:'a turn pass',lgUany:'an action',lgOther:'%a: %k',lgOtherY:'You: %k',
+lgUdelete:'a deletion',lgUattach:'an attachment',lgUlife:'a life change',lgUcmd_damage:'commander damage',lgUpass_turn:'a turn pass',lgUout:'leaving or rejoining',lgUany:'an action',lgOther:'%a: %k',lgOtherY:'You: %k',
 },
 };

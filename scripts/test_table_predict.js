@@ -26,11 +26,12 @@ def out(g, seat, a):
     print(json.dumps({"before": before, "action": a, "after": after}))
     return new
 
-for seed in range(8):
+N = int(sys.argv[1])
+for seed in range(6):
     rnd = random.Random(seed)
-    g = new_game({1: deck("a"), 2: deck("b")})
+    g = new_game({s: deck("abcdef"[s - 1]) for s in range(1, N + 1)})
     for _ in range(300):
-        seat = rnd.choice((1, 2))
+        seat = rnd.randint(1, N)
         zs = g["zones"]
         cards = [c for s in zs.values() for z in s.values() for c in z]
         mine = [c for z in ("hand", "battlefield", "graveyard") for c in zs[str(seat)][z]]
@@ -38,11 +39,11 @@ for seed in range(8):
         def pick(k=None):
             pool = mine if mine and rnd.random() < .8 else cards
             return [c["id"] for c in rnd.sample(pool, min(len(pool), k or rnd.randint(1, 3)))]
-        t = rnd.choice(["move"] * 8 + ["tap"] * 3 + ["untap_all", "life", "counter", "counter", "cmd_damage", "attach", "attach",
+        t = rnd.choice(["move"] * 8 + ["tap"] * 3 + ["untap_all", "life", "counter", "counter", "cmd_damage", "out", "attach", "attach",
                         "token", "flip", "delete", "look", "reveal", "shuffle", "mulligan", "roll", "pass_turn", "undo"])
         if t == "move":
             z = rnd.choice(ZONES + ["battlefield", "hand", "graveyard"])
-            a = {"type": "move", "cards": pick(), "to": {"seat": rnd.choice((seat, seat, 3 - seat)), "zone": z}}
+            a = {"type": "move", "cards": pick(), "to": {"seat": rnd.choice((seat, seat, rnd.randint(1, N))), "zone": z}}
             if z in ("battlefield", "exile") and rnd.random() < .4:
                 a["face_down"] = rnd.random() < .5
             if z == "library":
@@ -52,14 +53,16 @@ for seed in range(8):
         elif t == "tap":
             a = {"type": t, "cards": pick(), "tapped": rnd.random() < .6}
         elif t == "untap_all":
-            a = {"type": t, "seat": rnd.choice((1, 2))}
+            a = {"type": t, "seat": rnd.randint(1, N)}
         elif t == "life":
-            a = {"type": t, "seat": rnd.choice((1, 2)), "delta": rnd.choice((-5, -1, 1, 5, 1000))}
+            a = {"type": t, "seat": rnd.randint(1, N), "delta": rnd.choice((-5, -1, 1, 5, 1000))}
         elif t == "counter":
             a = {"type": t, "card": pick(1)[0], "name": rnd.choice("abc"), "delta": rnd.choice((-2, -1, 1, 3))}
         elif t == "cmd_damage":
-            s = rnd.choice((1, 2))
-            a = {"type": t, "seat": s, "commander": rnd.choice([f"{'ab'[2 - s]}-card-000", "nobody"] * 3 + ["x"][:rnd.randint(0, 1)]), "delta": rnd.choice((-3, 2, 7))}
+            s, f = rnd.randint(1, N), rnd.randint(1, N)  # f == s must be rejected
+            a = {"type": t, "seat": s, "from": f, "commander": rnd.choice([f"{'abcdef'[f - 1]}-card-000", "nobody"] * 3 + ["x"][:rnd.randint(0, 1)]), "delta": rnd.choice((-3, 2, 7))}
+        elif t == "out":
+            a = {"type": t, "out": rnd.random() < .5}
         elif t == "attach":
             host = rnd.choice(bf)["id"] if bf and rnd.random() < .85 else None
             a = {"type": t, "card": pick(1)[0], "to": host}
@@ -84,14 +87,16 @@ for seed in range(8):
         g = out(g, seat, a)
 `;
 
-const run = spawnSync('python3', ['-c', PY], {
-  cwd: fileURLToPath(new URL('../server/', import.meta.url)), encoding: 'utf8', maxBuffer: 1 << 30,
+const runs = [2, 3, 4, 6].map((n) => {
+  const run = spawnSync('python3', ['-c', PY, String(n)], {
+    cwd: fileURLToPath(new URL('../server/', import.meta.url)), encoding: 'utf8', maxBuffer: 1 << 30,
+  });
+  if (run.status !== 0) { console.error(run.stderr); process.exit(1); }
+  return [n, run.stdout.trim().split('\n')];
 });
-if (run.status !== 0) { console.error(run.stderr); process.exit(1); }
 
 const SHOULD_BE_NULL = new Set(['shuffle', 'mulligan', 'look', 'reveal', 'roll', 'token', 'pass_turn', 'flip', 'delete', 'undo']);
 const fields = ['zones', 'players', 'can_undo'];
-const counts = {};
 let failed = 0, handToField = 0;
 const fail = (msg, a) => { failed++; if (failed <= 10) console.error(`FAIL ${msg}: ${JSON.stringify(a)}`); };
 
@@ -105,30 +110,39 @@ function firstDiff(a, b, path = '') {
   return `${path}: predicted ${JSON.stringify(a)} actual ${JSON.stringify(b)}`;
 }
 
-const lines = run.stdout.trim().split('\n');
-for (const line of lines) {
-  const { before, action: a, after } = JSON.parse(line);
-  const snap = JSON.stringify(before);
-  const p = predict(before, a);
-  if (JSON.stringify(before) !== snap) fail('predict mutated its input', a);
-  const unnamed = a.type === 'move' && a.cards.some((id) => !Object.values(before.zones).some((z) => Object.values(z).some((l) => l.some((c) => c.id === id && c.name))));
-  if (SHOULD_BE_NULL.has(a.type) || (a.type === 'move' && (a.to.zone === 'library' || unnamed || a.shuffle))) {
-    if (p !== null) fail('should be null', a);
-    continue;
+const total = {};
+for (const [n, lines] of runs) {
+  const counts = {};
+  for (const line of lines) {
+    const { before, action: a, after } = JSON.parse(line);
+    const snap = JSON.stringify(before);
+    const p = predict(before, a);
+    if (JSON.stringify(before) !== snap) fail('predict mutated its input', a);
+    const unnamed = a.type === 'move' && a.cards.some((id) => !Object.values(before.zones).some((z) => Object.values(z).some((l) => l.some((c) => c.id === id && c.name))));
+    if (SHOULD_BE_NULL.has(a.type) || (a.type === 'move' && (a.to.zone === 'library' || unnamed || a.shuffle))) {
+      if (p !== null) fail('should be null', a);
+      continue;
+    }
+    if (p === null) continue;
+    counts[a.type] = (counts[a.type] || 0) + 1;
+    if (!after) { fail('predicted an action the reducer rejected', a); continue; }
+    for (const f of fields) {
+      const d = firstDiff(p[f], after[f], f);
+      if (d) { fail(d, a); break; }
+    }
+    if (a.type === 'move' && a.to.zone === 'battlefield' && a.to.seat === before.you
+        && a.cards.every((id) => before.zones[before.you].hand.some((c) => c.id === id && c.name))) handToField++;
   }
-  if (p === null) continue;
-  counts[a.type] = (counts[a.type] || 0) + 1;
-  if (!after) { fail('predicted an action the reducer rejected', a); continue; }
-  for (const f of fields) {
-    const d = firstDiff(p[f], after[f], f);
-    if (d) { fail(d, a); break; }
-  }
-  if (a.type === 'move' && a.to.zone === 'battlefield' && a.to.seat === before.you
-      && a.cards.every((id) => before.zones[before.you].hand.some((c) => c.id === id && c.name))) handToField++;
+
+  total[n] = counts;
+  console.log(`  ${n} players: ${lines.length} actions, predicted ${JSON.stringify(counts)}`);
 }
 
-for (const t of ['tap', 'untap_all', 'life', 'counter', 'cmd_damage', 'attach', 'move'])
-  if (!counts[t]) fail(`never predicted ${t}, the test is vacuous`, {});
+const counts = {};
+for (const c of Object.values(total)) for (const [k, v] of Object.entries(c)) counts[k] = (counts[k] || 0) + v;
+for (const n of Object.keys(total))
+  for (const t of ['tap', 'untap_all', 'life', 'counter', 'cmd_damage', 'out', 'attach', 'move'])
+    if (!total[n][t]) fail(`never predicted ${t} with ${n} players, the test is vacuous`, {});
 if (!handToField) fail('no predicted move from hand to own battlefield', {});
 if (failed) { console.error(`${failed} failure(s)`); process.exit(1); }
-console.log(`table predict ok: ${lines.length} actions, predicted ${JSON.stringify(counts)}, ${handToField} hand-to-battlefield`);
+console.log(`table predict ok: players 2, 3, 4, 6; predicted ${JSON.stringify(counts)}, ${handToField} hand-to-battlefield`);

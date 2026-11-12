@@ -44,7 +44,7 @@ const bub = {}, REST = 1100;
 const sign = (d) => (d > 0 ? '+' : d < 0 ? '−' : '±') + Math.abs(d);
 export function lifeMoved(prev, next, settle) {
   if (!prev.players || !next.players) return;
-  for (const s of [1, 2]) {
+  for (const s of Object.keys(next.players)) {
     const d = next.players[s].life - prev.players[s].life;
     if (d) bubble(s, d, settle);
   }

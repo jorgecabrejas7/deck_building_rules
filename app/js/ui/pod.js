@@ -217,13 +217,13 @@ async function loadGames() {
 function gamesHtml(t) {
   const others = state.pod.members.filter(m => !m.me);
   const invite = others.length
-    ? '<form class="gm-invite" data-gameform><label class="arch-field"><span>' + esc(t.pdGWho) + '</span><select name="opponent" class="arch-select">' +
+    ? '<form class="gm-invite" data-gameform><label class="arch-field"><span>' + esc(t.pdGWho) + '</span><select name="opponents" class="arch-select">' +
       others.map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select></label>' +
       '<button class="btn-primary">' + esc(t.pdGInvite) + '</button></form>'
     : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
   const li = (games ? games.list : []).map(g => {
-    const who = g.opponent === null ? t.pdGDeleted : g.opponent;
-    const me = g.picked[g.seat], them = g.picked[3 - g.seat];
+    const who = g.opponents.map(n => n === null ? t.pdGDeleted : n).join(', ');
+    const me = g.picked[g.seat], them = Object.entries(g.picked).every(([s, v]) => v || Number(s) === g.seat);
     const st = g.status === 'active' ? t.pdGActive
       : fill(t.pdGWait, { a: me ? t.pdGPicked : t.pdGNotPicked, b: them ? t.pdGPicked : t.pdGNotPicked });
     const lobby = g.status === 'lobby';
@@ -387,7 +387,7 @@ async function onClick(e) {
 async function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
-  if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponent: Number(f.opponent.value) }, 201);
+  if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponents: [Number(f.opponents.value)] }, 201);
   else if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
   else if ('addfriendform' in f.dataset) { if (await act('POST', here('members'), { user: Number(f.user.value) }, [200, 201])) refresh(); }
   else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }

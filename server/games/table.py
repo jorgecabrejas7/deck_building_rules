@@ -1,4 +1,5 @@
-"""Pure two-player table reducer: no Django, no I/O. State is plain JSON (seat keys are "1"/"2").
+"""Pure table reducer for 2 to 6 players: no Django, no I/O. State is plain JSON; seat keys are "1".."N" and
+N is len(state["players"]).
 
 Hidden information: view() never sends a name the viewer may not see. A card keeps its id across moves and draws;
 only a shuffle (a mulligan shuffles too) issues new ids, so an id cannot be followed through a shuffle.
@@ -9,6 +10,8 @@ the host across a change of control and is dropped when either card leaves the b
 Every card also carries a permanent "uid" that never leaves the server; undo uses it to keep what each seat
 has already seen. state["history"] holds up to UNDO_DEPTH pre-action snapshots of one seat's latest run of
 undoable actions; it and the raw log (names plus the seats that saw them) are never sent as they are.
+A card's "known_by" lists the seats that know it; "every seat" means all N. players[s]["cmd_damage"] is
+{"<source seat>": {"<commander>": n}}. players[s]["out"] only makes pass_turn skip the seat: nothing is enforced.
 """
 import copy
 import secrets
@@ -17,7 +20,8 @@ _rng = secrets.SystemRandom()
 ZONES = ("library", "hand", "battlefield", "graveyard", "exile", "command")
 PUBLIC = ("battlefield", "graveyard", "exile", "command")
 MAX_DECK = 250
-MAX_CARDS = 600  # per game, bounds token spam
+MAX_SEATS = 6
+MAX_TOKENS = 600  # per game, bounds token spam
 UNDO_DEPTH = 5  # the whole state, snapshots included, is written on every action
 LOG_SIZE = 50
 _NO_UNDO = {"shuffle", "mulligan", "look", "reveal", "roll"}  # random or informative: undo would cheat
@@ -59,11 +63,15 @@ def _shuffle(state, seat):
 
 
 def new_game(decks):
-    """decks: {1: {"entries": [{"name","quantity"}], "commanders": [name]}, 2: ...}"""
+    """decks: {1: {"entries": [{"name","quantity"}], "commanders": [name]}, ..., N: ...} with 2 <= N <= 6"""
+    n = len(decks) if isinstance(decks, dict) else 0
+    if not 2 <= n <= MAX_SEATS or set(decks) != set(range(1, n + 1)):
+        _bad()
+    seats = range(1, n + 1)
     state = {"seq": 0, "roll": None, "players": {}, "zones": {}, "log": [], "history": [],
-             "turn": {"seat": _rng.choice((1, 2)), "number": 1}}
-    for seat in (1, 2):
-        d, other = decks[seat], decks[3 - seat]
+             "turn": {"seat": _rng.choice(seats), "number": 1}}
+    for seat in seats:
+        d = decks[seat]
         if sum(e["quantity"] for e in d["entries"]) > MAX_DECK:
             _bad()
         z = {k: [] for k in ZONES}
@@ -72,14 +80,15 @@ def new_game(decks):
             for _ in range(e["quantity"]):
                 if e["name"] in pending:
                     pending.remove(e["name"])
-                    z["command"].append(_card(e["name"], seat, known_by=(1, 2)))
+                    z["command"].append(_card(e["name"], seat, known_by=seats))
                 else:
                     z["library"].append(_card(e["name"], seat))
-        z["command"] += [_card(n, seat, known_by=(1, 2)) for n in pending]  # commander absent from entries
+        z["command"] += [_card(c, seat, known_by=seats) for c in pending]  # commander absent from entries
         state["zones"][str(seat)] = z
-        state["players"][str(seat)] = {"life": 40, "commanders": list(d["commanders"]),
-                                       "cmd_damage": {n: 0 for n in other["commanders"]}}
-    for seat in (1, 2):
+        state["players"][str(seat)] = {
+            "life": 40, "commanders": list(d["commanders"]), "out": False,
+            "cmd_damage": {str(o): {c: 0 for c in decks[o]["commanders"]} for o in seats if o != seat and decks[o]["commanders"]}}
+    for seat in seats:
         _shuffle(state, seat)
         _draw(state, seat, 7)
     return state
@@ -91,13 +100,13 @@ def _visible(card, zone, viewer):
     return (zone in PUBLIC and not card["face_down"]) or viewer in card["known_by"]
 
 
-def _view_card(card, zone, viewer):
+def _view_card(card, zone, viewer, seats):
     out = {"id": card["id"], "owner": card["owner"], "tapped": card["tapped"],
            "face_down": card["face_down"], "counters": dict(card["counters"])}
     if zone == "battlefield" and card.get("attached"):
         out["attached"] = card["attached"]
     if _visible(card, zone, viewer):
-        out.update(name=card["name"], token=card["token"], shared=_visible(card, zone, 3 - viewer))
+        out.update(name=card["name"], token=card["token"], shared=all(_visible(card, zone, s) for s in seats if s != viewer))
     return out
 
 
@@ -119,12 +128,12 @@ def _view_entry(entry, viewer):
 
 
 def view(state, viewer):
-    """What `viewer` (1|2) may see. Player names and `picked` are added by the caller."""
-    h = state["history"]
+    """What `viewer` (a seat) may see. Player names and `picked` are added by the caller."""
+    h, seats = state["history"], _seats(state)
     return {
         "status": "active", "you": viewer,
         "players": copy.deepcopy(state["players"]),
-        "zones": {s: {z: [_view_card(c, z, viewer) for c in cards] for z, cards in zs.items()}
+        "zones": {s: {z: [_view_card(c, z, viewer, seats) for c in cards] for z, cards in zs.items()}
                   for s, zs in state["zones"].items()},
         "roll": copy.deepcopy(state["roll"]),
         "turn": dict(state["turn"]),
@@ -135,8 +144,12 @@ def view(state, viewer):
 
 # ---- validation ----
 
-def _seat(x):
-    if type(x) is not int or x not in (1, 2):
+def _seats(state):
+    return range(1, len(state["players"]) + 1)
+
+
+def _seat(state, x):
+    if type(x) is not int or x not in _seats(state):
         _bad()
     return x
 
@@ -196,8 +209,8 @@ def _reattach(state, hosts):
                 c["attached"] = None
 
 
-def _seen(card, zone):
-    return {s for s in (1, 2) if _visible(card, zone, s)}
+def _seen(state, card, zone):
+    return {s for s in _seats(state) if _visible(card, zone, s)}
 
 
 def _ref(card, seat, zone, seen):
@@ -220,7 +233,7 @@ def _move(state, seat, a):
     _fields(a, ("cards", "to"), ("pos", "face_down", "shuffle"), typed=True)
     ids = _ids(a["cards"])
     _fields(a["to"], ("seat", "zone"))
-    dest_seat, zone = _seat(a["to"]["seat"]), _zone(a["to"]["zone"])
+    dest_seat, zone = _seat(state, a["to"]["seat"]), _zone(a["to"]["zone"])
     pos = a.get("pos")
     if pos is not None and (zone != "library" or pos not in ("top", "bottom")):
         _bad()
@@ -233,13 +246,13 @@ def _move(state, seat, a):
     _remove(state, ids)
     moved, left, refs, peek = [], set(), [], False
     for c, src, src_seat in found:
-        before = _seen(c, src)
+        before = _seen(state, c, src)
         if src == "battlefield" and zone != "battlefield":
             c["tapped"], c["counters"], c["attached"] = False, {}, None
             left.add(c["id"])
         c["face_down"] = face_down
         c["known_by"] = sorted(before | ({dest_seat} if zone == "hand" else set()))
-        after = _seen(c, zone)
+        after = _seen(state, c, zone)
         peek = peek or (seat in after - before)
         refs.append(_ref(c, src_seat, src, before | after))
         moved.append(c)
@@ -261,12 +274,12 @@ def _tap(state, seat, a):
     found = _locate(state, ids)
     for c, _, _ in found:
         c["tapped"] = tapped
-    return {"tapped": tapped, "cards": [_ref(c, s, z, _seen(c, z)) for c, z, s in found]}
+    return {"tapped": tapped, "cards": [_ref(c, s, z, _seen(state, c, z)) for c, z, s in found]}
 
 
 def _untap_all(state, seat, a):
     _fields(a, ("seat",), typed=True)
-    s = _seat(a["seat"])
+    s = _seat(state, a["seat"])
     for c in state["zones"][str(s)]["battlefield"]:
         c["tapped"] = False
     return {"target": s}
@@ -280,10 +293,10 @@ def _flip(state, seat, a):
         _bad()
     refs, peek = [], False
     for c, z, at in found:
-        before = _seen(c, z)
-        c["known_by"] = sorted(before) if down else [1, 2]
+        before = _seen(state, c, z)
+        c["known_by"] = sorted(before) if down else list(_seats(state))
         c["face_down"] = down
-        after = _seen(c, z)
+        after = _seen(state, c, z)
         peek = peek or (seat in after - before)
         refs.append(_ref(c, at, z, before | after))
     return {"face_down": down, "cards": refs, "peek": peek}
@@ -300,15 +313,15 @@ def _counter(state, seat, a):
         c["counters"][name] = value
     else:
         c["counters"].pop(name, None)
-    return {"card": _ref(c, s, z, _seen(c, z)), "name": name, "delta": delta, "value": value}
+    return {"card": _ref(c, s, z, _seen(state, c, z)), "name": name, "delta": delta, "value": value}
 
 
 def _token(state, seat, a):
     _fields(a, ("seat", "name", "count"), typed=True)
-    s, name, count = _seat(a["seat"]), _str(a["name"], 1, 100), _int(a["count"], 1, 20)
-    if sum(len(cs) for zs in state["zones"].values() for cs in zs.values()) + count > MAX_CARDS:
+    s, name, count = _seat(state, a["seat"]), _str(a["name"], 1, 100), _int(a["count"], 1, 20)
+    if sum(c["token"] for zs in state["zones"].values() for cs in zs.values() for c in cs) + count > MAX_TOKENS:
         _bad()
-    state["zones"][str(s)]["battlefield"] += [_card(name, s, token=True, known_by=(1, 2)) for _ in range(count)]
+    state["zones"][str(s)]["battlefield"] += [_card(name, s, token=True, known_by=_seats(state)) for _ in range(count)]
     return {"target": s, "name": name, "count": count}
 
 
@@ -320,7 +333,7 @@ def _delete(state, seat, a):
         _bad()
     _remove(state, [cid])
     _reattach(state, {cid})
-    return {"card": _ref(c, s, z, _seen(c, z))}
+    return {"card": _ref(c, s, z, _seen(state, c, z))}
 
 
 def _attach(state, seat, a):
@@ -330,7 +343,7 @@ def _attach(state, seat, a):
     _fields(a, ("card", "to"), typed=True)
     cid = _str(a["card"], 1, 32)
     c, zone, cseat = _locate(state, [cid])[0]
-    before = _seen(c, zone)
+    before = _seen(state, c, zone)
     if a["to"] is None:
         c["attached"] = None
         return {"card": _ref(c, cseat, zone, before), "host": None}
@@ -343,15 +356,15 @@ def _attach(state, seat, a):
         c = state["zones"][str(seat)]["battlefield"][-1]
     _reattach(state, {c["id"]})
     c["attached"] = host["id"]
-    return {"card": _ref(c, cseat, zone, before | _seen(c, "battlefield")),
-            "host": _ref(host, hseat, hzone, _seen(host, hzone)), "peek": peek}
+    return {"card": _ref(c, cseat, zone, before | _seen(state, c, "battlefield")),
+            "host": _ref(host, hseat, hzone, _seen(state, host, hzone)), "peek": peek}
 
 
 def _look(state, seat, a):
     _fields(a, ("cards",), typed=True)
     refs = []
     for c, z, s in _locate(state, _ids(a["cards"])):
-        refs.append(_ref(c, s, z, _seen(c, z) | {seat}))
+        refs.append(_ref(c, s, z, _seen(state, c, z) | {seat}))
         c["known_by"] = sorted(set(c["known_by"]) | {seat})
     return {"cards": refs}
 
@@ -360,13 +373,13 @@ def _reveal(state, seat, a):
     _fields(a, ("cards",), typed=True)
     found = _locate(state, _ids(a["cards"]))
     for c, _, _ in found:
-        c["known_by"] = [1, 2]
-    return {"cards": [_ref(c, s, z, (1, 2)) for c, z, s in found]}
+        c["known_by"] = list(_seats(state))
+    return {"cards": [_ref(c, s, z, _seats(state)) for c, z, s in found]}
 
 
 def _shuffle_action(state, seat, a):
     _fields(a, ("seat",), typed=True)
-    s = _seat(a["seat"])
+    s = _seat(state, a["seat"])
     _shuffle(state, s)
     return {"target": s}
 
@@ -384,20 +397,27 @@ def _mulligan(state, seat, a):
 
 def _life(state, seat, a):
     _fields(a, ("seat", "delta"), typed=True)
-    s, delta = _seat(a["seat"]), _int(a["delta"], -999, 999)
+    s, delta = _seat(state, a["seat"]), _int(a["delta"], -999, 999)
     p = state["players"][str(s)]
     p["life"] = max(-999, min(999, p["life"] + delta))
     return {"target": s, "delta": delta, "life": p["life"]}
 
 
 def _cmd_damage(state, seat, a):
-    _fields(a, ("seat", "commander", "delta"), typed=True)
-    s, name, delta = _seat(a["seat"]), _str(a["commander"], 1, 200), _int(a["delta"], -999, 999)
-    if name not in state["players"][str(3 - s)]["commanders"]:
+    _fields(a, ("seat", "from", "commander", "delta"), typed=True)
+    s, src = _seat(state, a["seat"]), _seat(state, a["from"])
+    name, delta = _str(a["commander"], 1, 200), _int(a["delta"], -999, 999)
+    if src == s or name not in state["players"][str(src)]["commanders"]:
         _bad()
-    d = state["players"][str(s)]["cmd_damage"]
-    d[name] = max(0, min(999, d.get(name, 0) + delta))
-    return {"target": s, "commander": name, "delta": delta, "value": d[name]}
+    d = state["players"][str(s)]["cmd_damage"][str(src)]
+    d[name] = max(0, min(999, d[name] + delta))
+    return {"target": s, "from": src, "commander": name, "delta": delta, "value": d[name]}
+
+
+def _out(state, seat, a):
+    _fields(a, ("out",), typed=True)
+    state["players"][str(seat)]["out"] = _bool(a["out"])
+    return {"out": a["out"]}
 
 
 def _roll(state, seat, a):
@@ -408,18 +428,21 @@ def _roll(state, seat, a):
 
 
 def _pass_turn(state, seat, a):
-    """Either seat may pass; no rules are enforced. The next seat untaps and, with draw=true, draws one."""
+    """Any seat may pass; no rules are enforced. The next seat that is not out untaps and, with draw=true, draws one."""
     _fields(a, (), ("draw",), typed=True)
     draw = _bool(a["draw"]) if "draw" in a else False
-    turn = state["turn"]
-    turn["seat"], turn["number"] = 3 - turn["seat"], turn["number"] + 1
+    turn, n = state["turn"], len(state["players"])
+    prev = turn["seat"]
+    order = [(prev - 1 + i) % n + 1 for i in range(1, n)]
+    turn["seat"] = next((s for s in order if not state["players"][str(s)]["out"]), prev)
+    turn["number"] += 1
     s = turn["seat"]
     z = state["zones"][str(s)]
     for c in z["battlefield"]:
         c["tapped"] = False
     drawn = z["library"][:1] if draw else []
     _draw(state, s, len(drawn))
-    return {"target": s, "draw": draw, "cards": [_ref(c, s, "library", {s}) for c in drawn], "peek": bool(drawn)}
+    return {"target": s, "prev": prev, "draw": draw, "cards": [_ref(c, s, "library", {s}) for c in drawn], "peek": bool(drawn)}
 
 
 def _undo(state, seat):
@@ -428,7 +451,7 @@ def _undo(state, seat):
     if not hist or hist[-1]["seat"] != seat:
         raise ActionError("undo")
     last = hist.pop()
-    known = {c["uid"]: _seen(c, z) for zs in state["zones"].values() for z, cs in zs.items() for c in cs}
+    known = {c["uid"]: _seen(state, c, z) for zs in state["zones"].values() for z, cs in zs.items() for c in cs}
     for zs in last["state"]["zones"].values():
         for cs in zs.values():
             for c in cs:
@@ -440,12 +463,12 @@ def _undo(state, seat):
 _ACTIONS = {"move": _move, "tap": _tap, "untap_all": _untap_all, "flip": _flip, "counter": _counter,
             "token": _token, "delete": _delete, "look": _look, "reveal": _reveal,
             "shuffle": _shuffle_action, "mulligan": _mulligan, "life": _life,
-            "cmd_damage": _cmd_damage, "roll": _roll, "attach": _attach, "pass_turn": _pass_turn}
+            "cmd_damage": _cmd_damage, "out": _out, "roll": _roll, "attach": _attach, "pass_turn": _pass_turn}
 
 
 def apply(state, seat, action):
     """Return a new state; the input is never mutated. Raises ActionError('invalid'|'stale'|'undo')."""
-    _seat(seat)
+    _seat(state, seat)
     t = action.get("type") if isinstance(action, dict) else None
     if type(t) is not str or t not in _ACTIONS and t != "undo":
         _bad()

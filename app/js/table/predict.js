@@ -5,7 +5,7 @@ const PUBLIC = ['battlefield', 'graveyard', 'exile', 'command'];
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const int = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
 const str = (x, hi) => typeof x === 'string' && x.length >= 1 && x.length <= hi;
-const seatOk = (x) => x === 1 || x === 2;
+const seatOk = (v, x) => Number.isInteger(x) && x in v.players;
 const keys = (a, req, opt = []) => req.every((k) => k in a) && Object.keys(a).every((k) => k === 'type' || req.includes(k) || opt.includes(k));
 const ids = (x) => Array.isArray(x) && x.length >= 1 && x.length <= 100 && new Set(x).size === x.length && x.every((i) => str(i, 32));
 
@@ -22,6 +22,9 @@ function find(v, id) {
 function move(v, cardIds, seat, zone, faceDown) {
   const found = cardIds.map((id) => find(v, id));
   if (found.some((f) => !f || !f.card.name) || zone === 'library' || !v.zones[seat][zone]) return false;
+  // into another's hand only that seat learns it: with 3+ players whether all the others now know it is not in the view
+  const toOther = zone === 'hand' && seat !== v.you;
+  if (toOther && Object.keys(v.players).length > 2 && found.some((f) => !f.card.shared)) return false;
   faceDown = faceDown && (zone === 'battlefield' || zone === 'exile');
   const left = new Set();
   for (const { card, list, zone: from } of found) {
@@ -32,7 +35,7 @@ function move(v, cardIds, seat, zone, faceDown) {
       left.add(card.id);
     }
     card.face_down = faceDown;
-    card.shared = (PUBLIC.includes(zone) && !faceDown) || card.shared || (zone === 'hand' && seat !== v.you);
+    card.shared = (PUBLIC.includes(zone) && !faceDown) || card.shared || toOther;
     v.zones[seat][zone].push(card);
   }
   for (const zones of Object.values(v.zones)) for (const c of zones.battlefield) if (left.has(c.attached)) delete c.attached;
@@ -55,8 +58,8 @@ function attach(v, a) {
 const ACTIONS = {
   tap: (v, a) => keys(a, ['cards', 'tapped']) && ids(a.cards) && typeof a.tapped === 'boolean'
     && a.cards.map((id) => find(v, id)).every((f) => f && (f.card.tapped = a.tapped, true)),
-  untap_all: (v, a) => keys(a, ['seat']) && seatOk(a.seat) && (v.zones[a.seat].battlefield.forEach((c) => { c.tapped = false; }), true),
-  life: (v, a) => keys(a, ['seat', 'delta']) && seatOk(a.seat) && int(a.delta, -999, 999)
+  untap_all: (v, a) => keys(a, ['seat']) && seatOk(v, a.seat) && (v.zones[a.seat].battlefield.forEach((c) => { c.tapped = false; }), true),
+  life: (v, a) => keys(a, ['seat', 'delta']) && seatOk(v, a.seat) && int(a.delta, -999, 999)
     && (v.players[a.seat].life = clamp(v.players[a.seat].life + a.delta, -999, 999), true),
   counter: (v, a) => {
     if (!keys(a, ['card', 'name', 'delta']) || !str(a.card, 32) || !str(a.name, 30) || !int(a.delta, -999, 999)) return false;
@@ -67,14 +70,15 @@ const ACTIONS = {
     return true;
   },
   cmd_damage: (v, a) => {
-    if (!keys(a, ['seat', 'commander', 'delta']) || !seatOk(a.seat) || !str(a.commander, 200) || !int(a.delta, -999, 999)) return false;
-    if (!v.players[3 - a.seat].commanders.includes(a.commander)) return false;
-    const d = v.players[a.seat].cmd_damage;
-    d[a.commander] = clamp((d[a.commander] || 0) + a.delta, 0, 999);
+    if (!keys(a, ['seat', 'from', 'commander', 'delta']) || !seatOk(v, a.seat) || !seatOk(v, a.from) || a.from === a.seat
+      || !str(a.commander, 200) || !int(a.delta, -999, 999) || !v.players[a.from].commanders.includes(a.commander)) return false;
+    const d = v.players[a.seat].cmd_damage[a.from];
+    d[a.commander] = clamp(d[a.commander] + a.delta, 0, 999);
     return true;
   },
+  out: (v, a) => keys(a, ['out']) && typeof a.out === 'boolean' && (v.players[v.you].out = a.out, true),
   move: (v, a) => keys(a, ['cards', 'to'], ['pos', 'face_down', 'shuffle']) && ids(a.cards) && a.to && keys(a.to, ['seat', 'zone'])
-    && seatOk(a.to.seat) && !a.shuffle && a.pos == null && (a.face_down === undefined || typeof a.face_down === 'boolean')
+    && seatOk(v, a.to.seat) && !a.shuffle && a.pos == null && (a.face_down === undefined || typeof a.face_down === 'boolean')
     && move(v, a.cards, a.to.seat, a.to.zone, !!a.face_down),
   attach,
 };

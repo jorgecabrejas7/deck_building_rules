@@ -1,7 +1,7 @@
 // Bottom sheets: every action a player can take on a card, a pile, a commander or the menu.
 // buildSheet returns {title, body, items, art}: buttons carry data-i, the index of their handler in items.
 // A sheet opened from another one carries `back`; acting in it returns there instead of closing.
-import { ZONES, other, esc, index, tile, art, attachable, ICON, fsShown } from './board.js';
+import { ZONES, seats, facing, esc, index, tile, art, attachable, ICON, fsShown } from './board.js';
 import { logHtml } from './log.js';
 import { fill } from '../i18n.js';
 
@@ -26,7 +26,7 @@ export function buildSheet(sh, view, c) {
     title = card.name ? esc(card.name) : card.face_down ? t.tbCardDown : t.tbHiddenCard;
     big = art(card, 'img_normal');
     if (sh.move) {
-      for (const s of [view.you, other(view.you)]) {
+      for (const s of [view.you, ...seats(view).filter((x) => x !== view.you)]) {
         body += `<h3>${name(s)}</h3>`;
         const mv = (label, to, extra = {}) => !Object.keys(extra).length && s === seat && to === zone ? '' : b(label, () => send({ type: 'move', cards: ids, to: { seat: s, zone: to }, ...extra }));
         body += row(...ZONES.map((z) => z === 'library'
@@ -47,7 +47,7 @@ export function buildSheet(sh, view, c) {
         card.name && !card.shared && b(t.tbReveal, () => send({ type: 'reveal', cards: ids })),
         (bf || (zone === 'hand' && attachable(card))) && b(t.tbAttach, () => c.pickHost(card.id)),
         bf && card.attached && b(t.tbDetach, () => send({ type: 'attach', card: card.id, to: null })),
-        bf && b(t.tbGive, () => send({ type: 'move', cards: ids, to: { seat: other(seat), zone: 'battlefield' } })),
+        bf && b(t.tbGive, () => send({ type: 'move', cards: ids, to: { seat: facing(view, seat), zone: 'battlefield' } })),
         card.token && b(t.tbDelete, () => send({ type: 'delete', card: card.id }), 'danger'));
       body += `<h3>${t.tbSendTo}</h3>` + row(
         go(t.tbZhand, 'hand'),
@@ -104,11 +104,11 @@ export function buildSheet(sh, view, c) {
     title = `${t['tbZ' + sh.zone]} · ${name(sh.seat)} (${all.length})`;
     body = cards.length ? grid(sh.zone === 'graveyard' || sh.zone === 'exile' ? [...cards].reverse() : cards) : `<p>${sh.zone === 'library' && all.length ? t.tbNoneKnown : t.tbEmpty}</p>`;
   } else if (sh.k === 'cmd') {
-    const cmd = view.players[other(sh.seat)].commanders[sh.i];
+    const from = facing(view, sh.seat), cmd = view.players[from].commanders[sh.i];
     if (cmd === undefined) return null;
-    const d = (n) => b(n > 0 ? '+1' : '−1', () => send({ type: 'cmd_damage', seat: sh.seat, commander: cmd, delta: n }), '', true);
+    const d = (n) => b(n > 0 ? '+1' : '−1', () => send({ type: 'cmd_damage', seat: sh.seat, from, commander: cmd, delta: n }), '', true);
     title = `${t.tbCmdDmg} · ${name(sh.seat)}`;
-    body = `<p class="cl">${esc(cmd)}: <b>${(view.players[sh.seat].cmd_damage || {})[cmd] || 0}</b></p>` + row(d(-1), d(1));
+    body = `<p class="cl">${esc(cmd)}: <b>${view.players[sh.seat].cmd_damage[from][cmd] || 0}</b></p>` + row(d(-1), d(1));
   } else if (sh.k === 'token') {
     title = t.tbTokenNew;
     body = row(input('sn', '', `maxlength="100" placeholder="${t.tbTokenName}" aria-label="${t.tbTokenName}"`))

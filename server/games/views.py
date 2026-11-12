@@ -36,24 +36,25 @@ def pod_games(request, id):
     m = membership(request, id)
     if request.method == "GET":
         mine = GamePlayer.objects.filter(game__pod_id=id, user=request.user).select_related("game").order_by("-game_id")
-        games = []
-        for me in mine:
-            other = next((p for p in me.game.players.select_related("user") if p.seat != me.seat), None)
-            games.append({"id": me.game_id, "status": me.game.status, "seat": me.seat,
-                          "opponent": other.name if other else None, "picked": picked(me.game)})
+        games = [{"id": me.game_id, "status": me.game.status, "seat": me.seat, "picked": picked(me.game),
+                  "opponents": [p.name for p in me.game.players.select_related("user").order_by("seat") if p.seat != me.seat]}
+                 for me in mine]
         return JsonResponse({"games": games})
     data = body(request)
     if data is None:
         return bad({"body": "invalid"})
-    opp = data.get("opponent")
-    if type(opp) is not int or opp == request.user.id or not m.pod.members.filter(user_id=opp).exists():
-        return bad({"opponent": "invalid"})
+    opps = data.get("opponents")
+    if (type(opps) is not list or not 1 <= len(opps) <= table.MAX_SEATS - 1
+            or any(type(o) is not int or o == request.user.id for o in opps) or len(set(opps)) != len(opps)
+            or m.pod.members.filter(user_id__in=opps).count() != len(opps)):
+        return bad({"opponents": "invalid"})
     if GamePlayer.objects.filter(user=request.user).count() >= MAX_GAMES:
         return bad({"games": "limit"})
     with transaction.atomic():
         g = Game.objects.create(pod=m.pod)
         GamePlayer.objects.create(game=g, user=request.user, seat=1)
-        GamePlayer.objects.create(game=g, user_id=opp, seat=2)
+        for seat, opp in enumerate(opps, 2):
+            GamePlayer.objects.create(game=g, user_id=opp, seat=seat)
     return JsonResponse({"id": g.id}, status=201)
 
 

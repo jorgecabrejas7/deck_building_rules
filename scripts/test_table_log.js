@@ -32,11 +32,12 @@ const E = [
   { type: 'shuffle', target: 1 }, { type: 'shuffle', target: 2 },
   { type: 'mulligan', n: 6 },
   { type: 'life', target: 2, delta: -3, life: 37 }, { type: 'life', target: 1, delta: 2, life: 42 },
-  { type: 'cmd_damage', target: 2, commander: 'Atraxa', delta: 3, value: 3 }, { type: 'cmd_damage', target: 1, commander: 'Atraxa', delta: -1, value: 0 },
+  { type: 'cmd_damage', target: 2, from: 1, commander: 'Atraxa', delta: 3, value: 3 }, { type: 'cmd_damage', target: 1, from: 2, commander: 'Atraxa', delta: -1, value: 0 },
+  { type: 'out', out: true }, { type: 'out', out: false },
   { type: 'roll', sides: 20, result: 14 }, { type: 'roll', sides: 2, result: 1 },
-  { type: 'pass_turn', target: 2, draw: true, cards: [{ seat: 2, zone: 'library', name: 'Forest' }] }, { type: 'pass_turn', target: 2, draw: false, cards: [] },
-  { type: 'pass_turn', target: 1, draw: true, cards: [{ seat: 1, zone: 'library' }] },
-  ...['move', 'tap', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'life', 'cmd_damage', 'pass_turn'].map((u) => ({ type: 'undo', undone: u })),
+  { type: 'pass_turn', target: 2, prev: 1, draw: true, cards: [{ seat: 2, zone: 'library', name: 'Forest' }] }, { type: 'pass_turn', target: 2, prev: 1, draw: false, cards: [] },
+  { type: 'pass_turn', target: 1, prev: 2, draw: true, cards: [{ seat: 1, zone: 'library' }] },
+  ...['move', 'tap', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'life', 'cmd_damage', 'out', 'pass_turn'].map((u) => ({ type: 'undo', undone: u })),
 ];
 const errs = [], types = new Set();
 for (const lang of ['es', 'en']) for (const you of [1, 2]) {
@@ -51,7 +52,21 @@ for (const lang of ['es', 'en']) for (const you of [1, 2]) {
   view.log = E.map((e, i) => ({ seq: i, turn: i < 20 ? 1 : 2, seat: 1 + (i % 2), ...e }));
   if (!logHtml(view, t).includes(fill(t.tbTurnN, { n: 1 }))) errs.push(`${lang}: no turn heading`);
 }
-const all = ['move', 'tap', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'look', 'reveal', 'shuffle', 'mulligan', 'life', 'cmd_damage', 'roll', 'pass_turn', 'undo'];
+// four players: the commander sentence says whose commander it was; headings come from `prev`, not a guess
+const four = { you: 3, players: { 1: { name: 'ana' }, 2: { name: 'ben' }, 3: { name: 'cy' }, 4: { name: 'di' } }, turn: { seat: 4, number: 3 } };
+const pass = (turn, prev, target) => ({ seq: turn, turn, seat: prev, type: 'pass_turn', target, prev, draw: false, cards: [] });
+const cmd = { type: 'cmd_damage', target: 1, from: 4, commander: 'Atraxa', delta: 2, value: 2 };
+for (const lang of ['es', 'en']) {
+  const t = L[lang];
+  const said = line({ seq: 1, turn: 1, seat: 2, ...cmd }, four, t);
+  if (!said.includes('Atraxa</b> (<b>di</b>)') || !line({ seq: 1, turn: 1, seat: 2, ...cmd, from: 3 }, four, t).includes(`(${t.lgYouLow})`)) errs.push(`${lang} 4p cmd_damage: ${said}`);
+  four.log = [{ seq: 0, turn: 1, seat: 1, type: 'roll', sides: 6, result: 3 }, pass(2, 1, 3), pass(3, 3, 4), { seq: 9, turn: 3, seat: 2, type: 'out', out: true }];
+  const html = logHtml(four, t);
+  for (const [n, s] of [[1, 'ana'], [2, t.lgYouLow], [3, 'di']]) if (!html.includes(`<h3>${fill(t.tbTurnOf, { n, s })}</h3>`)) errs.push(`${lang} 4p heading of turn ${n}: ${html}`);
+  const outs = [line(four.log[3], four, t), line({ ...four.log[3], seat: 3 }, four, t), line({ ...four.log[3], out: false }, four, t)];
+  if (outs.some((x) => !x || /%[a-z]|undefined/.test(x)) || new Set(outs).size !== 3) errs.push(`${lang} out sentences: ${outs}`);
+}
+const all = ['move', 'tap', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'look', 'reveal', 'shuffle', 'mulligan', 'life', 'cmd_damage', 'out', 'roll', 'pass_turn', 'undo'];
 for (const k of all) if (!types.has(k)) errs.push(`no sample for ${k}`);
 errs.forEach((e) => console.error(e));
 console.log(errs.length ? `table log: ${errs.length} problem(s)` : `table log ok: ${E.length} entries in es and en`);
