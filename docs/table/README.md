@@ -18,7 +18,7 @@ phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (ph
 | Undo a step | `git revert <commit>` on `main` and push. The server follows `main` forward only, so never force-push. |
 | Checks | Seven commands, listed at the end. All pass at every commit below. |
 
-### What is live (after step 7)
+### What is live (after step 8)
 
 Games of 2 to 6 players; the pictures of that are under steps 6 and 7. The two-player table:
 
@@ -168,12 +168,40 @@ Not checked or weak in this step:
 - The first-time hint for the strip, and giving control in portrait, were not exercised.
 - With three or more players, a card moved into another player's hand waits for the server instead of moving at once.
 
+## Step 8 — The feel layer (`fd47e63`)
+
+- **Drag.** The dragged card is a copy of its own tile. It lifts from its slot, tilts with the speed of the
+  finger, and is pulled into zone chips, tray targets and hosts when it comes near. On release it carries on
+  into its new place. Dropped on nothing, it flies back.
+- **Hand.** Cards sit on an arc. The raised card straightens and grows and its neighbours part. With 20 cards on
+  a phone the raised card is 95 px wide or more.
+- **Flights.** A played card arcs from the hand. A card returning to the hand lands at its fan angle.
+- **Draw.** A card you draw flips face up on the way. The other player's draw flies as a card back.
+- **Untap all** ripples across your permanents. A **shuffled** library's chip riffles. A **die** tumbles before
+  it settles and a coin spins; a screen reader hears the result once, when it lands.
+- The multi-select bar no longer covers a life total. The menu no longer repeats Log and Full screen.
+
+Nothing in this step animates under reduced motion.
+
+![Drag to the graveyard](../../for_human_revision/07-feel/drag_to_graveyard.gif)
+![Sliding along the hand](../../for_human_revision/07-feel/hand_fan_slide.gif)
+![The draw flip](../../for_human_revision/07-feel/draw_flip.gif)
+
+<img src="img/08-hand-arc-portrait.jpg" width="300" alt="Hand arc, portrait"> ![Hand arc, landscape](img/08-hand-arc-landscape.jpg)
+
+Not checked or weak in this step:
+- A card dragged from the hand changes from the full card to the wide art tile at the moment of release.
+- When several cards are dragged together, only the one under the finger flies from where you let go.
+- The pull radius near a chip (about 40 px) was chosen by eye, not tuned with a finger.
+- The clips were captured with the pointer moving four times slower than a hand, so the tilt in them is milder
+  than it will feel.
+- The untap ripple was verified with 3 to 6 permanents, not more.
+
 ## What comes next, in this order
 
-1. The rest of the handling: drag physics, the hand as an arc, the draw flip, shuffle and dice.
-2. The look: playmat, card shadows, optional sound.
-3. Token lookup with art and power/toughness.
-4. Fixes from Jorge's and his testers' phone tests, as they arrive.
+1. The look: playmat, card shadows, optional sound.
+2. Token lookup with art and power/toughness.
+3. Fixes from Jorge's and his testers' phone tests, as they arrive.
 
 New steps are added below as they are built.
 
