@@ -18,11 +18,15 @@ phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (ph
 | Undo a step | `git revert <commit>` on `main` and push. The server follows `main` forward only, so never force-push. |
 | Checks | Seven commands, listed at the end. All pass at every commit below. |
 
-### What is live (after step 8)
+### What is live (after step 9)
 
 Games of 2 to 6 players; the pictures of that are under steps 6 and 7. The two-player table:
 
 Landscape is the main design. Both battlefields take the whole width, rows are centred, and every control floats.
+
+![The table now, dark](img/09-before-after-dark.jpg)
+
+The right half of that picture is the table now; the left half is the same screen one step earlier. The pictures below are from step 5, before the mat and the shadows:
 
 ![Landscape, light](img/05-floating-landscape.jpg)
 ![Landscape, dark](img/05-floating-landscape-dark.jpg)
@@ -197,11 +201,50 @@ Not checked or weak in this step:
   than it will feel.
 - The untap ripple was verified with 3 to 6 permanents, not more.
 
+## Step 9 — The look, and optional sound (`af60d2c`)
+
+- **The table is a mat:** grain, a vignette and a soft light at the centre, in both themes. Each player's half
+  is a tone over it, the centre line is a seam, and the half whose turn it is is lit from the seam.
+- **Cards have depth:** three shadow levels (resting, lifted, held), with a rim light on the dark table.
+  Corners match real cards. A held or enlarged card has a faint sheen that shifts as a dragged card tilts.
+- **One card back** for face-down cards, the draw flip and other players' draws.
+- **Tokens** are a tinted panel with the name centred. Names without art wrap by word and shrink with the tile.
+- **Controls recede:** pills, chips, the strip and the action button share one glass treatment.
+- **Sound, off by default.** Menu, Sound, On. Short synthesized sounds for tap, untap, play, draw, shuffle,
+  your turn, a roll and a rejected action. Nothing is loaded and no audio is set up while it is off.
+
+Before (left) and after (right), in the light and the dark theme. The two boards are different games.
+
+![Before and after, light](img/09-before-after-light.jpg)
+![Before and after, dark](img/09-before-after-dark.jpg)
+
+![The dark table](../../for_human_revision/08-look-and-sound/table_dark.gif)
+
+Close-ups: tokens and names without art at three tile sizes, frame colours, the card back, counters and P/T.
+
+![Close-up, dark](img/09-tiles-closeup-dark.jpg)
+![Close-up, light](img/09-tiles-closeup-light.jpg)
+
+Four players, and portrait before and after:
+
+![Four players](img/09-four-players.jpg)
+<img src="img/09-before-after-portrait.jpg" width="520" alt="Portrait before and after">
+
+Measured contrast of text on the new surfaces: life totals 15.0 (light) and 14.5 (dark), chip counts 15.6 and
+13.2, the turn tag 5.3 and 7.4, token names 9.1 and 10.4.
+
+Not checked or weak in this step:
+- Sound was verified by counting the audio calls in a test browser. Nobody has heard it yet.
+- The sheen is faint and hard to see on light art.
+- A very long single word on the smallest tile still breaks mid-word in the test browser, which has no
+  hyphenation; a real phone should hyphenate it.
+- Whether the mat adds repaints while cards fly could not be told: the counts varied too much between runs.
+  The drag loop's frame time did not change (16.7 ms on average).
+
 ## What comes next, in this order
 
-1. The look: playmat, card shadows, optional sound.
-2. Token lookup with art and power/toughness.
-3. Fixes from Jorge's and his testers' phone tests, as they arrive.
+1. Token lookup with art and power/toughness.
+2. Fixes from Jorge's and his testers' phone tests, as they arrive.
 
 New steps are added below as they are built.
 
