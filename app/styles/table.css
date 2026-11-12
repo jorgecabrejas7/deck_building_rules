@@ -106,8 +106,6 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 .chip .ic{color:var(--muted)}
 .chip b{font-weight:600}
 .chip.cmd{box-shadow:inset 0 0 0 1px var(--border)}
-.fs-btn{display:none!important}
-@media (min-width:400px){.fs-btn{display:inline-flex!important}}
 .life{flex:none;display:flex;align-items:center;gap:2px}
 .life button{width:40px;height:40px;border:none;border-radius:50%;background:var(--fill);color:var(--text);font-size:20px;line-height:1;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
 .life button:hover{background:var(--fill-hover)}
@@ -133,7 +131,7 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 @keyframes tb-glow{0%{opacity:0}6%,60%{opacity:1}to{opacity:0}}
 
 /* battlefield: creatures and the rest, lands in their own row nearest the rail */
-.bf{position:relative;flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2);transition:background var(--dur) var(--ease)}
+.bf{touch-action:none;position:relative;flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2);transition:background var(--dur) var(--ease)}
 .bf:not(:has(.tc))::after{content:attr(data-empty);position:absolute;inset:0;display:grid;place-items:center;padding:var(--sp-3);text-align:center;color:var(--muted);font-size:var(--fs-caption);pointer-events:none}
 .bfr{display:flex;flex-wrap:wrap;gap:6px}
 /* a battlefield too full for the smallest cards scrolls, resting on a whole line of cards */
@@ -189,6 +187,8 @@ body.dragging .tc.lifted{opacity:.3;transform:none;box-shadow:none}
 .tc.many{box-shadow:4px -4px 0 -1px var(--panel),4px -4px 0 0 var(--feltLine),0 0 0 1px oklch(0 0 0 / .14),0 4px 10px -4px oklch(0 0 0 / .25)}
 .nx{position:absolute;top:3px;right:3px;z-index:2;padding:1px 6px;border-radius:var(--r-pill);background:var(--badgeBg);color:var(--badgeFg);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;line-height:16px}
 .tc.tapped .nx{transform:rotate(-90deg)}
+.bf.over{touch-action:pan-y} /* a vertical pan scrolls a battlefield only while it overflows; else a slide is zoom-browse (table.js) */
+.bf .tc{touch-action:none} /* a finger on a card drags it at once */
 .tc.big{width:min(86vw,380px);height:auto;aspect-ratio:63/88;max-height:86dvh;transform:none;margin:0;border-radius:4.75%/3.5%;font-size:var(--fs-ui);cursor:default;box-shadow:0 30px 80px -20px oklch(0 0 0 / .6)}
 .tc.big .tn{padding:var(--sp-3)}
 
@@ -213,6 +213,14 @@ body.dragging [data-drop]{transition:background .12s,box-shadow .12s}
   .add{width:40px;padding:0}
   .add span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .strip .chip:not(.ico){padding-inline:6px}
+  .hand-head{gap:4px;padding-inline:4px}
+  .hand-bar{padding-inline:4px;gap:2px}
+  .tbtn.pass .ic{display:none} /* Undo, Draw, Token and Pass share 360px with the hand's toggle */
+}
+/* Draw keeps its icon until its word fits beside the hand's toggle */
+@media (max-width:479px){
+  .draw{width:40px;padding:0}
+  .draw span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 }
 .hand-bar{flex:1;min-height:40px;justify-content:flex-start;background:transparent;font-size:var(--fs-body);font-weight:600;padding-inline:var(--sp-2)}
 .hand-head .tbtn{flex:none;min-height:40px}
@@ -314,8 +322,21 @@ body.away .hand-row{display:none}
 @keyframes tb-zoom{from{transform:scale(.92);opacity:0}}
 
 /* a mouse resting on a card: the card, large, beside it */
-.hover{position:fixed;z-index:15;width:clamp(220px,22vw,300px);aspect-ratio:63/88;border-radius:4.75%/3.5%;overflow:hidden;pointer-events:none;box-shadow:0 24px 60px -16px oklch(0 0 0 / .55),0 0 0 1px oklch(0 0 0 / .2);animation:tb-fade .12s var(--ease)}
-.hover img{display:block;width:100%;height:100%}
+/* also a finger on the board or the hand (zoom.js sets its width); above the hand, the bar and flying cards, never shown with a sheet open */
+.hover{position:fixed;z-index:61;width:clamp(220px,22vw,300px);aspect-ratio:63/88;border-radius:4.75%/3.5%;overflow:hidden;pointer-events:none;box-shadow:0 24px 60px -16px oklch(0 0 0 / .55),0 0 0 1px oklch(0 0 0 / .2)}
+.hover .tc.big{width:100%;height:100%;max-height:none;box-shadow:none;border-radius:0}
+.hover .tc img{display:block;filter:none}
+
+/* quick zones while dragging: big drop targets at the screen edge farthest from where the drag began, under the ghost */
+.tray{position:fixed;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));z-index:50;display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.tray[hidden]{display:none}
+.tray.top{top:max(8px,env(safe-area-inset-top))}
+.tray.bottom{bottom:max(8px,env(safe-area-inset-bottom))}
+.tz{flex:1 1 56px;max-width:120px;min-height:56px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 2px;border-radius:var(--r-md);background:var(--panel);color:var(--text);
+  box-shadow:0 0 0 1px var(--border),var(--shadow-2);font-size:11px;font-weight:500;line-height:1.1;text-align:center;-webkit-user-select:none;user-select:none}
+.tz small{display:block;font-size:10px;font-weight:400;color:var(--muted)}
+.tz.drop-on{background:var(--accentBtn);color:var(--accentFg);box-shadow:0 0 0 3px var(--accent);transform:scale(1.06)}
+.tz.drop-on small{color:inherit}
 
 /* roomier screens: bigger cards */
 @media (min-width:380px){body.tbl{--cw:60px;--hw:78px;--pw:44px}}

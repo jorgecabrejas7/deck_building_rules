@@ -16,6 +16,7 @@ export const ICON = {
   plus: svg('M8 3.5v9M3.5 8h9'),
   sword: svg('M13.5 2.5 6.5 9.5M13.5 2.5H11M13.5 2.5V5M4 8l4 4M5.5 10.5l-3 3'),
   full: svg('M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10'),
+  fullOff: svg('M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5'),
   search: svg('M7 11.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zM10.3 10.3l3.2 3.2'),
   library: svg('M4 4.5h7v9H4zM6 2.5h6.5v9'),
   graveyard: svg('M4.5 13.5v-7a3.5 3.5 0 0 1 7 0v7M3 13.5h10M8 6v4M6.5 7.5h3'),
@@ -30,6 +31,14 @@ export const ICON = {
   undo: svg('M5 3 2 6l3 3M2 6h7.5a3.75 3.75 0 0 1 0 7.5H7'),
   log: svg('M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 5v3l2 1.5'),
   pass: svg('M2.5 8h10M9 4.5 12.5 8 9 11.5'),
+};
+
+export const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+// full screen: where the API exists, toggles it; elsewhere (iPhone) it explains Add to Home Screen, unless the page already runs as an app
+export const fsShown = () => !!document.fullscreenEnabled || !standalone();
+export const fsButton = (t, cls) => {
+  const on = !!document.fullscreenElement, label = on ? t.tbExitFullscreen : t.tbFullscreen;
+  return `<button class="${cls}" data-top="full" title="${label}" aria-label="${label}">${on ? ICON.fullOff : ICON.full}</button>`;
 };
 
 export function index(view) {
@@ -125,7 +134,7 @@ function seat(view, s, t) {
     : `<button class="chip" data-pile="${s}:hand" data-drop="${s}:hand" title="${t.tbZhand}" aria-label="${t.tbZhand}: ${z.hand.length}">${ICON.hand}<b>${z.hand.length}</b></button>`;
   const menu = `<button class="chip ico menu-btn" data-top="menu" title="${t.tbMenu}" aria-label="${t.tbMenu}">${ICON.menu}</button>`;
   // the opponent's rail opens the table's own controls: the menu (with the connection dot) and full screen
-  const ctl = me ? '' : menu + (document.fullscreenEnabled ? `<button class="chip ico fs-btn" data-top="full" title="${t.tbFullscreen}" aria-label="${t.tbFullscreen}">${ICON.full}</button>` : '');
+  const ctl = me ? '' : menu + (fsShown() ? fsButton(t, 'chip ico') : '');
   // the number opens a pad to add, subtract or set any amount
   const life = `<div class="life" role="group" aria-label="${t.tbLife}"><button data-life="${s}:-1" aria-label="${t.tbMinus}">−</button>`
     + `<button class="lv" data-pad="${s}" aria-label="${fill(t.tbLifeEdit, { n: who, l: p.life })}">${p.life}</button><button data-life="${s}:1" aria-label="${t.tbPlus}">+</button></div>`;
@@ -144,7 +153,7 @@ function seat(view, s, t) {
   }).join('');
   const counts = [['hand', z.hand.length], ...PILES.map((k) => [k, z[k].length])].map(([k, n]) => `<span class="pk-n" data-pk="${s}:${k}">${ICON[k]}${n}</span>`).join('');
   const label = [fill(t.tbShowBoard, { n: who }), turn && fill(t.tbTurnN, { n: view.turn.number }), `${t.tbZhand}: ${z.hand.length}`, ...PILES.map((k) => `${t['tbZ' + k]}: ${z[k].length}`), fill(t.tbPermanents, { n: z.battlefield.length })].filter(Boolean).join(', ');
-  const peek = `<div class="peek" data-drop="${s}:battlefield">${me ? '' : menu}`
+  const peek = `<div class="peek" data-drop="${s}:battlefield">${me ? '' : menu + (fsShown() ? fsButton(t, 'chip ico') : '')}`
     + `<button class="peek-open" data-focus="${s}" aria-expanded="false" aria-label="${label}"><span class="pk-top"><b class="who">${who}</b>${turn}${counts}</span><span class="pk-row">${minis}</span></button>${log}${life}</div>`;
   return `<section class="seat ${me ? 'me' : 'opp'}${turn ? ' turn' : ''}" data-seat="${s}" aria-label="${who}">${me ? area + strip + peek : peek + strip + area}</section>`;
 }

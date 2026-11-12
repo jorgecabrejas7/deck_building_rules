@@ -8,7 +8,9 @@ import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 import { buildBar } from './table/bar.js';
 import { handHtml, layoutHand, cardAtX, raise } from './table/hand.js';
-import { firstRun, startHints, placeCoach } from './table/coach.js';
+import { firstRun, startHints, placeCoach, explainFs } from './table/coach.js';
+import { showZoom, hideZoom } from './table/zoom.js';
+import { showTray, hideTray } from './table/tray.js';
 import { line } from './table/log.js';
 import { patch, snapshot, play } from './table/motion.js';
 import { predict } from './table/predict.js';
@@ -192,7 +194,7 @@ function renderSheet() {
   }
   items = built.items;
   const entering = el.hidden;
-  if (entering) { opener = document.activeElement; hov.hidden = true; }
+  if (entering) { opener = document.activeElement; hideZoom(); }
   const t = T(), pane = el.querySelector('.sh-pane'), top = pane ? pane.scrollTop : 0;
   const had = !entering && el.contains(document.activeElement), fi = had && document.activeElement.dataset.i; // a kept sheet keeps the focused button
   const body = built.art ? `<div class="sh-card"><button class="sh-art" data-zoom="${sheet.id}" aria-label="${t.tbZoom}"><img src="${esc(built.art)}" alt=""></button><div class="sh-acts">${built.body}</div></div>` : built.body;
@@ -309,6 +311,8 @@ function fit() {
       b.bf.style.setProperty('--cw', cw + 'px');
     }
   }
+  // a battlefield scrolls under a vertical pan only while it overflows; otherwise the browser must not take a slide for a scroll (table.css .bf)
+  for (const bf of document.querySelectorAll('.seat .bf')) bf.classList.toggle('over', bf.scrollHeight > bf.clientHeight + 1);
   placeBar();
   placeCoach();
 }
@@ -316,7 +320,9 @@ new ResizeObserver(() => fit()).observe($('board'));
 BOTH.addEventListener('change', () => applyFocus(false));
 
 function fullscreen() {
-  if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
+  if (!document.fullscreenEnabled) explainFs();
+  else if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(() => {});
 }
 
 async function endGame() {
@@ -381,7 +387,7 @@ function select(el, multi) {
     else sel.set(el.dataset.card, ids);
     selMode = true;
   }
-  hov.hidden = true;
+  hideZoom();
   applySel();
 }
 
@@ -452,25 +458,33 @@ addEventListener('resize', () => { placeBar(); placeCoach(); });
 // A card on the table or in the hand:
 //   tap: one of yours on the battlefield taps or untaps; any other card is selected and its bar opens. Double tap: full view
 //   hold still: selection mode (taps then add or remove cards). Hold and move: drag it, with the rest of the selection
-// The hand (touch): the card under the finger rises. Slide along the fan to move it; let go after sliding to select
-// that card, as a tap would. Moving up out of the hand drags the card at once (no hold needed): drop it on your
-// battlefield to play it, or flick it up to play it from the hand. Holding still on a card still enters selection mode.
+// Touch (a finger or a pen) on a battlefield card: move past the slop and the drag starts at once, no hold needed.
+// Touch on anything else of the board (empty battlefield, the gaps, a seat's background): slide to see cards large. Once the
+// finger has been down ZOOM_WAIT ms, the card under it is shown large, sliding onto another card switches to it, sliding off all
+// of them hides it, and lifting ends it with nothing else done (no tap, no selection). A quick sideways swipe never reaches that
+// and turns to the other board (phones); once a card was shown, lifting does not switch boards. When the browser takes the
+// gesture to scroll an overflowing battlefield (pointercancel), the zoom closes.
+// The hand (touch): the card under the finger rises and is shown large at once. Slide along the fan to move both; let go after
+// sliding to select that card, as a tap would. Moving up out of the hand closes the zoom and drags the card at once: drop it on
+// your battlefield to play it, or flick it up to play it from the hand. Holding still on a card still enters selection mode.
+// Dragging (touch or mouse) shows the quick zones (tray.js) for the card's owner; they are drop targets like any [data-drop].
 // A pile: tap opens it; hold and move drags its top card. Mouse: click is a tap, drag straight away, right-click
 // selects, shift/ctrl/cmd-click adds to a selection, resting on a card shows it large. Keyboard: Enter opens the bar.
-const HOLD = 320, SLOP = 8, DOUBLE = 350;
-let press = null, swallow = false, lastTap = null;
-const hov = $('hover');
+const HOLD = 320, SLOP = 8, DOUBLE = 350, ZOOM_WAIT = 150;
+let press = null, swallow = false, lastTap = null, zb = null; // zb: a finger sliding over the board to see cards large
 
 function cardAt(id) { return view && view.zones && index(view).get(id); }
+const tick = (ms) => { if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(ms); };
 
 function lift(p) {
   p.lifted = true;
   p.el.classList.add('lifted');
-  if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(12);
+  tick(12);
 }
 
 function startDrag(p, e) {
-  p.drag = true; hov.hidden = true;
+  p.drag = true; hideZoom();
+  if (!p.mouse) tick(8);
   // a selected card takes the whole selection along; any other card goes alone and ends a single card's bar
   p.ids = !p.pile && idsOf(p.el).some((id) => selIds().includes(id)) ? selIds() : [p.id];
   if (p.ids.length === 1 && !selMode) clearSel();
@@ -483,6 +497,8 @@ function startDrag(p, e) {
   document.body.append(g);
   document.body.classList.add('dragging');
   p.el.classList.add('lifted');
+  // shortcut: the tray serves the owner of the card under the finger, not of every card in a multi-selection; split it if mixed drags matter
+  showTray(p.hit.card.owner, p.hit.zone, p.y0 > innerHeight / 2, T());
   moveDrag(p, e);
 }
 
@@ -506,20 +522,22 @@ function endPress(e) {
   if (!p) return;
   clearTimeout(p.timer);
   p.el.classList.remove('lifted');
-  if (p.hand) raise(handRow(), null);
+  if (p.hand) { raise(handRow(), null); hideZoom(); }
   if (p.drag) {
     p.ghost.remove(); document.body.classList.remove('dragging');
     if (p.over) p.over.classList.remove('drop-on');
     swallow = true;
-    // a short quick flick up out of the hand, let go before it reaches a zone: played
-    const flick = up && p.hand && (!p.over || p.over.id === 'hand') && p.y0 - e.clientY > 2 * OUT && e.timeStamp - p.t0 < 400;
+    // a short quick flick up out of the hand, let go before it reaches a zone (the tray's targets count as none): played
+    const flick = up && p.hand && (!p.over || p.over.id === 'hand' || p.over.closest('#tray')) && p.y0 - e.clientY > 2 * OUT && e.timeStamp - p.t0 < 400;
     if (up && p.over && p.over.dataset.card) send({ type: 'attach', card: p.id, to: p.over.dataset.card });
     else if (up && (p.over || flick)) {
       const [s, zone] = flick ? [view.you, 'battlefield'] : p.over.dataset.drop.split(':'), seat = Number(s), idx = index(view);
       const ids = p.ids.filter((id) => { const h = idx.get(id); return h && !(h.seat === seat && h.zone === zone); });
-      for (let i = 0; i < ids.length; i += 100) send({ type: 'move', cards: ids.slice(i, i + 100), to: { seat, zone }, ...(zone === 'library' ? { pos: 'top' } : {}) });
+      const pos = !flick && zone === 'library' ? { pos: p.over.dataset.pos || 'top' } : {};
+      for (let i = 0; i < ids.length; i += 100) send({ type: 'move', cards: ids.slice(i, i + 100), to: { seat, zone }, ...pos });
       if (p.ids.length > 1) clearSel();
     }
+    hideTray(); // after the flick test above: it asks whether the target was in the tray
   } else if (p.scrub && !p.lifted && up) { // slid along the hand and let go: that card, as a tap
     swallow = true;
     select(p.el, selMode);
@@ -543,6 +561,7 @@ function openPile(pile) {
 
 document.addEventListener('pointerdown', (e) => {
   swallow = false; // a swallowed click belongs to the gesture before; a new press is a new gesture
+  zb = null;
   if (e.button !== 0) return;
   noteBoard(e);
   const life = e.target.closest('[data-life]');
@@ -556,11 +575,16 @@ document.addEventListener('pointerdown', (e) => {
   // a card, or a pile's top card (data-lift)
   const el = e.target.closest('[data-card],[data-lift]');
   const hit = el && cardAt(el.dataset.card || el.dataset.lift);
-  if (!hit) return;
+  if (!hit) {
+    if (!el && e.pointerType !== 'mouse' && e.isPrimary && e.target.closest('.sides') && !e.target.closest(CONTROL)) zb = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: e.timeStamp, on: false, shown: false };
+    return;
+  }
   const p = press = { el, id: hit.card.id, hit, pile: el.dataset.card ? null : el.dataset.pile, x: e.clientX, y: e.clientY, mouse: e.pointerType === 'mouse',
     y0: e.clientY, t0: e.timeStamp };
   p.hand = !p.mouse && !!el.closest('#hand .hand-row');
-  if (p.hand) raise(el.parentElement, el);
+  p.now = !p.mouse && !p.hand && !!el.closest('.bf'); // a finger drags a battlefield card at once; piles and sheets scroll, so they wait for the hold
+  p.side = e.clientX < innerWidth / 2 ? 'right' : 'left';
+  if (p.hand) { raise(el.parentElement, el); showZoom(hit.card, T(), { x: e.clientX, y: e.clientY, side: p.side }); }
   if (!p.mouse) p.timer = setTimeout(() => lift(p), HOLD);
 });
 
@@ -573,20 +597,37 @@ function handMove(p, e) {
   p.x = e.clientX; p.y = e.clientY; p.scrub = true;
   clearTimeout(p.timer); p.timer = setTimeout(() => lift(p), HOLD);
   if (hit && el !== p.el) { p.el = el; p.id = hit.card.id; p.hit = hit; raise(row, el); }
+  showZoom(p.hit.card, T(), { x: e.clientX, y: e.clientY, side: p.side });
+}
+
+// a finger sliding over empty board: the card under it, large
+function browse(e) {
+  const z = zb;
+  if (!z.on) { if (e.timeStamp - z.t0 < ZOOM_WAIT || Math.hypot(e.clientX - z.x0, e.clientY - z.y0) < SLOP) return; z.on = true; z.side = z.x0 < innerWidth / 2 ? 'right' : 'left'; }
+  const el = document.elementFromPoint(e.clientX, e.clientY), hit = el && el.closest('#board [data-card]') && cardAt(el.closest('[data-card]').dataset.card);
+  if (hit && showZoom(hit.card, T(), { x: e.clientX, y: e.clientY, side: z.side })) z.shown = true; else hideZoom();
+}
+function endBrowse(e) {
+  if (!zb || e.pointerId !== zb.id) return;
+  if (zb.shown) { swallow = true; setTimeout(() => { swallow = false; }, 400); }
+  zb = null; hideZoom();
 }
 
 document.addEventListener('pointermove', (e) => {
   if (e.pointerType === 'mouse' && !press) { hoverCard(e); const r = handRow(); if (r) raise(r, e.target.closest && e.target.closest('.hand-row') ? cardAtX(r, e.clientX) : null); }
+  if (zb && e.pointerId === zb.id) return browse(e);
   const p = press;
   if (!p) return;
   if (p.drag) return moveDrag(p, e);
   if (p.hand && !p.lifted) return handMove(p, e);
   if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < SLOP) return;
-  if (p.mouse || p.lifted) startDrag(p, e);
-  else { clearTimeout(p.timer); press = null; } // a finger that moves before the hold is a scroll
+  if (p.mouse || p.lifted || p.now) startDrag(p, e);
+  else { clearTimeout(p.timer); press = null; } // a finger that moves on a pile or in a sheet before the hold is a scroll
 });
 document.addEventListener('pointerup', endPress);
+document.addEventListener('pointerup', endBrowse); // after the swipe handler below has read zb
 document.addEventListener('pointercancel', endPress);
+document.addEventListener('pointercancel', endBrowse);
 // once a card is picked up, the finger drags it instead of scrolling the page
 document.addEventListener('touchmove', (e) => { if (press && (press.lifted || press.drag)) e.preventDefault(); }, { passive: false });
 // a long press must not open the browser's menu; a right-click selects
@@ -613,7 +654,7 @@ let swipe = null;
 document.addEventListener('pointerup', (e) => {
   const w = swipe;
   swipe = null;
-  if (!w || BOTH.matches || document.body.classList.contains('dragging')) return;
+  if (!w || BOTH.matches || document.body.classList.contains('dragging') || (zb && zb.shown)) return;
   const dx = e.clientX - w.x, dy = e.clientY - w.y;
   if (Math.abs(dx) < 56 || Math.abs(dx) < 1.5 * Math.abs(dy) || e.timeStamp - w.t > 800) return;
   swallow = true; setTimeout(() => { swallow = false; }, 400);
@@ -624,15 +665,11 @@ document.addEventListener('pointercancel', () => { swipe = null; });
 // a mouse resting on a card shows it large beside the card
 function hoverCard(e) {
   const el = e.target.closest && e.target.closest('[data-card]');
-  const hit = el && cardAt(el.dataset.card), src = hit && art(hit.card, true);
-  if (!src || document.body.classList.contains('dragging')) { hov.hidden = true; return; }
-  if (hov.dataset.id !== el.dataset.card) { hov.dataset.id = el.dataset.card; hov.innerHTML = `<img src="${esc(src)}" alt="">`; }
-  hov.hidden = false;
-  const r = el.getBoundingClientRect(), w = hov.offsetWidth, h = hov.offsetHeight;
-  hov.style.left = (r.right + 12 + w < innerWidth ? r.right + 12 : Math.max(8, r.left - 12 - w)) + 'px';
-  hov.style.top = Math.max(8, Math.min(r.top + r.height / 2 - h / 2, innerHeight - h - 8)) + 'px';
+  const hit = el && cardAt(el.dataset.card);
+  if (!hit || document.body.classList.contains('dragging')) hideZoom();
+  else showZoom(hit.card, T(), { rect: el.getBoundingClientRect() });
 }
-document.addEventListener('pointerout', (e) => { if (!e.relatedTarget) hov.hidden = true; });
+document.addEventListener('pointerout', (e) => { if (!e.relatedTarget && !zb && !(press && press.hand)) hideZoom(); });
 
 document.addEventListener('click', (e) => {
   const el = e.target.closest(CONTROL);
@@ -640,7 +677,7 @@ document.addEventListener('click', (e) => {
   if (sel.size && !selMode && !swallow && !e.target.closest('#bar') && !e.target.closest(BOARD_CARD)) clearSel();
   if (!el) return;
   if (swallow) { swallow = false; return; }
-  hov.hidden = true;
+  hideZoom();
   const d = el.dataset;
   if ('b' in d) { barItems[d.b](); return; }
   if ('focus' in d) { setFocus(Number(d.focus)); return; } // also while picking a host: it may be on the other board
@@ -680,6 +717,7 @@ document.addEventListener('click', (e) => {
   else if ('pick' in d) pickDeck();
   else if (d.top === 'menu') setSheet({ k: 'menu' });
   else if (d.top === 'full') fullscreen();
+  else if (d.top === 'draw') { const lib = view.zones[view.you].library; if (lib.length) send({ type: 'move', cards: [lib[0].id], to: { seat: view.you, zone: 'hand' } }); }
   else if (d.top === 'untap') send({ type: 'untap_all', seat: view.you });
   else if (d.top === 'undo') send({ type: 'undo' });
   else if (d.top === 'pass') tapPass();
@@ -704,7 +742,7 @@ document.addEventListener('keydown', (e) => {
   else if (sel.size && $('sheet').hidden) clearSel();
   else setSheet(null);
 });
-document.addEventListener('fullscreenchange', () => { if (sheet && sheet.k === 'menu') renderSheet(); });
+document.addEventListener('fullscreenchange', render); // the buttons and the menu item show which way it toggles
 
 render();
 connect();

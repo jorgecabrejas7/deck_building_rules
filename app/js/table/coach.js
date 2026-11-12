@@ -2,7 +2,7 @@
 // instead), then coach marks one at a time, each pointing at the real element. Both are remembered per viewer.
 // Not modal: the table stays usable under them. table.js calls firstRun when a game is active and placeCoach after
 // every layout change; the menu replays the hints with startHints.
-import { ICON } from './board.js';
+import { ICON, standalone } from './board.js';
 import { fill } from '../i18n.js';
 
 const FS = 'pdc_table_fs', HINTS = 'pdc_table_hints', IGNORED = 6000;
@@ -23,7 +23,6 @@ let T = null, started = false, steps = [], at = -1, back = null;
 
 const ios = () => /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const safari = () => /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
-const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
 // once per page: the offer first, then the hints when it is answered or ignored for a while (or at once when there is none)
 export function firstRun(dict, fullscreen) {
@@ -31,6 +30,13 @@ export function firstRun(dict, fullscreen) {
   started = true; T = dict;
   const offer = seen(FS) ? null : document.fullscreenEnabled ? 'fs' : ios() && safari() && !standalone() ? 'ios' : null;
   if (!offer) { if (!seen(HINTS)) startHints(); return; }
+  tipOf(offer, fullscreen, () => { remember(FS); if (!seen(HINTS)) startHints(); });
+  // a pill left unanswered steps aside for the hints (startHints hides it); it is offered again next visit
+  if (!seen(HINTS)) setTimeout(() => { if (!tip.hidden && at < 0) startHints(); }, IGNORED);
+}
+
+// the pill at the top: offer 'fs' asks for full screen, 'ios' explains Add to Home Screen; done runs when it is closed
+function tipOf(offer, fullscreen, done) {
   const tip = $('tip'), tx = T();
   tip.innerHTML = `<p>${offer === 'fs' ? tx.tbFsAsk : tx.tbIosAsk}</p>`
     + `<button class="sb ico" data-tip="x" aria-label="${tx.tbClose}" title="${tx.tbClose}">${ICON.close}</button>`
@@ -41,13 +47,13 @@ export function firstRun(dict, fullscreen) {
     const b = e.target.closest('[data-tip]');
     if (!b) return;
     if (b.dataset.tip === 'go') fullscreen(); // inside the tap: browsers grant full screen only to a user gesture
-    remember(FS);
     tip.hidden = true;
-    if (!seen(HINTS)) startHints();
+    done();
   };
-  // a pill left unanswered steps aside for the hints (startHints hides it); it is offered again next visit
-  if (!seen(HINTS)) setTimeout(() => { if (!tip.hidden && at < 0) startHints(); }, IGNORED);
 }
+
+// a full-screen button where the browser has no full screen: how to add the page to the Home Screen instead
+export const explainFs = () => tipOf('ios', null, () => {});
 
 export function startHints() {
   if (!T) return;
