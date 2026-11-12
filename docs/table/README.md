@@ -4,6 +4,7 @@ What changed on the play table, step by step, with a picture or a recording of e
 Newest state first, then the steps in the order they were built. Each step is one commit, so any of them
 can be undone on its own with a revert.
 
+All recordings are in [`for_human_revision/`](../../for_human_revision/), as videos, one folder per step.
 Recordings were captured at quarter speed in a headless browser and sped back up, so they stutter more than a real
 phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (phone portrait) and 1440×900 (desktop).
 
@@ -11,8 +12,8 @@ phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (ph
 
 | | |
 |---|---|
-| Live site | https://169-58-71-242.sslip.io/pod/ runs `main`. It has steps 1 to 5 below (commit `9544657`). |
-| Work branch | `design`. Newer steps land here first and reach the live site only when `design` is pushed to `main`. |
+| Live site | https://169-58-71-242.sslip.io/pod/ runs `main`. Every finished step is pushed there. |
+| Work branch | `design`. A step is built and checked here, then pushed to `main`. |
 | Before all this | Tag `before-table-redesign` (commit `91cb3df`). |
 | Undo a step | `git revert <commit>` on `main` and push. The server follows `main` forward only, so never force-push. |
 | Checks | Seven commands, listed at the end. All pass at every commit below. |
@@ -61,12 +62,12 @@ boards side by side with cards 32 to 41 px wide.
 
 Play, tap, and undo on a phone:
 
-<img src="img/01-play-portrait.gif" width="240" alt="Play a card"> <img src="img/01-tap-portrait.gif" width="240" alt="Tap"> <img src="img/01-undo-portrait.gif" width="240" alt="Play then undo">
+<img src="../../for_human_revision/01-glide-and-instant-actions/play-portrait.gif" width="240" alt="Play a card"> <img src="../../for_human_revision/01-glide-and-instant-actions/tap-portrait.gif" width="240" alt="Tap"> <img src="../../for_human_revision/01-glide-and-instant-actions/undo-portrait.gif" width="240" alt="Play then undo">
 
 The other player's card arriving, as you see it:
 
-![Opponent plays, desktop](img/01-opponent-desktop.gif)
-![Opponent plays, landscape](img/01-opponent-landscape.gif)
+![Opponent plays, desktop](../../for_human_revision/01-glide-and-instant-actions/opponent-desktop.gif)
+![Opponent plays, landscape](../../for_human_revision/01-glide-and-instant-actions/opponent-landscape.gif)
 
 ## Step 2 — Drag at once, slide to see cards large, quick zones (`ae222a1`)
 
