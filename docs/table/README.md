@@ -18,7 +18,9 @@ phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (ph
 | Undo a step | `git revert <commit>` on `main` and push. The server follows `main` forward only, so never force-push. |
 | Checks | Seven commands, listed at the end. All pass at every commit below. |
 
-### What is live (after step 5)
+### What is live (after step 7)
+
+Games of 2 to 6 players; the pictures of that are under steps 6 and 7. The two-player table:
 
 Landscape is the main design. Both battlefields take the whole width, rows are centred, and every control floats.
 
@@ -33,6 +35,8 @@ One round button opens the actions as bubbles. Passing the turn arms for 1.5 s a
 Portrait and desktop share the same controls.
 
 <img src="img/05-floating-portrait.jpg" width="300" alt="Portrait"> ![Desktop](img/05-floating-desktop.jpg)
+
+Videos of the current two-player table are in [`for_human_revision/05-floating-layout/`](../../for_human_revision/05-floating-layout/); of a four-player game, in [`06-multiplayer/`](../../for_human_revision/06-multiplayer/).
 
 ### Known weak spots (told to Jorge, not fixed yet)
 - On short phones, landscape tiles are 12 to 16% smaller than they were with a side rail, because every row is
@@ -112,13 +116,64 @@ The pictures are at the top of this page. A crowded board at 760×340:
 
 ![Crowded](img/05-crowded-landscape.jpg)
 
+## Step 6 — The server runs games of 2 to 6 players (`0a539b8`)
+
+Nothing to see on screen in this step.
+
+- Seats are 1 to N. Cards that were known to "both" players are known to every player.
+- Commander damage is kept per player it comes from, because two players may run the same commander.
+- The turn goes to the next player in order who is not out. A player can mark themselves out or back in.
+- The limit of 600 is on tokens, not on all cards.
+- The predictor and its parity test cover 2, 3, 4 and 6 players. The fuzz test checks that no hidden card name
+  reaches any player, with 2, 3 and 6 players.
+- With 6 players and 100-card decks, an action takes 3.8 ms on average and the stored game is about 205 KB.
+
+Games saved before this step used the old commander-damage shape and had to be ended.
+
+## Step 7 — The screen for 3 to 6 players (`869d081`)
+
+The screen still shows two battlefields: yours and one other player's.
+
+- The top battlefield follows the turn. Choosing someone by hand holds until the next turn change.
+- A strip of small pills shows every other player's name and life, whose turn it is, and who is out. Tap one
+  to see their battlefield. The same players are bubbles in the action menu.
+- A player who is not on top glows when they act, and their life change floats at their pill.
+- One commander-damage chip per player, showing the highest damage from a single commander. It opens a sheet
+  with every opponent's commanders.
+- Giving control asks which player. "I'm out of the game" is in the menu.
+- The Partidas form invites one to five pod members.
+
+The top following the turn, and tapping through the strip:
+
+![Following the turn](../../for_human_revision/06-multiplayer/follow.gif)
+![The strip](../../for_human_revision/06-multiplayer/strip.gif)
+
+Four players, and six with the bubbles open:
+
+![Four players](img/06-four-players.jpg)
+![Six players, bubbles](img/06-six-players-bubbles.jpg)
+
+A player who is out, and giving control to a chosen player:
+
+![Player out](img/06-player-out.jpg)
+![Give control](img/06-give-control.jpg)
+
+On a phone held upright: switching players, six players, commander damage, the lobby, and the invitation form.
+
+<img src="../../for_human_revision/06-multiplayer/portrait.gif" width="240" alt="Portrait"> <img src="img/06-six-players-portrait.jpg" width="240" alt="Six players"> <img src="img/06-commander-damage.jpg" width="240" alt="Commander damage"> <img src="img/06-lobby-six.jpg" width="240" alt="Lobby"> <img src="img/06-invite-form.jpg" width="240" alt="Invitation form">
+
+Not checked or weak in this step:
+- Some screenshots show card names instead of art because the art had not loaded in the test browser.
+- The strip's pills are bright in the light theme.
+- The first-time hint for the strip, and giving control in portrait, were not exercised.
+- With three or more players, a card moved into another player's hand waits for the server instead of moving at once.
+
 ## What comes next, in this order
 
-1. Games of 2 to 6 players. The screen always shows two battlefields, yours and one other player's.
-2. The rest of the handling: drag physics, the hand as an arc, the draw flip, shuffle and dice.
-3. The look: playmat, card shadows, optional sound.
-4. Token lookup with art and power/toughness.
-5. Fixes from Jorge's and his testers' phone tests, as they arrive.
+1. The rest of the handling: drag physics, the hand as an arc, the draw flip, shuffle and dice.
+2. The look: playmat, card shadows, optional sound.
+3. Token lookup with art and power/toughness.
+4. Fixes from Jorge's and his testers' phone tests, as they arrive.
 
 New steps are added below as they are built.
 
