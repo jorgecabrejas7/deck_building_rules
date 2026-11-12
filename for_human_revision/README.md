@@ -6,6 +6,8 @@ GitHub to play) and, where useful, `.gif` copies that show inline in the journal
 The journal with the explanation of every step and its screenshots is in
 [`docs/table/README.md`](../docs/table/README.md).
 
+**Start here: [`all_in_one.mp4`](all_in_one.mp4)** — every recording in one captioned video (about 80 seconds), in step order. It is rebuilt whenever a step adds recordings. The folders below hold the same clips one by one.
+
 How the recordings are made: a headless browser plays a real game against the local server, captured at quarter
 speed and sped back up. They stutter more than a real phone does; judge where things go and in what order, not the
 frame rate. File names say the screen (`portrait` 390×844, `landscape` 844×390, `desktop` 1440×900) and the action.
