@@ -58,8 +58,16 @@ export function buildSheet(sh, view, c) {
         go(t.tbZexile, 'exile'),
         go(`${t.tbZlibrary} · ${t.tbTop}`, 'library', { pos: 'top' }),
         go(`${t.tbZlibrary} · ${t.tbBottom}`, 'library', { pos: 'bottom' }),
+        b(`${t.tbZlibrary} · ${t.tbPosition}`, () => c.setSheet({ ...sh, pos: !sh.pos }), sh.pos ? 'on' : '', true),
         go(t.tbZcommand, 'command'),
         b(t.tbMove, () => c.setSheet({ ...sh, move: true }), 'quiet', true));
+      if (sh.pos) {
+        // N-th from the top of its owner's library: the steppers and quick numbers set N without the keyboard
+        const n = () => num('sp', 1, 10000, 2), setN = (v) => { document.getElementById('sp').value = Math.min(10000, Math.max(1, v)); };
+        body += `<div class="tk-n lib-n">` + b('−', () => setN(n() - 1), '', true) + input('sp', 2, 'type="number" min="1" max="10000" inputmode="numeric" aria-label="' + t.tbPosition + '"')
+          + b('+', () => setN(n() + 1), '', true) + [2, 3, 5, 7].map((k) => b(k, () => setN(k), 'quiet', true)).join('') + '</div>'
+          + row(b(t.tbPutThere, () => send({ type: 'move', cards: ids, to: { seat: card.owner, zone: 'library' }, pos: n() }), 'on'));
+      }
       if (bf) {
         const cn = (n, d) => b(d > 0 ? '+' : '−', () => send({ type: 'counter', card: card.id, name: n, delta: d }), '', true);
         body += `<h3>${t.tbCounters}</h3>`;

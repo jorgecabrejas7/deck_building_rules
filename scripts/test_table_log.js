@@ -20,6 +20,8 @@ const E = [
   { type: 'move', cards: [c('battlefield', 'A')], to: { seat: 1, zone: 'command' }, pos: null, face_down: false, shuffle: false },
   { type: 'move', cards: [c('hand')], to: { seat: 1, zone: 'library' }, pos: 'top', face_down: false, shuffle: false },
   { type: 'move', cards: [c('hand')], to: { seat: 2, zone: 'library' }, pos: 'bottom', face_down: false, shuffle: false },
+  { type: 'move', cards: [c('hand', 'Approach')], to: { seat: 1, zone: 'library' }, pos: 7, face_down: false, shuffle: false },
+  { type: 'move', cards: [c('hand'), c('hand')], to: { seat: 2, zone: 'library' }, pos: 3, face_down: false, shuffle: false },
   { type: 'move', cards: [c('library', 'Tutor')], to: { seat: 1, zone: 'library' }, pos: 'top', face_down: false, shuffle: true },
   { type: 'tap', tapped: true, cards: [c('battlefield', 'A')] }, { type: 'tap', tapped: false, cards: [c('battlefield', 'A')] },
   { type: 'transform', flipped: true, cards: [c('battlefield', 'A')] }, { type: 'transform', flipped: false, cards: [c('battlefield', 'A'), c('battlefield', 'B')] }, { type: 'transform', flipped: true, cards: [c('battlefield'), c('battlefield')] },

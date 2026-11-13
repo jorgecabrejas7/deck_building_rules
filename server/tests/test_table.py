@@ -157,6 +157,27 @@ def test_library_move_keeps_ids_within_library(game):
     check(g)
 
 
+def test_move_to_nth_from_top(game):
+    lib = ids(game, 1, "library")[:20]
+    two = ids(game, 1, "hand")[:2]
+    g = apply(game, 1, mv(two[:1], 1, "library", pos=7))
+    assert ids(g, 1, "library").index(two[0]) == 6 and g["log"][-1]["pos"] == 7
+    g = apply(g, 1, mv(two, 1, "library", pos=3))  # several keep their order from that place
+    assert ids(g, 1, "library")[2:4] == two
+    assert ids(apply(game, 1, mv(two[:1], 1, "library", pos=1)), 1, "library") == ids(apply(game, 1, mv(two[:1], 1, "library", pos="top")), 1, "library")
+    assert ids(apply(game, 1, mv(two[:1], 1, "library", pos=10000)), 1, "library")[-1] == two[0]
+    g = apply(game, 1, mv(lib[:1], 1, "library", pos=5))  # already in that library: counted without it
+    assert ids(g, 1, "library")[4] == lib[0] and len(ids(g, 1, "library")) == len(lib) + 72
+    assert ids(g, 1, "library")[:4] == lib[1:5]
+    check(g)
+    assert ids(apply(g, 1, {"type": "undo"}), 1, "library") == ids(game, 1, "library")
+    for bad in (0, -1, 2.5, "7", True, 10001):
+        with pytest.raises(ActionError):
+            apply(game, 1, mv(two[:1], 1, "library", pos=bad))
+    with pytest.raises(ActionError):
+        apply(game, 1, mv(two[:1], 1, "hand", pos=7))
+
+
 def test_ids_survive_moves_and_draws_but_not_shuffles(game):
     c = ids(game, 1, "hand")[0]
     g = game

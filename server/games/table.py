@@ -252,8 +252,10 @@ def _move(state, seat, a):
     _fields(a["to"], ("seat", "zone"))
     dest_seat, zone = _seat(state, a["to"]["seat"]), _zone(a["to"]["zone"])
     pos = a.get("pos")
-    if pos is not None and (zone != "library" or pos not in ("top", "bottom")):
+    if pos is not None and zone != "library":
         _bad()
+    if pos is not None and pos not in ("top", "bottom"):
+        _int(pos, 1, 10000)
     face_down = _bool(a["face_down"]) if "face_down" in a else False
     face_down = face_down and zone in ("battlefield", "exile")
     flipped = _bool(a["flipped"]) if "flipped" in a else None  # None: keep, as tapped does on a change of control
@@ -281,7 +283,9 @@ def _move(state, seat, a):
     if shuffle:
         _shuffle(state, dest_seat)
     dest = state["zones"][str(dest_seat)][zone]
-    if zone == "library" and pos != "bottom":
+    if type(pos) is int:  # N-th from the top, counted once the moved cards are out; past the end is the bottom
+        dest[pos - 1:pos - 1] = moved
+    elif zone == "library" and pos != "bottom":
         dest[0:0] = moved
     else:
         dest.extend(moved)

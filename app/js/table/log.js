@@ -17,7 +17,7 @@ function moveKey(e) {
   if (to === 'graveyard') return from === 'library' ? 'lgMill' : from === 'hand' ? 'lgDiscard' : 'lgToGrave';
   if (to === 'exile') return 'lgExile';
   if (to === 'command') return 'lgToCmd';
-  return e.shuffle ? 'lgTopShuffled' : e.pos === 'bottom' ? 'lgBottom' : 'lgTop';
+  return e.shuffle ? 'lgTopShuffled' : e.pos === 'bottom' ? 'lgBottom' : e.pos > 1 ? 'lgPos' : 'lgTop';
 }
 
 export function line(e, view, t) {
@@ -28,7 +28,7 @@ export function line(e, view, t) {
   const S = (k, v = {}) => fill(t[me ? k + 'Y' : k], { a: nm(e.seat), ...v });
   const c = e.cards ? cards(e.cards, t) : e.card ? cards([e.card], t) : '';
   switch (e.type) {
-    case 'move': return S(moveKey(e), { c, s: obj(e.to.seat), z: own(t.lgLib, e.to.seat) }) + (e.face_down ? t.lgDown : '');
+    case 'move': return S(moveKey(e), { c, s: obj(e.to.seat), z: own(t.lgLib, e.to.seat), n: e.pos }) + (e.face_down ? t.lgDown : '');
     case 'tap': return S(e.tapped ? 'lgTap' : 'lgUntap', { c });
     case 'transform': return S(e.flipped ? 'lgTransform' : 'lgUntransform', { c });
     case 'untap_all': return S('lgUntapAll');

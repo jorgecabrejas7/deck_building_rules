@@ -49,7 +49,7 @@ for seed in range(6):
             if z == "battlefield" and rnd.random() < .4:
                 a["flipped"] = rnd.random() < .5
             if z == "library":
-                a["pos"] = rnd.choice(("top", "bottom"))
+                a["pos"] = rnd.choice(("top", "bottom", rnd.randint(1, 30)))  # a number is never predicted
             if rnd.random() < .03:
                 a["shuffle"] = True
         elif t == "tap":
