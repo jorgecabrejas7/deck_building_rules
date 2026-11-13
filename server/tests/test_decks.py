@@ -10,7 +10,7 @@ from decks.models import Deck, DeckVersion
 
 pytestmark = pytest.mark.django_db
 LIST = {"entries": [{"name": "Sol Ring", "quantity": 1}, {"name": "Island", "quantity": 30}],
-        "commanders": ["Atraxa"]}
+        "commanders": ["Atraxa"], "side": [{"name": "Mana Crypt", "quantity": 1}], "maybe": []}
 BODY = {"name": "My deck", "list": LIST, "source": "paste"}
 
 
@@ -103,7 +103,7 @@ def test_rename_and_bad_visibility(a):
 def test_new_version_keeps_old(a):
     d = make(a)
     before = Deck.objects.get(pk=d["id"]).updated_at
-    new = {"entries": [{"name": "Forest", "quantity": 2}], "commanders": []}
+    new = {"entries": [{"name": "Forest", "quantity": 2}], "commanders": [], "side": [], "maybe": []}
     r = send(a, "post", f"/pod/api/decks/{d['id']}/versions", {"list": new, "source": "builder", "note": "swap"})
     assert r.status_code == 201 and r.json()["deck"]["version_count"] == 2
     assert Deck.objects.get(pk=d["id"]).updated_at > before
@@ -130,7 +130,8 @@ def test_limits(a):
     {"list": {"entries": [{"name": "", "quantity": 1}], "commanders": []}},
     {"list": {"entries": [{"name": "A", "quantity": 1}] * 301, "commanders": []}},
     {"list": {"entries": [{"name": "A", "quantity": 1}], "commanders": list("abcd")}},
-    {"list": "x"},
+    {"list": "x"}, {"list": {**LIST, "side": "x"}}, {"list": {**LIST, "maybe": [{"name": "A", "quantity": 0}]}},
+    {"list": {**LIST, "side": [{"name": "A", "quantity": 1}] * 101}},
 ])
 def test_bad_input(a, over):
     r = send(a, "post", "/pod/api/decks", {**BODY, **over})
@@ -175,3 +176,10 @@ def test_archidekt_dev_proxy(a, monkeypatch):
     assert seen[0].get_header("User-agent") == "pod-deck-checker"
     send(a, "get", "/pod/api/archidekt/123")
     assert seen[1].full_url == "https://archidekt.com/api/decks/123/"
+
+
+def test_boards_are_optional_and_stored(a):
+    bare = {"entries": [{"name": "Forest", "quantity": 2}], "commanders": []}
+    r = send(a, "post", "/pod/api/decks", {**BODY, "list": bare})
+    d = send(a, "get", f"/pod/api/decks/{r.json()['deck']['id']}").json()
+    assert d["versions"][0]["list"] == {**bare, "side": [], "maybe": []}

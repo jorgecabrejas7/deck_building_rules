@@ -40,6 +40,7 @@ urlpatterns = [
     path("pod/api/pods/<int:id>/decks", pods.add_deck),
     path("pod/api/pods/<int:id>/decks/<int:deck_id>", pods.remove_deck),
     path("pod/api/games/<int:id>/deck", games.game_deck),
+    path("pod/api/games/<int:id>/ready", games.game_ready),
     path("pod/api/games/<int:id>", games.game),
 ]
 if settings.DEV_STATIC:

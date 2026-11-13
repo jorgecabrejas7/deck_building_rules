@@ -11,6 +11,7 @@ from .models import Deck, DeckVersion
 
 MAX_DECKS = 100
 MAX_VERSIONS = 100
+MAX_BOARD = 100  # entries on the side and maybe boards
 MAX_BODY_BYTES = 32000
 SOURCES = ("paste", "moxfield", "archidekt", "builder")
 VISIBILITIES = ("private", "pods", "link")
@@ -49,14 +50,24 @@ def clean_name(v):
     return v if 1 <= len(v) <= 100 else None
 
 
+def clean_entries(v, lo, hi):
+    """The [{name, quantity}] list v with only those two keys, or None when malformed or not lo..hi long."""
+    if not (isinstance(v, list) and lo <= len(v) <= hi and all(
+            isinstance(e, dict) and is_str(e.get("name"), 1, 200)
+            and type(e.get("quantity")) is int and 1 <= e["quantity"] <= 99 for e in v)):
+        return None
+    return [{"name": e["name"], "quantity": e["quantity"]} for e in v]
+
+
 def clean_version(data):
     """(fields, errors) for the list/source/source_url/note of a version."""
     lst, errors = data.get("list"), {}
-    entries = lst.get("entries") if isinstance(lst, dict) else None
-    cmds = lst.get("commanders") if isinstance(lst, dict) else None
-    if not (isinstance(entries, list) and 1 <= len(entries) <= 300 and all(
-            isinstance(e, dict) and is_str(e.get("name"), 1, 200)
-            and type(e.get("quantity")) is int and 1 <= e["quantity"] <= 99 for e in entries)
+    lst = lst if isinstance(lst, dict) else {}
+    entries = clean_entries(lst.get("entries"), 1, 300)
+    side = clean_entries(lst.get("side", []), 0, MAX_BOARD)
+    maybe = clean_entries(lst.get("maybe", []), 0, MAX_BOARD)
+    cmds = lst.get("commanders")
+    if not (entries is not None and side is not None and maybe is not None
             and isinstance(cmds, list) and len(cmds) <= 3 and all(isinstance(c, str) for c in cmds)):
         errors["list"] = "invalid"
     if data.get("source") not in SOURCES:
@@ -68,8 +79,7 @@ def clean_version(data):
         errors["note"] = "invalid"
     if errors:
         return None, errors
-    return {"list": {"entries": [{"name": e["name"], "quantity": e["quantity"]} for e in entries],
-                     "commanders": cmds},
+    return {"list": {"entries": entries, "commanders": cmds, "side": side, "maybe": maybe},
             "source": data["source"], "source_url": url, "note": data.get("note", "")}, None
 
 

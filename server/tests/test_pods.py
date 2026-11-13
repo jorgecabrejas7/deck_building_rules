@@ -11,7 +11,7 @@ from pods.models import Pod, PodDeck, PodMember
 from pods.rules import apply_edits, template
 
 pytestmark = pytest.mark.django_db
-LIST = {"entries": [{"name": "Sol Ring", "quantity": 1}], "commanders": ["Atraxa"]}
+LIST = {"entries": [{"name": "Sol Ring", "quantity": 1}], "commanders": ["Atraxa"], "side": [], "maybe": []}
 
 
 def login(name):

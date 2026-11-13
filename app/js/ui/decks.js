@@ -32,7 +32,7 @@ function flash(key) {
 export async function saveDeck() {
   if (!state.result) return;
   if (state.saveSt === 'sdSignIn') { location.assign('account.html'); return; }
-  const body = { list: { entries: state.deck.entries, commanders: state.result.commanders }, source: state.deckSource.source,
+  const body = { list: { entries: state.deck.entries, commanders: state.result.commanders, side: state.deck.side || [], maybe: state.deck.maybe || [] }, source: state.deckSource.source,
     ...(state.deckSource.url ? { source_url: state.deckSource.url } : {}) };
   const open = state.openDeck;
   const res = open ? await api(API + 'decks/' + open.id + '/versions', 'POST', body)
@@ -135,7 +135,7 @@ async function runImport(ids) {
     imp.progress = fill(t.sdImportProg, { n: n + 1, m: picked.length }); renderDecks();
     try {
       const d = await fetchArchidekt(item.id);
-      const res = await api(API + 'decks', 'POST', { name: d.name.slice(0, 100), list: { entries: d.entries, commanders: d.commanders }, source: 'archidekt', source_url: 'https://archidekt.com/decks/' + item.id });
+      const res = await api(API + 'decks', 'POST', { name: d.name.slice(0, 100), list: { entries: d.entries, commanders: d.commanders, side: d.side, maybe: d.maybe }, source: 'archidekt', source_url: 'https://archidekt.com/decks/' + item.id });
       if (res.status === 201) ok++;
       else if (res.data.errors && res.data.errors.decks === 'limit') break;
     } catch (e) { console.error(e); }

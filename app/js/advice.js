@@ -116,6 +116,8 @@ export function deckToText(deck) {
   for (const c of deck.commanders || []) lines.push('Commander: ' + c);
   const cmds = new Set(deck.commanders || []);
   for (const e of deck.entries) if (!cmds.has(e.name)) lines.push(e.quantity + 'x ' + e.name);
+  for (const [head, board] of [['Sideboard', deck.side], ['Maybeboard', deck.maybe]])
+    if (board && board.length) lines.push(head, ...board.map(e => e.quantity + 'x ' + e.name));
   return lines.join('\n');
 }
 

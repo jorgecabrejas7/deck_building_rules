@@ -224,7 +224,7 @@ function gamesHtml(t) {
     : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
   const li = (games ? games.list : []).map(g => {
     const who = g.opponents.map(n => n === null ? t.pdGDeleted : n).join(', ');
-    const me = g.picked[g.seat], them = Object.entries(g.picked).every(([s, v]) => v || Number(s) === g.seat);
+    const me = g.decks[g.seat], them = Object.entries(g.decks).every(([s, v]) => v || Number(s) === g.seat);
     const st = g.status === 'active' ? t.pdGActive
       : fill(t.pdGWait, { a: me ? t.pdGPicked : t.pdGNotPicked, b: them ? t.pdGPicked : t.pdGNotPicked });
     const lobby = g.status === 'lobby';
