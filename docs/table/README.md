@@ -18,6 +18,19 @@ phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (ph
 | Undo a step | `git revert <commit>` on `main` and push. The server follows `main` forward only, so never force-push. |
 | Checks | Seven commands, listed at the end. All pass at every commit below. |
 
+### What changed on 2026-11-13 (steps 11 to 16)
+
+Second round of the day, all committed on `design`, not yet on `main` or the live site:
+
+- A double tap opens a card's actions reliably, holding a card and letting go does too, and the action bar is a compact 3-column panel in landscape (step 11).
+- Battlefield tiles show the card's name (step 12).
+- Two-faced cards turn on the battlefield and can be played on their other face from the hand (step 13).
+- The token sheet offers your deck's tokens and other decks' tokens, for any player; Copy and a counter row are in the action bar (step 14).
+- A new game opens a lobby with each player's deck, its Main, Sideboard and Maybeboard, and Ready; the Games tab picks players with chips (step 15).
+- The library sheet's count starts at 1 and has steppers and quick numbers (step 16).
+
+Nothing here was tested on a real phone. Recordings: folders `10` to `13` in `for_human_revision/`.
+
 ### What is live (after step 10)
 
 Games of 2 to 6 players; the pictures of that are under steps 6 and 7. The two-player table:
@@ -275,6 +288,125 @@ Not checked or weak in this step:
 - A face-down card adds nothing to "from your cards".
 - A token whose image fails to load shows a blank tile.
 - No real keyboard or thumb has used the sheet yet.
+
+## Step 11 — Card handling (`cd3dd86`)
+
+- **Double tap** is matched by time and place, not by the card under the second tap, and acts on the first tap's card. It works on a single card, on a stack and on a tapped card. A single tap still taps or untaps.
+- **Hold, then let go** opens the card's actions; the held card shows large meanwhile. Holding and moving still drags.
+- **The action bar** in landscape is a compact panel of 3 columns beside the card, at most 40% of the width.
+- **Holding a card in a pile sheet** (graveyard, exile, library lists) shows it large above the sheet.
+
+A yellow dot in the videos is the finger. Videos: [`10-card-handling/`](../../for_human_revision/10-card-handling/all_in_one.mp4).
+
+![Action bar in landscape](img/11-card-bar-landscape.jpg)
+![Holding a card in the graveyard](img/11-graveyard-hold.jpg)
+
+<img src="img/11-card-bar-portrait.jpg" width="300" alt="Action bar in portrait">
+
+Try on a phone: tap twice fast on a creature, on a stack of tokens and on a tapped card; hold a card for half a second and let go; hold a card in the graveyard sheet.
+
+Not checked or weak in this step:
+- Nothing was tried on a real phone. The test double taps were sent by a headless browser, 20 of 20 worked there.
+- The panel covers neighbouring cards while it is open, as before.
+- In the videos holds look slower than a thumb because the browser sends the touch by script.
+
+## Step 12 — Titles on tiles (`e37fe50`)
+
+- Every battlefield tile has a name strip at its top, on art tiles and on token panels, tapped or not.
+- Long names are cut with an ellipsis; the full name is in the large view.
+
+![Full board in landscape](img/12-tile-titles.jpg)
+<img src="img/12-tile-titles-portrait.jpg" width="300" alt="Titles in portrait">
+
+Videos: [`11-tile-titles-and-two-faced-cards/`](../../for_human_revision/11-tile-titles-and-two-faced-cards/all_in_one.mp4).
+
+Try on a phone: a board with 8 creatures and 6 lands in landscape, then portrait.
+
+Not checked or weak in this step:
+- With 8 or more creatures on a landscape phone the tiles get small and long names are cut ("Siege-Gang Co...").
+- Battlefield tiles show only the first counter plus "+n".
+- Two same-named tokens (for example two Wurms) appear as two separate tiles.
+
+## Step 13 — Two-faced cards (`e37fe50`, server `fb4c352`)
+
+- **Transform** in the action bar of a two-faced card on the battlefield turns it (Delver of Secrets becomes Insectile Aberration, and back).
+- **The large view** shows both faces side by side in landscape.
+- **Play other face** in the hand's action bar puts the card on the battlefield turned (Valki, God of Lies arrives as Tibalt, Cosmic Impostor). Leaving the battlefield puts the front face back.
+- The server has a `transform` action.
+
+![Turned](img/13-transform-turned.jpg)
+![Both faces](img/13-both-faces.jpg)
+![Played on its other face](img/13-play-other-face.jpg)
+<img src="img/13-both-faces-portrait.jpg" width="300" alt="Large view in portrait">
+
+Try on a phone: double tap a Delver on the battlefield, Transform, then View; put Valki in your hand and use Play other face.
+
+Not checked or weak in this step:
+- Turning has no flip animation; the tile changes at once.
+- In portrait the large view shows one face with a "Two-faced card" hint.
+- A copy of a turned card copies the front face.
+- Only Delver of Secrets and Valki were tried; cards with three or more parts (melds) were not.
+
+## Step 14 — Tokens at hand (`fb4c352`, `f50de0b`)
+
+- The token sheet has **Your deck** (the tokens your own cards make, read from the deck, not only from what is on the table) and **Other decks**, and a row of chips (You, then each other player) to say who gets the token. It goes back to You when reopened.
+- A token made for another player goes onto that player's battlefield.
+- **Copy** in the action bar copies a creature or a token, with its counters; it works on an opponent's card too.
+- **The counter row** in the action bar: +1/+1 and −1/−1 with steppers, and Other.
+
+![Token sheet](img/14-token-sheet.jpg)
+![A token for another player](img/14-token-made.jpg)
+![Counter row](img/14-counter-row.jpg)
+![Copy](img/14-copy.jpg)
+<img src="img/14-token-sheet-portrait.jpg" width="300" alt="Token sheet in portrait">
+
+Videos: [`12-tokens-at-hand/`](../../for_human_revision/12-tokens-at-hand/all_in_one.mp4).
+
+Try on a phone (3 players): open the token bubble, make one for you, pick another player's chip and make one for them; double tap a creature, add counters, Copy.
+
+Not checked or weak in this step:
+- "Other" counter opens the card's sheet rather than a small box.
+- The sheet still says "Your deck" in the video while another player's chip is chosen; it lists the tokens of your own deck.
+- A copy of a turned card copies the front face.
+- The screen shows one other player at a time, so with three players a token made for someone is seen only while that player is on top.
+- In landscape the sheet shows about one row of tokens at once.
+
+## Step 15 — Lobby and decks (`e2b0f2b`, `f50de0b`)
+
+- **The Games tab** picks the players with chips and has a Create game button; the game opens as a lobby.
+- **The lobby** lists the players with their deck and Ready, and your deck as cards with the commander's art. Choosing a deck gives you a copy of it for this game, with tabs **Main, Sideboard and Maybeboard**. A card opens to move it to another board, one copy at a time; the change is saved a moment later. Ready locks the boards; the other player sees it live. When everyone is ready the table opens.
+- **Decks keep** their sideboard and maybeboard (the importers read them, the server stores them).
+- Board changes apply to that game only; the saved deck is not touched.
+
+![Games tab](img/15-games-tab.jpg)
+![Lobby: choose a deck](img/15-lobby-choose.jpg)
+![Lobby: sideboard](img/15-lobby-sideboard.jpg)
+![The other player sees Ready](img/15-lobby-b-sees-ready.jpg)
+![Portrait: deck, a card to move, Ready seen](img/15-lobby-portrait.jpg)
+
+Videos: [`13-lobby-and-decks/`](../../for_human_revision/13-lobby-and-decks/all_in_one.mp4). They show two players on two screens at once.
+
+Try on a phone, with a friend: create a game from the Games tab, each choose a deck, move a card from the Sideboard to Main, press Ready on one phone and watch the other.
+
+Not checked or weak in this step:
+- The lobby moves one copy at a time.
+- Board rows show names only: no thumbnail and no large view.
+- Deck cards show no card count.
+- The state with no decks at all was not exercised, and the deck search (it shows from 9 decks) was only seen, not used.
+- Decks saved before today have an empty sideboard and maybeboard until they are imported again.
+- Board swaps apply to that game only, by design.
+- The menus rework (a dock) is waiting for Jorge's choice.
+
+## Step 16 — Library sheet count (`7f57f5e`)
+
+- "How many from the top" starts at 1 and has − and + steppers and quick numbers 2, 3, 5, 7, 10. Draw, Mill, Exile, Look and Reveal "N" use it.
+
+![Library sheet](img/16-library-sheet.jpg)
+
+Video: the last clip of [`10-card-handling/`](../../for_human_revision/10-card-handling/all_in_one.mp4).
+
+Not checked or weak in this step:
+- The number field still opens the keyboard on a phone when tapped; the quick numbers avoid that (not tried on a phone).
 
 ## What comes next
 
