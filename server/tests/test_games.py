@@ -268,8 +268,8 @@ def test_connect_refused(setup):
     async def scenario():
         for who, g in ((None, gid), (c, gid), (a, gid + 99)):
             comm_ = comm(g, who)
-            ok, code = await comm_.connect()
-            assert not ok and code == 4403
+            assert (await comm_.connect())[0]  # accepted, so the browser gets the close code
+            assert await comm_.receive_output() == {"type": "websocket.close", "code": 4403}
         ok, _ = await comm(gid, a, origin=b"http://evil.example").connect()
         assert not ok
 

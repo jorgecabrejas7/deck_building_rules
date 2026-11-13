@@ -65,6 +65,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_id = self.scope["url_route"]["kwargs"]["id"]
         self.seat = await seat_of(self.game_id, self.scope["user"])
         if self.seat is None:
+            await self.accept()  # a refused handshake reaches the browser as code 1006 and it keeps retrying
             return await self.close(code=4403)
         self.group = f"game_{self.game_id}"
         self.sent = -1
