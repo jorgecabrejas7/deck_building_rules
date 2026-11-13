@@ -6,7 +6,7 @@ GitHub to play) and, where useful, `.gif` copies that show inline in the journal
 The journal with the explanation of every step and its screenshots is in
 [`docs/table/README.md`](../docs/table/README.md).
 
-**Start with the `all_in_one.mp4` inside each folder**: that feature's recordings in one captioned video. They are rebuilt whenever a step adds recordings. The other files in a folder are the same clips one by one. [`all_in_one.mp4`](all_in_one.mp4) here at the top is every feature in a row (about six and a half minutes).
+**Start with the `all_in_one.mp4` inside each folder**: that feature's recordings in one captioned video. They are rebuilt whenever a step adds recordings. The other files in a folder are the same clips one by one. [`all_in_one.mp4`](all_in_one.mp4) here at the top is every feature in a row (about nine and a half minutes).
 
 How the recordings are made: a headless browser plays a real game against the local server, captured at quarter
 speed and sped back up. They stutter more than a real phone does; judge where things go and in what order, not the
@@ -24,5 +24,7 @@ frame rate. File names say the screen (`portrait` 390×844, `landscape` 844×390
 | `11-tile-titles-and-two-faced-cards/` | [watch](11-tile-titles-and-two-faced-cards/all_in_one.mp4) | Steps 12 and 13, commits `e37fe50` and `fb4c352` | The top of the printed card on battlefield tiles, title bar and art (a full board arriving, with tokens, counters and taps); Transform on Delver of Secrets and the large view with both faces; Play other face from the hand (Valki, God of Lies becomes Tibalt). Landscape and portrait. |
 | `12-tokens-at-hand/` | [watch](12-tokens-at-hand/all_in_one.mp4) | Step 14, commits `fb4c352` and `f50de0b` | The token sheet with Your deck and Other decks; a token for yourself and one for another player in a 3-player game; the counter row; Copy on a creature with counters and on a token. Landscape and portrait. |
 | `13-lobby-and-decks/` | [watch](13-lobby-and-decks/all_in_one.mp4) | Step 15, commits `e2b0f2b` and `f50de0b` | The Games tab with player chips and Create game; the lobby of two players on two screens (top and bottom in landscape, side by side in portrait): choosing a deck, Main / Sideboard / Maybeboard, moving a sideboard card to Main, Ready seen live by the other player, and the table opening when both are ready. |
+| `14-battlefield-zones/` | [watch](14-battlefield-zones/all_in_one.mp4) | Step 18, commit `28fd2af` | Battlefield zones by card type: creatures in the front row; lands, then artifacts, enchantments and other permanents in the back row, each group on a faint tray. A board filling up with mixed permanents played from the hand, a board with many permanents, and the opponent's board (mirrored; in portrait you tap their bar to see it). Landscape and portrait. |
+| `15-deck-check-and-versions/` | [watch](15-deck-check-and-versions/all_in_one.mp4) | Step 19, commit `28fd2af` | The lobby's 100-card check and deck versions: taking a card out of Main shows the warning and turns Ready off, putting it back turns Ready on, swapping a card and saving the list as a named version, choosing between the version chips (Pod night, Bracket 4, Bracket 3), then Ready and the table opening. Landscape and portrait. A yellow dot is a finger. |
 
 New folders are added as steps are finished.

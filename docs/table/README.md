@@ -422,6 +422,45 @@ Not checked or weak in this step:
 
 Video: the last clip of [`10-card-handling/`](../../for_human_revision/10-card-handling/all_in_one.mp4).
 
+## Step 18 — Battlefield zones (`28fd2af`)
+
+- A battlefield is now laid out by card type. **Creatures** stand in the front row (an artifact creature counts as a creature). Behind them is the back row: **lands** first, then **artifacts**, **enchantments** and **other** (planeswalkers, battles, face-down cards). Each group sits on its own faint tray. The opponent's board mirrors this: back row near their edge, creatures next to the middle line.
+- Cards land in their zone as they are played from the hand; identical plain cards still stack into one pile.
+
+![Landscape: many permanents](img/18-landscape-many.jpg)
+![Landscape: the opponent's board on top](img/18-landscape-opponent.jpg)
+![Portrait: the opponent's board](img/18-portrait-opponent.jpg)
+
+Videos: [`14-battlefield-zones/`](../../for_human_revision/14-battlefield-zones/all_in_one.mp4). Landscape and portrait; a board filling from the hand, many permanents, the opponent's board. In the recordings the cards were played with game actions (as the play from hand would send them), not dragged.
+
+Try on a phone: play a land, a creature, an artifact and an enchantment from your hand and watch each go to its row.
+
+Not checked or weak in this step:
+- There are no visible zone labels: the zones are told apart by trays and gaps only.
+- In portrait, cards in the back row can touch the Pass button.
+- Cards whose image has not loaded yet (no type known) go to "other" until it does.
+
+## Step 19 — 100-card check and versions (`28fd2af`)
+
+- **Exactly 100 cards.** If Main does not hold 100 cards the lobby shows "Main has N cards: a Commander deck needs exactly 100", the Main tab count turns red and **Ready is disabled**. The server refuses Ready too. Moving the card back (or another one in) turns Ready on again.
+- **Save as a version.** Once the lobby list differs from the chosen version, "Save as a version" asks for a name and stores the list as a new version of the deck.
+- **Version chips.** A chosen deck shows its versions as chips (name and card count, for example Bracket 3 and Bracket 4); tapping one loads that version into the lobby. The other player sees the version name in your row.
+
+![Landscape: 99 cards, warning, Ready off](img/19-landscape-2-warning.jpg)
+![Landscape: three version chips](img/19-landscape-5-three-chips.jpg)
+![Portrait: 99 cards, warning, Ready off](img/19-portrait-2-warning.jpg)
+![Portrait: three version chips](img/19-portrait-5-three-chips.jpg)
+
+Videos: [`15-deck-check-and-versions/`](../../for_human_revision/15-deck-check-and-versions/all_in_one.mp4), landscape and portrait, about 40 seconds each.
+
+Try on a phone: choose a deck, take a card out of Main (Ready goes grey), put another in, save the list under a name, switch between two version chips, press Ready.
+
+Not checked or weak in this step:
+- Versions saved before 2026-11-13 have no name and show their dates; there is no way to rename a version.
+- A deck that is not 100 cards cannot be made Ready; there is no override.
+- The lobby moves one copy at a time (taking 5 Plains out is five taps).
+- Naming rules (length, duplicates) and many versions on one deck were not exercised.
+
 ## What comes next
 
 Everything on the list is built. What remains is fixing what Jorge and his testers find on real phones, and the
