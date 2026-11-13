@@ -81,10 +81,11 @@ export const counterText = (k, v) => {
   const sg = (k[0] === '+') === (v > 0) ? '+' : '−', n = Math.abs(v);
   return `${sg}${n}/${sg}${n}`;
 };
-// a permanent's section, from its front face; face-down and not-yet-loaded cards go to "other"
+// a permanent's section, from its front face: creature first (an artifact creature is a creature), then land, planeswalker and battle
+// ("other"), artifact, enchantment; face-down and not-yet-loaded cards go to "other"
 const section = (c) => {
-  const tl = !c.face_down && c.name && ((cached(c) || {}).type_line || '').split(' // ')[0];
-  return !tl ? 'other' : /\bCreature\b/.test(tl) ? 'creatures' : /\bLand\b/.test(tl) ? 'lands' : 'other';
+  const tl = ((known(c) || {}).type_line || '').split(' // ')[0], is = (w) => new RegExp(`\\b(${w})\\b`).test(tl);
+  return is('Creature') ? 'creatures' : is('Land') ? 'lands' : is('Planeswalker|Battle') ? 'other' : is('Artifact') ? 'artifacts' : is('Enchantment') ? 'enchantments' : 'other';
 };
 // key: which cached image: img_small (a pile, the drag ghost), img_normal (the full view), img_art (a permanent's tile)
 // a token with `ref` is looked up in the token dataset, anything else by name (a copy of a card is a token without `ref`, drawn as that card)
@@ -146,7 +147,7 @@ function chip(s, zone, t, view) {
 // a battlefield in sections, each a list of groups: identical plain cards (same name and tapped state, no counters,
 // nothing attached either way, face up) share one group; any other card is a group of one
 function sections(view, s, att) {
-  const on = new Set([...att.values()].flat().map((c) => c.id)), out = { creatures: [], other: [], lands: [] }, seen = new Map();
+  const on = new Set([...att.values()].flat().map((c) => c.id)), out = { creatures: [], lands: [], artifacts: [], enchantments: [], other: [] }, seen = new Map();
   for (const c of view.zones[s].battlefield) {
     if (on.has(c.id)) continue; // drawn tucked behind its host
     const plain = c.name && !c.face_down && !c.attached && !att.has(c.id) && !Object.keys(c.counters || {}).length;
@@ -180,12 +181,12 @@ function seat(view, s, t) {
     if (!under) return tile(c, t, false, [c, ...more], true);
     return `<div class="stk" style="--n:${under.length}">${under.map((x, i) => tile(x, t, false, [x], true).replace('<button ', `<button style="--i:${i}" `)).join('')}${tile(c, t, false, [c], true)}</div>`;
   };
-  // mine reads creatures, then other and lands, down towards me; theirs mirrors it. Other and lands share one .bfb: two groups on
-  // one line behind the creatures when they fit, else one under the other
+  // mine reads creatures, then the back row down towards me; theirs mirrors it. The back row is the lands on the left and, beside them,
+  // artifacts, enchantments and planeswalkers (other); table.js fit() keeps them on one line when they fit, else lands on their own line
   const group = (k) => `<div class="bfr ${k}" role="group" aria-label="${t['tbSec' + k]}">${secs[k].map(stack).join('')}</div>`;
   const part = (ks) => ks.filter((k) => secs[k].length).map(group).join('');
-  const back = (ks) => { const h = part(ks); return h && `<div class="bfb">${h}</div>`; };
-  const rows = me ? part(['creatures']) + back(['other', 'lands']) : back(['lands', 'other']) + part(['creatures']);
+  const back = () => { const l = part(['lands']), r = part(['artifacts', 'enchantments', 'other']); return l || r ? `<div class="bfb">${l}${r && `<div class="bfo">${r}</div>`}</div>` : ''; };
+  const rows = me ? part(['creatures']) + back() : back() + part(['creatures']);
   // one chip with the highest commander damage taken; it opens the sheet with every commander
   const cmds = Object.keys(p.cmd_damage).length ? [`<button class="chip cmd" data-cmd="${s}" title="${t.tbCmdDmg}" aria-label="${t.tbCmdDmg}: ${cmdHigh(p)}">${ICON.sword}<b>${cmdHigh(p)}</b></button>`] : [];
   // the number opens a pad to add, subtract or set any amount
@@ -200,7 +201,7 @@ function seat(view, s, t) {
   const hud = `<div class="hud"><div class="pill"><span class="who-c"><b class="who">${who}</b>${turn}${gone}</span>${life}</div><div class="chips">${chips}</div></div>`;
   const bf = `<div class="bf" data-drop="${s}:battlefield" data-empty="${me ? t.tbDropHere : t.tbZbattlefield}">${rows}</div>`;
   // the collapsed bar (tall screens): tap it to open this board, drop a card on it to put the card onto this battlefield
-  const minis = ['creatures', 'other', 'lands'].flatMap((k) => secs[k]).map(([c, ...more]) => {
+  const minis = ['creatures', 'lands', 'artifacts', 'enchantments', 'other'].flatMap((k) => secs[k]).map(([c, ...more]) => {
     const src = art(c, 'img_art');
     return `<span data-m="${[c, ...more].map((x) => x.id).join(' ')}" class="mini${c.tapped ? ' tapped' : ''}${c.face_down || !c.name ? ' back' : c.token ? ' tok' : ''}">${src ? `<img src="${esc(src)}" alt="" draggable="false">` : ''}${more.length ? `<b>×${more.length + 1}</b>` : ''}</span>`;
   }).join('');

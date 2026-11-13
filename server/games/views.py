@@ -15,6 +15,7 @@ from .models import Game, GamePlayer
 
 MAX_GAMES = 5
 MAX_CARDS = 250
+DECK_SIZE = 100  # a Commander deck, commanders included
 BOARDS = ("entries", "side", "maybe")
 
 
@@ -87,14 +88,17 @@ def game_deck(request, id):
     data = body(request)
     if data is None or type(data.get("deck")) is not int:
         return bad({"deck": "invalid"})
-    version = DeckVersion.objects.select_related("deck").filter(deck_id=data["deck"], deck__owner=request.user).first()
+    if "version" in data and type(data["version"]) is not int:
+        return bad({"version": "invalid"})
+    versions = DeckVersion.objects.select_related("deck").filter(deck_id=data["deck"], deck__owner=request.user)
+    version = (versions.filter(pk=data["version"]) if "version" in data else versions).first()
     if version is None:
         raise Http404
     if sum(e["quantity"] for e in version.list["entries"]) > MAX_CARDS:
         return bad({"deck": "size"})
 
     def change(p):
-        p.deck, p.list, p.ready = version.deck, version.list, False
+        p.deck, p.version, p.list, p.ready = version.deck, version, version.list, False
 
     return in_lobby(id, me, change)
 
@@ -126,6 +130,8 @@ def game_ready(request, id):
                     or sum(e["quantity"] for e in new["entries"]) > MAX_CARDS):
                 return {"list": "invalid"}
             p.list = new
+        if data["ready"] and sum(e["quantity"] for e in p.list["entries"]) != DECK_SIZE:
+            return {"list": "count"}
         p.ready = data["ready"]
 
     return in_lobby(id, me, change)

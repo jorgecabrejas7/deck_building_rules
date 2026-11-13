@@ -16,13 +16,14 @@ RATE = 10  # actions per second per connection
 def lobby_view(game, seat):
     """Per seat only public facts; the viewer alone gets their own boards in `mine`."""
     players, mine = {}, None
-    for p in game.players.select_related("user", "deck"):
+    for p in game.players.select_related("user", "deck", "version"):
         lst = p.list
         players[str(p.seat)] = {"name": p.name, "deck": p.deck.name if p.deck else None,
                                 "commanders": lst["commanders"] if lst else [],
-                                "count": sum(e["quantity"] for e in lst["entries"]) if lst else 0, "ready": p.ready}
+                                "count": sum(e["quantity"] for e in lst["entries"]) if lst else 0, "ready": p.ready,
+                                "version": p.version.name if p.version else ""}
         if p.seat == seat:
-            mine = {"deck": p.deck_id, **(lst or {"entries": [], "commanders": [], "side": [], "maybe": []})}
+            mine = {"deck": p.deck_id, "version": p.version_id, **(lst or {"entries": [], "commanders": [], "side": [], "maybe": []})}
     return {"status": "lobby", "you": seat, "zones": {}, "players": players, "mine": mine}
 
 

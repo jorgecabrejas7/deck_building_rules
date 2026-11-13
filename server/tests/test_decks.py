@@ -183,3 +183,16 @@ def test_boards_are_optional_and_stored(a):
     r = send(a, "post", "/pod/api/decks", {**BODY, "list": bare})
     d = send(a, "get", f"/pod/api/decks/{r.json()['deck']['id']}").json()
     assert d["versions"][0]["list"] == {**bare, "side": [], "maybe": []}
+
+
+def test_version_names_and_summary_versions(a):
+    d = make(a)
+    assert [(v["name"], v["count"]) for v in d["versions"]] == [("", 31)]
+    url = f"/pod/api/decks/{d['id']}/versions"
+    assert send(a, "post", url, {"list": LIST, "source": "paste", "name": "x" * 61}).json() == {"errors": {"name": "invalid"}}
+    r = send(a, "post", url, {"list": LIST, "source": "paste", "name": " Bracket 3 "})
+    assert r.status_code == 201 and [v["name"] for v in r.json()["deck"]["versions"]] == ["Bracket 3", ""]
+    assert [v["name"] for v in send(a, "get", f"/pod/api/decks/{d['id']}").json()["versions"]] == ["Bracket 3", ""]
+    for _ in range(views.MAX_PICKER + 2):
+        DeckVersion.objects.create(deck_id=d["id"], list=LIST, source="paste")
+    assert len(send(a, "get", "/pod/api/decks").json()["decks"][0]["versions"]) == views.MAX_PICKER

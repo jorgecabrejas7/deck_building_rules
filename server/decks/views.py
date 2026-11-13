@@ -11,6 +11,7 @@ from .models import Deck, DeckVersion
 
 MAX_DECKS = 100
 MAX_VERSIONS = 100
+MAX_PICKER = 20  # versions a deck summary lists
 MAX_BOARD = 100  # entries on the side and maybe boards
 MAX_BODY_BYTES = 32000
 SOURCES = ("paste", "moxfield", "archidekt", "builder")
@@ -87,7 +88,9 @@ def summary(d):
     latest = d.versions.first()
     return {"id": d.id, "name": d.name, "visibility": d.visibility, "link_token": d.link_token,
             "created_at": d.created_at, "updated_at": d.updated_at, "version_count": d.versions.count(),
-            "commanders": latest.list["commanders"] if latest else []}
+            "commanders": latest.list["commanders"] if latest else [],
+            "versions": [{"id": v.id, "name": v.name, "created_at": v.created_at,
+                          "count": sum(e["quantity"] for e in v.list["entries"])} for v in d.versions.all()[:MAX_PICKER]]}
 
 
 def own_deck(request, id):
@@ -143,7 +146,7 @@ def deck(request, id):
         d.save()
         return JsonResponse({"deck": summary(d)})
     versions = [{"id": v.id, "list": v.list, "source": v.source, "source_url": v.source_url,
-                 "note": v.note, "created_at": v.created_at} for v in d.versions.all()]
+                 "note": v.note, "name": v.name, "created_at": v.created_at} for v in d.versions.all()]
     return JsonResponse({"deck": summary(d), "versions": versions})
 
 
@@ -155,11 +158,14 @@ def versions(request, id):
     if data is None:
         return bad({"body": "invalid"})
     fields, errors = clean_version(data)
+    name = data.get("name", "")  # the version's own name; on a new deck "name" is the deck's
+    if not is_str(name, 0, 60):
+        errors = {**(errors or {}), "name": "invalid"}
     if errors:
         return bad(errors)
     if d.versions.count() >= MAX_VERSIONS:
         return bad({"versions": "limit"})
-    DeckVersion.objects.create(deck=d, **fields)
+    DeckVersion.objects.create(deck=d, name=name.strip(), **fields)
     d.save()  # auto_now bumps updated_at
     return JsonResponse({"deck": summary(d)}, status=201)
 

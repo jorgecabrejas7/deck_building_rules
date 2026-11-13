@@ -16,6 +16,7 @@ class GamePlayer(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     seat = models.IntegerField(choices=[(i, i) for i in range(1, 7)])
     deck = models.ForeignKey("decks.Deck", on_delete=models.SET_NULL, null=True, related_name="+")  # only to show the choice
+    version = models.ForeignKey("decks.DeckVersion", on_delete=models.SET_NULL, null=True, related_name="+")  # the one copied
     # This game's working copy {entries, commanders, side, maybe}: boards can be rearranged here, the saved deck never changes.
     # Once the game is active only entries/commanders were dealt; side and maybe are not part of the game state.
     list = models.JSONField(null=True)

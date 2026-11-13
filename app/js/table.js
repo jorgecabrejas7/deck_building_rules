@@ -322,31 +322,33 @@ function applyFocus(swap) {
 // ---- card size: the largest width at which every card of a battlefield fits without scrolling ----
 // Wide screens show both boards stacked, full width: they share one size and split the height by what each holds, so a crowded side
 // never squeezes the other. Tall screens size the one open board, at most so that four tiles fit across. Past the smallest size a
-// battlefield scrolls inside itself. Each board is a creatures row, then a back row (lands and other on one line when both fit, else
-// one under the other). The pill, its chip column and the pass button stand in corners: every row is inset equally on both sides by
+// battlefield scrolls inside itself. Each board is a creatures row, then a back row (the lands and the other zones on one line when they fit, else
+// the lands on a line of their own). The pill, its chip column and the pass button stand in corners: every row is inset equally on both sides by
 // what it needs to clear them at its distance from the player's edge, so rows stay centred on the screen.
 // shortcut: the gaps are table.css constants (card gap 6, row gap 4, groups 16 apart; a tile is RATIO wide for each unit of height,
 // an attached card shows OFF of the width above its host); change both together
 const GAP = 6, ROW = 4, GROUP = 16, RATIO = 1.25, OFF = 0.3;
 const BAND = 34; // wide: the extra top padding of a battlefield under the players strip (table.css .str)
 const OPP = 0.88; // wide: their cards a little smaller, so yours (which you tap) can be bigger
-const lineW = (cw, n) => n * cw + Math.max(0, n - 1) * GAP;
+// items marked `s` start a zone: a GROUP gap before them instead of a card gap
+const gapOf = (it) => (it.s ? GROUP : GAP);
+const lineW = (cw, items) => items.reduce((x, it, i) => x + (i ? gapOf(it) : 0) + cw, 0);
 function rowH(cw, items, W) {
   const ih = cw / RATIO;
   let h = 0, x = 0, line = 0;
   for (const it of items) {
-    if (x && x + GAP + cw > W) { h += line + GAP; x = 0; line = 0; }
-    x += (x ? GAP : 0) + cw; line = Math.max(line, ih + it.n * cw * OFF);
+    if (x && x + gapOf(it) + cw > W) { h += line + GAP; x = 0; line = 0; }
+    x += (x ? gapOf(it) : 0) + cw; line = Math.max(line, ih + it.n * cw * OFF);
   }
   return h + line;
 }
-// b: { W, front: creature items, back: [one items list per group, lands first], pillW, colW: widths of the pill and the chip column,
+// b: { W, front: creature items, back: [one items list per block: the lands, then the other zones side by side], pillW, colW: widths of the pill and the chip column,
 // reachP, reachH: how far from the player's edge the pill and the whole corner block reach, pass: the pass button's room }
-// returns the height, and the inset of the creatures row and the [left, right] margins of each back group
+// returns the height, and the inset of the creatures row and the [left, right] margins of each back block
 function plan(cw, b) {
   const inset = (y0, y1, extra = 0) => Math.max(extra, y0 < b.reachP ? b.pillW : 0, y1 > b.reachP && y0 < b.reachH ? b.colW : 0);
   const one1 = (items) => items.reduce((h, it) => Math.max(h, cw / RATIO + it.n * cw * OFF), 0), n = b.back.length;
-  const flat = b.back.flat(), i1 = inset(0, one1(flat)), w1 = b.back.reduce((x, g) => x + lineW(cw, g.length), GROUP * Math.max(0, n - 1));
+  const flat = b.back.flatMap((g, i) => g.map((it, j) => (i && !j ? { ...it, s: true } : it))), i1 = inset(0, one1(flat)), w1 = b.back.reduce((x, g) => x + lineW(cw, g), GROUP * Math.max(0, n - 1));
   let backH = 0, back = [];
   if (n < 2 || w1 <= b.W - 2 * i1) { backH = n ? rowH(cw, flat, b.W - 2 * i1) : 0; back = b.back.map((g, i) => [n > 1 && i ? 0 : i1, n > 1 && i < n - 1 ? 0 : i1]); }
   else for (const g of b.back) { // one under the other
@@ -365,7 +367,8 @@ function fit() {
   const boards = [...document.querySelectorAll('.seat .bf')].filter((bf) => bf.offsetParent).map((bf) => {
     const cs = getComputedStyle(bf), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom), seat = bf.closest('.seat'), me = seat.classList.contains('me');
     const items = (r) => [...r.children].map((it) => ({ n: it.matches('.stk') ? it.childElementCount - 1 : 0 }));
-    const bg = [...bf.querySelectorAll('.bfb>.bfr')].sort((x, y) => y.classList.contains('lands') - x.classList.contains('lands')); // table.css puts lands first
+    const bg = [...bf.querySelectorAll('.bfb>.bfr,.bfb>.bfo')]; // the lands, then the other zones in one block
+    const block = (el) => (el.matches('.bfo') ? [...el.children] : [el]).flatMap((g, i) => items(g).map((it, j) => (i && !j ? { ...it, s: true } : it)));
     const W = bf.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     // the corner block's reach from the player's edge (wide only: on tall screens the pill is a band at the edge, in the padding)
     const a = seat.querySelector('.area').getBoundingClientRect(), pill = seat.querySelector('.pill'), chips = seat.querySelector('.chips');
@@ -373,7 +376,7 @@ function fit() {
     const reach = (el) => { const r = el.getBoundingClientRect(); return (me ? a.bottom - r.top : r.bottom - a.top) - band; };
     const corner = wide ? { pillW: pill.offsetWidth + 16, colW: chips.offsetWidth + 16, reachP: reach(pill) + 4, reachH: reach(chips) + 4 } : { pillW: 0, colW: 0, reachP: 0, reachH: 0 };
     return { bf, seat, padY, H: bf.clientHeight - padY, W, ...corner, min: corner.reachH + 4, pass: wide ? pass : 0,
-      fe: bf.querySelector('.bfr.creatures'), bg, front: [...bf.querySelectorAll('.creatures')].flatMap(items), back: bg.map(items), scale: wide && !me ? OPP : 1,
+      fe: bf.querySelector('.bfr.creatures'), bg, front: [...bf.querySelectorAll('.creatures')].flatMap(items), back: bg.map(block), scale: wide && !me ? OPP : 1,
       hi: wide ? hi : Math.min(hi, Math.floor((W - 3 * GAP) / 4)) };
   });
   const sized = (b, cw) => plan(Math.round(cw * b.scale), b);
@@ -389,7 +392,7 @@ function fit() {
     if (!(wide && boards.length === 2)) { cw = b.hi; while (cw > lo && sized(b, cw).h > b.H) cw--; }
     const { front, back } = sized(b, cw);
     b.bf.style.setProperty('--cw', Math.round(cw * b.scale) + 'px');
-    if (b.fe) b.fe.style.paddingInline = front + 'px';
+    if (b.fe) b.fe.style.marginInline = front + 'px';
     b.bg.forEach((g, i) => [g.style.marginLeft, g.style.marginRight] = back[i].map((x) => x + 'px'));
   }
   // a battlefield scrolls under a vertical pan only while it overflows; otherwise the browser must not take a slide for a scroll (table.css .bf)

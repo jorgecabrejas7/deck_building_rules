@@ -8,11 +8,12 @@ from django.test import Client
 
 from accounts.models import User
 from decks.models import Deck, DeckVersion
+from games.consumers import named_view
 from games.models import Game, GamePlayer
 from pod.asgi import application
 from pods.models import Pod, PodMember
 
-LIST = {"entries": [{"name": "Atraxa", "quantity": 1}, {"name": "Sol Ring", "quantity": 1}], "commanders": ["Atraxa"],
+LIST = {"entries": [{"name": "Atraxa", "quantity": 1}, {"name": "Sol Ring", "quantity": 99}], "commanders": ["Atraxa"],
         "side": [{"name": "Mana Crypt", "quantity": 1}], "maybe": [{"name": "Island", "quantity": 2}]}
 
 # Relies on table.py: new_game accepts {seat: {"entries","commanders"}}; apply(state, seat, {"type":"life",
@@ -32,7 +33,7 @@ def post(c, url, data):
     return c.post(url, json.dumps(data), content_type="application/json")
 
 
-def mkdeck(user, cards=1):
+def mkdeck(user, cards=99):
     d = Deck.objects.create(owner=user, name="D")
     DeckVersion.objects.create(deck=d, list={**LIST, "entries": [LIST["entries"][0], {"name": "Sol Ring", "quantity": cards}]},
                                source="paste")
@@ -129,26 +130,26 @@ def test_moved_boards_are_what_is_dealt(setup):
     a, b, pod = setup
     gid = lobby(a, b, pod)
     choose(a, gid), choose(b, gid)
-    moved = {"entries": [{"name": "Atraxa", "quantity": 1}, {"name": "Mana Crypt", "quantity": 1}, {"name": "Island", "quantity": 1}],
-             "side": [{"name": "Sol Ring", "quantity": 1}], "maybe": [{"name": "Island", "quantity": 1}]}  # a split quantity
+    moved = {"entries": [{"name": "Atraxa", "quantity": 1}, {"name": "Mana Crypt", "quantity": 1}, {"name": "Sol Ring", "quantity": 97}, {"name": "Island", "quantity": 1}],
+             "side": [{"name": "Sol Ring", "quantity": 2}], "maybe": [{"name": "Island", "quantity": 1}]}  # a split quantity
     assert ready(a, gid, **moved).json() == {"status": "lobby"}
     assert GamePlayer.objects.get(game_id=gid, seat=1).list == {**moved, "commanders": ["Atraxa"]}
     assert ready(b, gid).json() == {"status": "active"}
-    assert played(gid, 1) == (["Atraxa", "Island", "Mana Crypt"], ["Atraxa"])
-    assert played(gid, 2) == (["Atraxa", "Sol Ring"], ["Atraxa"])
+    assert played(gid, 1) == (sorted(["Atraxa", "Island", "Mana Crypt"] + ["Sol Ring"] * 97), ["Atraxa"])
+    assert played(gid, 2) == (sorted(["Atraxa"] + ["Sol Ring"] * 99), ["Atraxa"])
     assert Deck.objects.get(owner=a.user).versions.get().list == LIST  # the saved deck is untouched
 
 
 def test_bad_boards_refused(setup):
     a, b, pod = setup
     gid = lobby(a, b, pod)
-    choose(a, gid, mkdeck(a.user, 3))
-    atraxa, sol, crypt, isle = ({"name": n, "quantity": q} for n, q in (("Atraxa", 1), ("Sol Ring", 3), ("Mana Crypt", 1), ("Island", 2)))
+    choose(a, gid, mkdeck(a.user))
+    atraxa, sol, crypt, isle = ({"name": n, "quantity": q} for n, q in (("Atraxa", 1), ("Sol Ring", 99), ("Mana Crypt", 1), ("Island", 2)))
     ok = {"entries": [atraxa, sol], "side": [crypt], "maybe": [isle]}
     cases = [
         {**ok, "side": [crypt, {"name": "Black Lotus", "quantity": 1}]},   # invented card
         {**ok, "side": []},                                                 # vanished
-        {**ok, "entries": [atraxa, {"name": "Sol Ring", "quantity": 4}]},  # changed total
+        {**ok, "entries": [atraxa, {"name": "Sol Ring", "quantity": 100}]},  # changed total
         {**ok, "entries": [sol], "side": [crypt, atraxa]},                  # commander moved out
         {"entries": [], "side": [atraxa, sol, crypt], "maybe": [isle]},     # empty main
         {**ok, "entries": [atraxa, {"name": "Sol Ring", "quantity": 0}]},   # malformed
@@ -176,7 +177,8 @@ def test_rechoosing_resets_ready_and_boards(setup):
     a, b, pod = setup
     gid = lobby(a, b, pod)
     choose(a, gid)
-    ready(a, gid, entries=[LIST["entries"][0]], side=[{"name": "Sol Ring", "quantity": 1}, *LIST["side"]], maybe=LIST["maybe"])
+    ready(a, gid, entries=[LIST["entries"][0], {"name": "Sol Ring", "quantity": 98}, *LIST["side"]],
+          side=[{"name": "Sol Ring", "quantity": 1}], maybe=LIST["maybe"])
     p = GamePlayer.objects.get(game_id=gid, seat=1)
     assert p.ready and p.list["side"][0]["name"] == "Sol Ring"
     choose(a, gid)
@@ -379,9 +381,9 @@ def test_lobby_view_and_action_refused(setup):
         s = await c.receive_json_from()
         assert s["seq"] == 2 and s["ack"] is None
         assert s["view"] == {"status": "lobby", "you": 2, "zones": {},
-                             "players": {"1": {"name": "ana", "deck": "D", "commanders": ["Atraxa"], "count": 2, "ready": True},
-                                         "2": {"name": "ben", "deck": None, "commanders": [], "count": 0, "ready": False}},
-                             "mine": {"deck": None, "entries": [], "commanders": [], "side": [], "maybe": []}}
+                             "players": {"1": {"name": "ana", "deck": "D", "commanders": ["Atraxa"], "count": 100, "ready": True, "version": ""},
+                                         "2": {"name": "ben", "deck": None, "commanders": [], "count": 0, "ready": False, "version": ""}},
+                             "mine": {"deck": None, "version": None, "entries": [], "commanders": [], "side": [], "maybe": []}}
         await c.send_to(act(5))
         assert await c.receive_json_from() == {"type": "error", "ack": 5, "code": "lobby"}
         await c.disconnect()
@@ -476,3 +478,39 @@ def test_deleted_opponent_shows_null_name(setup):
         await c.disconnect()
 
     run(scenario)
+
+
+def test_ready_needs_exactly_100_cards(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    choose(a, gid)
+    short = {"entries": [LIST["entries"][0], {"name": "Sol Ring", "quantity": 98}], "side": [{"name": "Sol Ring", "quantity": 1}],
+             "maybe": [{"name": "Mana Crypt", "quantity": 1}, *LIST["maybe"]]}
+    assert ready(a, gid, **short).json() == {"errors": {"list": "count"}}
+    assert ready(a, gid, False, **short).json() == {"status": "lobby"}  # saving boards is not restricted
+    assert ready(a, gid).json() == {"errors": {"list": "count"}}
+    assert GamePlayer.objects.get(game_id=gid, seat=1).list["entries"] == short["entries"]
+
+
+def test_choose_a_deck_version(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    d = mkdeck(a.user)
+    old = d.versions.get()
+    old.name = "Bracket 3"
+    old.save()
+    new = DeckVersion.objects.create(deck=d, list={**LIST, "side": []}, source="paste", name="Bracket 4")
+    choose(a, gid, d)  # latest by default
+    p = GamePlayer.objects.get(game_id=gid, seat=1)
+    assert p.version_id == new.id and p.list["side"] == []
+    assert post(a, f"/pod/api/games/{gid}/deck", {"deck": d.id, "version": old.id}).status_code == 200
+    p = GamePlayer.objects.get(game_id=gid, seat=1)
+    assert p.version_id == old.id and p.list == LIST and not p.ready
+    view = named_view(Game.objects.get(pk=gid), 1)
+    assert view["mine"]["version"] == old.id and view["players"]["1"]["version"] == "Bracket 3"
+    assert named_view(Game.objects.get(pk=gid), 2)["players"]["1"]["version"] == "Bracket 3"
+    other = mkdeck(a.user)
+    for bad in (other.versions.get().id, mkdeck(b.user).versions.get().id, 0):
+        assert post(a, f"/pod/api/games/{gid}/deck", {"deck": d.id, "version": bad}).status_code == 404
+    assert post(a, f"/pod/api/games/{gid}/deck", {"deck": d.id, "version": "x"}).status_code == 400
+    assert GamePlayer.objects.get(game_id=gid, seat=1).version_id == old.id
