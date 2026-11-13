@@ -429,12 +429,15 @@ body.modal-open{overflow:hidden}
 .gm-pick{flex:1 1 100%;min-width:0;margin:0;padding:0;border:none;display:flex;flex-wrap:wrap;gap:var(--sp-2)}
 .gm-pick legend{padding:0 0 var(--sp-2);font-size:var(--fs-caption);color:var(--muted)}
 .gm-n{margin-left:var(--sp-2);font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
-.gm-opt{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-4);border-radius:var(--r-pill);background:var(--fill);cursor:pointer}
-.gm-opt:has(:checked){background:var(--accentBtn);color:var(--accentFg)}
-.gm-opt:has(:disabled){opacity:.45;cursor:default}
-.gm-opt input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
-.gm-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.gm-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2) var(--sp-4);padding:var(--sp-3) 0;border-top:1px solid var(--border2)}
+.gm-chip{box-sizing:border-box;min-height:44px;padding:0 var(--sp-4);border:none;border-radius:var(--r-pill);background:var(--fill);color:var(--text);font:inherit;font-size:var(--fs-ui);cursor:pointer;transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.gm-chip:hover{background:var(--fill-hover)}
+.gm-chip:active{transform:scale(.96)}
+.gm-chip[aria-pressed=true]{background:var(--accentBtn);color:var(--accentFg);font-weight:600}
+.gm-chip[aria-pressed=true]::before{content:"\2713";margin-right:6px}
+.gm-chip:disabled{opacity:.45;cursor:default;transform:none}
+@media (prefers-reduced-motion:reduce){.gm-chip{transition:none}.gm-chip:active{transform:none}}
+.gm-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-2)}
+.gm-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2) var(--sp-4);padding:var(--sp-3) var(--sp-4);border-radius:var(--r-md);background:var(--fill);box-shadow:0 0 0 1px var(--border2)}
 .gm-who{display:flex;flex-direction:column;gap:2px;min-width:0}
 .gm-who b{font-size:var(--fs-ui);font-weight:600;overflow-wrap:anywhere}
 .gm-st{display:inline-flex;align-items:baseline;gap:6px;font-size:var(--fs-caption);color:var(--muted)}

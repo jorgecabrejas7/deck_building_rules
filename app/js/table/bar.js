@@ -37,8 +37,8 @@ export function buildBar(ids, view, c) {
     away('graveyard') && b('graveyard', t.tbZgraveyard, go('graveyard')),
     away('exile') && b('exile', t.tbZexile, go('exile')),
     away('library') && b('library', t.tbZlibrary, go('library', { pos: 'top' }), `${t.tbZlibrary} · ${t.tbTop}`),
-    // another of the same token for whoever controls it
-    lead && lead.card.token && lead.zone === 'battlefield' && b('plus', t.tbTkOne, () => send({ type: 'token', seat: lead.seat, name: lead.card.name, count: 1, ...(lead.card.ref ? { ref: lead.card.ref } : {}) })),
+    // a token of it on your battlefield: same name and ref, same counters (a flipped two-faced card copies its front name)
+    hits.length === 1 && hits[0].zone === 'battlefield' && b('plus', t.tbCopy, () => { const k = hits[0].card; send({ type: 'token', seat: view.you, name: k.name, count: 1, ...(k.token && k.ref ? { ref: k.ref } : {}), ...(Object.keys(k.counters || {}).length ? { counters: k.counters } : {}) }); }),
     lead && attachable(lead.card) && (lead.zone === 'battlefield' || lead.zone === 'hand') && b('attach', t.tbAttachShort, () => c.pickHost(lead.card.id), t.tbAttach),
     // the selection stays: the bar docks and the card is the first of several
     lead && !c.multi && `<button class="ba" data-b="${items.push(c.selectMany) - 1}">${ICON.multi}<span>${t.tbSelectMany}</span></button>`,
@@ -49,11 +49,11 @@ export function buildBar(ids, view, c) {
   let cn = '';
   if (hits.length === 1 && hits[0].zone === 'battlefield') {
     const card = hits[0].card, has = card.counters || {};
-    cn = `<div class="bcs">${[...new Set(['+1/+1', ...Object.keys(has)])].map((k) => {
+    cn = `<div class="bcs">${[...new Set(['+1/+1', '-1/-1', ...Object.keys(has)])].map((k) => {
       const v = has[k] || 0, step = (d) => { items.push(() => send({ type: 'counter', card: card.id, name: k, delta: d })); return items.length - 1; };
       return `<div class="bc" role="group" aria-label="${esc(k)}"><button class="bs" data-b="${step(-1)}" aria-label="${t.tbMinus} ${esc(k)}"${v > 0 ? '' : ' disabled'}>−</button>`
         + `<span class="bv">${esc(k)} <b>${v}</b></span><button class="bs" data-b="${step(1)}" aria-label="${t.tbPlus} ${esc(k)}">+</button></div>`;
-    }).join('')}</div>`;
+    }).join('')}<button class="bs bo" data-b="${items.push(() => { c.done(); c.openSheet(card.id); }) - 1}" title="${t.tbCounterNew}">${t.tbCounterOther}</button></div>`;
   }
   const head = c.multi ? `<div class="bh"><b>${ids.length === 1 ? t.tbSel1 : fill(t.tbSelN, { n: ids.length })}</b><button class="sb" data-b="${items.push(c.done) - 1}">${t.tbCancel}</button></div>` : '';
   return { html: `${head}<div class="bas" style="--cols:${acts.length}">${acts.join('')}</div>${cn}`, items };

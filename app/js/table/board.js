@@ -59,10 +59,10 @@ export function index(view) {
   return m;
 }
 
-// names worth an image: face-up named cards that are not tokens (those come from the dataset)
+// names worth an image: face-up named cards, but not tokens that have a `ref` (those come from the dataset)
 export function visibleNames(view) {
   const out = new Set();
-  for (const { card } of index(view).values()) if (card.name && !card.token && !card.face_down) out.add(card.name);
+  for (const { card } of index(view).values()) if (card.name && !(card.token && card.ref) && !card.face_down) out.add(card.name);
   return [...out];
 }
 
@@ -87,10 +87,10 @@ const section = (c) => {
   return !tl ? 'other' : /\bCreature\b/.test(tl) ? 'creatures' : /\bLand\b/.test(tl) ? 'lands' : 'other';
 };
 // key: which cached image: img_small (a pile, the drag ghost), img_normal (the full view), img_art (a permanent's tile)
-// a token with `ref` is looked up in the token dataset, anything else by name
+// a token with `ref` is looked up in the token dataset, anything else by name (a copy of a card is a token without `ref`, drawn as that card)
 // a turned two-sided card reads as its back face: the cached card with the back's own name, type, art, P/T and colour laid over it
 const cached = (c) => { const i = cardCache[c.name]; return c.flipped && i && i.back ? { ...i, ...i.back } : i; };
-const known = (c) => c.name && !c.face_down && (c.token ? tokenInfo(c.ref) : cached(c));
+const known = (c) => c.name && !c.face_down && (c.token && c.ref ? tokenInfo(c.ref) : cached(c));
 // the name the shown face carries (a cached name is both faces' "A // B")
 const shownName = (c) => (c.flipped && !c.token && (cardCache[c.name] || {}).back ? cardCache[c.name].back.name : c.name);
 // a face-up card with a back face: its zoom shows both
@@ -129,7 +129,9 @@ export function tile(c, t, big = false, group = [c], wide = false) {
   const cn = Object.entries(c.counters || {}).map(([k, v]) => counterText(k, v));
   // a named counter writes its number last and gives its name the ellipsis, so "charge 3" shrinks to "cha… 3" and never loses the 3
   const pill = ([k, v]) => k === '+1/+1' || k === '-1/-1' ? `<b class="cn">${counterText(k, v)}</b>` : `<b class="cn"><i>${esc(k)}</i><span>${v}</span></b>`;
-  const cns = cn.length ? `<span class="cns" aria-hidden="true">${Object.entries(c.counters).map(pill).join('')}</span>` : '';
+  // a permanent's tile is small: its first counter and "+n" for the rest in one row (every counter is in the label, the bar and the card sheet)
+  const shown = Object.entries(c.counters || {}).slice(0, wide ? 1 : undefined), more = cn.length - shown.length;
+  const cns = cn.length ? `<span class="cns" aria-hidden="true">${shown.map(pill).join('')}${more > 0 ? `<b class="cn">+${more}</b>` : ''}</span>` : '';
   return `<button class="${cls}"${wide ? ` data-c="${frame(c)}"` : ''} data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(nm) : t.tbHiddenCard}${st ? ' · ' + st : ''}${c.token ? ' · ' + t.tbTkLow : ''}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
     + `${face}${title}${mark}${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
 }
@@ -211,10 +213,3 @@ function seat(view, s, t) {
 
 export const boardHtml = (view, t) => `<div class="sides">${seat(view, topSeat(view), t)}${seat(view, view.you, t)}</div>`;
 
-export function lobbyHtml(view, t, decks, err) {
-  const st = (s) => `<li class="${view.picked[s] ? 'ready' : ''}"><span>${s === view.you ? t.tbYou : esc(view.players[s].name || t.tbOpp)}</span><b>${view.picked[s] ? t.tbReady : t.tbWaiting}</b></li>`;
-  const pick = decks === null ? ''
-    : !decks.length ? `<p>${t.tbDeckNone}</p>`
-    : `<select id="deckSel" class="f-in">${decks.map((d) => `<option value="${d.id}">${esc(d.name)}${d.commanders.length ? ' · ' + esc(d.commanders.join(' / ')) : ''}</option>`).join('')}</select><button class="sb on" data-pick>${t.tbPickGo}</button>`;
-  return `<div class="lobby"><h2>${t.tbLobbyT}</h2><p>${t.tbLobbyX}</p><ul class="ready-list">${seats(view).map(st).join('')}</ul>${pick}<p class="f-err">${err ? t[err] : ''}</p></div>`;
-}

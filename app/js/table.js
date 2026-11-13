@@ -3,10 +3,11 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, lobbyHtml, index, visibleNames, tile, bigHtml, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
+import { initLobby, renderLobby } from './table/lobby.js';
+import { boardHtml, index, visibleNames, tile, bigHtml, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
-import { paintTokens, pickToken, pickCustom, stepCount } from './table/tokenpick.js';
+import { paintTokens, pickToken, pickCustom, stepCount, setTarget } from './table/tokenpick.js';
 import { loadTokens } from './table/tokens.js';
 import { buildBar } from './table/bar.js';
 import { handHtml, layoutHand, cardAtX, raise } from './table/hand.js';
@@ -30,7 +31,7 @@ const BACKOFF = [500, 1000, 2000, 4000, 8000];
 // base: the last view the server sent; pending: actions sent and not yet answered; view (what is shown) is pending predicted over base
 let view = null, base = null, pending = [], lastSeq = -1, sock = null, attempt = 0, timer = null, n = 0;
 let gone = gameId ? null : 'tbNoGame'; // message key once the game is unreachable for good
-let sheet = null, items = [], dialOpen = false, picking = null, decks = null, lobbyErr = '', toastTimer = null, opener = null, logSeq = null;
+let sheet = null, items = [], dialOpen = false, picking = null, toastTimer = null, opener = null, logSeq = null;
 // the active board: one at a time on phones, highlighted where both fit. Yours unless you look at theirs
 let focus = 0, focusTimer = null;
 // card size, per viewer: a multiplier on the fitted card width
@@ -181,7 +182,7 @@ function render() {
   const board = $('board');
   if (gone) { board.innerHTML = `<div class="lobby gone"><p>${t[gone]}</p><a class="sb on" href="./">${t.tbBack}</a></div>`; sheet = null; }
   else if (!view) board.textContent = t.tbConnecting;
-  else if (view.status === 'lobby') { keepInputs(board, () => { board.innerHTML = `<button class="chip ico menu-btn lobby-menu" data-top="menu" aria-label="${t.tbMenu}">${ICON.menu}</button>` + lobbyHtml(view, t, decks, lobbyErr); }); if (decks === null) loadDecks(); }
+  else if (view.status === 'lobby') renderLobby(view);
   else patch(board, boardHtml(view, t));
   // a new top player: the battlefield fades in (play() sees no card as moved, since each stays in its own seat and zone)
   const tp = active ? topSeat(view) : 0;
@@ -261,12 +262,13 @@ function renderSheet() {
   if (sheet.k === 'token') openTokens(entering);
 }
 
-// the dataset loads when a card with `ref` is on the table or the sheet opens; the table and the sheet draw again when it arrives
+// the dataset loads when a card with `ref` is on the table, a deck can make tokens, or the sheet opens; the table and the sheet draw again when it arrives
 const afterTokens = () => { render(); repaintTokens(); };
 const repaintTokens = () => { if (sheet && sheet.k === 'token') paintTokens(view, ctx()); };
 function openTokens(entering) {
   const load = loadTokens(true);
   if (load) load.then(afterTokens);
+  if (entering) setTarget(null);
   repaintTokens();
   if (entering && !matchMedia('(pointer:coarse)').matches) $('tq').focus(); // on a phone the keyboard would cover the list
 }
@@ -414,24 +416,10 @@ async function endGame() {
   if (r.status === 204 || r.status === 404) location.assign('./'); else toast(T().tbEndErr);
 }
 
-async function loadDecks() {
-  decks = [];
-  const r = await api(API + 'decks');
-  if (r.status === 200) decks = r.data.decks || []; else { decks = null; lobbyErr = 'tbDeckErr'; }
-  render();
-}
-
-async function pickDeck() {
-  const r = await api(API + 'games/' + gameId + '/deck', 'POST', { deck: Number($('deckSel').value) });
-  lobbyErr = r.status === 200 ? '' : 'tbPickErr';
-  if (r.status === 200 && view && view.status === 'lobby' && r.data.picked) view.picked = r.data.picked;
-  render();
-}
-
 // card images: one Scryfall batch for the names on the table that are not cached yet
 const asked = new Set();
 function loadImages() {
-  if ([...index(view).values()].some((h) => h.card.ref)) { const load = loadTokens(); if (load) load.then(afterTokens); }
+  if ([...index(view).values()].some((h) => h.card.ref) || Object.values(view.players).some((p) => (p.tokens || []).length)) { const load = loadTokens(); if (load) load.then(afterTokens); }
   const need = visibleNames(view).filter((x) => !cardCache[x] && !asked.has(x));
   if (!need.length) return;
   need.forEach((x) => asked.add(x));
@@ -458,7 +446,7 @@ function closePreview() {
 // cards, the bar docks above the hand with the count, and its actions take every selected card.
 let sel = new Map(), selMode = false, barItems = [], barKey = '', said = '';
 const BOARD_CARD = '#board [data-card],#hand [data-card]';
-const CONTROL = '[data-b],[data-focus],[data-show],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-dial],[data-open],[data-top],[data-pick],[data-pad],[data-preview-close],[data-tk],[data-step],[data-tkadd]';
+const CONTROL = '[data-b],[data-focus],[data-show],[data-unpick],[data-i],[data-close],[data-back],[data-zoom],[data-card],[data-pile],[data-life],[data-cmd],[data-token],[data-dial],[data-open],[data-top],[data-pad],[data-preview-close],[data-tk],[data-tkfor],[data-step],[data-tkadd]';
 const idsOf = (el) => el.dataset.ids ? el.dataset.ids.split(' ') : [el.dataset.card];
 const selIds = () => [...new Set([...sel.values()].flat())];
 const elFor = (id) => document.querySelector(`#board [data-card="${id}"],#hand [data-card="${id}"]`) || document.querySelector(`#board [data-ids~="${id}"]`);
@@ -834,10 +822,10 @@ document.addEventListener('click', (e) => {
   else if ('cmd' in d) setSheet({ k: 'cmd', seat: Number(d.cmd) });
   else if ('token' in d) setSheet({ k: 'token' });
   else if ('tk' in d) pickToken(d.tk, view, ctx());
+  else if ('tkfor' in d) { setTarget(Number(d.tkfor)); repaintTokens(); }
   else if ('step' in d) stepCount(Number(d.step));
   else if ('tkadd' in d) pickCustom(view, ctx());
   else if ('open' in d) openPile(d.open);
-  else if ('pick' in d) pickDeck();
   else if (d.top === 'menu') setSheet({ k: 'menu' });
   else if (d.top === 'full') fullscreen();
   else if (d.top === 'draw') { const lib = view.zones[view.you].library; if (lib.length) send({ type: 'move', cards: [lib[0].id], to: { seat: view.you, zone: 'hand' } }); }
@@ -869,5 +857,6 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('fullscreenchange', render); // the buttons show which way it toggles
 
+initLobby($('board'), gameId, say);
 render();
 connect();

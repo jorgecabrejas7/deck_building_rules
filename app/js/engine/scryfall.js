@@ -26,7 +26,6 @@ function cardFromScryfall(c) {
     legal_commander: (c.legalities && c.legalities.commander) || "unknown",
     edhrec_rank: c.edhrec_rank || null,
     power: front.power ?? null, toughness: front.toughness ?? null, loyalty: front.loyalty ?? null,
-    parts: (c.all_parts || []).filter(p => p.component === "token").slice(0, 8).map(p => p.id), // printing ids of the tokens it makes
     img_art: imgs.art_crop || "", img_normal: imgs.normal || "", img_small: imgs.small || "",
     back: bk && { name: bk.name, type_line: bk.type_line || "", power: bk.power ?? null, toughness: bk.toughness ?? null, loyalty: bk.loyalty ?? null,
       colors: bk.colors || [], img_art: bk.image_uris.art_crop || "", img_small: bk.image_uris.small || "", img_normal: bk.image_uris.normal || "" },
@@ -40,21 +39,6 @@ export async function scryfallFetch(url, opts) {
     const res = await fetch(url, opts);
     if (res.status !== 429 || attempt === 4) return res;
     await sleep((Number(res.headers.get("Retry-After")) || 2 ** attempt) * 1000);
-  }
-}
-
-// printing id -> oracle id into `map` (null when Scryfall does not know the id); one request per 75 ids, the API's limit
-export async function oracleIds(ids, map) {
-  const need = ids.filter(id => !map.has(id));
-  for (let i = 0; i < need.length; i += 75) {
-    const batch = need.slice(i, i + 75);
-    const res = await scryfallFetch("https://api.scryfall.com/cards/collection", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifiers: batch.map(id => ({ id })) }),
-    });
-    if (!res.ok) throw new Error("Scryfall " + res.status);
-    for (const c of (await res.json()).data || []) map.set(c.id, c.oracle_id);
-    for (const id of batch) if (!map.has(id)) map.set(id, null);
   }
 }
 

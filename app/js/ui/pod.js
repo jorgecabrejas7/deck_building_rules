@@ -26,6 +26,7 @@ let editing = false;
 let editorEl = null;        // kept across renders so a half-edited rule is not lost
 let copied = false;
 let games = null;           // {podId, list, busy}: my games in the active pod; null = to be loaded
+let picked = new Set();     // user ids ticked for the next game
 let gMsg = null;            // i18n key of the last games answer
 let failed = false;         // reading the table failed: not retried until the rules or the pod change
 
@@ -69,7 +70,7 @@ async function reload() {
   if (state.activeId && !state.pod) { msg = 'pdErr'; return; }
   applyRules();
 }
-const reset = () => { games = null; gMsg = null; asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
+const reset = () => { games = null; gMsg = null; picked = new Set(); asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
 
 export async function selectPod(id) {
   const res = await api(API + 'pods/active', 'POST', { pod: id });
@@ -215,19 +216,19 @@ async function loadGames() {
   paint();
 }
 const MAX_OPP = 5; // a table seats six
+const gErr = (res) => res.data.errors && res.data.errors.games === 'limit' ? 'pdGLimit' : res.status === 0 ? 'pdErr' : 'pdGErr';
 function gamesHtml(t) {
   const others = state.pod.members.filter(m => !m.me);
+  const n = others.filter(m => picked.has(m.id)).length;
   const invite = others.length
-    ? '<form class="gm-invite" data-gameform><fieldset class="gm-pick"><legend>' + esc(t.pdGWho) + ' <span class="gm-n" data-pickn>' + esc(fill(t.pdGCount, { n: 0, m: MAX_OPP })) + '</span></legend>' +
-      others.map(m => '<label class="gm-opt"><input type="checkbox" name="opponents" value="' + m.id + '"><span>' + esc(m.name) + '</span></label>').join('') + '</fieldset>' +
-      '<button class="btn-primary" disabled>' + esc(t.pdGInvite) + '</button></form>'
+    ? '<form class="gm-invite" data-gameform><fieldset class="gm-pick"><legend>' + esc(t.pdGWho) + ' <span class="gm-n" data-pickn>' + esc(fill(t.pdGCount, { n, m: MAX_OPP })) + '</span></legend>' +
+      others.map(m => '<button type="button" class="gm-chip" data-act="game-pick" data-user="' + m.id + '" aria-pressed="' + picked.has(m.id) + '"' + (!picked.has(m.id) && n >= MAX_OPP ? ' disabled' : '') + '>' + esc(m.name) + '</button>').join('') + '</fieldset>' +
+      '<button class="btn-primary"' + (n ? '' : ' disabled') + '>' + esc(t.pdGCreate) + '</button></form>'
     : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
   const li = (games ? games.list : []).map(g => {
     const who = g.opponents.map(n => n === null ? t.pdGDeleted : n).join(', ');
-    const me = g.decks[g.seat], them = Object.entries(g.decks).every(([s, v]) => v || Number(s) === g.seat);
-    const st = g.status === 'active' ? t.pdGActive
-      : fill(t.pdGWait, { a: me ? t.pdGPicked : t.pdGNotPicked, b: them ? t.pdGPicked : t.pdGNotPicked });
-    const lobby = g.status === 'lobby';
+    const lobby = g.status === 'lobby', seats = Object.values(g.ready);
+    const st = lobby ? fill(t.pdGLobby, { a: seats.filter(Boolean).length, n: seats.length }) : t.pdGPlaying;
     const end = asking === 'g' + g.id
       ? '<span class="dk-confirm">' + esc(t.pdGAsk) + '</span><button class="btn-ghost-sm btn-danger" data-act="game-end-yes" data-game="' + g.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
       : '<button class="btn-ghost-sm" data-act="game-end" data-game="' + g.id + '">' + esc(lobby ? t.pdGDecline : t.pdGEnd) + '</button>';
@@ -237,9 +238,16 @@ function gamesHtml(t) {
   return invite + (gMsg ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') +
     (li ? '<ul class="gm-list">' + li + '</ul>' : games && !games.busy ? '<p class="note-sm">' + esc(t.pdGNone) + '</p>' : '');
 }
+// a new game goes straight to its lobby
+async function createGame() {
+  const res = await api(API + here('games'), 'POST', { opponents: [...picked] });
+  if (res.status === 201) { location.assign('table.html?game=' + res.data.id); return; }
+  gMsg = gErr(res);
+  paint();
+}
 async function gameAct(method, path, body, ok) {
   const res = await api(API + path, method, body);
-  gMsg = res.status === ok ? null : res.data.errors && res.data.errors.games === 'limit' ? 'pdGLimit' : res.status === 0 ? 'pdErr' : 'pdGErr';
+  gMsg = res.status === ok ? null : gErr(res);
   asking = null;
   await loadGames();
   return res.status === ok;
@@ -359,6 +367,16 @@ async function onClick(e) {
     state.tableOpen = true; state.tableResults = null; state.tab = 'load';
     renderAll(); return runTableMode();
   }
+  if (a === 'game-pick') { // toggled in place, so the focus stays on the chip
+    const id = Number(b.dataset.user), f = b.form || b.closest('form');
+    picked.has(id) ? picked.delete(id) : picked.add(id);
+    const chips = [...f.querySelectorAll('.gm-chip')], n = picked.size;
+    b.setAttribute('aria-pressed', picked.has(id));
+    f.querySelector('[data-pickn]').textContent = fill(T().pdGCount, { n, m: MAX_OPP });
+    f.querySelector('.btn-primary').disabled = !n;
+    for (const c of chips) c.disabled = c.getAttribute('aria-pressed') !== 'true' && n >= MAX_OPP;
+    return;
+  }
   if (a === 'game-end') { asking = 'g' + b.dataset.game; return paint(); }
   if (a === 'game-end-yes') { await gameAct('DELETE', 'games/' + b.dataset.game, undefined, 204); return; }
   if (a === 'add-open') {
@@ -388,7 +406,7 @@ async function onClick(e) {
 async function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
-  if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponents: [...f.querySelectorAll('input[name=opponents]:checked')].map(i => Number(i.value)) }, 201);
+  if ('gameform' in f.dataset) { if (picked.size) await createGame(); }
   else if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
   else if ('addfriendform' in f.dataset) { if (await act('POST', here('members'), { user: Number(f.user.value) }, [200, 201])) refresh(); }
   else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }
@@ -400,10 +418,4 @@ async function onSubmit(e) {
 
 function onChange(e) {
   if (e.target.id === 'podSelTab') selectPod(Number(e.target.value) || null);
-  else if (e.target.name === 'opponents') { // the count, the submit with none picked, the boxes once five are
-    const f = e.target.form, boxes = [...f.querySelectorAll('input[name=opponents]')], n = boxes.filter(i => i.checked).length;
-    f.querySelector('[data-pickn]').textContent = fill(T().pdGCount, { n, m: MAX_OPP });
-    f.querySelector('button').disabled = !n;
-    for (const i of boxes) i.disabled = !i.checked && n >= MAX_OPP;
-  }
 }
