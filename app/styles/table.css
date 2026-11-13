@@ -213,6 +213,8 @@ body.tbl.dark{--f-w:oklch(0.95 0.03 92);--f-b:oklch(0.46 0.08 305);--f-n:oklch(0
 .tc.w{--ch:calc(var(--cw) / 1.25);--tf:clamp(9px,calc(var(--cw) * .13),13px);--tt:calc(var(--tf) * 1.45);--frame:var(--f-n);border:2px solid var(--frame);border-radius:var(--r-tile)}
 .tc.w[data-c=w]{--frame:var(--f-w)}.tc.w[data-c=u]{--frame:var(--f-u)}.tc.w[data-c=b]{--frame:var(--f-b)}.tc.w[data-c=r]{--frame:var(--f-r)}.tc.w[data-c=g]{--frame:var(--f-g)}.tc.w[data-c=m]{--frame:var(--f-m)}
 .tc.w:focus-visible{z-index:3}
+/* the printed card, enlarged a little so its black border falls outside, cut under the art: title bar and art show */
+.tc.w:not(.back)>img{position:absolute;left:-4%;top:-5.5%;width:108%;height:auto;max-width:none;object-fit:fill}
 /* tapped: tilted and dimmed, never wider than untapped, so the row keeps its layout */
 .tc.w.tapped{transform:rotate(12deg);filter:saturate(.5) brightness(.78)}
 .tc.w.tapped:active{transform:rotate(12deg) scale(.96)}
@@ -220,10 +222,11 @@ body.tbl.dark{--f-w:oklch(0.95 0.03 92);--f-b:oklch(0.46 0.08 305);--f-n:oklch(0
 /* the name strip: one line over the art, a dark band tinted with the frame colour (white text on it reads in both themes) */
 .tt{position:absolute;left:0;right:0;top:0;z-index:2;box-sizing:border-box;height:var(--tt);padding:0 4px;background:color-mix(in oklab,var(--frame) 30%,oklch(0.16 0.01 260 / .86));color:#fff;font-size:var(--tf);font-weight:600;line-height:var(--tt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;text-shadow:0 1px 1px oklch(0 0 0 / .5)}
 .tc.w>.tn{padding:2px;font-size:clamp(8px,calc((var(--cw) - 10px) / 6),13px);line-height:1.1}
-.tc.w .nx{top:calc(var(--tt) + 3px)}
+.tc.w .nx{top:calc(var(--cw) * .14 + 2px)}
 /* a permanent's corners: counters top left under the name strip (they give way first), power/toughness or loyalty bottom right; the stack count is top right */
 .pt{position:absolute;right:3px;bottom:3px;z-index:3;padding:0 4px;border-radius:var(--r-pill);background:oklch(0.2 0.005 260);color:#fff;font-size:clamp(10px,calc(var(--cw) * .16),16px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;pointer-events:none;box-shadow:0 0 0 1.5px oklch(1 0 0 / .75)}
-.tc.w .cns{left:3px;top:calc(var(--tt) + 3px);right:auto;bottom:auto;flex-direction:row;align-items:flex-start;max-width:calc(100% - 6px)} /* one row, so counters never reach the badge below */
+.tc.w .cns{left:3px;top:calc(var(--cw) * .14 + 2px);right:auto;bottom:auto;flex-direction:row;align-items:flex-start;max-width:calc(100% - 6px)} /* one row, so counters never reach the badge below */
+.tc.w:not(:has(>img)) :is(.nx,.cns){top:calc(var(--tt) + 3px)} /* no image: the written strip is taller than a printed title bar */
 body.dragging .tc.lifted{opacity:.22;box-shadow:none}
 body.dragging .bf .tc.lifted{transform:none}
 /* a token is a real object, not a placeholder: a tinted panel with a dashed inner edge and its name centred; a card with art has neither */

@@ -117,14 +117,14 @@ const stat = (c) => {
 };
 
 // a card is its image; the name is written only while there is no image to show.
-// wide: a permanent on a battlefield, drawn as its art crop in a framed wide tile with its P/T or loyalty, no card text.
+// wide: a permanent on a battlefield, drawn as the top of its card (title bar and art) in a framed wide tile with its P/T or loyalty, no card text.
 // group: a stack of identical cards drawn as one. A tap acts on its first card (data-card); a selection takes them all (data-ids)
 export function tile(c, t, big = false, group = [c], wide = false) {
-  const back = c.face_down || !c.name, nm = shownName(c), src = art(c, wide ? 'img_art' : big ? 'img_normal' : 'img_small'), n = group.length, st = wide ? stat(c) : '';
+  const back = c.face_down || !c.name, nm = shownName(c), src = art(c, wide || big ? 'img_normal' : 'img_small'), n = group.length, st = wide ? stat(c) : '';
   const cls = ['tc', wide && 'w', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
-  // a wide tile writes its name on the strip, so without art it has nothing else to write
+  // a wide tile shows the top of the printed card: its title bar and its art. Without the image, the name goes on a strip
   const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : wide && !back ? '' : `<span class="tn">${nm ? esc(nm) : ''}</span>`;
-  const title = wide && !back ? `<span class="tt" aria-hidden="true">${esc(nm)}</span>` : '';
+  const title = wide && !back && !src ? `<span class="tt" aria-hidden="true">${esc(nm)}</span>` : '';
   const mark = c.token && src && !big ? `<b class="tkm" aria-hidden="true">${t.tbTkMark}</b>` : '';
   const cn = Object.entries(c.counters || {}).map(([k, v]) => counterText(k, v));
   // a named counter writes its number last and gives its name the ellipsis, so "charge 3" shrinks to "cha… 3" and never loses the 3

@@ -18,18 +18,19 @@ phone does. Screenshots are 760×340 or 844×390 (phone landscape), 390×844 (ph
 | Undo a step | `git revert <commit>` on `main` and push. The server follows `main` forward only, so never force-push. |
 | Checks | Seven commands, listed at the end. All pass at every commit below. |
 
-### What changed on 2026-11-13 (steps 11 to 16)
+### What changed on 2026-11-13 (steps 11 to 17)
 
 Second round of the day, all committed on `design`, not yet on `main` or the live site:
 
 - A double tap opens a card's actions reliably, holding a card and letting go does too, and the action bar is a compact 3-column panel in landscape (step 11).
-- Battlefield tiles show the card's name (step 12).
+- Battlefield tiles show the top of the real printed card: its title bar with name and mana cost, then the art (step 12).
 - Two-faced cards turn on the battlefield and can be played on their other face from the hand (step 13).
 - The token sheet offers your deck's tokens and other decks' tokens, for any player; Copy and a counter row are in the action bar (step 14).
 - A new game opens a lobby with each player's deck, its Main, Sideboard and Maybeboard, and Ready; the Games tab picks players with chips (step 15).
 - The library sheet's count starts at 1 and has steppers and quick numbers (step 16).
+- A card can be sent to a chosen position in your library (step 17).
 
-Nothing here was tested on a real phone. Recordings: folders `10` to `13` in `for_human_revision/`.
+Nothing here was tested on a real phone. Recordings: folders `10` to `13` in `for_human_revision/`. Only the two titles clips (and the other clips of folder `11`, re-recorded with them) show the new card-top tiles; the clips in the other folders were recorded before it and still show the earlier tiles.
 
 ### What is live (after step 10)
 
@@ -310,22 +311,25 @@ Not checked or weak in this step:
 - The panel covers neighbouring cards while it is open, as before.
 - In the videos holds look slower than a thumb because the browser sends the touch by script.
 
-## Step 12 — Titles on tiles (`e37fe50`)
+## Step 12 — The top of the card on tiles (`e37fe50`, look reworked after)
 
-- Every battlefield tile has a name strip at its top, on art tiles and on token panels, tapped or not.
-- Long names are cut with an ellipsis; the full name is in the large view.
+- A battlefield tile shows the top of the real printed card: its title bar (name and mana cost), then the art, cut just above the type line. It is the full card image enlarged a little inside the tile, so the black card border falls outside; the tile keeps its own coloured frame.
+- Token panels do the same with the token's own card. Counters and the ×n badge sit just under the printed title bar; P/T or loyalty stays at the bottom corner.
+- Our own name strip (long names cut with an ellipsis) only appears when a card has no image.
+- At the smallest tile size the printed text is tiny, as on any small card; the large view has the name and the text.
 
 ![Full board in landscape](img/12-tile-titles.jpg)
-<img src="img/12-tile-titles-portrait.jpg" width="300" alt="Titles in portrait">
+<img src="img/12-tile-titles-portrait.jpg" width="300" alt="Card tops in portrait">
 
 Videos: [`11-tile-titles-and-two-faced-cards/`](../../for_human_revision/11-tile-titles-and-two-faced-cards/all_in_one.mp4).
 
 Try on a phone: a board with 8 creatures and 6 lands in landscape, then portrait.
 
 Not checked or weak in this step:
-- With 8 or more creatures on a landscape phone the tiles get small and long names are cut ("Siege-Gang Co...").
+- With 8 or more creatures on a landscape phone the printed title is a few pixels high and hard to read.
+- Planeswalker and old-frame titles sit slightly higher; the bar is still visible but tight at the top edge.
 - Battlefield tiles show only the first counter plus "+n".
-- Two same-named tokens (for example two Wurms) appear as two separate tiles.
+- A token stack shows ×n and P/T close together on the smallest tiles.
 
 ## Step 13 — Two-faced cards (`e37fe50`, server `fb4c352`)
 
@@ -407,6 +411,16 @@ Video: the last clip of [`10-card-handling/`](../../for_human_revision/10-card-h
 
 Not checked or weak in this step:
 - The number field still opens the keyboard on a phone when tapped; the quick numbers avoid that (not tried on a phone).
+
+## Step 17 — Library position (`5aca63d`)
+
+- A card's action sheet has "Library · position": pick a number (quick numbers or the field, 1 is the top), then "Put it there". The card goes into your library at that place; the log says "position 7 from the top".
+- One card at a time, and only into the owner's library.
+
+![Position picker](img/17-library-position.jpg)
+![The log](img/17-library-position-log.jpg)
+
+Video: the last clip of [`10-card-handling/`](../../for_human_revision/10-card-handling/all_in_one.mp4).
 
 ## What comes next
 
