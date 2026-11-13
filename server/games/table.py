@@ -12,9 +12,13 @@ has already seen. state["history"] holds up to UNDO_DEPTH pre-action snapshots o
 undoable actions; it and the raw log (names plus the seats that saw them) are never sent as they are.
 A card's "known_by" lists the seats that know it; "every seat" means all N. players[s]["cmd_damage"] is
 {"<source seat>": {"<commander>": n}}. players[s]["out"] only makes pass_turn skip the seat: nothing is enforced.
+players[s]["tokens"] is the sorted oracle ids of the tokens the seat's deck can make (data/token_makers.json), so
+the client can offer them after the deck list is gone.
 """
 import copy
+import json
 import secrets
+from pathlib import Path
 
 _rng = secrets.SystemRandom()
 ZONES = ("library", "hand", "battlefield", "graveyard", "exile", "command")
@@ -25,6 +29,8 @@ MAX_TOKENS = 600  # per game, bounds token spam
 UNDO_DEPTH = 5  # the whole state, snapshots included, is written on every action
 LOG_SIZE = 50
 _REF_CHARS = set("0123456789abcdef-")
+_MAKERS = Path(__file__).resolve().parents[2] / "data" / "token_makers.json"  # data/ sits beside server/ in the repo and on the VPS
+_makers = None
 _NO_UNDO = {"shuffle", "mulligan", "look", "reveal", "roll"}  # random or informative: undo would cheat
 
 
@@ -43,7 +49,7 @@ def _new_id():
 
 
 def _card(name, owner, token=False, known_by=(), ref=None):
-    return {"id": _new_id(), "uid": _new_id(), "name": name, "owner": owner, "tapped": False, "face_down": False,
+    return {"id": _new_id(), "uid": _new_id(), "name": name, "owner": owner, "tapped": False, "face_down": False, "flipped": False,
             "counters": {}, "token": token, "known_by": sorted(known_by), "attached": None, "ref": ref}
 
 
@@ -61,6 +67,14 @@ def _shuffle(state, seat):
     for c in lib:
         c["id"] = _new_id()
         c["known_by"] = []
+
+
+def _deck_tokens(d):
+    global _makers
+    if _makers is None:
+        _makers = json.loads(_MAKERS.read_text(encoding="utf-8"))  # missing file: fail loudly
+    names = {*(e["name"] for e in d["entries"]), *d["commanders"]}
+    return sorted({t for n in names for k in (n, n.split(" // ")[0]) for t in _makers.get(k, ())})
 
 
 def new_game(decks):
@@ -87,7 +101,7 @@ def new_game(decks):
         z["command"] += [_card(c, seat, known_by=seats) for c in pending]  # commander absent from entries
         state["zones"][str(seat)] = z
         state["players"][str(seat)] = {
-            "life": 40, "commanders": list(d["commanders"]), "out": False,
+            "life": 40, "commanders": list(d["commanders"]), "out": False, "tokens": _deck_tokens(d),
             "cmd_damage": {str(o): {c: 0 for c in decks[o]["commanders"]} for o in seats if o != seat and decks[o]["commanders"]}}
     for seat in seats:
         _shuffle(state, seat)
@@ -102,7 +116,7 @@ def _visible(card, zone, viewer):
 
 
 def _view_card(card, zone, viewer, seats):
-    out = {"id": card["id"], "owner": card["owner"], "tapped": card["tapped"],
+    out = {"id": card["id"], "owner": card["owner"], "tapped": card["tapped"], "flipped": card["flipped"],
            "face_down": card["face_down"], "counters": dict(card["counters"])}
     if zone == "battlefield" and card.get("attached"):
         out["attached"] = card["attached"]
@@ -233,7 +247,7 @@ def _remove(state, ids):
 # a card it could not see before; such an action cannot be undone.
 
 def _move(state, seat, a):
-    _fields(a, ("cards", "to"), ("pos", "face_down", "shuffle"), typed=True)
+    _fields(a, ("cards", "to"), ("pos", "face_down", "flipped", "shuffle"), typed=True)
     ids = _ids(a["cards"])
     _fields(a["to"], ("seat", "zone"))
     dest_seat, zone = _seat(state, a["to"]["seat"]), _zone(a["to"]["zone"])
@@ -242,6 +256,7 @@ def _move(state, seat, a):
         _bad()
     face_down = _bool(a["face_down"]) if "face_down" in a else False
     face_down = face_down and zone in ("battlefield", "exile")
+    flipped = _bool(a["flipped"]) if "flipped" in a else None  # None: keep, as tapped does on a change of control
     shuffle = _bool(a["shuffle"]) if "shuffle" in a else False  # a tutor's "shuffle, then put it on top"
     if shuffle and zone != "library":
         _bad()
@@ -253,6 +268,10 @@ def _move(state, seat, a):
         if src == "battlefield" and zone != "battlefield":
             c["tapped"], c["counters"], c["attached"] = False, {}, None
             left.add(c["id"])
+        if zone != "battlefield":
+            c["flipped"] = False
+        elif flipped is not None:
+            c["flipped"] = flipped
         c["face_down"] = face_down
         c["known_by"] = sorted(before | ({dest_seat} if zone == "hand" else set()))
         after = _seen(state, c, zone)
@@ -280,6 +299,17 @@ def _tap(state, seat, a):
     return {"tapped": tapped, "cards": [_ref(c, s, z, _seen(state, c, z)) for c, z, s in found]}
 
 
+def _transform(state, seat, a):
+    _fields(a, ("cards", "flipped"), typed=True)
+    ids, flipped = _ids(a["cards"]), _bool(a["flipped"])
+    found = _locate(state, ids)
+    if any(z != "battlefield" for _, z, _ in found):
+        _bad()
+    for c, _, _ in found:
+        c["flipped"] = flipped
+    return {"flipped": flipped, "cards": [_ref(c, s, z, _seen(state, c, z)) for c, z, s in found]}
+
+
 def _untap_all(state, seat, a):
     _fields(a, ("seat",), typed=True)
     s = _seat(state, a["seat"])
@@ -305,6 +335,13 @@ def _flip(state, seat, a):
     return {"face_down": down, "cards": refs, "peek": peek}
 
 
+def _counts(x):
+    """A {counter name: value} dict within the `counter` action's limits; zero values are dropped."""
+    if type(x) is not dict or len(x) > 20:
+        _bad()
+    return {_str(k, 1, 30): _int(v, -999, 999) for k, v in x.items() if _int(v, -999, 999)}
+
+
 def _counter(state, seat, a):
     _fields(a, ("card", "name", "delta"), typed=True)
     cid, name, delta = _str(a["card"], 1, 32), _str(a["name"], 1, 30), _int(a["delta"], -999, 999)
@@ -320,15 +357,19 @@ def _counter(state, seat, a):
 
 
 def _token(state, seat, a):
-    """`ref` is the client's token dataset key (a Scryfall oracle id); only its shape is checked here."""
-    _fields(a, ("seat", "name", "count"), ("ref",), typed=True)
+    """`counters` are copied onto every token made. `ref` is the client's token dataset key (a Scryfall oracle id); only its shape is checked here."""
+    _fields(a, ("seat", "name", "count"), ("ref", "counters"), typed=True)
     s, name, count = _seat(state, a["seat"]), _str(a["name"], 1, 100), _int(a["count"], 1, 20)
     ref = _str(a["ref"], 1, 40) if "ref" in a else None
     if ref is not None and not set(ref) <= _REF_CHARS:
         _bad()
+    counters = _counts(a["counters"]) if "counters" in a else {}  # "copy this permanent"
     if sum(c["token"] for zs in state["zones"].values() for cs in zs.values() for c in cs) + count > MAX_TOKENS:
         _bad()
-    state["zones"][str(s)]["battlefield"] += [_card(name, s, token=True, known_by=_seats(state), ref=ref) for _ in range(count)]
+    made = [_card(name, s, token=True, known_by=_seats(state), ref=ref) for _ in range(count)]
+    for c in made:
+        c["counters"] = dict(counters)
+    state["zones"][str(s)]["battlefield"] += made
     return {"target": s, "name": name, "count": count}
 
 
@@ -467,7 +508,7 @@ def _undo(state, seat):
     return {"undone": last["type"]}
 
 
-_ACTIONS = {"move": _move, "tap": _tap, "untap_all": _untap_all, "flip": _flip, "counter": _counter,
+_ACTIONS = {"move": _move, "tap": _tap, "transform": _transform, "untap_all": _untap_all, "flip": _flip, "counter": _counter,
             "token": _token, "delete": _delete, "look": _look, "reveal": _reveal,
             "shuffle": _shuffle_action, "mulligan": _mulligan, "life": _life,
             "cmd_damage": _cmd_damage, "out": _out, "roll": _roll, "attach": _attach, "pass_turn": _pass_turn}

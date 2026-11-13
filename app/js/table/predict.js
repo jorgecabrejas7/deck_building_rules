@@ -19,7 +19,7 @@ function find(v, id) {
 }
 
 // Move named cards to the end of seat/zone; false when the server must decide (unknown or hidden card, library).
-function move(v, cardIds, seat, zone, faceDown) {
+function move(v, cardIds, seat, zone, faceDown, flipped) {
   const found = cardIds.map((id) => find(v, id));
   if (found.some((f) => !f || !f.card.name) || zone === 'library' || !v.zones[seat][zone]) return false;
   // into another's hand only that seat learns it: with 3+ players whether all the others now know it is not in the view
@@ -34,6 +34,8 @@ function move(v, cardIds, seat, zone, faceDown) {
       delete card.attached;
       left.add(card.id);
     }
+    if (zone !== 'battlefield') card.flipped = false;
+    else if (flipped !== undefined) card.flipped = flipped;
     card.face_down = faceDown;
     card.shared = (PUBLIC.includes(zone) && !faceDown) || card.shared || toOther;
     v.zones[seat][zone].push(card);
@@ -58,6 +60,9 @@ function attach(v, a) {
 const ACTIONS = {
   tap: (v, a) => keys(a, ['cards', 'tapped']) && ids(a.cards) && typeof a.tapped === 'boolean'
     && a.cards.map((id) => find(v, id)).every((f) => f && (f.card.tapped = a.tapped, true)),
+  transform: (v, a) => keys(a, ['cards', 'flipped']) && ids(a.cards) && typeof a.flipped === 'boolean'
+    && a.cards.map((id) => find(v, id)).every((f) => f && f.zone === 'battlefield')
+    && (a.cards.forEach((id) => { find(v, id).card.flipped = a.flipped; }), true),
   untap_all: (v, a) => keys(a, ['seat']) && seatOk(v, a.seat) && (v.zones[a.seat].battlefield.forEach((c) => { c.tapped = false; }), true),
   life: (v, a) => keys(a, ['seat', 'delta']) && seatOk(v, a.seat) && int(a.delta, -999, 999)
     && (v.players[a.seat].life = clamp(v.players[a.seat].life + a.delta, -999, 999), true),
@@ -77,9 +82,9 @@ const ACTIONS = {
     return true;
   },
   out: (v, a) => keys(a, ['out']) && typeof a.out === 'boolean' && (v.players[v.you].out = a.out, true),
-  move: (v, a) => keys(a, ['cards', 'to'], ['pos', 'face_down', 'shuffle']) && ids(a.cards) && a.to && keys(a.to, ['seat', 'zone'])
+  move: (v, a) => keys(a, ['cards', 'to'], ['pos', 'face_down', 'flipped', 'shuffle']) && ids(a.cards) && a.to && keys(a.to, ['seat', 'zone'])
     && seatOk(v, a.to.seat) && !a.shuffle && a.pos == null && (a.face_down === undefined || typeof a.face_down === 'boolean')
-    && move(v, a.cards, a.to.seat, a.to.zone, !!a.face_down),
+    && (a.flipped === undefined || typeof a.flipped === 'boolean') && move(v, a.cards, a.to.seat, a.to.zone, !!a.face_down, a.flipped),
   attach,
 };
 

@@ -39,19 +39,23 @@ for seed in range(6):
         def pick(k=None):
             pool = mine if mine and rnd.random() < .8 else cards
             return [c["id"] for c in rnd.sample(pool, min(len(pool), k or rnd.randint(1, 3)))]
-        t = rnd.choice(["move"] * 8 + ["tap"] * 3 + ["untap_all", "life", "counter", "counter", "cmd_damage", "out", "attach", "attach",
+        t = rnd.choice(["move"] * 8 + ["tap"] * 3 + ["transform"] * 2 + ["untap_all", "life", "counter", "counter", "cmd_damage", "out", "attach", "attach",
                         "token", "flip", "delete", "look", "reveal", "shuffle", "mulligan", "roll", "pass_turn", "undo"])
         if t == "move":
             z = rnd.choice(ZONES + ["battlefield", "hand", "graveyard"])
             a = {"type": "move", "cards": pick(), "to": {"seat": rnd.choice((seat, seat, rnd.randint(1, N))), "zone": z}}
             if z in ("battlefield", "exile") and rnd.random() < .4:
                 a["face_down"] = rnd.random() < .5
+            if z == "battlefield" and rnd.random() < .4:
+                a["flipped"] = rnd.random() < .5
             if z == "library":
                 a["pos"] = rnd.choice(("top", "bottom"))
             if rnd.random() < .03:
                 a["shuffle"] = True
         elif t == "tap":
             a = {"type": t, "cards": pick(), "tapped": rnd.random() < .6}
+        elif t == "transform":
+            a = {"type": t, "cards": pick(2) if rnd.random() < .5 else [c["id"] for c in rnd.sample(bf, min(len(bf), 2))] or ["zz"], "flipped": rnd.random() < .6}
         elif t == "untap_all":
             a = {"type": t, "seat": rnd.randint(1, N)}
         elif t == "life":
@@ -143,7 +147,7 @@ for (const [n, lines] of runs) {
 const counts = {};
 for (const c of Object.values(total)) for (const [k, v] of Object.entries(c)) counts[k] = (counts[k] || 0) + v;
 for (const n of Object.keys(total))
-  for (const t of ['tap', 'untap_all', 'life', 'counter', 'cmd_damage', 'out', 'attach', 'move'])
+  for (const t of ['tap', 'untap_all', 'life', 'counter', 'cmd_damage', 'out', 'attach', 'move', 'transform'])
     if (!total[n][t]) fail(`never predicted ${t} with ${n} players, the test is vacuous`, {});
 if (!handToField) fail('no predicted move from hand to own battlefield', {});
 if (failed) { console.error(`${failed} failure(s)`); process.exit(1); }

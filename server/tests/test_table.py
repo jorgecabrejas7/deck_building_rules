@@ -1,5 +1,6 @@
 import json
 import random
+from pathlib import Path
 
 import pytest
 
@@ -84,6 +85,32 @@ def test_new_game(game):
         assert game["zones"][str(s)]["command"][0]["known_by"] == list(seats(game))
     assert game["players"]["1"]["cmd_damage"] == {str(o): {f"{'abcdef'[o - 1]}-card-000": 0} for o in seats(game) if o != 1}
     check(game)
+
+
+TOKENS = json.loads((Path(__file__).resolve().parents[2] / "data" / "tokens.json").read_text(encoding="utf-8"))
+
+
+def token_ids(*names):
+    return sorted(e["o"] for n in names for e in TOKENS if e["n"] == n)
+
+
+def test_new_game_tokens():
+    makers = {"entries": [{"name": "Siege-Gang Commander", "quantity": 1}, {"name": "Generous Gift", "quantity": 1}],
+              "commanders": ["Siege-Gang Commander"]}
+    g = new_game({1: makers, 2: deck("b")})
+    tokens = g["players"]["1"]["tokens"]
+    assert tokens == sorted(tokens) and all(set(token_ids(n)) & set(tokens) for n in ("Goblin", "Elephant"))  # many tokens share a name
+    assert g["players"]["2"]["tokens"] == []
+    for viewer in (1, 2):  # every seat sees every seat's tokens
+        assert {s: p["tokens"] for s, p in view(g, viewer)["players"].items()} == {"1": tokens, "2": []}
+
+
+def test_new_game_tokens_by_front_face():
+    full = next(k for k in json.loads((Path(__file__).resolve().parents[2] / "data" / "token_makers.json").read_text()) if " // " in k)
+    front = {"entries": [{"name": full.split(" // ")[0], "quantity": 1}], "commanders": []}
+    both = {"entries": [{"name": full, "quantity": 1}], "commanders": []}
+    a, b = new_game({1: front, 2: both})["players"].values()
+    assert a["tokens"] and a["tokens"] == b["tokens"]
 
 
 def test_new_game_quantities_and_limit():
@@ -281,6 +308,15 @@ def test_token_ref(game):
     check(g)
 
 
+def test_token_counters(game):
+    g = apply(game, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 2, "counters": {"+1/+1": 3, "stun": 0, "lore": -1}})
+    toks = view(g, 1)["zones"]["2"]["battlefield"]
+    assert [t["counters"] for t in toks] == [{"+1/+1": 3, "lore": -1}] * 2
+    toks[0]["counters"]["x"] = 1  # copies, not one shared dict
+    assert g["zones"]["2"]["battlefield"][1]["counters"] == {"+1/+1": 3, "lore": -1}
+    assert apply(game, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 1, "counters": {}})["zones"]["2"]["battlefield"][0]["counters"] == {}
+
+
 def test_token_and_delete(game):
     g = apply(game, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 3})
     toks = g["zones"]["2"]["battlefield"]
@@ -373,6 +409,12 @@ def test_roll(game):
     (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": ""}, "invalid"),
     (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": "a" * 41}, "invalid"),
     (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": 7}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": []}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"": 1}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"y" * 31: 1}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"a": 1000}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"a": "1"}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {f"c{i}": 1 for i in range(21)}}, "invalid"),
     (1, {"type": "mulligan", "n": 8}, "invalid"),
     (1, {"type": "shuffle", "seat": "1"}, "invalid"),
     (1, {"type": "move", "cards": [], "to": {"seat": 1, "zone": "hand"}}, "invalid"),
@@ -386,6 +428,10 @@ def test_roll(game):
     (1, {"type": "move", "cards": ["a"], "to": {"seat": 1, "zone": "hand"}}, "stale"),
     (1, {"type": "tap", "cards": ["a"], "tapped": 1}, "invalid"),
     (1, {"type": "tap", "cards": ["a"], "tapped": True}, "stale"),
+    (1, {"type": "transform", "cards": ["a"], "flipped": 1}, "invalid"),
+    (1, {"type": "transform", "cards": ["a"]}, "invalid"),
+    (1, {"type": "transform", "cards": ["a"], "flipped": True}, "stale"),
+    (1, {"type": "move", "cards": ["a"], "to": {"seat": 1, "zone": "battlefield"}, "flipped": "yes"}, "invalid"),
     (1, {"type": "look", "cards": ["a"]}, "stale"),
     (1, {"type": "counter", "card": "a", "name": "x" * 31, "delta": 1}, "invalid"),
     (1, {"type": "counter", "card": "a", "name": "x", "delta": 1}, "stale"),
@@ -670,3 +716,27 @@ def test_log_names_per_seat(game):
     log = view(g, 1)["log"]
     assert len(log) == 50 and log[-1]["type"] == "roll" and log[-1]["result"] == g["roll"]["result"]
     check(g)
+
+
+def test_transform(game):
+    h = ids(game, 1, "hand")[:1]
+    with pytest.raises(ActionError):  # not on a battlefield
+        apply(game, 1, {"type": "transform", "cards": h, "flipped": True})
+    g = apply(game, 1, mv(h, 1, "battlefield"))
+    assert view(g, 2)["zones"]["1"]["battlefield"][0]["flipped"] is False
+    g = apply(g, 2, {"type": "transform", "cards": h, "flipped": True})  # any seat, like tap
+    assert view(g, 1)["zones"]["1"]["battlefield"][0]["flipped"] and view(g, 2)["log"][-1]["flipped"]
+    assert not apply(g, 1, {"type": "transform", "cards": h, "flipped": False})["zones"]["1"]["battlefield"][0]["flipped"]
+    assert not view(apply(g, 2, {"type": "undo"}), 1)["zones"]["1"]["battlefield"][0]["flipped"]
+
+
+def test_move_flipped(game):
+    h = ids(game, 1, "hand")[:1]
+    g = apply(game, 1, mv(h, 1, "battlefield", flipped=True))
+    assert card(g, h[0])["flipped"]
+    g2 = apply(g, 1, mv(h, 2, "battlefield"))  # change of control keeps it, like tapped
+    assert card(g2, h[0])["flipped"]
+    assert not card(apply(g2, 1, mv(h, 2, "battlefield", flipped=False)), h[0])["flipped"]
+    for z in ("hand", "graveyard"):
+        assert not card(apply(g, 1, mv(h, 1, z)), h[0])["flipped"]
+    assert not card(apply(game, 1, mv(h, 1, "hand", flipped=True)), h[0])["flipped"]
