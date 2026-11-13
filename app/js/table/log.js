@@ -30,6 +30,7 @@ export function line(e, view, t) {
   switch (e.type) {
     case 'move': return S(moveKey(e), { c, s: obj(e.to.seat), z: own(t.lgLib, e.to.seat) }) + (e.face_down ? t.lgDown : '');
     case 'tap': return S(e.tapped ? 'lgTap' : 'lgUntap', { c });
+    case 'transform': return S(e.flipped ? 'lgTransform' : 'lgUntransform', { c });
     case 'untap_all': return S('lgUntapAll');
     case 'flip': return S(e.face_down ? 'lgFlipDown' : 'lgFlipUp', { c });
     case 'counter': return S(e.delta < 0 ? 'lgCtrDel' : 'lgCtrAdd', { n: Math.abs(e.delta), k: esc(e.name), c });

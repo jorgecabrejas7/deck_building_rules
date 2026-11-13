@@ -3,7 +3,7 @@ import { state, store, cardCache, persistCache } from './state.js';
 import { T } from './i18n.js';
 import { api } from './api.js';
 import { fetchCards } from './engine/scryfall.js';
-import { boardHtml, lobbyHtml, index, visibleNames, tile, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
+import { boardHtml, lobbyHtml, index, visibleNames, tile, bigHtml, attachable, esc, ICON, topSeat, setTop } from './table/board.js';
 import { fill } from './i18n.js';
 import { buildSheet } from './table/sheet.js';
 import { paintTokens, pickToken, pickCustom, stepCount } from './table/tokenpick.js';
@@ -325,7 +325,7 @@ function applyFocus(swap) {
 // what it needs to clear them at its distance from the player's edge, so rows stay centred on the screen.
 // shortcut: the gaps are table.css constants (card gap 6, row gap 4, groups 16 apart; a tile is RATIO wide for each unit of height,
 // an attached card shows OFF of the width above its host); change both together
-const GAP = 6, ROW = 4, GROUP = 16, RATIO = 1.37, OFF = 0.28;
+const GAP = 6, ROW = 4, GROUP = 16, RATIO = 1.25, OFF = 0.3;
 const BAND = 34; // wide: the extra top padding of a battlefield under the players strip (table.css .str)
 const OPP = 0.88; // wide: their cards a little smaller, so yours (which you tap) can be bigger
 const lineW = (cw, n) => n * cw + Math.max(0, n - 1) * GAP;
@@ -443,7 +443,7 @@ function preview(id) {
   const hit = index(view).get(id);
   if (!hit) return;
   previewFrom = document.activeElement;
-  $('preview').innerHTML = tile(hit.card, T(), true).replace('data-card', 'data-x');
+  $('preview').innerHTML = bigHtml(hit.card, T(), innerWidth >= 560);
   $('preview').hidden = false;
   $('preview').focus();
 }

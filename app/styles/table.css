@@ -203,25 +203,27 @@ body[data-conn=off] .tb-stat{background:var(--badBg);color:var(--badFg)}
 .tn{position:absolute;inset:0;padding:4px;overflow:hidden;overflow-wrap:anywhere;hyphens:auto;text-wrap:balance;font-weight:500}
 /* a stack written as its name (a token without art): the count sits at the bottom, under the name */
 .tc.many>.tn{padding-bottom:22px}
-.tc.w.many>.tn{padding-bottom:18px}
 .tc.many:has(>.tn) .nx{top:auto;bottom:3px}
 .tc:hover{box-shadow:var(--sh-lift)}
 .tc:active{transform:scale(.96)}
-/* a permanent on a battlefield: its art crop in a wide tile with a thin frame in the card's colour, no name and no rules text.
+/* a permanent on a battlefield: its art crop in a wide tile with a thin frame in the card's colour and its name on a strip across the top, no rules text.
    Mirrored in table.js (RATIO, OFF) and motion.js (TILT) */
 body.tbl{--f-w:oklch(0.9 0.07 92);--f-u:oklch(0.6 0.14 245);--f-b:oklch(0.38 0.03 300);--f-r:oklch(0.6 0.19 30);--f-g:oklch(0.58 0.14 150);--f-m:oklch(0.78 0.14 85);--f-n:oklch(0.62 0.025 70)}
 body.tbl.dark{--f-w:oklch(0.95 0.03 92);--f-b:oklch(0.46 0.08 305);--f-n:oklch(0.66 0.02 75)}
-.tc.w{--ch:calc(var(--cw) / 1.37);--frame:var(--f-n);border:2px solid var(--frame);border-radius:var(--r-tile)}
+.tc.w{--ch:calc(var(--cw) / 1.25);--tf:clamp(9px,calc(var(--cw) * .13),13px);--tt:calc(var(--tf) * 1.45);--frame:var(--f-n);border:2px solid var(--frame);border-radius:var(--r-tile)}
 .tc.w[data-c=w]{--frame:var(--f-w)}.tc.w[data-c=u]{--frame:var(--f-u)}.tc.w[data-c=b]{--frame:var(--f-b)}.tc.w[data-c=r]{--frame:var(--f-r)}.tc.w[data-c=g]{--frame:var(--f-g)}.tc.w[data-c=m]{--frame:var(--f-m)}
 .tc.w:focus-visible{z-index:3}
 /* tapped: tilted and dimmed, never wider than untapped, so the row keeps its layout */
 .tc.w.tapped{transform:rotate(12deg);filter:saturate(.5) brightness(.78)}
 .tc.w.tapped:active{transform:rotate(12deg) scale(.96)}
 .tc.w.back{border-color:var(--f-n)}
+/* the name strip: one line over the art, a dark band tinted with the frame colour (white text on it reads in both themes) */
+.tt{position:absolute;left:0;right:0;top:0;z-index:2;box-sizing:border-box;height:var(--tt);padding:0 4px;background:color-mix(in oklab,var(--frame) 30%,oklch(0.16 0.01 260 / .86));color:#fff;font-size:var(--tf);font-weight:600;line-height:var(--tt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;text-shadow:0 1px 1px oklch(0 0 0 / .5)}
 .tc.w>.tn{padding:2px;font-size:clamp(8px,calc((var(--cw) - 10px) / 6),13px);line-height:1.1}
-/* a permanent's corners: counters top left (they give way first), power/toughness or loyalty bottom right; the stack count is top right */
+.tc.w .nx{top:calc(var(--tt) + 3px)}
+/* a permanent's corners: counters top left under the name strip (they give way first), power/toughness or loyalty bottom right; the stack count is top right */
 .pt{position:absolute;right:3px;bottom:3px;z-index:3;padding:0 4px;border-radius:var(--r-pill);background:oklch(0.2 0.005 260);color:#fff;font-size:clamp(10px,calc(var(--cw) * .16),16px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;pointer-events:none;box-shadow:0 0 0 1.5px oklch(1 0 0 / .75)}
-.tc.w .cns{left:3px;top:3px;right:auto;bottom:auto;align-items:flex-start;max-width:calc(100% - 6px)}
+.tc.w .cns{left:3px;top:calc(var(--tt) + 3px);right:auto;bottom:auto;align-items:flex-start;max-width:calc(100% - 6px)}
 body.dragging .tc.lifted{opacity:.22;box-shadow:none}
 body.dragging .bf .tc.lifted{transform:none}
 /* a token is a real object, not a placeholder: a tinted panel with a dashed inner edge and its name centred; a card with art has neither */
@@ -478,8 +480,8 @@ body.away .hand-row{display:none}
 .srow:has(>.sb:nth-child(3):last-child)>.sb{flex-basis:0}
 
 /* an aura or equipment tucked behind its host, its top edge showing */
-.stk{position:relative;flex:none;padding-top:calc(var(--n) * var(--cw) * .28)}
-.stk>.tc:not(:last-child){position:absolute;left:0;top:calc(var(--i) * var(--cw) * .28)}
+.stk{position:relative;flex:none;padding-top:calc(var(--n) * var(--cw) * .3)}
+.stk>.tc:not(:last-child){position:absolute;left:0;top:calc(var(--i) * var(--cw) * .3)}
 .bf .tc.drop-on{box-shadow:0 0 0 3px var(--accent),var(--sh-lift);transform:scale(1.06)}
 
 /* choosing a host: the battlefields light up, everything else steps back */
@@ -615,3 +617,12 @@ body.selecting .tc.w.sel::after{top:auto;bottom:3px;left:3px;width:18px;height:1
   .strip{position:absolute;z-index:5;top:5px;left:150px;right:10px;padding:0;min-height:0;background:none}
   .seat.opp.str .bf{padding-top:calc(4px + 34px)}
 }
+
+/* two-sided cards: both faces side by side in the big view (the shown face first, the other dimmer); on a narrow screen one face and a hint */
+.duo{display:flex;gap:8px;align-items:center;justify-content:center}
+.preview .duo{gap:16px}
+.preview .duo .tc.big{width:min(44vw,300px,calc(86dvh * 63 / 88))}
+.duo .tc.alt{opacity:.8}
+.hover.two{aspect-ratio:auto;overflow:visible;box-shadow:none}
+.hover.two .duo .tc.big{flex:1 1 0;width:auto;height:auto;aspect-ratio:63/88;box-shadow:var(--sh-held)}
+.dh{position:absolute;left:50%;bottom:6px;z-index:5;translate:-50% 0;max-width:92%;padding:1px 8px;border-radius:var(--r-pill);background:oklch(0.2 0.005 260 / .85);color:#fff;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}

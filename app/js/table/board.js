@@ -33,6 +33,7 @@ export const ICON = {
   exile: svg('M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM4.1 4.1l7.8 7.8'),
   command: svg('M2.5 12.5h11M3.2 10.5 2.5 5l3 2.5L8 3.5l2.5 4 3-2.5-.7 5.5z'),
   hand: svg('M3 5.2 7.5 4l1.8 8.3-4.5 1.2zM9.5 3.5H14V12H10.6'),
+  transform: svg('M3 5.5h10M10 2.5l3 3-3 3M13 10.5H3M6 7.5l-3 3 3 3'),
   tap: svg('M2.5 7.5h8v6h-8zM6.5 2.5h2a4 4 0 0 1 4 4V9M11 7.5l1.5 1.5L14 7.5'),
   play: svg('M8 13.5v-9M4.5 8 8 4.5 11.5 8M3 2.5h10'),
   attach: svg('M10.5 5 6 9.5a1.4 1.4 0 0 0 2 2L13 6.5a2.8 2.8 0 0 0-4-4L4 7.5a4.2 4.2 0 0 0 6 6l3-3'),
@@ -82,12 +83,25 @@ export const counterText = (k, v) => {
 };
 // a permanent's section, from its front face; face-down and not-yet-loaded cards go to "other"
 const section = (c) => {
-  const tl = !c.face_down && c.name && ((cardCache[c.name] || {}).type_line || '').split(' // ')[0];
+  const tl = !c.face_down && c.name && ((cached(c) || {}).type_line || '').split(' // ')[0];
   return !tl ? 'other' : /\bCreature\b/.test(tl) ? 'creatures' : /\bLand\b/.test(tl) ? 'lands' : 'other';
 };
 // key: which cached image: img_small (a pile, the drag ghost), img_normal (the full view), img_art (a permanent's tile)
 // a token with `ref` is looked up in the token dataset, anything else by name
-const known = (c) => c.name && !c.face_down && (c.token ? tokenInfo(c.ref) : cardCache[c.name]);
+// a turned two-sided card reads as its back face: the cached card with the back's own name, type, art, P/T and colour laid over it
+const cached = (c) => { const i = cardCache[c.name]; return c.flipped && i && i.back ? { ...i, ...i.back } : i; };
+const known = (c) => c.name && !c.face_down && (c.token ? tokenInfo(c.ref) : cached(c));
+// the name the shown face carries (a cached name is both faces' "A // B")
+const shownName = (c) => (c.flipped && !c.token && (cardCache[c.name] || {}).back ? cardCache[c.name].back.name : c.name);
+// a face-up card with a back face: its zoom shows both
+export const twoSided = (c) => !c.token && !c.face_down && !!c.name && !!(cardCache[c.name] || {}).back;
+// the big view of a card: both faces side by side when it has two and `both` (the shown one first, the other `alt`), else the shown face and a hint
+export const bigHtml = (c, t, both = true) => {
+  const one = (x) => tile(x, t, true).replace('data-card', 'data-x');
+  if (!twoSided(c)) return one(c);
+  const hint = `<small class="dh">${t.tbTwoSided}</small>`;
+  return both ? `<div class="duo">${one(c)}${one({ ...c, flipped: !c.flipped }).replace('class="tc', 'class="tc alt')}</div>` : one(c).replace(/<\/button>$/, `${hint}</button>`);
+};
 export const art = (c, key = 'img_small') => (known(c) || {})[key] || '';
 // a permanent's frame colour: one letter per colour, m for two or more, n for colourless and lands
 const frame = (c) => {
@@ -106,16 +120,18 @@ const stat = (c) => {
 // wide: a permanent on a battlefield, drawn as its art crop in a framed wide tile with its P/T or loyalty, no card text.
 // group: a stack of identical cards drawn as one. A tap acts on its first card (data-card); a selection takes them all (data-ids)
 export function tile(c, t, big = false, group = [c], wide = false) {
-  const back = c.face_down || !c.name, src = art(c, wide ? 'img_art' : big ? 'img_normal' : 'img_small'), n = group.length, st = wide ? stat(c) : '';
+  const back = c.face_down || !c.name, nm = shownName(c), src = art(c, wide ? 'img_art' : big ? 'img_normal' : 'img_small'), n = group.length, st = wide ? stat(c) : '';
   const cls = ['tc', wide && 'w', c.tapped && 'tapped', back && 'back', c.token && 'tok', big && 'big', n > 1 && 'many'].filter(Boolean).join(' ');
-  const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : `<span class="tn">${c.name ? esc(c.name) : ''}</span>`;
+  // a wide tile writes its name on the strip, so without art it has nothing else to write
+  const face = src ? `<img src="${esc(src)}" alt="" draggable="false">` : wide && !back ? '' : `<span class="tn">${nm ? esc(nm) : ''}</span>`;
+  const title = wide && !back ? `<span class="tt" aria-hidden="true">${esc(nm)}</span>` : '';
   const mark = c.token && src && !big ? `<b class="tkm" aria-hidden="true">${t.tbTkMark}</b>` : '';
   const cn = Object.entries(c.counters || {}).map(([k, v]) => counterText(k, v));
   // a named counter writes its number last and gives its name the ellipsis, so "charge 3" shrinks to "cha… 3" and never loses the 3
   const pill = ([k, v]) => k === '+1/+1' || k === '-1/-1' ? `<b class="cn">${counterText(k, v)}</b>` : `<b class="cn"><i>${esc(k)}</i><span>${v}</span></b>`;
   const cns = cn.length ? `<span class="cns" aria-hidden="true">${Object.entries(c.counters).map(pill).join('')}</span>` : '';
-  return `<button class="${cls}"${wide ? ` data-c="${frame(c)}"` : ''} data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(c.name) : t.tbHiddenCard}${st ? ' · ' + st : ''}${c.token ? ' · ' + t.tbTkLow : ''}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
-    + `${face}${mark}${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
+  return `<button class="${cls}"${wide ? ` data-c="${frame(c)}"` : ''} data-card="${c.id}"${n > 1 ? ` data-n="${n}" data-ids="${group.map((x) => x.id).join(' ')}"` : ''} aria-label="${c.name ? esc(nm) : t.tbHiddenCard}${st ? ' · ' + st : ''}${c.token ? ' · ' + t.tbTkLow : ''}${c.tapped ? ' · ' + t.tbTapped : ''}${n > 1 ? ' · ' + fill(t.tbCopies, { n }) : ''}${cn.length ? ' · ' + esc(cn.join(', ')) : ''}">`
+    + `${face}${title}${mark}${cns}${st ? `<b class="pt" aria-hidden="true">${esc(st)}</b>` : ''}${n > 1 ? `<b class="nx" aria-hidden="true">×${n}</b>` : ''}</button>`;
 }
 
 // a pile as a zone chip: icon and count. Tap opens it, a card dropped on it goes there, and data-lift is the card a drag out of it takes
@@ -132,7 +148,7 @@ function sections(view, s, att) {
   for (const c of view.zones[s].battlefield) {
     if (on.has(c.id)) continue; // drawn tucked behind its host
     const plain = c.name && !c.face_down && !c.attached && !att.has(c.id) && !Object.keys(c.counters || {}).length;
-    const k = plain && [c.name, c.tapped, c.token, c.ref].join('|'), g = k && seen.get(k);
+    const k = plain && [c.name, c.tapped, c.flipped, c.token, c.ref].join('|'), g = k && seen.get(k);
     if (g) g.push(c);
     else { const ng = [c]; if (k) seen.set(k, ng); out[section(c)].push(ng); }
   }

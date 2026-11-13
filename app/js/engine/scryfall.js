@@ -11,6 +11,7 @@ function cardFromScryfall(c) {
   const mana = c.mana_cost !== undefined && c.mana_cost !== "" ? c.mana_cost
     : faces ? (faces[0].mana_cost || "") : "";
   const front = faces ? faces[0] : c; // power, toughness and loyalty are the front face's
+  const bk = faces && faces[1] && faces[1].image_uris ? faces[1] : null; // a two-sided card: the face that shows when it is turned
   const eur = c.prices && (parseFloat(c.prices.eur) || parseFloat(c.prices.eur_foil)) || null;
   return {
     name: c.name, cmc: c.cmc, mana_cost: mana,
@@ -27,6 +28,8 @@ function cardFromScryfall(c) {
     power: front.power ?? null, toughness: front.toughness ?? null, loyalty: front.loyalty ?? null,
     parts: (c.all_parts || []).filter(p => p.component === "token").slice(0, 8).map(p => p.id), // printing ids of the tokens it makes
     img_art: imgs.art_crop || "", img_normal: imgs.normal || "", img_small: imgs.small || "",
+    back: bk && { name: bk.name, type_line: bk.type_line || "", power: bk.power ?? null, toughness: bk.toughness ?? null, loyalty: bk.loyalty ?? null,
+      colors: bk.colors || [], img_art: bk.image_uris.art_crop || "", img_small: bk.image_uris.small || "", img_normal: bk.image_uris.normal || "" },
   };
 }
 

@@ -1,7 +1,7 @@
 // The action bar: the few actions a selection needs most, one tap each. It floats beside a single card, or docks above
 // the hand in selection mode. buildBar returns {html, items}: buttons carry data-b, the index of their handler in items.
 // c.lead is the card the bar is about when one card (or one stack) is selected; null for a selection of several.
-import { esc, index, attachable, ICON } from './board.js';
+import { esc, index, attachable, twoSided, ICON } from './board.js';
 import { fill } from '../i18n.js';
 
 export function buildBar(ids, view, c) {
@@ -25,10 +25,14 @@ export function buildBar(ids, view, c) {
   };
   const away = (zone) => hits.some((h) => h.zone !== zone);
   const bf = hits.filter((h) => h.zone === 'battlefield'), tap = (v) => () => send({ type: 'tap', cards: bf.filter((h) => h.card.tapped !== v).map((h) => h.card.id), tapped: v });
+  // a card with a back face turns on the battlefield, and from the hand can be played showing its other face
+  const turns = bf.length && bf.every((h) => twoSided(h.card)) && lead, other = lead && lead.zone === 'hand' && twoSided(lead.card);
   const acts = [
     bf.some((h) => !h.card.tapped) && b('tap', t.tbTap, tap(true)),
     bf.some((h) => h.card.tapped) && b('untap', t.tbUntap, tap(false)),
+    turns && b('transform', t.tbTransform, () => send({ type: 'transform', cards: bf.map((h) => h.card.id), flipped: !lead.card.flipped })),
     away('battlefield') && b('play', hits.every((h) => h.zone === 'hand') ? t.tbPlay : t.tbZbattlefield, go('battlefield')),
+    other && b('transform', t.tbPlayOther, go('battlefield', { flipped: true })),
     away('hand') && b('hand', t.tbZhand, go('hand')),
     away('graveyard') && b('graveyard', t.tbZgraveyard, go('graveyard')),
     away('exile') && b('exile', t.tbZexile, go('exile')),

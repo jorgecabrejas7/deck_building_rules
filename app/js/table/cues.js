@@ -16,7 +16,7 @@ export function changed(prev, next) {
     if (!o) { out.add(card(id)); out.add(pile(h)); continue; }
     if (o.seat !== h.seat || o.zone !== h.zone) { out.add(card(id)); out.add(pile(o)); out.add(pile(h)); }
     const x = o.card, y = h.card;
-    if (x.tapped !== y.tapped || x.face_down !== y.face_down || x.name !== y.name || x.attached !== y.attached || JSON.stringify(x.counters) !== JSON.stringify(y.counters)) out.add(card(id));
+    if (x.tapped !== y.tapped || x.flipped !== y.flipped || x.face_down !== y.face_down || x.name !== y.name || x.attached !== y.attached || JSON.stringify(x.counters) !== JSON.stringify(y.counters)) out.add(card(id));
   }
   for (const [id, h] of a) if (!b.has(id)) out.add(pile(h));
   return [...out];

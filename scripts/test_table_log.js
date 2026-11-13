@@ -22,6 +22,7 @@ const E = [
   { type: 'move', cards: [c('hand')], to: { seat: 2, zone: 'library' }, pos: 'bottom', face_down: false, shuffle: false },
   { type: 'move', cards: [c('library', 'Tutor')], to: { seat: 1, zone: 'library' }, pos: 'top', face_down: false, shuffle: true },
   { type: 'tap', tapped: true, cards: [c('battlefield', 'A')] }, { type: 'tap', tapped: false, cards: [c('battlefield', 'A')] },
+  { type: 'transform', flipped: true, cards: [c('battlefield', 'A')] }, { type: 'transform', flipped: false, cards: [c('battlefield', 'A'), c('battlefield', 'B')] }, { type: 'transform', flipped: true, cards: [c('battlefield'), c('battlefield')] },
   { type: 'untap_all', target: 1 },
   { type: 'flip', face_down: true, cards: [c('battlefield', 'A')] }, { type: 'flip', face_down: false, cards: [c('exile', 'A')] },
   { type: 'counter', card: c('battlefield', 'A'), name: '+1/+1', delta: 2, value: 2 }, { type: 'counter', card: c('battlefield', 'A'), name: 'loyalty', delta: -1, value: 3 },
@@ -37,7 +38,7 @@ const E = [
   { type: 'roll', sides: 20, result: 14 }, { type: 'roll', sides: 2, result: 1 },
   { type: 'pass_turn', target: 2, prev: 1, draw: true, cards: [{ seat: 2, zone: 'library', name: 'Forest' }] }, { type: 'pass_turn', target: 2, prev: 1, draw: false, cards: [] },
   { type: 'pass_turn', target: 1, prev: 2, draw: true, cards: [{ seat: 1, zone: 'library' }] },
-  ...['move', 'tap', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'life', 'cmd_damage', 'out', 'pass_turn'].map((u) => ({ type: 'undo', undone: u })),
+  ...['move', 'tap', 'transform', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'life', 'cmd_damage', 'out', 'pass_turn'].map((u) => ({ type: 'undo', undone: u })),
 ];
 const errs = [], types = new Set();
 for (const lang of ['es', 'en']) for (const you of [1, 2]) {
@@ -66,7 +67,7 @@ for (const lang of ['es', 'en']) {
   const outs = [line(four.log[3], four, t), line({ ...four.log[3], seat: 3 }, four, t), line({ ...four.log[3], out: false }, four, t)];
   if (outs.some((x) => !x || /%[a-z]|undefined/.test(x)) || new Set(outs).size !== 3) errs.push(`${lang} out sentences: ${outs}`);
 }
-const all = ['move', 'tap', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'look', 'reveal', 'shuffle', 'mulligan', 'life', 'cmd_damage', 'out', 'roll', 'pass_turn', 'undo'];
+const all = ['move', 'tap', 'transform', 'untap_all', 'flip', 'counter', 'token', 'delete', 'attach', 'look', 'reveal', 'shuffle', 'mulligan', 'life', 'cmd_damage', 'out', 'roll', 'pass_turn', 'undo'];
 for (const k of all) if (!types.has(k)) errs.push(`no sample for ${k}`);
 errs.forEach((e) => console.error(e));
 console.log(errs.length ? `table log: ${errs.length} problem(s)` : `table log ok: ${E.length} entries in es and en`);

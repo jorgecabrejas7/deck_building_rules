@@ -189,7 +189,7 @@ export function clone(el, c, w, id) {
   f.dataset.fly = id;
   f.removeAttribute('data-card'); f.removeAttribute('data-ids');
   f.setAttribute('aria-hidden', 'true'); f.tabIndex = -1;
-  const h = el.classList.contains('w') ? w / 1.37 : w * 1.4; // the wide tile's ratio mirrors table.css .tc.w
+  const h = el.classList.contains('w') ? w / 1.25 : w * 1.4; // the wide tile's ratio mirrors table.css .tc.w
   f.style.cssText = `--cw:${w}px;left:${c[0] - w / 2}px;top:${c[1] - h / 2}px`;
   document.body.append(f);
   return f;
