@@ -437,6 +437,7 @@ button.lb-card:hover{background:var(--fill)}
 .tk-n{flex:none;display:flex;align-items:center;gap:var(--sp-1)}
 .tk-n .sb{width:44px;min-height:48px;padding:0;border-radius:var(--r-md);font-size:var(--fs-lead)}
 .tk-n .si{flex:none;width:3.4em;padding:0;text-align:center;font-variant-numeric:tabular-nums}
+.lib-n{flex-wrap:wrap;margin-bottom:var(--sp-3)}
 .tkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:var(--sp-2);margin-bottom:var(--sp-2)}
 .tkt{display:flex;flex-direction:column;gap:3px;min-width:0;padding:0;border:none;background:none;color:var(--text);font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .tkt .tc{width:100%;height:auto;aspect-ratio:1.37;--cw:92px;cursor:inherit}

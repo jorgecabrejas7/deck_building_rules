@@ -71,7 +71,7 @@ export function buildSheet(sh, view, c) {
   } else if (sh.k === 'pile') {
     // either library: the owner draws, the other player can take, mill, exile or look at the top N
     const s = sh.seat, mine = s === view.you, lib = view.zones[s].library, top = (k) => lib.slice(0, k).map((x) => x.id);
-    const n = () => num('sn', 1, 100, 3);
+    const n = () => num('sn', 1, 100, 1), setN = (v) => { document.getElementById('sn').value = Math.min(100, Math.max(1, v)); };
     const mv = (zone, extra = {}, to = s) => () => { const ids = top(n()); if (ids.length) send({ type: 'move', cards: ids, to: { seat: to, zone }, ...extra }); };
     // searching looks at every card first (the server lets 100 ids through per action), then lists the ones now known
     const search = () => {
@@ -82,7 +82,9 @@ export function buildSheet(sh, view, c) {
     title = `${t.tbZlibrary} · ${name(s)} (${lib.length})`;
     body += row(mine && b(t.tbDraw1, () => { if (lib.length) send({ type: 'move', cards: top(1), to: { seat: s, zone: 'hand' } }); }, 'on'),
       b(ICON.search + t.tbSearch, search, mine ? '' : 'on', true), b(t.tbShuffle, () => send({ type: 'shuffle', seat: s })));
-    body += `<h3><label for="sn">${t.tbN}</label></h3>` + row(input('sn', 3, 'type="number" min="1" max="100" inputmode="numeric"'));
+    // one by default; the steppers and the quick numbers set it without the keyboard
+    body += `<h3><label for="sn">${t.tbN}</label></h3><div class="tk-n lib-n">` + b('−', () => setN(n() - 1), '', true) + input('sn', 1, 'type="number" min="1" max="100" inputmode="numeric"')
+      + b('+', () => setN(n() + 1), '', true) + [2, 3, 5, 7, 10].map((k) => b(k, () => setN(k), 'quiet', true)).join('') + '</div>';
     body += row(mine ? b(t.tbDrawN, mv('hand')) : b(t.tbTakeN, mv('hand', {}, view.you)), b(t.tbMillN, mv('graveyard')),
       b(t.tbExileN, mv('exile')), b(t.tbExileDownN, mv('exile', { face_down: true })),
       b(t.tbLookN, () => { if (lib.length) send({ type: 'look', cards: top(n()) }); c.setSheet({ k: 'list', seat: s, zone: 'library' }); }, '', true),
