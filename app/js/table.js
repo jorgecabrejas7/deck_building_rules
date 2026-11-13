@@ -512,8 +512,9 @@ function renderBar() {
   bar.innerHTML = built.html;
   bar.hidden = false;
   bar.classList.toggle('dock', selMode);
-  const bas = bar.querySelector('.bas'); // two rows when one does not fit the screen
-  if (bas.scrollWidth > bas.clientWidth + 1) bas.style.setProperty('--cols', Math.ceil(bas.childElementCount / 2));
+  const bas = bar.querySelector('.bas'); // wide: a panel of at most 3 columns; tall: two rows when one does not fit the screen
+  if (!selMode && BOTH.matches) bas.style.setProperty('--cols', Math.min(3, bas.childElementCount));
+  else if (bas.scrollWidth > bas.clientWidth + 1) bas.style.setProperty('--cols', Math.ceil(bas.childElementCount / 2));
   const hit = lead && cardAt(lead);
   bar.setAttribute('aria-label', hit ? (hit.card.name || T().tbHiddenCard) : said);
   // a new card or a change of mode plays the entrance again
@@ -530,6 +531,13 @@ function placeBar() {
   const a = elFor([...sel.values()][0][0]), r = a && a.getBoundingClientRect();
   if (!r || !r.width) { clearSel(); return; } // its board was turned away
   const w = bar.offsetWidth, h = bar.offsetHeight, m = 8, gap = 10;
+  if (BOTH.matches && !a.closest('#hand')) { // wide: a panel beside the card, on the side with room
+    const right = r.right + gap + w <= innerWidth - m || r.left - gap - w < m;
+    bar.style.left = Math.round(Math.min(Math.max(m, right ? r.right + gap : r.left - gap - w), innerWidth - m - w)) + 'px';
+    bar.style.top = Math.round(Math.min(Math.max(m, r.top + r.height / 2 - h / 2), innerHeight - m - h)) + 'px';
+    bar.dataset.side = 'beside';
+    return;
+  }
   const edge = a.closest('#hand') ? $('hand').getBoundingClientRect().top : r.top; // over a hand card, above the whole hand: its head keeps Undo and Pass reachable
   const above = edge - gap - h >= m, top = above ? edge - gap - h : Math.min(r.bottom + gap, innerHeight - m - h);
   bar.style.left = Math.round(Math.min(Math.max(m, r.left + r.width / 2 - w / 2), innerWidth - m - w)) + 'px';
@@ -543,9 +551,11 @@ addEventListener('resize', () => { placeBar(); placeCoach(); });
 // A card on the battlefield:
 //   Touch (a finger or a pen): press it and, after PRESS ms, it is shown large and stays while the finger rests. Move past the slop
 //   and it is dragged instead (the zoom closes; the ghost and the quick zones appear; a selected card takes the whole selection).
-//   Lift without moving: a press shorter than PRESS is a tap, a longer one (the zoom was shown) only closes the zoom and does nothing else.
+//   Lift without moving: a press shorter than PRESS is a tap; a longer one (the zoom was shown) closes the zoom and opens that card's bar.
 //   Tap: one of yours taps or untaps at once; any other card is selected and its bar opens.
-//   Double tap: the bar opens, on any card. On one of yours both taps toggle it, which nets to no change.
+//   Double tap: two taps within DOUBLE ms and TAP_NEAR px open the bar of the FIRST tap's card, whatever is under the finger by then
+//   (the card may have left its stack or tilted). On one of yours both taps toggle it, which nets to no change. A press that starts
+//   in that window never becomes a zoom, so its click is not swallowed.
 //   The bar's Select several starts selection mode: taps then add or remove cards, and a stack of identical cards counts whole.
 // Touch on anything else of the board (empty battlefield, the gaps, a seat's background): slide to see cards large. Once the
 // finger has been down ZOOM_WAIT ms, the card under it is shown large, sliding onto another card switches to it, sliding off all
@@ -556,12 +566,15 @@ addEventListener('resize', () => { placeBar(); placeCoach(); });
 // sliding to select that card, as a tap would. Moving up out of the hand closes the zoom and drags the card at once: drop it on
 // your battlefield to play it, or flick it up to play it from the hand.
 // Dragging (touch or mouse) shows the quick zones (tray.js) for the card's owner; they are drop targets like any [data-drop].
-// A pile, or a card listed in a sheet: tap opens it; hold HOLD ms, then move, to drag it (its top card, for a pile). Moving before the hold scrolls.
+// A pile, or a card listed in a sheet: tap opens it; hold HOLD ms to see it large (and lift it), then move to drag it (its top card, for a
+// pile) or let go to open it. Moving before the hold scrolls.
 // Mouse: resting on a card shows it large, click is a tap, double click opens the bar, drag straight away, right-click
 // selects, shift/ctrl/cmd-click adds to a selection. Keyboard: Enter opens the bar.
-const HOLD = 320, PRESS = 120, SLOP = 8, DOUBLE = 350, ZOOM_WAIT = 150;
+const HOLD = 320, PRESS = 120, SLOP = 8, DOUBLE = 400, TAP_NEAR = 30, ZOOM_WAIT = 150;
 let press = null, swallow = false, lastTap = null, zb = null; // zb: a finger sliding over the board to see cards large
 
+// a point close in time and place to the last tap: the second tap of a double tap, whatever is under the finger now
+const tapNear = (e) => !!lastTap && e.timeStamp - lastTap.t < DOUBLE && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < TAP_NEAR;
 function cardAt(id) { return view && view.zones && index(view).get(id); }
 const tick = (ms) => { if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(ms); };
 
@@ -569,6 +582,7 @@ const tick = (ms) => { if (navigator.vibrate && navigator.userActivation && navi
 function lift(p) {
   p.lifted = true;
   p.el.classList.add('lifted');
+  showZoom(p.hit.card, T(), { x: p.x, y: p.y, side: p.side });
   tick(12);
 }
 
@@ -606,12 +620,12 @@ function endPress(e) {
   press = null;
   if (!p) return;
   clearTimeout(p.timer);
-  if (p.hand || p.held) hideZoom();
+  if (p.hand || p.held || p.lifted) hideZoom();
   if (!p.drag) {
     p.el.classList.remove('lifted');
     if (p.hand) raise(handRow(), null);
     if (p.scrub && up) { swallow = true; select(p.el, selMode); } // slid along the hand and let go: that card, as a tap
-    else if (p.held && up) swallow = true; // it was shown large: lifting only closes that
+    else if (p.held && up) { swallow = true; lastTap = null; select(p.el, selMode); } // it was shown large: the zoom closes, its actions open
     else if (p.lifted && up) { // a pile or a sheet card, held still and let go
       swallow = true;
       if (p.pile) openPile(p.pile);
@@ -681,7 +695,7 @@ document.addEventListener('pointerdown', (e) => {
   p.now = !p.mouse && !p.hand && !!el.closest('.bf'); // a finger drags a battlefield card at once; piles and sheets scroll, so they wait for the hold
   p.side = e.clientX < innerWidth / 2 ? 'right' : 'left';
   if (p.hand) { raise(el.parentElement, el); showZoom(hit.card, T(), { x: e.clientX, y: e.clientY, side: p.side }); }
-  else if (p.now) p.timer = setTimeout(() => { p.held = true; showZoom(hit.card, T(), { x: p.x, y: p.y, side: p.side }); }, PRESS);
+  else if (p.now) { if (!tapNear(e)) p.timer = setTimeout(() => { p.held = true; showZoom(hit.card, T(), { x: p.x, y: p.y, side: p.side }); }, PRESS); }
   else if (!p.mouse) p.timer = setTimeout(() => lift(p), HOLD);
 });
 
@@ -770,6 +784,16 @@ document.addEventListener('pointerout', (e) => { if (!e.relatedTarget && !zb && 
 
 document.addEventListener('click', (e) => {
   const el = e.target.closest(CONTROL);
+  // a double tap acts on the card of the first tap, even when the second landed beside it
+  if (e.detail && !swallow && !selMode && !e.shiftKey && !e.ctrlKey && !e.metaKey && tapNear(e) && !e.target.closest('#bar,#sheet') && (!el || (el.dataset.card && el.matches(BOARD_CARD)))) {
+    const first = lastTap, h = cardAt(first.id), el0 = elFor(first.id);
+    lastTap = null;
+    if (h && h.zone === 'battlefield' && el0) {
+      if (first.tapped !== undefined) send({ type: 'tap', cards: [first.id], tapped: !first.tapped }); // undo the first tap's toggle
+      select(el0, false);
+      return;
+    }
+  }
   // a single card's bar closes on a tap anywhere else; a tap on empty space does nothing more, a control still runs
   if (sel.size && !selMode && !swallow && !e.target.closest('#bar') && !e.target.closest(BOARD_CARD)) clearSel();
   if (!el) return;
@@ -797,15 +821,12 @@ document.addEventListener('click', (e) => {
     const hit = cardAt(d.card);
     if (!hit) return;
     if (el.closest('#sheet')) { openCard(d.card); return; } // a card listed in a sheet opens its own sheet
-    const dbl = !!e.detail && lastTap && lastTap.id === d.card && e.timeStamp - lastTap.t < DOUBLE;
-    lastTap = dbl ? null : { id: d.card, t: e.timeStamp };
+    const own = hit.zone === 'battlefield' && hit.seat === view.you;
+    lastTap = { id: d.card, t: e.timeStamp, x: e.clientX, y: e.clientY, ...(own ? { tapped: !hit.card.tapped } : {}) };
     if (selMode || e.shiftKey || e.ctrlKey || e.metaKey) select(el, true);
     else if (!e.detail) { select(el, false); $('bar').querySelector('button').focus(); } // the keyboard: the bar, for any card
-    else if (hit.zone === 'battlefield' && hit.seat === view.you) {
-      if (!dbl) clearSel();
-      send({ type: 'tap', cards: [hit.card.id], tapped: !hit.card.tapped }); // both taps of a double tap toggle: it nets to no change
-      if (dbl) select(el, false);
-    } else select(el, false);
+    else if (own) { clearSel(); send({ type: 'tap', cards: [hit.card.id], tapped: !hit.card.tapped }); }
+    else select(el, false);
   }
   else if ('pile' in d) openPile(d.pile);
   else if ('life' in d) { const [s, dl] = d.life.split(':').map(Number); send({ type: 'life', seat: s, delta: dl }); }

@@ -525,6 +525,14 @@ body.selecting .tc.sel::after{content:"";position:absolute;left:4px;top:4px;z-in
 @keyframes tb-up{from{opacity:0;translate:0 12px}}
 body.dragging .tb-bar,body.picking .tb-bar,body:has(#sheet:not([hidden])) .tb-bar,body:has(#preview:not([hidden])) .tb-bar{display:none}
 .bas{display:grid;grid-template-columns:repeat(var(--cols),minmax(max-content,1fr));gap:2px}
+/* wide screens: a compact panel beside the card, 3 columns at most, counters in one row */
+@media (min-width:900px),(orientation:landscape) and (min-width:640px) and (max-height:560px){
+  .tb-bar:not(.dock){max-width:min(40vw,calc(100% - 16px))}
+  .tb-bar:not(.dock) .bas{grid-template-columns:repeat(var(--cols),minmax(0,1fr))}
+  .tb-bar:not(.dock) .bcs{flex-direction:row;flex-wrap:wrap}
+  .tb-bar:not(.dock) .bs{width:36px;height:34px}
+  .tb-bar:not(.dock) .bv{padding:0 2px}
+}
 .ba{box-sizing:border-box;min-width:48px;min-height:52px;padding:6px 6px 5px;border:none;border-radius:var(--r-md);background:transparent;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
   font-size:11px;font-weight:500;line-height:1.1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background var(--dur) var(--ease),transform .12s var(--ease)}
 .ba .ic{width:20px;height:20px}
