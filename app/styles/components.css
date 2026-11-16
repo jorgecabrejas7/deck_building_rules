@@ -490,3 +490,4 @@ body.modal-open{overflow:hidden}
 .pod-picks{display:flex;flex-direction:column}
 .dk-pick[hidden]{display:none}
 .dk-row>.tier-pill,.gm-row>.tier-pill{flex:none}
+.dk-list>.dk-actions .btn-ghost-sm{min-height:44px}

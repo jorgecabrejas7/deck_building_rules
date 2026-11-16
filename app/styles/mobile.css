@@ -13,7 +13,7 @@
   .main{gap:var(--sp-4)}
   .tab-pane{gap:var(--sp-4)}
 
-  /* the control fills the width, so all five tabs show without scrolling */
+  /* the control fills the width; with eight tabs it scrolls sideways and keeps the active one in view */
   .tabbar{display:flex;width:100%;box-sizing:border-box}
   .tab-btn{flex:1 1 auto;padding-inline:var(--sp-1)}
 

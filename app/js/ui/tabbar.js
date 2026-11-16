@@ -12,6 +12,7 @@ const TAB_LABEL = { load: 'tabLoad', build: 'tabBuild', decks: 'tabDecks', infor
 
 export function renderTabbar() {
   const t = T();
+  $('tabbar').setAttribute('aria-label', t.tabsLabel);
   $('tabbar').innerHTML = TAB_KEYS.map(k => {
     const enabled = k !== 'informe' || !!state.result;
     const active = state.tab === k;
