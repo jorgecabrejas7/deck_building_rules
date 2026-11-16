@@ -31,7 +31,8 @@ import { renderTableMode } from './ui/table.js';
 import { renderCurve } from './ui/curve.js';
 import { renderGuide } from './ui/guide.js';
 import { renderFriends, loadFriends } from './ui/friends.js';
-import { renderPod, renderGames, renderPodPicker, selectPod, joinPod } from './ui/pod.js';
+import { renderPod, renderPodPicker, selectPod, joinPod } from './ui/pod.js';
+import { renderGames, renderHeroInvite, loadGames } from './ui/games.js';
 import { renderDecks, saveDeck, openLinked } from './ui/decks.js';
 import { openHow, closeHow } from './ui/how.js';
 import { copyReport, copyShareLink } from './ui/report.js';
@@ -126,6 +127,7 @@ export function renderAll() {
   if (state.tab === 'pod') renderPod();
   if (state.tab === 'friends') renderFriends();
   if (state.tab === 'games') renderGames();
+  if (state.tab === 'load') renderHeroInvite();
   restoreFocus(focus);
   saveSession();
 }
@@ -198,7 +200,7 @@ const __boot = () => {
   }
   history.scrollRestoration = 'manual';
   if (bootPods) { state.pods = bootPods.pods; state.activeId = bootPods.active ? bootPods.active.id : null; }
-  if (bootPods) loadFriends(); // the tab badge; does not block the boot
+  if (bootPods) { loadFriends(); loadGames(); } // the tab counts and the invitation on the first screen; neither blocks the boot
   // raised before the first render, which saves the session
   state.shared = /^#(d|deck)=/.test(location.hash);
   renderAll();

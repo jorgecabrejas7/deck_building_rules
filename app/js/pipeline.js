@@ -98,10 +98,11 @@ export async function readDeps() {
     [getComboDb(), getSaltDb(), getCardTags(), getLandDenial(), getPrecons()].map(p => p.catch(() => null)));
   return { comboDb, saltDb, cardTags, landDenial, precons };
 }
-export async function readDeck(parsed, deps, pick) {
+// rules: another pod's, when the deck is read for a pod that is not the active one
+export async function readDeck(parsed, deps, pick, rules = RULES) {
   const names = [...new Set(parsed.entries.map(e => e.name))];
   const { notFound } = await PodEngine.fetchCards(names, cardCache, () => {});
-  return PodEngine.analyzeDeck({ parsed, db: cardCache, rules: RULES, pick,
+  return PodEngine.analyzeDeck({ parsed, db: cardCache, rules, pick,
     combos: deps.comboDb ? PodEngine.matchCombos(parsed.entries.map(e => e.name), deps.comboDb) : null,
     ...deps, notFound });
 }

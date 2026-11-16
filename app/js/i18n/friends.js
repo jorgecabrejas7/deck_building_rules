@@ -2,7 +2,7 @@
 export default {
 es: {
 tabFriends:'Amigos',
-frTitle:'Amigos',frIntro:'Tus amigos son las personas a las que puedes añadir a un pod que administras. Una solicitud solo se convierte en amistad cuando la otra persona la acepta.',
+frTitle:'Amigos',frIntro:'Con tus amigos puedes jugar una partida sin compartir pod, y añadirlos a un pod que administras. Una solicitud solo se convierte en amistad cuando la otra persona la acepta.',
 frSignInNote:'Los amigos están ligados a tu cuenta. Entra para añadir amigos.',
 frYou:'Tu nombre de usuario: %n. Compártelo para que te añadan.',frUsername:'Nombre de usuario',frSend:'Enviar solicitud',
 frSent:'Solicitud enviada.',frNowFriends:'Ya sois amigos.',frUnknown:'No hay ninguna persona con ese nombre de usuario.',frSelf:'Ese es tu propio nombre de usuario.',
@@ -14,7 +14,7 @@ frLoading:'Cargando amigos…',frErr:'No se pudo contactar con el servidor. Int�
 },
 en: {
 tabFriends:'Friends',
-frTitle:'Friends',frIntro:'Your friends are the people you can add to a pod you manage. A request only becomes a friendship when the other person accepts it.',
+frTitle:'Friends',frIntro:'You can play a game with a friend without sharing a pod, and add friends to a pod you manage. A request only becomes a friendship when the other person accepts it.',
 frSignInNote:'Friends belong to your account. Sign in to add friends.',
 frYou:'Your username: %n. Share it so people can add you.',frUsername:'Username',frSend:'Send request',
 frSent:'Request sent.',frNowFriends:'You are now friends.',frUnknown:'Nobody has that username.',frSelf:'That is your own username.',

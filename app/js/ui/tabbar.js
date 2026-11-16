@@ -5,7 +5,9 @@ import { startCheapest } from '../pipeline.js';
 import { renderAll } from '../main.js';
 import { podOpened } from './pod.js';
 import { friendsBadge, loadFriends } from './friends.js';
+import { gamesBadge, loadGames } from './games.js';
 
+const BADGE = { friends: friendsBadge, games: gamesBadge }; // what is waiting for me behind a tab
 const TAB_LABEL = { load: 'tabLoad', build: 'tabBuild', decks: 'tabDecks', informe: 'tabInforme', pod: 'tabPod', friends: 'tabFriends', games: 'tabGames', guide: 'tabGuide' };
 
 export function renderTabbar() {
@@ -15,14 +17,15 @@ export function renderTabbar() {
     const active = state.tab === k;
     return '<button id="tabbtn-' + k + '" data-tab="' + k + '" ' + (enabled ? '' : 'disabled') +
       ' role="tab" aria-selected="' + active + '" aria-controls="tab-' + k + '" tabindex="' + (active ? 0 : -1) + '"' +
-      ' class="tab-btn' + (active ? ' active' : '') + '">' + t[TAB_LABEL[k]] + (k === 'friends' && friendsBadge() > 0 ? ' (' + friendsBadge() + ')' : '') + '</button>';
+      ' class="tab-btn' + (active ? ' active' : '') + '">' + t[TAB_LABEL[k]] + (BADGE[k] && BADGE[k]() > 0 ? ' (' + BADGE[k]() + ')' : '') + '</button>';
   }).join('');
   for (const b of $('tabbar').querySelectorAll('[data-tab]'))
     b.onclick = () => {
       if (b.disabled) return;
       const changed = state.tab !== b.dataset.tab;
       state.tab = b.dataset.tab;
-      if (changed && (state.tab === 'pod' || state.tab === 'games')) podOpened();
+      if (changed && state.tab === 'pod') podOpened();
+      if (changed && state.tab === 'games') loadGames();
       if (changed && state.tab === 'friends') loadFriends();
       renderAll();
       // a tab change is a new page: don't land mid-way down an unrelated panel

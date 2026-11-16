@@ -18,15 +18,13 @@ let run = 0;                // the latest table computation; an older one stops 
 let progress = null;        // {n, m} while decks are being read
 let loadingDetail = false;
 let status = 'idle';        // idle | error: the last detail load
-let asking = null;         // 'leave' | 'm<userId>' | 'd<deckId>': the action awaiting its second press
+let asking = null;          // 'leave' | 'm<userId>' | 'd<deckId>': the action awaiting its second press
 let msg = null;             // i18n key of the last answer worth showing
 let adding = null;          // {decks}: my decks that could join, once Añadir mi mazo is pressed
 let renaming = false;
 let editing = false;
 let editorEl = null;        // kept across renders so a half-edited rule is not lost
 let copied = false;
-let games = null;           // {podId, list, busy}: my games in the active pod; null = to be loaded
-let gMsg = null;            // i18n key of the last games answer
 let failed = false;         // reading the table failed: not retried until the rules or the pod change
 
 const keyOf = (d) => d.id + '|' + d.updated_at + '|' + state.pod.rules_updated_at;
@@ -69,7 +67,7 @@ async function reload() {
   if (state.activeId && !state.pod) { msg = 'pdErr'; return; }
   applyRules();
 }
-const reset = () => { games = null; gMsg = null; asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
+const reset = () => { asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
 
 export async function selectPod(id) {
   const res = await api(API + 'pods/active', 'POST', { pod: id });
@@ -202,47 +200,8 @@ function adminHtml(t) {
     '<button class="btn-ghost-sm" data-act="regen">' + esc(t.pdRegen) + '</button></div><p class="note-sm">' + esc(t.pdRegenNote) + '</p></div>';
 }
 
-// ---- games (F5): invite another member, open or end my games ----
-// opening the Pod tab reloads them, so an invitation from another member shows up
-export function podOpened() { games = null; if (state.tab === 'pod') loadFriends(); }
-async function loadGames() {
-  const id = state.pod.id;
-  games = { podId: id, list: [], busy: true };
-  const res = await api(API + 'pods/' + id + '/games');
-  if (!state.pod || state.pod.id !== id) return;
-  if (res.status === 200) games = { podId: id, list: res.data.games, busy: false };
-  else { games = { podId: id, list: [], busy: false }; gMsg = 'pdGErr'; }
-  paint();
-}
-function gamesHtml(t) {
-  const others = state.pod.members.filter(m => !m.me);
-  const invite = others.length
-    ? '<form class="dk-form" data-gameform><select name="opponent" class="arch-select" aria-label="' + esc(t.pdGWho) + '">' +
-      others.map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select>' +
-      '<button class="btn-primary">' + esc(t.pdGInvite) + '</button></form>'
-    : '<p class="note-sm">' + esc(t.pdGNoOthers) + '</p>';
-  const li = (games ? games.list : []).map(g => {
-    const who = g.opponent === null ? t.pdGDeleted : g.opponent;
-    const me = g.picked[g.seat], them = g.picked[3 - g.seat];
-    const st = g.status === 'active' ? t.pdGActive
-      : fill(t.pdGWait, { a: me ? t.pdGPicked : t.pdGNotPicked, b: them ? t.pdGPicked : t.pdGNotPicked });
-    const lobby = g.status === 'lobby';
-    const end = asking === 'g' + g.id
-      ? '<span class="dk-confirm">' + esc(t.pdGAsk) + '</span><button class="btn-ghost-sm btn-danger" data-act="game-end-yes" data-game="' + g.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
-      : '<button class="btn-ghost-sm" data-act="game-end" data-game="' + g.id + '">' + esc(!lobby ? t.pdGEnd : g.seat === 1 ? t.pdCancel : t.pdGDecline) + '</button>';
-    return '<li class="pod-member"><span class="pod-mname">' + esc(who) + ' <span class="lbl-muted">' + esc(st) + '</span></span><span class="dk-actions">' +
-      '<a class="btn-primary dk-login" href="table.html?game=' + g.id + '">' + esc(t.pdGOpen) + '</a>' + end + '</span></li>';
-  }).join('');
-  return invite + (gMsg ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') +
-    (li ? '<ul class="pod-members">' + li + '</ul>' : games && !games.busy ? '<p class="note-sm">' + esc(t.pdGNone) + '</p>' : '');
-}
-async function gameAct(method, path, body, ok) {
-  const res = await api(API + path, method, body);
-  gMsg = res.status === ok ? null : res.data.errors && res.data.errors.games === 'limit' ? 'pdGLimit' : res.status === 0 ? 'pdErr' : 'pdGErr';
-  asking = null;
-  await loadGames();
-  return res.status === ok;
-}
+// opening the Pod tab asks for the friends an admin may add
+export function podOpened() { loadFriends(); }
 
 function createHtml(t) {
   return '<details class="pod-create"' + (state.pod ? '' : ' open') + '><summary>' + esc(t.pdCreate) + '</summary><form class="dk-form" data-createform>' +
@@ -253,32 +212,11 @@ function createHtml(t) {
 }
 
 const pickHtml = (t) => '<label class="arch-field"><span class="lbl-muted">' + esc(t.pdPicker) + '</span><select id="podSelTab" class="arch-select">' + pickerOptions() + '</select></label>';
-const paint = () => { if (state.tab === 'pod') renderPod(); else if (state.tab === 'games') renderGames(); };
+const paint = () => { if (state.tab === 'pod') renderPod(); };
 function ensureDetail() {
   if (!state.activeId || state.pod || loadingDetail || status === 'error') return;
   loadingDetail = true;
   loadDetail(state.activeId).then(p => { state.pod = p; status = p ? 'idle' : 'error'; }).finally(() => { loadingDetail = false; paint(); });
-}
-
-// The Partidas tab: the active pod's games, with the same picker as the Pod tab.
-export function renderGames() {
-  const t = T(), el = $('gamesPanel');
-  const note = (k) => '<p class="note-sm">' + esc(t[k]) + '</p>';
-  let body;
-  if (!state.pods) body = note('pdSignInNote') + '<a class="btn-primary dk-login" href="account.html">' + esc(t.sdSignIn) + '</a>';
-  else {
-    ensureDetail();
-    const flash = msg ? '<p class="note-bad" role="status">' + esc(t[msg]) + '</p>' : '';
-    if (!state.activeId) body = pickHtml(t) + flash + note('pdGNeedPod') + '<button class="btn-primary" data-act="to-pod">' + esc(t.pdGToPod) + '</button>';
-    else if (!state.pod) body = pickHtml(t) + flash + note(status === 'error' ? 'pdErr' : 'pdLoading');
-    else {
-      if (!games || games.podId !== state.pod.id) loadGames();
-      body = pickHtml(t) + flash + '<div class="panel pod-card">' + gamesHtml(t) + '</div>';
-    }
-  }
-  if (state.pods) body += '<div class="panel pod-card">' + note('pdGPracticeNote') + (gMsg && !state.pod ? '<p class="note-bad" role="status">' + esc(t[gMsg]) + '</p>' : '') + '<button class="btn-primary" data-act="practice">' + esc(t.pdGPractice) + '</button></div>';
-  el.innerHTML = '<div class="stack-16"><div class="part-head"><div><h2 class="part-title">' + esc(t.pdGames) + '</h2><p class="part-sub">' + esc(t.pdGIntro) + '</p></div></div>' + body + '</div>';
-  el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange;
 }
 
 export function renderPod() {
@@ -352,21 +290,12 @@ async function onClick(e) {
   if (!b || b.tagName === 'SELECT') return;
   const a = b.dataset.act, entry = state.pod && state.pod.decks.find(d => d.id === Number(b.dataset.deck)), user = Number(b.dataset.user);
   if (a === 'cancel') { asking = null; adding = null; renaming = false; return paint(); }
-  if (a === 'to-pod') return $('tabbtn-pod').click();
-  if (a === 'practice') {
-    const res = await api(API + 'games/practice', 'POST', {});
-    if (res.status === 201) return location.assign('table.html?game=' + res.data.id);
-    gMsg = res.data.errors && res.data.errors.games === 'limit' ? 'pdGLimit' : 'pdGErr';
-    return paint();
-  }
   if (a === 'analyze') return openDeck(entry);
   if (a === 'compare') {
     state.tableTexts = [deckToText(state.deck), deckToText(entry.list), '', ''];
     state.tableOpen = true; state.tableResults = null; state.tab = 'load';
     renderAll(); return runTableMode();
   }
-  if (a === 'game-end') { asking = 'g' + b.dataset.game; return paint(); }
-  if (a === 'game-end-yes') { await gameAct('DELETE', 'games/' + b.dataset.game, undefined, 204); return; }
   if (a === 'add-open') {
     const res = await api(API + 'decks');
     adding = { decks: res.status === 200 ? res.data.decks : [] };
@@ -394,8 +323,7 @@ async function onClick(e) {
 async function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
-  if ('gameform' in f.dataset) await gameAct('POST', here('games'), { opponent: Number(f.opponent.value) }, 201);
-  else if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
+  if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
   else if ('addfriendform' in f.dataset) { if (await act('POST', here('members'), { user: Number(f.user.value) }, [200, 201])) refresh(); }
   else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }
   else if ('createform' in f.dataset) {

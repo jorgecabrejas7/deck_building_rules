@@ -3,6 +3,7 @@ import { T, fill } from '../i18n.js';
 import { api } from '../api.js';
 import { $, esc } from './helpers.js';
 import { renderAll } from '../main.js';
+import { inviteFriend } from './games.js';
 
 const API = '../api/';
 let data = null;      // {friends, incoming, outgoing} once loaded
@@ -25,7 +26,8 @@ export async function loadFriends() {
   return data;
 }
 
-const btn = (act, id, label, cls) => '<button class="' + (cls || 'btn-ghost-sm') + '" data-act="' + act + '" data-user="' + id + '">' + esc(label) + '</button>';
+// every button says whom it acts on: a screen reader hears "Quitar, ana", not fifteen times "Quitar"
+const btn = (act, u, label, cls) => '<button class="' + (cls || 'btn-ghost-sm') + '" id="fr-' + act + '-' + u.id + '" data-act="' + act + '" data-user="' + u.id + '" aria-label="' + esc(label + ', ' + u.name) + '">' + esc(label) + '</button>';
 const row = (u, acts) => '<li class="pod-member"><span class="pod-mname">' + esc(u.name) + '</span><span class="dk-actions">' + acts + '</span></li>';
 const section = (title, items) => items ? '<div class="panel pod-card"><h3 class="pod-sub">' + esc(title) + '</h3><ul class="pod-members">' + items + '</ul></div>' : '';
 
@@ -37,17 +39,17 @@ export function renderFriends() {
   else if (!data) body = '<p class="note-sm">' + esc(t.frLoading) + '</p>';
   else {
     const friends = data.friends.map(u => row(u, asking === 'f' + u.id
-      ? '<span class="dk-confirm">' + esc(fill(t.frRemoveAsk, { n: u.name })) + '</span>' + btn('remove-yes', u.id, t.pdYes, 'btn-ghost-sm btn-danger') + '<button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
-      : btn('remove', u.id, t.frRemove))).join('');
+      ? '<span class="dk-confirm">' + esc(fill(t.frRemoveAsk, { n: u.name })) + '</span>' + btn('remove-yes', u, t.pdYes, 'btn-ghost-sm btn-danger') + '<button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
+      : btn('play', u, t.frPlay) + btn('remove', u, t.frRemove))).join('');
     body = '<div class="panel pod-card">' +
       (me ? '<p class="note-sm">' + fill(esc(t.frYou), { n: '<b>' + esc(me) + '</b>' }) + '</p>' : '') +
       '<form class="dk-form" data-friendform><input name="username" class="arch-select" maxlength="150" required autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="' + esc(t.frUsername) + '" aria-label="' + esc(t.frUsername) + '">' +
       '<button class="btn-primary">' + esc(t.frSend) + '</button></form>' +
       (msg ? '<p class="' + (bad ? 'note-bad' : 'note-sm') + '" role="status">' + esc(t[msg]) + '</p>' : '') + '</div>' +
-      section(t.frIncoming, data.incoming.map(u => row(u, btn('accept', u.id, t.frAccept, 'btn-primary') + btn('decline', u.id, t.frDecline))).join('')) +
+      section(t.frIncoming, data.incoming.map(u => row(u, btn('accept', u, t.frAccept, 'btn-primary') + btn('decline', u, t.frDecline))).join('')) +
       '<div class="panel pod-card"><h3 class="pod-sub">' + esc(t.frFriends) + '</h3>' +
       (friends ? '<ul class="pod-members">' + friends + '</ul>' : '<p class="note-sm">' + esc(t.frNone) + '</p>') + '</div>' +
-      section(t.frOutgoing, data.outgoing.map(u => row(u, btn('decline', u.id, t.frCancel))).join(''));
+      section(t.frOutgoing, data.outgoing.map(u => row(u, btn('decline', u, t.frCancel))).join(''));
   }
   el.innerHTML = '<div class="stack-16"><div class="part-head"><div><h2 class="part-title">' + esc(t.frTitle) + '</h2><p class="part-sub">' + esc(t.frIntro) + '</p></div></div>' + body + '</div>';
   el.onclick = onClick; el.onsubmit = onSubmit;
@@ -70,6 +72,7 @@ async function onClick(e) {
   const a = b.dataset.act, id = b.dataset.user;
   if (a === 'cancel') { asking = null; return renderFriends(); }
   if (a === 'remove') { asking = 'f' + id; return renderFriends(); }
+  if (a === 'play') return inviteFriend(Number(id));
   msg = null;
   if (a === 'accept') await act('POST', 'friends/' + id + '/accept', undefined, 204);
   else await act('DELETE', 'friends/' + id, undefined, 204); // remove-yes, decline, cancel

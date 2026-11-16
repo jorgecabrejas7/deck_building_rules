@@ -8,6 +8,9 @@ export const eur = (v) => '€' + v.toFixed(2);
 // Banned cards named by the pod rules, read off the point evaluation that finds them.
 export const bannedCards = (r) => r.evalRes.violations.filter(v => v.id === 'banned')
   .flatMap(v => v.cards).map(c => String(Array.isArray(c) ? c[0] : c).split(' // ')[0]);
+// Does what was typed appear in any of these texts? Case and accents do not count.
+const fold = (s) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+export const has = (q, ...texts) => fold(texts.join(' ')).includes(fold(q.trim()));
 export const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 export function tierTone(k) {

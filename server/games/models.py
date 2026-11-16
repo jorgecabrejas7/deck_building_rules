@@ -3,7 +3,8 @@ from django.db import models
 
 
 class Game(models.Model):
-    pod = models.ForeignKey("pods.Pod", on_delete=models.CASCADE, null=True, related_name="games")  # null: a practice game
+    pod = models.ForeignKey("pods.Pod", on_delete=models.CASCADE, null=True, related_name="games")  # null: a game between friends, or a practice game
+    practice = models.BooleanField(default=False)  # solo, against an empty seat
     status = models.CharField(max_length=6, choices=[(s, s) for s in ("lobby", "active")], default="lobby")
     state = models.JSONField(default=dict)
     seq = models.IntegerField(default=0)

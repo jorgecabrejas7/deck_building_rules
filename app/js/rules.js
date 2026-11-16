@@ -18,6 +18,6 @@ try {
 export const bootPods = await podsAsk;
 
 // The rules in force: the active pod's, or the template. The pod stores no power brackets, they are shared.
-const podRules = (pod) => ({ ...pod.rules, power_brackets: TEMPLATE.power_brackets });
+export const podRules = (pod) => ({ ...pod.rules, power_brackets: TEMPLATE.power_brackets });
 export let RULES = bootPods && bootPods.active ? podRules(bootPods.active) : TEMPLATE;
 export function setRules(pod) { RULES = pod ? podRules(pod) : TEMPLATE; }
