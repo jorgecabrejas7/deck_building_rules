@@ -4,7 +4,8 @@ import { state, persistCache } from '../state.js';
 import { T, fill } from '../i18n.js';
 import { api } from '../api.js';
 import { setRules } from '../rules.js';
-import { $, esc, tierTone, announce } from './helpers.js';
+import { $, esc, has, tierTone, announce } from './helpers.js';
+import { forgetDecks } from './decks.js';
 import { friendList, loadFriends } from './friends.js';
 import { loadStudy } from './profile.js';
 import { analyze, readDeck, readDeps, recompute } from '../pipeline.js';
@@ -18,10 +19,14 @@ let run = 0;                // the latest table computation; an older one stops 
 let progress = null;        // {n, m} while decks are being read
 let loadingDetail = false;
 let status = 'idle';        // idle | error: the last detail load
-let asking = null;          // 'leave' | 'm<userId>' | 'd<deckId>': the action awaiting its second press
+let asking = null;          // 'leave' | 'regen' | 'm<userId>' | 'd<deckId>': the action awaiting its second press
 let msg = null;             // i18n key of the last answer worth showing
-let adding = null;          // {decks}: my decks that could join, once Añadir mi mazo is pressed
-let renaming = false;
+let adding = null;          // {decks}: my saved decks, while the tick list of Mis mazos en este pod is open
+let view = 'decks';         // decks | members | settings: one view of the pod at a time
+let creating = false;       // the Nuevo pod form is open
+let q = '';                 // what is typed in the deck search
+let filter = 'all';         // all | in | out | mine
+let tableOpen = false;      // the figures table is unfolded
 let editing = false;
 let editorEl = null;        // kept across renders so a half-edited rule is not lost
 let copied = false;
@@ -67,7 +72,7 @@ async function reload() {
   if (state.activeId && !state.pod) { msg = 'pdErr'; return; }
   applyRules();
 }
-const reset = () => { asking = null; adding = null; renaming = false; editing = false; editorEl = null; };
+const reset = () => { asking = null; adding = null; creating = false; editing = false; editorEl = null; view = 'decks'; q = ''; filter = 'all'; status = 'idle'; };
 
 export async function selectPod(id) {
   const res = await api(API + 'pods/active', 'POST', { pod: id });
@@ -95,10 +100,10 @@ const figures = (r) => ({ tier: r.evalRes.tier, banned: r.evalRes.violations.som
 
 async function compute() {
   const mine = ++run;
-  const todo = state.pod.decks.filter(d => d.list && !rows.has(keyOf(d)));
+  const todo = state.pod.decks.filter(d => !rows.has(keyOf(d)));
   if (!todo.length) { progress = null; return; }
   progress = { n: 0, m: todo.length };
-  renderPod();
+  paintRows();
   try {
     const deps = await readDeps();
     for (const d of todo) {
@@ -108,57 +113,98 @@ async function compute() {
       if (mine !== run) return;
       rows.set(key, figures(r));
       progress.n++;
-      renderPod();
+      paintRows();
     }
     persistCache();
-  } catch (e) { console.error(e); msg = 'pdErr'; failed = true; }
-  if (mine === run) { progress = null; renderPod(); }
+  } catch (e) { console.error(e); failed = true; }
+  if (mine === run) { progress = null; paintRows(); }
 }
 
 const cell = (v) => '<td class="mono num">' + v + '</td>';
-function deckRow(d, t) {
-  const f = d.list ? rows.get(keyOf(d)) : null;
+const isOut = (f) => f.tier === 'above';
+
+// The figures of every deck, for comparing side by side: folded, since the list above already says who is in.
+function tableRow(d, t) {
+  const f = rows.get(keyOf(d));
   const who = d.mine ? t.pdYou : fill(t.pdOwner, { n: d.owner });
   const head = '<th scope="row"><span class="pod-name">' + esc(d.name) + '</span><span class="pod-why pod-who">' + esc(who) + '</span></th>';
-  let body;
-  if (!d.list) body = '<td colspan="6" class="note-sm">' + esc(t.pdPrivate) + '</td>';
-  else if (!f) body = '<td colspan="6" class="note-sm">…</td>';
-  else body = '<td><span class="tier-pill ' + tierTone(f.tier) + '">' + esc(t['short_' + f.tier]) + '</span>' +
-      (f.banned ? '<span class="pod-why">' + esc(t.podBanned) + '</span>' : '') + '</td>' +
-    cell(f.points) + cell(f.level.pending ? '—' : esc(f.level.bracket) + ' · ' + f.level.score) + cell(f.level.pending ? '…' : f.checklist) +
-    cell(f.salt === null ? '—' : f.salt.toFixed(1)) + cell('€' + Math.round(f.price));
-  const ask = asking === 'd' + d.id;
-  const out = !(d.mine || state.pod.role === 'admin') ? ''
-    : ask ? '<span class="dk-confirm">' + esc(fill(t.pdRemoveDeckAsk, { n: d.name })) + '</span><button class="btn-ghost-sm btn-danger" data-act="deck-out-yes" data-deck="' + d.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>'
-    : '<button class="btn-ghost-sm" data-act="deck-out" data-deck="' + d.id + '">' + esc(t.pdRemoveDeck) + '</button>';
-  const acts = (d.list ? '<button class="btn-ghost-sm" data-act="analyze" data-deck="' + d.id + '">' + esc(t.pdAnalyze) + '</button>' +
-    (state.deck ? '<button class="btn-ghost-sm" data-act="compare" data-deck="' + d.id + '">' + esc(t.pdCompare) + '</button>' : '') : '') + out;
+  const body = !f ? '<td colspan="6" class="note-sm">…</td>'
+    : '<td><span class="tier-pill ' + tierTone(f.tier) + '">' + esc(t['short_' + f.tier]) + '</span></td>' +
+      cell(f.points) + cell(f.level.pending ? '—' : esc(f.level.bracket) + ' · ' + f.level.score) + cell(f.level.pending ? '…' : f.checklist) +
+      cell(f.salt === null ? '—' : f.salt.toFixed(1)) + cell('€' + Math.round(f.price));
+  const acts = state.deck ? '<button class="btn-ghost-sm" id="pd-cmp-' + d.id + '" data-act="compare" data-deck="' + d.id + '" aria-label="' + esc(t.pdCompare + ', ' + d.name) + '">' + esc(t.pdCompare) + '</button>' : '';
   return '<tr>' + head + body + '<td><div class="pod-actions">' + acts + '</div></td></tr>';
 }
-
 function deckTable(t) {
   const med = state.study && state.study.medians;
   const ref = (label, m) => '<tr class="pod-ref"><th scope="row">' + esc(label) + '</th><td></td>' +
     cell(Math.round(m.points)) + cell(m.power.toFixed(1)) + cell('') + cell(m.salt_total.toFixed(1)) + cell('€' + Math.round(m.price)) + '<td></td></tr>';
   const th = (label, cls) => '<th scope="col"' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(label) + '</th>';
-  const decks = state.pod.decks;
   return '<div class="tbl-scroll pod-scroll"><table class="pod-table"><thead><tr>' + th(t.tmDeck) + th(t.tierWord) + th(t.pts, 'num') +
     th(t.pfPractical, 'num') + th(t.brTileN, 'num') + th(t.pfSalt, 'num') + th(t.price, 'num') + '<td></td></tr></thead><tbody>' +
-    decks.map(d => deckRow(d, t)).join('') +
+    state.pod.decks.map(d => tableRow(d, t)).join('') +
     (med ? ref(t.pfRef_precon, med.precon) + ref(t.pfRef_cedh, med.cedh) : '') + '</tbody></table></div>' +
-    (progress ? '<p class="note-sm" role="status">' + esc(fill(t.pdCalc, progress)) + '</p>' : '') +
-    (decks.length ? '' : '<p class="note-sm">' + esc(t.pdEmpty) + '</p>') + (med ? '<p class="note-sm">' + esc(t.pdRefNote) + '</p>' : '');
+    (med ? '<p class="note-sm">' + esc(t.pdRefNote) + '</p>' : '');
 }
 
-// ---- adding a deck, members, admin ----
-function addHtml(t) {
+// ---- the Mazos view: who is in and who is out, grouped by member; a tap opens the deck ----
+const chip = (id, act, value, label, on) => '<button class="chip-dashed gm-chip" id="' + id + '" data-act="' + act + '" data-value="' + value + '" aria-pressed="' + on + '">' + esc(label) + '</button>';
+function deckLi(d, t) {
+  const f = rows.get(keyOf(d));
+  const sub = [d.list.commanders.join(' / '), f && f.banned ? t.podBanned : null].filter(Boolean).join(' · ');
+  const pill = f ? '<span class="tier-pill ' + tierTone(f.tier) + '">' + esc(t['short_' + f.tier]) + '</span>' : '<span class="lbl-muted" aria-hidden="true">…</span>';
+  const canOut = !d.mine && state.pod.role === 'admin'; // my own decks leave through the tick list above
+  const out = !canOut ? ''
+    : asking === 'd' + d.id ? ''
+    : '<button class="btn-ghost-sm" id="pd-out-' + d.id + '" data-act="deck-out" data-deck="' + d.id + '" aria-label="' + esc(t.pdRemoveDeck + ', ' + d.name) + '">' + esc(t.pdRemoveDeck) + '</button>';
+  const ask = asking === 'd' + d.id
+    ? '<div class="dk-actions"><span class="dk-confirm">' + esc(fill(t.pdRemoveDeckAsk, { n: d.name })) + '</span><button class="btn-ghost-sm btn-danger" id="pd-outyes-' + d.id + '" data-act="deck-out-yes" data-deck="' + d.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" id="pd-outno-' + d.id + '" data-act="cancel" data-back="pd-out-' + d.id + '">' + esc(t.pdCancel) + '</button></div>'
+    : '';
+  return '<li><div class="dk-row"><button class="gm-row" id="pd-open-' + d.id + '" data-act="analyze" data-deck="' + d.id + '"><span class="gm-main"><span class="gm-name">' + esc(d.name) + '</span>' +
+    (sub ? '<span class="gm-sub">' + esc(sub) + '</span>' : '') + '</span>' + pill + '</button>' + out + '</div>' + ask + '</li>';
+}
+function rowsHtml(t) {
+  const decks = state.pod.decks;
+  const read = decks.map(d => rows.get(keyOf(d))).filter(Boolean), out = read.filter(isOut).length;
+  const sum = progress ? fill(t.pdCalc, progress)
+    : read.length ? fill(t.pdIn, { n: read.length - out }) + ' · ' + fill(t.pdOut, { n: out }) : '';
+  const keep = (d) => {
+    const f = rows.get(keyOf(d));
+    return has(q, d.name, d.owner, ...d.list.commanders) &&
+      (filter === 'all' || (filter === 'mine' ? d.mine : !!f && isOut(f) === (filter === 'out')));
+  };
+  const owners = [...new Set(decks.map(d => d.owner))].sort((a, b) => a.localeCompare(b));
+  const mine = decks.find(d => d.mine);
+  if (mine) { owners.splice(owners.indexOf(mine.owner), 1); owners.unshift(mine.owner); } // my decks first
+  const groups = owners.map(o => {
+    const all = decks.filter(d => d.owner === o), shown = all.filter(keep);
+    if (!shown.length) return '';
+    const title = all[0].mine ? t.pdMine : fill(t.pdOf, { n: o });
+    return '<li class="gm-group">' + esc(title) + ' <span class="lbl-muted">' + shown.length + (shown.length < all.length ? ' / ' + all.length : '') + '</span></li>' + shown.map(d => deckLi(d, t)).join('');
+  }).join('');
+  return (sum ? '<p class="note-sm" role="status">' + esc(sum) + '</p>' : '') +
+    (failed ? '<p class="note-bad" role="alert">' + esc(t.pdReadErr) + '</p><div class="dk-actions"><button class="btn-ghost-sm" id="pd-retry" data-act="retry">' + esc(t.pdRetry) + '</button></div>' : '') +
+    '<ul class="gm-list">' + (groups || '<li class="note-sm">' + esc(decks.length ? t.gmNoMatch : t.pdEmpty) + '</li>') + '</ul>';
+}
+// Ticking one of my saved decks puts it in this pod; unticking takes it out.
+function mineHtml(t) {
+  if (!adding) return '<div class="dk-actions"><button class="btn-primary" id="pd-mine" data-act="add-open">' + esc(t.pdMyDecks) + '</button></div>';
   const inPod = new Set(state.pod.decks.map(d => d.id));
-  if (!adding) return '<button class="btn-ghost-sm" data-act="add-open">' + esc(t.pdAdd) + '</button>';
-  const free = adding.decks.filter(d => !inPod.has(d.id));
-  if (!free.length) return '<p class="note-sm">' + esc(t.pdAddNone) + '</p>';
-  return '<form class="dk-form" data-addform><select name="deck" aria-label="' + esc(t.pdAdd) + '">' +
-    free.map(d => '<option value="' + d.id + '">' + esc(d.name) + '</option>').join('') + '</select>' +
-    '<button class="btn-primary">' + esc(t.pdAddGo) + '</button><button type="button" class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button></form>';
+  const picks = adding.decks.map(d => '<label class="dk-pick" data-text="' + esc(d.name + ' ' + d.commanders.join(' ')) + '"><input type="checkbox" id="pd-tick-' + d.id + '" data-act="tick" data-deck="' + d.id + '"' + (inPod.has(d.id) ? ' checked' : '') + '>' +
+    '<span>' + esc(d.name) + (d.commanders.length ? ' <span class="lbl-muted">' + esc(d.commanders.join(' / ')) + '</span>' : '') + '</span></label>').join('');
+  return '<section class="pod-mine"><h3 class="pod-sub">' + esc(t.pdMyDecks) + '</h3>' +
+    (adding.decks.length > 8 ? '<div class="dk-form"><input type="search" id="pdMineQ" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="' + esc(t.sdFind) + '" aria-label="' + esc(t.sdFind) + '"></div>' : '') +
+    (picks ? '<div class="pod-picks" id="pdPicks">' + picks + '</div>' : '<p class="note-sm">' + esc(t.pdAddNone) + '</p>') +
+    '<div class="dk-actions"><button class="btn-ghost-sm" id="pd-mine-done" data-act="add-close">' + esc(t.pdDone) + '</button></div></section>';
+}
+function decksView(t) {
+  const n = state.pod.decks.length;
+  const filters = n > 1 ? '<div class="dk-actions" role="group" aria-label="' + esc(t.pdFilter) + '">' +
+    [['all', t.sdAll], ['in', t.pdFIn], ['out', t.pdFOut], ['mine', t.pdFMine]].map(([k, l]) => chip('pd-f-' + k, 'filter', k, l, filter === k)).join('') + '</div>' : '';
+  return mineHtml(t) +
+    (n > 8 ? '<div class="dk-form"><input type="search" id="pdQ" value="' + esc(q) + '" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="' + esc(t.pdFind) + '" aria-label="' + esc(t.pdFind) + '"></div>' : '') +
+    filters + '<div id="pdRows">' + rowsHtml(t) + '</div>' +
+    (n ? '<details class="pod-create" id="pdTable"' + (tableOpen ? ' open' : '') + '><summary>' + esc(t.pdTable) + '</summary><div id="pdTableBody">' + deckTable(t) + '</div></details>' : '');
 }
 
 function friendsHtml(t) {
@@ -172,47 +218,62 @@ function friendsHtml(t) {
 
 function membersHtml(t) {
   const admin = state.pod.role === 'admin';
-  const ask = (key, text, yes) => '<span class="dk-confirm">' + esc(text) + '</span><button class="btn-ghost-sm btn-danger" data-act="' + yes + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button>';
+  const ask = (text, yes, id, back) => '<span class="dk-confirm">' + esc(text) + '</span><button class="btn-ghost-sm btn-danger" id="pd-' + yes + '-' + id + '" data-act="' + yes + '" data-user="' + id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel" data-back="' + back + '">' + esc(t.pdCancel) + '</button>';
+  const btn = (act, m, label) => '<button class="btn-ghost-sm" id="pd-' + act + '-' + m.id + '" data-act="' + act + '" data-user="' + m.id + '" aria-label="' + esc(label + ', ' + m.name) + '">' + esc(label) + '</button>';
   const li = state.pod.members.map(m => {
+    const n = state.pod.decks.filter(d => d.owner === m.name).length;
     let acts = '';
-    if (m.me) acts = asking === 'leave' ? ask(fill(t.pdLeaveAsk, { n: state.pod.name }), 'leave-yes') : '<button class="btn-ghost-sm" data-act="leave">' + esc(t.pdLeave) + '</button>';
-    else if (admin) {
-      acts = '<button class="btn-ghost-sm" data-act="' + (m.role === 'admin' ? 'demote' : 'promote') + '" data-user="' + m.id + '">' + esc(m.role === 'admin' ? t.pdDemote : t.pdMakeAdmin) + '</button>' +
-        (asking === 'm' + m.id ? ask(fill(t.pdKickAsk, { n: m.name }), 'kick-yes" data-user="' + m.id) : '<button class="btn-ghost-sm" data-act="kick" data-user="' + m.id + '">' + esc(t.pdKick) + '</button>');
-    }
-    return '<li class="pod-member"><span class="pod-mname">' + esc(m.name) + (m.me ? ' <span class="lbl-muted">(' + esc(t.pdYou) + ')</span>' : '') +
-      ' <span class="lbl-muted">' + esc(m.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + '</span></span><span class="dk-actions">' + acts + '</span></li>';
+    if (m.me) acts = asking === 'leave' ? ask(fill(t.pdLeaveAsk, { n: state.pod.name }), 'leave-yes', m.id, 'pd-leave-' + m.id) : btn('leave', m, t.pdLeave);
+    else if (admin) acts = asking === 'm' + m.id ? ask(fill(t.pdKickAsk, { n: m.name }), 'kick-yes', m.id, 'pd-kick-' + m.id)
+      : btn(m.role === 'admin' ? 'demote' : 'promote', m, m.role === 'admin' ? t.pdDemote : t.pdMakeAdmin) + btn('kick', m, t.pdKick);
+    return '<li class="pod-member"><span class="gm-main"><span class="gm-name">' + esc(m.name) + (m.me ? ' <span class="lbl-muted">(' + esc(t.pdYou) + ')</span>' : '') + '</span>' +
+      '<span class="gm-sub">' + esc((m.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + ' · ' + count(n, t.pdDeck1, t.pdDeckN)) + '</span></span><span class="dk-actions">' + acts + '</span></li>';
   }).join('');
-  return '<h3 class="pod-sub">' + esc(t.pdMembers) + '</h3><ul class="pod-members">' + li + '</ul>' + (admin ? friendsHtml(t) : '');
+  const invite = admin ? '<h3 class="pod-sub">' + esc(t.pdAddFriend) + '</h3>' + friendsHtml(t) +
+    '<div class="pod-invite"><span class="lbl-muted">' + esc(t.pdInvite) + '</span><input readonly class="pod-link-in" value="' + esc(inviteLink(state.pod.invite_code)) + '" aria-label="' + esc(t.pdInvite) + '">' +
+    '<div class="dk-actions"><button class="btn-ghost-sm" id="pd-copy" data-act="copy">' + esc(copied ? t.pdCopied : t.pdCopy) + '</button></div></div>' : '';
+  return '<ul class="pod-members pod-people">' + li + '</ul>' + invite;
 }
 
-function adminHtml(t) {
+function settingsHtml(t) {
   const p = state.pod;
-  const name = renaming
-    ? '<form class="dk-form" data-renameform><input name="name" value="' + esc(p.name) + '" maxlength="100" required aria-label="' + esc(t.pdRename) + '">' +
-      '<button class="btn-ghost-sm">' + esc(t.pdSave) + '</button><button type="button" class="btn-ghost-sm" data-act="cancel">' + esc(t.pdCancel) + '</button></form>'
-    : '<button class="btn-ghost-sm" data-act="rename">' + esc(t.pdRename) + '</button>';
-  return '<h3 class="pod-sub">' + esc(t.pdAdmin) + '</h3><div class="dk-actions">' + name +
-    '<button class="btn-ghost-sm" data-act="rules" aria-expanded="' + editing + '">' + esc(editing ? t.pdCloseRules : t.pdEditRules) + '</button></div>' +
+  const regen = asking === 'regen'
+    ? '<span class="dk-confirm">' + esc(t.pdRegenNote) + '</span><button class="btn-ghost-sm btn-danger" id="pd-regen-yes" data-act="regen-yes">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" data-act="cancel" data-back="pd-regen">' + esc(t.pdCancel) + '</button>'
+    : '<button class="btn-ghost-sm" id="pd-regen" data-act="regen">' + esc(t.pdRegen) + '</button>';
+  return '<form class="dk-form" data-renameform><input name="name" id="pdName" value="' + esc(p.name) + '" maxlength="100" required aria-label="' + esc(t.pdName) + '">' +
+    '<button class="btn-ghost-sm" id="pd-rename">' + esc(t.pdSave) + '</button></form>' +
+    '<div class="dk-actions"><button class="btn-ghost-sm" id="pd-rules" data-act="rules" aria-expanded="' + editing + '">' + esc(editing ? t.pdCloseRules : t.pdEditRules) + '</button></div>' +
     (editing ? '<div id="podRules" class="pod-rules"></div>' : '') +
-    '<div class="pod-invite"><span class="lbl-muted">' + esc(t.pdInvite) + '</span><input readonly class="pod-link-in" value="' + esc(inviteLink(p.invite_code)) + '" aria-label="' + esc(t.pdInvite) + '">' +
-    '<div class="dk-actions"><button class="btn-ghost-sm" data-act="copy">' + esc(copied ? t.pdCopied : t.pdCopy) + '</button>' +
-    '<button class="btn-ghost-sm" data-act="regen">' + esc(t.pdRegen) + '</button></div><p class="note-sm">' + esc(t.pdRegenNote) + '</p></div>';
+    '<h3 class="pod-sub">' + esc(t.pdInvite) + '</h3><div class="dk-actions">' + regen + '</div>';
 }
 
 // opening the Pod tab asks for the friends an admin may add
-export function podOpened() { loadFriends(); }
+export function podOpened() { if (status === 'error') status = 'idle'; loadFriends(); }
 
 function createHtml(t) {
-  return '<details class="pod-create"' + (state.pod ? '' : ' open') + '><summary>' + esc(t.pdCreate) + '</summary><form class="dk-form" data-createform>' +
-    '<input name="name" maxlength="100" required placeholder="' + esc(t.pdName) + '" aria-label="' + esc(t.pdName) + '">' +
-    '<label class="dk-vis"><span class="lbl-muted">' + esc(t.pdCopyFrom) + '</span><select name="from"><option value="">' + esc(t.pdTemplate) + '</option>' +
+  return '<section class="panel pod-card"><h3 class="pod-sub">' + esc(t.pdCreate) + '</h3><form class="dk-form" data-createform>' +
+    '<input name="name" id="pdNewName" maxlength="100" required placeholder="' + esc(t.pdName) + '" aria-label="' + esc(t.pdName) + '">' +
+    '<label class="dk-vis"><span class="lbl-muted">' + esc(t.pdCopyFrom) + '</span><select name="from" class="pod-link-in"><option value="">' + esc(t.pdTemplate) + '</option>' +
     state.pods.map(p => '<option value="' + p.id + '">' + esc(p.name) + '</option>').join('') + '</select></label>' +
-    '<button class="btn-primary">' + esc(t.pdCreateGo) + '</button></form></details>';
+    '<button class="btn-primary">' + esc(t.pdCreateGo) + '</button></form></section>';
 }
 
-const pickHtml = (t) => '<label class="arch-field"><span class="lbl-muted">' + esc(t.pdPicker) + '</span><select id="podSelTab" class="arch-select">' + pickerOptions() + '</select></label>';
-const paint = () => { if (state.tab === 'pod') renderPod(); };
+// Redraws the tab and puts the keyboard back where it was, or on the control named.
+function paint(focus) {
+  if (state.tab !== 'pod') return;
+  const id = focus || (document.activeElement && document.activeElement.id);
+  renderPod();
+  const el = id && $(id);
+  if (el) el.focus({ preventScroll: true });
+}
+// While decks are being read only the rows change, so a search being typed is left alone.
+function paintRows() {
+  if (state.tab !== 'pod') return;
+  const host = $('pdRows');
+  if (!host) return paint();
+  host.innerHTML = rowsHtml(T());
+  if (tableOpen) $('pdTableBody').innerHTML = deckTable(T());
+}
 function ensureDetail() {
   if (!state.activeId || state.pod || loadingDetail || status === 'error') return;
   loadingDetail = true;
@@ -228,16 +289,22 @@ export function renderPod() {
   if (!state.pods) body = note('pdSignInNote') + '<a class="btn-primary dk-login" href="account.html">' + esc(t.sdSignIn) + '</a>';
   else {
     ensureDetail();
-    const pick = pickHtml(t);
-    const flash = msg ? '<p class="note-bad" role="status">' + esc(t[msg]) + '</p>' : '';
-    if (!state.activeId) body = pick + flash + note('pdNoPod') + createHtml(t);
-    else if (!state.pod) body = pick + flash + note(status === 'error' ? 'pdErr' : 'pdLoading');
+    // every pod is one tap away; the last chip starts a new one
+    const pick = '<div class="dk-actions" role="group" aria-label="' + esc(t.pdPicker) + '">' +
+      state.pods.map(p => chip('pd-pod-' + p.id, 'pod', p.id, p.name, p.id === state.activeId && !creating)).join('') +
+      chip('pd-new', 'new', '', t.pdNew, creating) + '</div>';
+    const flash = msg ? '<p class="note-bad" role="alert">' + esc(t[msg]) + '</p>' : '';
+    if (creating || !state.pods.length) body = pick + flash + createHtml(t);
+    else if (!state.activeId) body = pick + flash + note('pdNoPod');
+    else if (!state.pod) body = pick + flash + (status === 'error'
+      ? '<p class="note-bad" role="alert">' + esc(t.pdErr) + '</p><div class="dk-actions"><button class="btn-ghost-sm" id="pd-reload" data-act="reload">' + esc(t.pdRetry) + '</button></div>'
+      : note('pdLoading'));
     else {
-      const p = state.pod;
-      body = pick + flash + '<p class="note-sm">' + esc(p.role === 'admin' ? t.pdRoleAdmin : t.pdRoleMember) + ' · ' + esc(count(p.members.length, t.pdMember1, t.pdMemberN) + ' · ' + count(p.decks.length, t.pdDeck1, t.pdDeckN)) + '</p>' +
-        '<div class="panel pod-card">' + deckTable(t) + '<div class="dk-actions">' + addHtml(t) + '</div></div>' +
-        '<div class="panel pod-card">' + membersHtml(t) + (p.role === 'admin' ? adminHtml(t) : '') + '</div>' +
-        createHtml(t);
+      const p = state.pod, admin = p.role === 'admin';
+      if (view === 'settings' && !admin) view = 'decks';
+      const tab = (k, label) => '<button class="tab-btn' + (view === k ? ' active' : '') + '" id="pd-view-' + k + '" data-act="view" data-value="' + k + '" aria-pressed="' + (view === k) + '">' + esc(label) + '</button>';
+      const views = '<div class="tabbar pod-views" role="group" aria-label="' + esc(t.pdViews) + '">' + tab('decks', t.pdVDecks + ' ' + p.decks.length) + tab('members', t.pdMembers + ' ' + p.members.length) + (admin ? tab('settings', t.pdVSettings) : '') + '</div>';
+      body = pick + flash + views + '<div class="panel pod-card">' + (view === 'members' ? membersHtml(t) : view === 'settings' ? settingsHtml(t) : decksView(t)) + '</div>';
     }
   }
   el.innerHTML = '<div class="stack-16">' + head + body + '</div>';
@@ -249,9 +316,11 @@ export function renderPod() {
     }
     host.replaceWith(editorEl);
   }
-  const stale = state.pod && !progress && !failed && state.pod.decks.some(d => d.list && !rows.has(keyOf(d)));
+  const stale = state.pod && view === 'decks' && !creating && !progress && !failed && state.pod.decks.some(d => !rows.has(keyOf(d)));
   if (stale) compute();
-  el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange;
+  el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange; el.oninput = onInput;
+  const table = $('pdTable');
+  if (table) table.ontoggle = () => { tableOpen = table.open; };
 }
 
 function onSaved(pod) {
@@ -267,14 +336,12 @@ async function act(method, path, body, ok) {
   const errs = res.data.errors || {};
   if (![ok].flat().includes(res.status)) {
     msg = errs.user === 'invalid' ? 'pdErrFriend' : errs.decks === 'limit' || errs.pods === 'limit' ? 'pdErrLimit' : errs.role === 'last_admin' ? 'pdErrLastAdmin' : 'pdErr';
-    renderPod(); return null;
+    paint(); return null;
   }
   msg = null;
   return res;
 }
 const here = (path) => 'pods/' + state.pod.id + (path ? '/' + path : '');
-
-async function refresh() { asking = null; adding = null; renaming = false; await reload(); renderAll(); }
 
 function openDeck(entry) {
   const list = entry.list, text = deckToText(list);
@@ -287,9 +354,15 @@ function openDeck(entry) {
 
 async function onClick(e) {
   const b = e.target.closest('[data-act]');
-  if (!b || b.tagName === 'SELECT') return;
+  if (!b || b.tagName === 'INPUT') return;
   const a = b.dataset.act, entry = state.pod && state.pod.decks.find(d => d.id === Number(b.dataset.deck)), user = Number(b.dataset.user);
-  if (a === 'cancel') { asking = null; adding = null; renaming = false; return paint(); }
+  if (a === 'cancel') { asking = null; return paint(b.dataset.back); }
+  if (a === 'pod') { creating = false; if (Number(b.dataset.value) !== state.activeId || !state.pod) return selectPod(Number(b.dataset.value)); return paint(); }
+  if (a === 'new') { creating = !creating; return paint(creating ? 'pdNewName' : 'pd-new'); }
+  if (a === 'view') { view = b.dataset.value; asking = null; return paint(); }
+  if (a === 'filter') { filter = b.dataset.value; return paint(); }
+  if (a === 'retry') { failed = false; msg = null; return paint(); }
+  if (a === 'reload') { status = 'idle'; return paint(); }
   if (a === 'analyze') return openDeck(entry);
   if (a === 'compare') {
     state.tableTexts = [deckToText(state.deck), deckToText(entry.list), '', ''];
@@ -300,36 +373,56 @@ async function onClick(e) {
     const res = await api(API + 'decks');
     adding = { decks: res.status === 200 ? res.data.decks : [] };
     if (res.status !== 200) msg = 'pdErr';
-    return renderPod();
+    return paint(adding.decks.length > 8 ? 'pdMineQ' : 'pd-mine-done');
   }
-  if (a === 'deck-out') { asking = 'd' + entry.id; return renderPod(); }
-  if (a === 'deck-out-yes') { if (await act('DELETE', here('decks/' + entry.id), undefined, 204)) refresh(); return; }
-  if (a === 'leave') { asking = 'leave'; return renderPod(); }
+  if (a === 'add-close') { adding = null; return paint('pd-mine'); }
+  if (a === 'deck-out') { asking = 'd' + entry.id; return paint('pd-outyes-' + entry.id); }
+  if (a === 'deck-out-yes') { if (await act('DELETE', here('decks/' + entry.id), undefined, 204)) changed(); return; }
+  if (a === 'leave') { asking = 'leave'; return paint('pd-leave-yes-' + user); }
   if (a === 'leave-yes') { if (await act('POST', here('leave'), undefined, 204)) { reset(); await reload(); renderAll(); } return; }
-  if (a === 'kick') { asking = 'm' + user; return renderPod(); }
-  if (a === 'kick-yes') { if (await act('DELETE', here('members/' + user), undefined, 204)) refresh(); return; }
-  if (a === 'promote') { if (await act('POST', here('members/' + user), { role: 'admin' }, 204)) refresh(); return; }
-  if (a === 'demote') { if (await act('POST', here('members/' + user), { role: 'member' }, 204)) refresh(); return; }
-  if (a === 'rename') { renaming = true; return renderPod(); }
-  if (a === 'rules') { editing = !editing; editorEl = null; return renderPod(); }
-  if (a === 'regen') { const res = await act('POST', here('invite'), undefined, 200); if (res) { state.pod.invite_code = res.data.invite_code; renderPod(); } return; }
+  if (a === 'kick') { asking = 'm' + user; return paint('pd-kick-yes-' + user); }
+  if (a === 'kick-yes') { if (await act('DELETE', here('members/' + user), undefined, 204)) changed(); return; }
+  if (a === 'promote') { if (await act('POST', here('members/' + user), { role: 'admin' }, 204)) changed('pd-demote-' + user); return; }
+  if (a === 'demote') { if (await act('POST', here('members/' + user), { role: 'member' }, 204)) changed('pd-promote-' + user); return; }
+  if (a === 'rules') { editing = !editing; editorEl = null; return paint(); }
+  if (a === 'regen') { asking = 'regen'; return paint('pd-regen-yes'); }
+  if (a === 'regen-yes') { const res = await act('POST', here('invite'), undefined, 200); asking = null; if (res) { state.pod.invite_code = res.data.invite_code; announce(T().pdRegenDone); paint('pd-regen'); } return; }
   if (a === 'copy') {
     try { await navigator.clipboard.writeText(inviteLink(state.pod.invite_code)); } catch (err) { return; }
-    copied = true; renderPod(); announce(T().pdCopied);
-    setTimeout(() => { copied = false; if (state.tab === 'pod') renderPod(); }, 1600);
+    copied = true; paint(); announce(T().pdCopied);
+    setTimeout(() => { copied = false; paint(); }, 1600);
   }
+}
+
+// After a change to this pod: read it again, keep the view and what is unfolded, tell Mis mazos its list is old.
+async function changed(focus) {
+  asking = null;
+  forgetDecks();
+  await reload();
+  renderAll();
+  if (focus && $(focus)) $(focus).focus({ preventScroll: true });
 }
 
 async function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
-  if ('addform' in f.dataset) { if (await act('POST', here('decks'), { deck: Number(f.deck.value) }, 201)) refresh(); }
-  else if ('addfriendform' in f.dataset) { if (await act('POST', here('members'), { user: Number(f.user.value) }, [200, 201])) refresh(); }
-  else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) refresh(); }
+  if ('addfriendform' in f.dataset) { if (await act('POST', here('members'), { user: Number(f.user.value) }, [200, 201])) changed(); }
+  else if ('renameform' in f.dataset) { if (await act('POST', here(), { name: f.name.value.trim() }, 200)) { announce(T().sdRenamed); changed('pdName'); } }
   else if ('createform' in f.dataset) {
     const res = await act('POST', 'pods', { name: f.name.value.trim(), from: f.from.value ? Number(f.from.value) : null }, 201);
     if (res) { reset(); await reload(); renderAll(); }
   }
 }
 
-function onChange(e) { if (e.target.id === 'podSelTab') selectPod(Number(e.target.value) || null); }
+async function onChange(e) {
+  if (e.target.dataset.act !== 'tick') return;
+  const id = Number(e.target.dataset.deck), on = e.target.checked;
+  const res = on ? await act('POST', here('decks'), { deck: id }, [200, 201]) : await act('DELETE', here('decks/' + id), undefined, [204, 404]);
+  if (res) changed(e.target.id);
+}
+
+// Typing filters what is under the field without redrawing the field itself.
+function onInput(e) {
+  if (e.target.id === 'pdQ') { q = e.target.value; $('pdRows').innerHTML = rowsHtml(T()); }
+  if (e.target.id === 'pdMineQ') for (const l of $('pdPicks').children) l.hidden = !has(e.target.value, l.dataset.text);
+}

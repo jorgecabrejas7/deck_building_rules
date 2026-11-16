@@ -52,6 +52,9 @@ export async function saveDeck() {
   flash('sdSaved');
 }
 
+// Another tab changed which pods a deck is in: ask for the list again next time.
+export function forgetDecks() { list = null; status = 'idle'; }
+
 // ---- opening ----
 function fillDeck(version) {
   const text = deckToText(version.list);

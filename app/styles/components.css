@@ -480,3 +480,13 @@ body.modal-open{overflow:hidden}
 .dk-more{display:flex;flex-direction:column;gap:var(--sp-3);padding:var(--sp-2) 0 var(--sp-4)}
 .dk-set{border:0;margin:0;padding:0;min-width:0}
 .dk-set legend{padding:0;margin-bottom:var(--sp-1)}
+
+/* Pod: one view at a time, like the report */
+.pod-views{align-self:flex-start;max-width:100%}
+.pod-views .tab-btn{min-height:44px}
+/* a member's name is short: its buttons stay beside it */
+.pod-people .gm-main{flex-basis:6rem}
+.pod-mine{display:flex;flex-direction:column;gap:var(--sp-3);padding-bottom:var(--sp-4);border-bottom:1px solid var(--border2)}
+.pod-picks{display:flex;flex-direction:column}
+.dk-pick[hidden]{display:none}
+.dk-row>.tier-pill,.gm-row>.tier-pill{flex:none}
