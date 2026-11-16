@@ -59,7 +59,7 @@ def test_anonymous_forbidden_everywhere():
 
 def test_create_list_get(a):
     d = make(a)
-    assert d["version_count"] == 1 and d["commanders"] == ["Atraxa"] and d["visibility"] == "private"
+    assert d["version_count"] == 1 and d["commanders"] == ["Atraxa"] and d["visibility"] == "private" and d["pods"] == []
     assert send(a, "get", "/pod/api/decks").json()["decks"][0]["id"] == d["id"]
     r = send(a, "get", f"/pod/api/decks/{d['id']}").json()
     assert r["versions"][0]["list"] == LIST and r["versions"][0]["source"] == "paste"
@@ -80,8 +80,7 @@ def test_link_token_follows_visibility(a, b):
     d = make(a)
     url, link = f"/pod/api/decks/{d['id']}", f"/pod/api/decks/link/{d['link_token']}"
     assert send(b, "get", link).status_code == 404
-    send(a, "post", url, {"visibility": "pods"})
-    assert send(b, "get", url).status_code == 404 and send(b, "get", link).status_code == 404
+    assert send(b, "get", url).status_code == 404
     send(a, "post", url, {"visibility": "link"})
     r = send(b, "get", link)
     assert r.status_code == 200
@@ -95,8 +94,9 @@ def test_rename_and_bad_visibility(a):
     d = make(a)
     url = f"/pod/api/decks/{d['id']}"
     assert send(a, "post", url, {"name": "  New  "}).json()["deck"]["name"] == "New"
-    r = send(a, "post", url, {"visibility": "public"})
-    assert (r.status_code, r.json()) == (400, {"errors": {"visibility": "invalid"}})
+    for v in ("public", "pods"):
+        r = send(a, "post", url, {"visibility": v})
+        assert (r.status_code, r.json()) == (400, {"errors": {"visibility": "invalid"}})
     assert send(a, "post", url, {"name": " "}).status_code == 400
 
 
@@ -175,3 +175,20 @@ def test_archidekt_dev_proxy(a, monkeypatch):
     assert seen[0].get_header("User-agent") == "pod-deck-checker"
     send(a, "get", "/pod/api/archidekt/123")
     assert seen[1].full_url == "https://archidekt.com/api/decks/123/"
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_folds_pods_visibility_into_private():
+    from django.db import connection
+    from django.db.migrations.executor import MigrationExecutor
+    try:
+        old = MigrationExecutor(connection).migrate([("decks", "0001_initial")]).apps
+        owner = old.get_model("accounts", "User").objects.create(username="old")
+        for i, v in enumerate(("pods", "link", "private")):
+            old.get_model("decks", "Deck").objects.create(owner=owner, name=v, visibility=v, link_token=f"t{i}")
+        new = MigrationExecutor(connection).migrate([("decks", "0002_visibility_private_or_link")]).apps
+        seen = dict(new.get_model("decks", "Deck").objects.values_list("name", "visibility"))
+        assert seen == {"pods": "private", "link": "link", "private": "private"}
+    finally:
+        ex = MigrationExecutor(connection)
+        ex.migrate(ex.loader.graph.leaf_nodes())

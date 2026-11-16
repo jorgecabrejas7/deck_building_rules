@@ -2,7 +2,7 @@
 import { state } from '../state.js';
 import { T, fill } from '../i18n.js';
 import { api } from '../api.js';
-import { $, esc, announce } from './helpers.js';
+import { $, esc, has, announce } from './helpers.js';
 import { renderHeader } from './header.js';
 import { renderAll } from '../main.js';
 import { analyze } from '../pipeline.js';
@@ -15,7 +15,11 @@ let list = null;           // the summaries, newest first
 let status = 'idle';       // idle | loading | done | auth | error
 let hist = null;           // {id, versions}: the history unfolded under one deck
 let confirmId = null;      // the deck whose Borrar awaits its second press
-let renameId = null;
+let openId = null;         // the deck whose Opciones are unfolded
+let podMsg = null;         // the deck whose last pod tick was refused
+let q = '';                // what is typed in the search
+let filter = 'all';        // all | none (in no pod) | a pod id
+let byName = false;        // sorted by name instead of newest first
 let copiedId = null;
 let imp = null;            // Archidekt import: {user, status, items, busy, progress}
 
@@ -87,33 +91,32 @@ async function load() {
 }
 
 async function showHistory(id) {
-  if (hist && hist.id === id) { hist = null; return renderDecks(); }
+  if (hist && hist.id === id) { hist = null; return paint(); }
   const res = await api(API + 'decks/' + id);
   if (res.status !== 200) return announce(T().sdLoadErr);
   hist = { id, versions: res.data.versions };
-  renderDecks();
+  paint();
 }
 
 async function remove(id) {
   const res = await api(API + 'decks/' + id, 'DELETE');
   confirmId = null;
   if (res.status !== 204) announce(T().sdFailed);
-  else { if (state.openDeck && state.openDeck.id === id) state.openDeck = null; hist = null; list = list.filter(d => d.id !== id); announce(T().sdDeleted); }
+  else { if (state.openDeck && state.openDeck.id === id) state.openDeck = null; hist = null; openId = null; list = list.filter(d => d.id !== id); announce(T().sdDeleted); }
   renderAll();
 }
 
 async function patch(row, body) {
   const res = await api(API + 'decks/' + row.id, 'POST', body);
-  renameId = null;
   if (res.status !== 200) announce(T().sdFailed);
-  else { Object.assign(row, res.data.deck); if (state.openDeck && state.openDeck.id === row.id) state.openDeck.name = row.name; }
-  renderDecks();
+  else { Object.assign(row, res.data.deck); if (state.openDeck && state.openDeck.id === row.id) state.openDeck.name = row.name; if (body.name) announce(T().sdRenamed); }
+  paint();
 }
 
 async function copyLink(d) {
   try { await navigator.clipboard.writeText(linkOf(d)); } catch (e) { return; }
-  copiedId = d.id; renderDecks(); announce(T().copied);
-  setTimeout(() => { if (copiedId === d.id) { copiedId = null; renderDecks(); } }, 1600);
+  copiedId = d.id; paint(); announce(T().copied);
+  setTimeout(() => { if (copiedId === d.id) { copiedId = null; paint(); } }, 1600);
 }
 
 // ---- import from Archidekt ----
@@ -155,34 +158,63 @@ const changes = (v, older, t) => {
     (cut.length ? '<p class="note-sm"><b>' + esc(t.sdCut) + '</b> ' + names(cut) + '</p>' : '');
 };
 
-function cardHtml(d, t) {
-  const n = d.version_count, vis = d.visibility;
-  const head = renameId === d.id
-    ? '<form class="dk-form" data-rename="' + d.id + '"><input name="name" value="' + esc(d.name) + '" maxlength="100" required aria-label="' + esc(t.sdRename) + '">' +
-      '<button class="btn-ghost-sm">' + esc(t.sdRenameSave) + '</button><button type="button" class="btn-ghost-sm" data-act="cancel">' + esc(t.sdCancel) + '</button></form>'
-    : '<h3 class="dk-name">' + esc(d.name) + '</h3>';
-  const meta = [d.commanders.join(' / '), fmtDate(d.updated_at), n + ' ' + (n === 1 ? t.sdVersion1 : t.sdVersionN)].filter(Boolean).map(esc).join(' · ');
+// One deck is one row: tapping it opens the deck, Opciones unfolds everything else.
+function optionsHtml(d, t) {
+  const n = d.version_count, shared = d.visibility === 'link', showHist = hist && hist.id === d.id;
+  const pods = state.pods && state.pods.length
+    ? state.pods.map(p => '<label class="dk-pick"><input type="checkbox" id="dk-pod-' + d.id + '-' + p.id + '" data-act="pod" data-pod="' + p.id + '"' + (d.pods.includes(p.id) ? ' checked' : '') + '><span>' + esc(p.name) + '</span></label>').join('')
+    : '<p class="note-sm">' + esc(t.sdNoPods) + '</p>';
   const del = confirmId === d.id
-    ? '<span class="dk-confirm">' + esc(fill(t.sdDeleteAsk, { n: d.name })) + '</span><button class="btn-ghost-sm btn-danger" data-act="delete-yes">' + esc(t.sdDeleteYes) + '</button><button class="btn-ghost-sm" data-act="cancel">' + esc(t.sdCancel) + '</button>'
-    : '<button class="btn-ghost-sm" data-act="delete">' + esc(t.sdDelete) + '</button>';
-  const open = hist && hist.id === d.id;
-  return '<article class="panel dk-card" data-id="' + d.id + '">' + head + '<p class="note-sm">' + meta + '</p>' +
-    '<div class="dk-actions"><button class="btn-primary" data-act="open">' + esc(t.sdOpen) + '</button>' +
-    '<button class="btn-ghost-sm" data-act="rename">' + esc(t.sdRename) + '</button>' +
-    '<button class="btn-ghost-sm" data-act="history" aria-expanded="' + !!open + '">' + esc(open ? t.sdHideHistory : t.sdHistory) + '</button></div>' +
-    '<div class="dk-actions"><label class="dk-vis"><span class="lbl-muted">' + esc(t.sdVis) + '</span><select data-act="vis"><option value="private"' + (vis === 'private' ? ' selected' : '') + '>' + esc(t.sdVisPrivate) + '</option><option value="pods"' + (vis === 'pods' ? ' selected' : '') + '>' + esc(t.sdVisPods) + '</option><option value="link"' + (vis === 'link' ? ' selected' : '') + '>' + esc(t.sdVisLink) + '</option></select></label>' +
-    (vis === 'link' ? '<button class="btn-ghost-sm" data-act="copy">' + esc(copiedId === d.id ? t.copied : t.sdCopyLink) + '</button>' : '') + '</div>' +
-    (open ? '<ol class="dk-history">' + hist.versions.map((v, i) => '<li><b>' + esc(fmtDate(v.created_at)) + '</b>' + (v.note ? ' · ' + esc(v.note) : '') + changes(v, hist.versions[i + 1], t) + '</li>').join('') + '</ol>' : '') +
-    '<div class="dk-actions">' + del + '</div></article>';
+    ? '<span class="dk-confirm">' + esc(fill(t.sdDeleteAsk, { n: d.name })) + '</span><button class="btn-ghost-sm btn-danger" id="dk-delyes-' + d.id + '" data-act="delete-yes">' + esc(t.sdDeleteYes) + '</button><button class="btn-ghost-sm" id="dk-delno-' + d.id + '" data-act="cancel">' + esc(t.sdCancel) + '</button>'
+    : '<button class="btn-ghost-sm" id="dk-del-' + d.id + '" data-act="delete">' + esc(t.sdDelete) + '</button>';
+  return '<div class="dk-more" id="dk-more-' + d.id + '">' +
+    '<p class="note-sm">' + esc(fmtDate(d.updated_at) + ' · ' + n + ' ' + (n === 1 ? t.sdVersion1 : t.sdVersionN)) + '</p>' +
+    '<form class="dk-form" data-rename="' + d.id + '"><input name="name" id="dk-name-' + d.id + '" value="' + esc(d.name) + '" maxlength="100" required aria-label="' + esc(t.sdRename) + '">' +
+    '<button class="btn-ghost-sm" id="dk-rename-' + d.id + '">' + esc(t.sdRenameSave) + '</button></form>' +
+    '<fieldset class="dk-set"><legend class="lbl-muted">' + esc(t.sdPods) + '</legend>' + pods + (podMsg === d.id ? '<p class="note-bad" role="alert">' + esc(t.sdPodErr) + '</p>' : '') + '</fieldset>' +
+    '<fieldset class="dk-set"><legend class="lbl-muted">' + esc(t.sdShareTitle) + '</legend><label class="dk-pick"><input type="checkbox" id="dk-share-' + d.id + '" data-act="share"' + (shared ? ' checked' : '') + '><span>' + esc(t.sdShare) + '</span></label>' +
+    (shared ? '<div class="dk-actions"><button class="btn-ghost-sm" id="dk-copy-' + d.id + '" data-act="copy">' + esc(copiedId === d.id ? t.copied : t.sdCopyLink) + '</button></div>' : '') + '</fieldset>' +
+    '<div class="dk-actions"><button class="btn-ghost-sm" id="dk-hist-' + d.id + '" data-act="history" aria-expanded="' + !!showHist + '">' + esc(showHist ? t.sdHideHistory : t.sdHistory) + '</button>' + del + '</div>' +
+    (showHist ? '<ol class="dk-history">' + hist.versions.map((v, i) => '<li><b>' + esc(fmtDate(v.created_at)) + '</b>' + (v.note ? ' · ' + esc(v.note) : '') + changes(v, hist.versions[i + 1], t) + '</li>').join('') + '</ol>' : '') +
+    '</div>';
+}
+
+const podName = (id) => ((state.pods || []).find(p => p.id === id) || {}).name;
+function shown() {
+  const found = list.filter(d => has(q, d.name, ...d.commanders) && (filter === 'all' || (filter === 'none' ? !d.pods.length : d.pods.includes(filter))));
+  return byName ? found.sort((a, b) => a.name.localeCompare(b.name, state.lang)) : found; // the server sends newest first
+}
+function rowsHtml(t) {
+  const found = shown();
+  const li = found.map(d => {
+    const open = openId === d.id;
+    const sub = [d.commanders.join(' / '), d.pods.map(podName).filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+    return '<li data-id="' + d.id + '"><div class="dk-row"><button class="gm-row" id="dk-open-' + d.id + '" data-act="open"><span class="gm-main"><span class="gm-name">' + esc(d.name) + '</span>' +
+      (sub ? '<span class="gm-sub">' + esc(sub) + '</span>' : '') + '</span></button>' +
+      '<button class="btn-ghost-sm" id="dk-opt-' + d.id + '" data-act="options" aria-expanded="' + open + '" aria-controls="dk-more-' + d.id + '" aria-label="' + esc(t.sdOptions + ', ' + d.name) + '">' + esc(t.sdOptions) + '</button></div>' +
+      (open ? optionsHtml(d, t) : '') + '</li>';
+  }).join('');
+  return '<p class="note-sm" role="status">' + esc(fill(t.sdCount, { n: found.length, m: list.length })) + '</p>' +
+    '<ul class="gm-list">' + (li || '<li class="note-sm">' + esc(t.gmNoMatch) + '</li>') + '</ul>';
+}
+const chip = (id, act, value, label, on) => '<button class="chip-dashed gm-chip" id="' + id + '" data-act="' + act + '" data-value="' + value + '" aria-pressed="' + on + '">' + esc(label) + '</button>';
+function listHtml(t) {
+  if (!list.length) return '<p class="note-sm">' + esc(t.sdEmpty) + '</p>';
+  const pods = state.pods || [];
+  const filters = pods.length ? '<div class="dk-actions" role="group" aria-label="' + esc(t.sdFilter) + '">' + chip('dk-f-all', 'filter', 'all', t.sdAll, filter === 'all') +
+    pods.map(p => chip('dk-f-' + p.id, 'filter', p.id, p.name, filter === p.id)).join('') + chip('dk-f-none', 'filter', 'none', t.sdNoPod, filter === 'none') + '</div>' : '';
+  const sort = '<div class="dk-actions" role="group" aria-label="' + esc(t.sdSort) + '">' + chip('dk-s-recent', 'sort', '', t.sdSortRecent, !byName) + chip('dk-s-name', 'sort', '1', t.sdSortName, byName) + '</div>';
+  return '<section class="panel dk-card"><div class="dk-form"><input type="search" id="dkQ" value="' + esc(q) + '" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="' + esc(t.sdFind) + '" aria-label="' + esc(t.sdFind) + '"></div>' +
+    filters + (list.length > 1 ? sort : '') + '<div id="dkRows">' + rowsHtml(t) + '</div></section>';
 }
 
 function importHtml(t) {
-  if (!imp) return '<button class="btn-ghost-sm" data-act="imp-open">' + esc(t.sdImport) + '</button>';
+  if (!imp) return '<div class="dk-actions"><button class="btn-ghost-sm" id="dk-imp-open" data-act="imp-open">' + esc(t.sdImport) + '</button></div>';
   const note = (k) => '<p class="note-sm">' + esc(t[k]) + '</p>';
   const body = imp.status === 'loading' ? note('sdLoading') : imp.status === 'auth' ? note('sdNeedLogin') : imp.status === 'error' ? note('sdErr') : imp.status === 'none' ? note('sdImportNone')
     : imp.status === 'done' ? '<form data-importform class="dk-import-list">' + imp.items.map(i => '<label class="dk-pick"><input type="checkbox" value="' + i.id + '"' + (imp.busy ? ' disabled' : '') + '><span>' + esc(i.name) + ' <span class="lbl-muted">' + esc(i.size) + '</span></span></label>').join('') +
       '<button class="btn-primary"' + (imp.busy ? ' disabled' : '') + '>' + esc(imp.busy ? imp.progress : t.sdImportGo) + '</button></form>' : '';
-  return '<section class="panel dk-import"><form data-userform class="dk-form"><input name="user" value="' + esc(imp.user) + '" maxlength="40" pattern="[A-Za-z0-9_.\\-]{1,40}" required aria-label="' + esc(t.sdImportUser) + '" placeholder="' + esc(t.sdImportUser) + '">' +
+  return '<section class="panel dk-import"><form data-userform class="dk-form"><input name="user" id="dkImpUser" value="' + esc(imp.user) + '" maxlength="40" pattern="[A-Za-z0-9_.\\-]{1,40}" required aria-label="' + esc(t.sdImportUser) + '" placeholder="' + esc(t.sdImportUser) + '">' +
     '<button class="btn-ghost-sm">' + esc(t.sdImportFind) + '</button><button type="button" class="btn-ghost-sm" data-act="imp-close">' + esc(t.sdCancel) + '</button></form>' + body + '</section>';
 }
 
@@ -192,31 +224,61 @@ export function renderDecks() {
   const body = status === 'auth' ? '<p>' + esc(t.sdNeedLogin) + '</p><a class="btn-primary dk-login" href="account.html">' + esc(t.sdSignIn) + '</a>'
     : status === 'error' ? '<p>' + esc(t.sdErr) + '</p>'
     : status !== 'done' ? '<p class="note-sm">' + esc(t.sdLoading) + '</p>'
-    : (list.length ? list.map(d => cardHtml(d, t)).join('') : '<p class="note-sm">' + esc(t.sdEmpty) + '</p>') + importHtml(t);
+    : importHtml(t) + listHtml(t);
   el.innerHTML = '<div class="part-head"><div><h2 class="part-title">' + esc(t.tabDecks) + '</h2><p class="part-sub">' + esc(t.sdIntro) + '</p></div></div><div class="dk-list">' + body + '</div>';
-  el.onclick = onClick; el.onchange = onChange; el.onsubmit = onSubmit;
+  el.onclick = onClick; el.onchange = onChange; el.onsubmit = onSubmit; el.oninput = onInput;
+}
+// Redraws the tab and puts the keyboard back where it was, or on the control named.
+function paint(focus) {
+  if (state.tab !== 'decks') return;
+  const id = focus || (document.activeElement && document.activeElement.id);
+  renderDecks();
+  const el = id && $(id);
+  if (el) el.focus({ preventScroll: true });
 }
 
 const rowOf = (el) => { const c = el.closest('[data-id]'); return c && list.find(x => x.id === Number(c.dataset.id)); };
 
+// Typing filters the rows under the field without redrawing the field itself.
+function onInput(e) { if (e.target.id === 'dkQ') { q = e.target.value; $('dkRows').innerHTML = rowsHtml(T()); } }
+
 function onClick(e) {
   const b = e.target.closest('[data-act]');
-  if (!b || b.tagName === 'SELECT') return;
+  if (!b || b.tagName === 'INPUT') return;
   const act = b.dataset.act, d = rowOf(b);
-  if (act === 'imp-open') { imp = { user: '', status: 'idle', items: [], busy: false, progress: '' }; return renderDecks(); }
-  if (act === 'imp-close') { imp = null; return renderDecks(); }
-  if (act === 'cancel') { renameId = null; confirmId = null; return renderDecks(); }
+  if (act === 'imp-open') { imp = { user: '', status: 'idle', items: [], busy: false, progress: '' }; return paint('dkImpUser'); }
+  if (act === 'imp-close') { imp = null; return paint('dk-imp-open'); }
+  if (act === 'filter') { filter = Number(b.dataset.value) || b.dataset.value; return paint(); }
+  if (act === 'sort') { byName = !!b.dataset.value; return paint(); }
   if (!d) return;
   if (act === 'open') openSaved(d.id);
-  else if (act === 'rename') { renameId = d.id; renderDecks(); }
+  else if (act === 'options') { openId = openId === d.id ? null : d.id; confirmId = null; podMsg = null; hist = null; paint(); }
   else if (act === 'history') showHistory(d.id);
   else if (act === 'copy') copyLink(d);
-  else if (act === 'delete') { confirmId = d.id; renderDecks(); }
+  else if (act === 'delete') { confirmId = d.id; paint('dk-delyes-' + d.id); }
+  else if (act === 'cancel') { confirmId = null; paint('dk-del-' + d.id); }
   else if (act === 'delete-yes') remove(d.id);
 }
 
+// A tick puts the deck in that pod or takes it out; the Pod tab reads the pod again when it is the active one.
+async function togglePod(d, podId, on) {
+  const res = on ? await api(API + 'pods/' + podId + '/decks', 'POST', { deck: d.id }) : await api(API + 'pods/' + podId + '/decks/' + d.id, 'DELETE');
+  const ok = on ? res.status === 200 || res.status === 201 : res.status === 204 || res.status === 404;
+  podMsg = ok ? null : d.id;
+  if (ok) {
+    d.pods = on ? [...d.pods, podId] : d.pods.filter(x => x !== podId);
+    const p = state.pods.find(x => x.id === podId);
+    if (p) p.decks += on ? 1 : -1;
+    if (podId === state.activeId) state.pod = null;
+    announce(fill(on ? T().sdPodIn : T().sdPodOut, { n: podName(podId) }));
+  }
+  paint();
+}
+
 function onChange(e) {
-  if (e.target.dataset.act === 'vis') patch(rowOf(e.target), { visibility: e.target.value });
+  const act = e.target.dataset.act, d = rowOf(e.target);
+  if (act === 'share') patch(d, { visibility: e.target.checked ? 'link' : 'private' });
+  else if (act === 'pod') togglePod(d, Number(e.target.dataset.pod), e.target.checked);
 }
 
 function onSubmit(e) {

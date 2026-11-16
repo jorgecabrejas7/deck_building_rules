@@ -35,7 +35,7 @@ def detail_response(m, request, status=200):
         decks.append({"id": d.id, "name": d.name, "owner": d.owner.username, "mine": d.owner_id == request.user.id,
                       "added_at": e.added_at, "updated_at": d.updated_at,
                       "commanders": latest.list["commanders"] if latest else [],
-                      "list": latest.list if latest and d.visibility in ("pods", "link") else None})
+                      "list": latest.list if latest else None})
     members = [{"id": x.user_id, "name": x.user.username, "role": x.role, "me": x.user_id == request.user.id}
                for x in p.members.select_related("user").order_by("joined_at", "id")]
     return JsonResponse({"pod": {
@@ -219,9 +219,6 @@ def add_deck(request, id):
         if m.pod.entries.count() >= MAX_PODDECKS:
             return bad({"decks": "limit"})
         entry = PodDeck.objects.create(pod=m.pod, deck=d)
-    if d.visibility == "private":
-        d.visibility = "pods"
-        d.save()
     return JsonResponse({"id": d.id, "added_at": entry.added_at}, status=201 if created else 200)
 
 

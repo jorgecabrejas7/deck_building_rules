@@ -163,13 +163,12 @@ def test_enter_deck(a, b, c):
     assert enter(c, p, mkdeck(c)).status_code == 404
     assert enter(a, p, d).status_code == 201
     d.refresh_from_db()
-    assert d.visibility == "pods"
+    assert d.visibility == "private"  # entering a pod is what shares it with that pod
+    assert send(a, "get", "/pod/api/decks").json()["decks"][0]["pods"] == [p["id"]]
     assert enter(a, p, d).status_code == 200
     assert PodDeck.objects.count() == 1
     row = send(b, "get", f"/pod/api/pods/{p['id']}").json()["pod"]["decks"][0]
     assert row["list"] == LIST and row["owner"] == "ana" and not row["mine"] and row["commanders"] == ["Atraxa"]
-    send(a, "post", f"/pod/api/decks/{d.id}", {"visibility": "private"})
-    assert send(b, "get", f"/pod/api/pods/{p['id']}").json()["pod"]["decks"][0]["list"] is None
     assert send(b, "delete", f"{base}/{d.id}").status_code == 403
     assert send(a, "delete", f"{base}/{d.id}").status_code == 204
     assert enter(a, p, d).status_code == 201

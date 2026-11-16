@@ -473,3 +473,10 @@ body.modal-open{overflow:hidden}
 /* the line of a game keeps room to read; its buttons drop below it on a phone */
 .pod-member .gm-main{padding:var(--sp-2) 0;flex:1 1 11rem}
 .pod-member .gm-main+.dk-actions{padding-bottom:var(--sp-2)}
+
+/* Mis mazos: one row a deck, the rest behind Opciones */
+.dk-row{display:flex;align-items:center;gap:var(--sp-2)}
+.dk-row .gm-row{flex:1;min-width:0;width:auto;margin:0 0 0 calc(-1*var(--sp-2))}
+.dk-more{display:flex;flex-direction:column;gap:var(--sp-3);padding:var(--sp-2) 0 var(--sp-4)}
+.dk-set{border:0;margin:0;padding:0;min-width:0}
+.dk-set legend{padding:0;margin-bottom:var(--sp-1)}

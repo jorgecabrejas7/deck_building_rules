@@ -13,7 +13,7 @@ MAX_DECKS = 100
 MAX_VERSIONS = 100
 MAX_BODY_BYTES = 32000
 SOURCES = ("paste", "moxfield", "archidekt", "builder")
-VISIBILITIES = ("private", "pods", "link")
+VISIBILITIES = ("private", "link")
 
 
 def signed_in(view):
@@ -77,7 +77,8 @@ def summary(d):
     latest = d.versions.first()
     return {"id": d.id, "name": d.name, "visibility": d.visibility, "link_token": d.link_token,
             "created_at": d.created_at, "updated_at": d.updated_at, "version_count": d.versions.count(),
-            "commanders": latest.list["commanders"] if latest else []}
+            "commanders": latest.list["commanders"] if latest else [],
+            "pods": sorted(d.pod_entries.values_list("pod_id", flat=True))}
 
 
 def own_deck(request, id):
