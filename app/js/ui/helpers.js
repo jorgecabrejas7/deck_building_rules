@@ -59,3 +59,18 @@ export function dialCost(spec, lang) {
   const steps = Object.entries(spec.point_steps).map(([k, v]) => k + '→' + v).join(', ');
   return (P ? 'gratis hasta ' : 'free up to ') + spec.baseline_max + (steps ? ' · ' + steps : '') + (P ? ' · después +1/unidad' : ' · then +1/unit');
 }
+
+// A deck's cover: its commanders' art, straight from Scryfall by name (an image that fails to load just leaves the tint).
+const hueOf = (text) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+export const coverStyle = (name) => '--hue:' + hueOf(name);
+export const coverArt = (commanders) => commanders.slice(0, 2).map(c =>
+  '<img src="https://api.scryfall.com/cards/named?format=image&version=art_crop&exact=' + encodeURIComponent(c) + '" alt="" loading="lazy" decoding="async" draggable="false">').join('');
+// Covers fade in once loaded; el is any ancestor of the images, bound once.
+export function bindCovers(el) {
+  if (el.dataset.covers) return;
+  el.dataset.covers = '1';
+  el.addEventListener('load', (e) => { if (e.target.tagName === 'IMG') e.target.classList.add('in'); }, true);
+  el.addEventListener('error', (e) => { if (e.target.tagName === 'IMG') e.target.remove(); }, true);
+}
+// Runs a redraw as a view transition where the browser has them, so things glide to their new place.
+export const glide = (fn) => document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches ? document.startViewTransition(fn) : fn();
