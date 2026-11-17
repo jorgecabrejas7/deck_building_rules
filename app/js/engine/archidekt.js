@@ -6,7 +6,11 @@ import { OUT_OF_DECK_RE, boardOf } from "./decks.js";
 export async function fetchArchidekt(id) {
   const res = await fetch("../api/archidekt/" + id);
   if (!res.ok) throw new Error("archidekt " + res.status);
-  const data = await res.json();
+  return parseArchidekt(await res.json(), id);
+}
+
+// Archidekt's deck payload as {name, entries, commanders, side, maybe}.
+export function parseArchidekt(data, id) {
   if (!data || !Array.isArray(data.cards)) throw new Error("archidekt returned a non-deck payload");
   // Two ways a card sits outside the 100: the owner unticked its category, or
   // it lives in a maybeboard/sideboard. Archidekt ships Sideboard with

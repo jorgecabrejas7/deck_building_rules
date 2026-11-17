@@ -1,5 +1,4 @@
 import json
-import re
 import mimetypes
 from pathlib import Path
 
@@ -54,12 +53,9 @@ def me(request):
             errors["language"] = "invalid"
         if "display_name" in data and not (isinstance(data["display_name"], str) and len(data["display_name"]) <= 50):
             errors["display_name"] = "invalid"
-        if "archidekt_username" in data and not (isinstance(data["archidekt_username"], str)
-                                                 and re.fullmatch(r"[A-Za-z0-9_.-]{0,40}", data["archidekt_username"])):
-            errors["archidekt_username"] = "invalid"
         if errors:
             return JsonResponse({"errors": errors}, status=400)
-        for k in ("display_name", "language", "archidekt_username"):
+        for k in ("display_name", "language"):
             if k in data:
                 setattr(u, k, data[k])
         u.save()

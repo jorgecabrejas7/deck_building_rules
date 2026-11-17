@@ -1,5 +1,4 @@
 import json
-import re
 import urllib.error
 import urllib.request
 from functools import wraps
@@ -203,12 +202,3 @@ def archidekt_get(url):
 @signed_in
 def archidekt_deck(request, id):
     return archidekt_get(f"https://archidekt.com/api/decks/{id}/")
-
-
-@require_GET
-@signed_in
-def archidekt_user(request, username):
-    if not re.fullmatch(r"[A-Za-z0-9_.-]{1,40}", username):
-        raise Http404
-    return archidekt_get(
-        f"https://archidekt.com/api/decks/v3/?ownerUsername={username}&deckFormat=3&pageSize=50")

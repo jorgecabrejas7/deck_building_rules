@@ -5,7 +5,7 @@ import pytest
 from django.test import Client
 
 from accounts.models import User
-from decks import views
+from decks import archidekt, views
 from decks.models import Deck, DeckVersion
 
 pytestmark = pytest.mark.django_db
@@ -52,7 +52,8 @@ def test_anonymous_forbidden_everywhere():
     for method, url in [("get", "/pod/api/decks"), ("post", "/pod/api/decks"), ("get", "/pod/api/decks/1"),
                         ("post", "/pod/api/decks/1"), ("delete", "/pod/api/decks/1"),
                         ("post", "/pod/api/decks/1/versions"), ("get", "/pod/api/decks/link/x"),
-                        ("get", "/pod/api/archidekt/1"), ("get", "/pod/api/archidekt/user/x")]:
+                        ("get", "/pod/api/archidekt/1"), ("post", "/pod/api/sync/archidekt"), ("get", "/pod/api/sync/archidekt/decks"),
+                        ("get", "/pod/api/sync/archidekt/decks/1")]:
         r = send(c, method, url, {} if method == "post" else None)
         assert (r.status_code, r.json()) == (403, {"error": "forbidden"}), url
 
@@ -164,18 +165,14 @@ def test_csrf_enforced():
 
 
 def test_archidekt_dev_proxy(a, monkeypatch):
-    assert send(a, "get", "/pod/api/archidekt/user/bad%20name").status_code == 404
-    assert send(a, "get", "/pod/api/archidekt/user/" + "x" * 41).status_code == 404
     resp = mock.MagicMock()
     resp.__enter__.return_value.status, resp.__enter__.return_value.read.return_value = 200, b'{"count": 0}'
     seen = []
     monkeypatch.setattr(views.urllib.request, "urlopen", lambda req, timeout: seen.append(req) or resp)
-    r = send(a, "get", "/pod/api/archidekt/user/ana.b-1")
+    r = send(a, "get", "/pod/api/archidekt/123")
     assert r.status_code == 200 and r.json() == {"count": 0}
-    assert seen[0].full_url == "https://archidekt.com/api/decks/v3/?ownerUsername=ana.b-1&deckFormat=3&pageSize=50"
+    assert seen[0].full_url == "https://archidekt.com/api/decks/123/"
     assert seen[0].get_header("User-agent") == "pod-deck-checker"
-    send(a, "get", "/pod/api/archidekt/123")
-    assert seen[1].full_url == "https://archidekt.com/api/decks/123/"
 
 
 def test_boards_are_optional_and_stored(a):
@@ -222,3 +219,64 @@ def test_summary_names_the_last_copy_from_archidekt(a):
     send(a, "post", f"/pod/api/decks/{d['id']}/versions", {"list": LIST, "source": "archidekt", "source_url": url})
     r = send(a, "post", f"/pod/api/decks/{d['id']}/versions", {"list": LIST, "source": "builder"})  # edited here afterwards
     assert r.json()["deck"]["archidekt"]["url"] == url
+
+
+# ---- the player's own Archidekt account ----
+
+def archidekt_says(monkeypatch, answers):
+    """Archidekt answers by path prefix; every call is recorded as (path, data, token)."""
+    calls = []
+    def call(path, data=None, token=None):
+        calls.append((path, data, token))
+        return next(v for k, v in answers.items() if path.startswith(k))
+    monkeypatch.setattr(archidekt, "call", call)
+    return calls
+
+
+def test_archidekt_sign_in_keeps_the_token_and_never_the_password(a, monkeypatch):
+    url = "/pod/api/sync/archidekt"
+    calls = archidekt_says(monkeypatch, {"rest-auth/login/": (400, {"non_field_errors": ["no"]})})
+    assert send(a, "post", url, {"email": "ana@x.com", "password": "bad"}).json() == {"errors": {"login": "refused"}}
+    for body in ({}, {"email": "ana@x.com"}, {"email": "", "password": "x"}, {"email": 3, "password": "x"}):
+        assert send(a, "post", url, body).json() == {"errors": {"login": "invalid"}}
+    assert len(calls) == 1
+    calls = archidekt_says(monkeypatch, {"rest-auth/login/": (200, {"access_token": "acc", "refresh_token": "ref", "user": {"username": "AnaDecks"}})})
+    assert send(a, "post", url, {"email": " ana@x.com ", "password": "s3cret"}).json() == {"username": "AnaDecks"}
+    assert calls == [("rest-auth/login/", {"email": "ana@x.com", "password": "s3cret"}, None)]
+    send(a, "post", url, {"email": "AnaDecks", "password": "s3cret"})
+    assert calls[1][1] == {"username": "AnaDecks", "password": "s3cret"}
+    u = User.objects.get(username="ana")
+    assert (u.archidekt_username, u.archidekt_refresh) == ("AnaDecks", "ref")
+    assert "s3cret" not in json.dumps(list(User.objects.filter(pk=u.pk).values()), default=str)
+    assert send(a, "get", "/pod/api/decks").json()["archidekt_username"] == "AnaDecks"
+    assert "ref" not in a.get("/pod/api/me").content.decode()  # the token never reaches the browser
+    assert a.delete(url).status_code == 204
+    u.refresh_from_db()
+    assert (u.archidekt_username, u.archidekt_refresh) == ("", "")
+    archidekt_says(monkeypatch, {"rest-auth/login/": (0, None)})
+    assert send(a, "post", url, {"email": "a@x.com", "password": "x"}).status_code == 502
+
+
+def test_archidekt_decks_are_read_with_the_players_token(a, monkeypatch):
+    assert send(a, "get", "/pod/api/sync/archidekt/decks").status_code == 401  # not signed in to Archidekt
+    User.objects.filter(username="ana").update(archidekt_username="AnaDecks", archidekt_refresh="ref")
+    page = lambda n, more: (200, {"next": "x" if more else None, "results": [{"id": n, "name": f"Deck {n}", "updatedAt": "2026-01-01T00:00:00Z", "private": True}]})
+    calls = archidekt_says(monkeypatch, {
+        "rest-auth/token/refresh/": (200, {"access": "acc", "refresh": "ref2"}),
+        "decks/v3/?ownerUsername=AnaDecks&deckFormat=3&pageSize=50&page=1": page(1, True),
+        "decks/v3/?ownerUsername=AnaDecks&deckFormat=3&pageSize=50&page=2": page(2, False),
+        "decks/7/": (200, {"name": "Private one", "cards": []}), "decks/8/": (404, None)})
+    r = send(a, "get", "/pod/api/sync/archidekt/decks")
+    assert r.json() == {"decks": [{"id": 1, "name": "Deck 1", "updatedAt": "2026-01-01T00:00:00Z"}, {"id": 2, "name": "Deck 2", "updatedAt": "2026-01-01T00:00:00Z"}]}
+    assert calls[0] == ("rest-auth/token/refresh/", {"refresh": "ref"}, None) and all(c[2] == "acc" for c in calls[1:])
+    assert User.objects.get(username="ana").archidekt_refresh == "ref2"
+    assert send(a, "get", "/pod/api/sync/archidekt/decks/7").json() == {"name": "Private one", "cards": []}
+    assert send(a, "get", "/pod/api/sync/archidekt/decks/8").status_code == 404
+    assert [c[0] for c in calls].count("rest-auth/token/refresh/") == 1  # the access token is reused
+
+
+def test_dead_archidekt_token_asks_to_sign_in_again(a, monkeypatch):
+    User.objects.filter(username="ana").update(archidekt_username="AnaDecks", archidekt_refresh="old")
+    archidekt_says(monkeypatch, {"rest-auth/token/refresh/": (401, {"code": "token_not_valid"})})
+    assert send(a, "get", "/pod/api/sync/archidekt/decks").json() == {"error": "archidekt"}
+    assert User.objects.get(username="ana").archidekt_username == ""

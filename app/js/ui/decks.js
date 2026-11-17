@@ -7,7 +7,7 @@ import { renderHeader } from './header.js';
 import { renderAll } from '../main.js';
 import { analyze } from '../pipeline.js';
 import { deckToText } from '../advice.js';
-import { parseDecklist, deckFingerprint, fetchArchidekt, diffCards } from '../engine/index.js';
+import { parseDecklist, deckFingerprint, parseArchidekt, diffCards } from '../engine/index.js';
 
 const API = '../api/';
 const LABEL_MS = 3000;
@@ -128,19 +128,29 @@ async function copyLink(d) {
 // ---- sync with Archidekt: one press brings every public Commander deck of that user and updates the ones already here ----
 const boards = (l) => JSON.stringify([...['entries', 'side', 'maybe'].map(b => (l[b] || []).map(e => e.quantity + ' ' + e.name).sort()), [...l.commanders].sort()]);
 
-async function runSync(user) {
+// Signs in to Archidekt through the server, which keeps a token and never the password, then syncs.
+async function connect(email, password) {
   sync = { busy: true, n: 0, m: 0 };
   paint();
-  const stop = (err) => { sync = { ask: true, err }; paint('dkArchUser'); };
-  if (user !== archUser) {
-    const r = await api(API + 'me', 'POST', { archidekt_username: user });
-    if (r.status !== 200) return stop('sdErr');
-    archUser = user;
-  }
-  // shortcut: the proxy route lists the first 50 decks; page it when someone has more Commander decks than that
-  const res = await api(API + 'archidekt/user/' + encodeURIComponent(user));
-  const items = res.status === 200 && Array.isArray(res.data.results) ? res.data.results.filter(r => !r.private) : null;
-  if (!items || !items.length) return stop(items ? 'sdImportNone' : 'sdErr');
+  const res = await api(API + 'sync/archidekt', 'POST', { email, password });
+  if (res.status !== 200) { sync = { ask: true, err: (res.data.errors || {}).login ? 'sdSyncRefused' : 'sdErr' }; return paint('dkArchEmail'); }
+  archUser = res.data.username;
+  return runSync();
+}
+async function disconnect() {
+  await api(API + 'sync/archidekt', 'DELETE');
+  archUser = ''; sync = null;
+  paint('dkArchEmail');
+}
+
+async function runSync() {
+  sync = { busy: true, n: 0, m: 0 };
+  paint();
+  const stop = (err) => { sync = { ask: true, err }; paint('dkArchEmail'); };
+  const res = await api(API + 'sync/archidekt/decks');
+  if (res.status === 401) { archUser = ''; return stop('sdSyncAgain'); } // Archidekt's token ran out
+  const items = res.status === 200 ? res.data.decks : null;
+  if (!items || !items.length) { sync = { done: null, err: items ? 'sdImportNone' : 'sdErr' }; return paint('dk-sync'); }
   const mine = new Map(list.filter(d => d.archidekt).map(d => [d.archidekt.url, d]));
   const out = { added: 0, updated: 0, same: 0, failed: 0, limit: false };
   sync.m = items.length;
@@ -151,7 +161,9 @@ async function runSync(user) {
     const url = 'https://archidekt.com/decks/' + item.id, d = mine.get(url);
     try {
       if (d && item.updatedAt && Date.parse(item.updatedAt) < Date.parse(d.archidekt.at)) { out.same++; continue; }
-      const a = await fetchArchidekt(item.id);
+      const got = await api(API + 'sync/archidekt/decks/' + item.id);
+      if (got.status !== 200) { out.failed++; continue; }
+      const a = parseArchidekt(got.data, item.id);
       const body = { list: { entries: a.entries, commanders: a.commanders, side: a.side, maybe: a.maybe }, source: 'archidekt', source_url: url };
       if (d) { // a new version only when Archidekt's list differs from the last copy taken from it: edits made here stay on top
         const cur = await api(API + 'decks/' + d.id);
@@ -253,12 +265,18 @@ function sheetHtml(t) {
 function syncHtml(t) {
   const note = (cls, text) => '<p class="' + cls + '" role="status">' + esc(text) + '</p>';
   if (sync && sync.busy) return '<section class="lib-sync"><button class="btn-primary busy" disabled>' + I_SYNC + esc(t.sdSync) + '</button><p class="note-sm" id="dkSyncSt" role="status">' + esc(sync.m ? fill(t.sdSyncProg, sync) : t.sdLoading) + '</p></section>';
-  if ((sync && sync.ask) || !archUser) return '<section class="lib-sync"><form data-syncform class="dk-form"><input name="user" id="dkArchUser" value="' + esc(archUser) + '" maxlength="40" pattern="[A-Za-z0-9_.\\-]{1,40}" required autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="' + esc(t.sdImportUser) + '" placeholder="' + esc(t.sdImportUser) + '">' +
-    '<button class="btn-primary">' + esc(t.sdSyncConnect) + '</button>' + (archUser ? '<button type="button" class="btn-ghost-sm" data-act="sync-keep">' + esc(t.sdCancel) + '</button>' : '') + '</form>' +
-    (sync && sync.err ? note('note-bad', t[sync.err]) : note('note-sm', t.sdSyncHow)) + '</section>';
+  if (!archUser) {
+    if (!sync || !sync.ask) return '<section class="lib-sync"><button class="btn-primary" id="dk-sync" data-act="sync-ask">' + I_SYNC + esc(t.sdSyncConnect) + '</button></section>';
+    const field = (name, id, type, label, auto) => '<input name="' + name + '" id="' + id + '" type="' + type + '" maxlength="' + (type === 'password' ? 200 : 254) + '" required autocomplete="' + auto + '" autocapitalize="none" spellcheck="false" aria-label="' + esc(label) + '" placeholder="' + esc(label) + '">';
+    return '<section class="lib-sync"><form data-syncform class="lib-login">' + field('email', 'dkArchEmail', 'text', t.sdSyncEmail, 'off') + field('password', 'dkArchPass', 'password', t.sdSyncPass, 'off') +
+      '<div class="dk-actions"><button class="btn-primary">' + esc(t.sdSyncGo) + '</button><button type="button" class="btn-ghost-sm" data-act="sync-keep">' + esc(t.sdCancel) + '</button></div></form>' +
+      (sync.err ? note('note-bad', t[sync.err]) : '') + note('note-sm', t.sdSyncHow) + '</section>';
+  }
   const o = sync && sync.done;
   return '<section class="lib-sync"><div class="dk-actions"><button class="btn-primary" id="dk-sync" data-act="sync">' + I_SYNC + esc(t.sdSync) + '</button>' +
-    '<button class="btn-ghost-sm" id="dk-sync-user" data-act="sync-user" aria-label="' + esc(t.sdSyncChange + ', ' + archUser) + '">@' + esc(archUser) + '</button></div>' +
+    (sync && sync.leave ? '<button class="btn-ghost-sm btn-danger" id="dk-sync-leave" data-act="sync-leave-yes">' + esc(t.sdSyncLeave) + '</button><button class="btn-ghost-sm" id="dk-sync-stay" data-act="sync-keep">' + esc(t.sdCancel) + '</button>'
+      : '<button class="btn-ghost-sm" id="dk-sync-user" data-act="sync-leave" aria-label="' + esc(t.sdSyncLeave + ', ' + archUser) + '">@' + esc(archUser) + '</button>') + '</div>' +
+    (sync && sync.err ? note('note-bad', t[sync.err]) : '') +
     (o ? note(o.failed ? 'note-bad' : 'note-sm', fill(t.sdSyncDone, o) + (o.failed ? ' ' + fill(o.limit ? t.sdSyncLimit : t.sdSyncFailed, { n: o.failed }) : '')) : '') + '</section>';
 }
 
@@ -306,9 +324,11 @@ function onClick(e) {
   const b = e.target.closest('[data-act]');
   if (!b || b.tagName === 'INPUT') return;
   const act = b.dataset.act, d = rowOf(b);
-  if (act === 'sync') return runSync(archUser);
-  if (act === 'sync-user') { sync = { ask: true }; return paint('dkArchUser'); }
-  if (act === 'sync-keep') { sync = null; return paint('dk-sync-user'); }
+  if (act === 'sync') return runSync();
+  if (act === 'sync-ask') { sync = { ask: true }; return paint('dkArchEmail'); }
+  if (act === 'sync-leave') { sync = { leave: true }; return paint('dk-sync-leave'); }
+  if (act === 'sync-leave-yes') return disconnect();
+  if (act === 'sync-keep') { sync = null; return paint(archUser ? 'dk-sync-user' : 'dk-sync'); }
   if (act === 'filter') { filter = Number(b.dataset.value) || b.dataset.value; arrived = true; return glide(() => paint()); }
   if (act === 'sort') { byName = !!b.dataset.value; arrived = true; return glide(() => paint()); }
   if (!d) return;
@@ -346,5 +366,5 @@ function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
   if (f.dataset.rename) patch(list.find(x => x.id === Number(f.dataset.rename)), { name: f.name.value.trim() });
-  else if ('syncform' in f.dataset) runSync(f.user.value.trim());
+  else if ('syncform' in f.dataset) connect(f.email.value.trim(), f.password.value);
 }
