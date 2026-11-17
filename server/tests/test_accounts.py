@@ -80,6 +80,10 @@ def test_me_post(client, active):
     assert post(client, "/pod/api/me", {"language": "fr"}).status_code == 400
     r = post(client, "/pod/api/me", {"language": "en", "display_name": "Bob"})
     assert r.status_code == 200 and r.json()["user"]["language"] == "en"
+    assert r.json()["user"]["archidekt_username"] == ""
+    for bad in ("a b", "x" * 41, "a/b", 7):
+        assert post(client, "/pod/api/me", {"archidekt_username": bad}).status_code == 400
+    assert post(client, "/pod/api/me", {"archidekt_username": "Yor.yi_1"}).json()["user"]["archidekt_username"] == "Yor.yi_1"
 
 
 def test_me_post_requires_csrf(active):

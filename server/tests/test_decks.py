@@ -72,7 +72,7 @@ def test_non_owner_gets_404(a, b):
     assert send(b, "post", url, {"name": "x"}).status_code == 404
     assert send(b, "delete", url).status_code == 404
     assert send(b, "post", url + "/versions", BODY).status_code == 404
-    assert send(b, "get", "/pod/api/decks").json() == {"decks": []}
+    assert send(b, "get", "/pod/api/decks").json() == {"decks": [], "archidekt_username": ""}
     assert Deck.objects.filter(pk=d["id"]).exists()
 
 
@@ -213,3 +213,12 @@ def test_migration_folds_pods_visibility_into_private():
     finally:
         ex = MigrationExecutor(connection)
         ex.migrate(ex.loader.graph.leaf_nodes())
+
+
+def test_summary_names_the_last_copy_from_archidekt(a):
+    d = make(a)
+    assert d["archidekt"] is None
+    url = "https://archidekt.com/decks/7"
+    send(a, "post", f"/pod/api/decks/{d['id']}/versions", {"list": LIST, "source": "archidekt", "source_url": url})
+    r = send(a, "post", f"/pod/api/decks/{d['id']}/versions", {"list": LIST, "source": "builder"})  # edited here afterwards
+    assert r.json()["deck"]["archidekt"]["url"] == url

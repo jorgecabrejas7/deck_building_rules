@@ -21,7 +21,8 @@ let q = '';                // what is typed in the search
 let filter = 'all';        // all | none (in no pod) | a pod id
 let byName = false;        // sorted by name instead of newest first
 let copiedId = null;
-let imp = null;            // Archidekt import: {user, status, items, busy, progress}
+let archUser = '';         // the Archidekt username kept on the account
+let sync = null;           // the Archidekt sync: {ask, err} the username is asked for | {busy, n, m} | {done: counts}
 
 const linkOf = (d) => location.origin + location.pathname + '#deck=' + d.link_token;
 const cards = (v) => v.list.entries.map(e => [e.name, e.quantity]);
@@ -89,7 +90,7 @@ async function load() {
   status = 'loading';
   const res = await api(API + 'decks');
   if (res.status === 403) status = 'auth';
-  else if (res.status === 200) { status = 'done'; list = res.data.decks; } else status = 'error';
+  else if (res.status === 200) { status = 'done'; list = res.data.decks; archUser = res.data.archidekt_username; } else status = 'error';
   if (state.tab === 'decks') renderDecks();
 }
 
@@ -122,33 +123,52 @@ async function copyLink(d) {
   setTimeout(() => { if (copiedId === d.id) { copiedId = null; paint(); } }, 1600);
 }
 
-// ---- import from Archidekt ----
-async function findUser(user) {
-  imp = { user, status: 'loading', items: [], busy: false, progress: '' };
-  renderDecks();
-  const res = await api(API + 'archidekt/user/' + encodeURIComponent(user));
-  const results = res.status === 200 && Array.isArray(res.data.results) ? res.data.results.filter(r => !r.private) : null;
-  imp.status = res.status === 403 ? 'auth' : !results ? 'error' : results.length ? 'done' : 'none';
-  imp.items = results || [];
-  renderDecks();
-}
+// ---- sync with Archidekt: one press brings every public Commander deck of that user and updates the ones already here ----
+const boards = (l) => JSON.stringify([...['entries', 'side', 'maybe'].map(b => (l[b] || []).map(e => e.quantity + ' ' + e.name).sort()), [...l.commanders].sort()]);
 
-async function runImport(ids) {
-  const t = T(), picked = imp.items.filter(i => ids.includes(String(i.id)));
-  let ok = 0;
-  imp.busy = true;
-  for (const [n, item] of picked.entries()) {
-    imp.progress = fill(t.sdImportProg, { n: n + 1, m: picked.length }); renderDecks();
-    try {
-      const d = await fetchArchidekt(item.id);
-      const res = await api(API + 'decks', 'POST', { name: d.name.slice(0, 100), list: { entries: d.entries, commanders: d.commanders, side: d.side, maybe: d.maybe }, source: 'archidekt', source_url: 'https://archidekt.com/decks/' + item.id });
-      if (res.status === 201) ok++;
-      else if (res.data.errors && res.data.errors.decks === 'limit') break;
-    } catch (e) { console.error(e); }
+async function runSync(user) {
+  sync = { busy: true, n: 0, m: 0 };
+  paint();
+  const stop = (err) => { sync = { ask: true, err }; paint('dkArchUser'); };
+  if (user !== archUser) {
+    const r = await api(API + 'me', 'POST', { archidekt_username: user });
+    if (r.status !== 200) return stop('sdErr');
+    archUser = user;
   }
-  imp = null; status = 'idle';
-  announce(fill(t.sdImportDone, { n: ok, m: picked.length }));
-  renderDecks();
+  // shortcut: the proxy route lists the first 50 decks; page it when someone has more Commander decks than that
+  const res = await api(API + 'archidekt/user/' + encodeURIComponent(user));
+  const items = res.status === 200 && Array.isArray(res.data.results) ? res.data.results.filter(r => !r.private) : null;
+  if (!items || !items.length) return stop(items ? 'sdImportNone' : 'sdErr');
+  const mine = new Map(list.filter(d => d.archidekt).map(d => [d.archidekt.url, d]));
+  const out = { added: 0, updated: 0, same: 0, failed: 0, limit: false };
+  sync.m = items.length;
+  for (const item of items) {
+    sync.n++;
+    const st = $('dkSyncSt');
+    if (st) st.textContent = fill(T().sdSyncProg, sync);
+    const url = 'https://archidekt.com/decks/' + item.id, d = mine.get(url);
+    try {
+      if (d && item.updatedAt && Date.parse(item.updatedAt) < Date.parse(d.archidekt.at)) { out.same++; continue; }
+      const a = await fetchArchidekt(item.id);
+      const body = { list: { entries: a.entries, commanders: a.commanders, side: a.side, maybe: a.maybe }, source: 'archidekt', source_url: url };
+      if (d) { // a new version only when Archidekt's list differs from the last copy taken from it: edits made here stay on top
+        const cur = await api(API + 'decks/' + d.id);
+        const last = cur.status === 200 && cur.data.versions.find(v => v.source === 'archidekt');
+        if (last && boards(last.list) === boards(body.list)) { out.same++; continue; }
+        const r = await api(API + 'decks/' + d.id + '/versions', 'POST', body);
+        r.status === 201 ? out.updated++ : out.failed++;
+      } else {
+        const r = await api(API + 'decks', 'POST', { ...body, name: a.name.slice(0, 100) });
+        if (r.status === 201) out.added++;
+        else if ((r.data.errors || {}).decks === 'limit') { out.limit = true; out.failed = items.length - out.added - out.updated - out.same; break; }
+        else out.failed++;
+      }
+    } catch (e) { console.error(e); out.failed++; }
+  }
+  sync = { done: out };
+  hist = null;
+  announce(fill(T().sdSyncDone, out));
+  await load();
 }
 
 // ---- rendering ----
@@ -211,14 +231,16 @@ function listHtml(t) {
     filters + (list.length > 1 ? sort : '') + '<div id="dkRows">' + rowsHtml(t) + '</div></section>';
 }
 
-function importHtml(t) {
-  if (!imp) return '<div class="dk-actions"><button class="btn-ghost-sm" id="dk-imp-open" data-act="imp-open">' + esc(t.sdImport) + '</button></div>';
-  const note = (k) => '<p class="note-sm">' + esc(t[k]) + '</p>';
-  const body = imp.status === 'loading' ? note('sdLoading') : imp.status === 'auth' ? note('sdNeedLogin') : imp.status === 'error' ? note('sdErr') : imp.status === 'none' ? note('sdImportNone')
-    : imp.status === 'done' ? '<form data-importform class="dk-import-list">' + imp.items.map(i => '<label class="dk-pick"><input type="checkbox" value="' + i.id + '"' + (imp.busy ? ' disabled' : '') + '><span>' + esc(i.name) + ' <span class="lbl-muted">' + esc(i.size) + '</span></span></label>').join('') +
-      '<button class="btn-primary"' + (imp.busy ? ' disabled' : '') + '>' + esc(imp.busy ? imp.progress : t.sdImportGo) + '</button></form>' : '';
-  return '<section class="panel dk-import"><form data-userform class="dk-form"><input name="user" id="dkImpUser" value="' + esc(imp.user) + '" maxlength="40" pattern="[A-Za-z0-9_.\\-]{1,40}" required aria-label="' + esc(t.sdImportUser) + '" placeholder="' + esc(t.sdImportUser) + '">' +
-    '<button class="btn-ghost-sm">' + esc(t.sdImportFind) + '</button><button type="button" class="btn-ghost-sm" data-act="imp-close">' + esc(t.sdCancel) + '</button></form>' + body + '</section>';
+function syncHtml(t) {
+  const note = (cls, text) => '<p class="' + cls + '" role="status">' + esc(text) + '</p>';
+  if (sync && sync.busy) return '<section class="dk-sync"><button class="btn-primary" disabled>' + esc(t.sdSync) + '</button><p class="note-sm" id="dkSyncSt" role="status">' + esc(sync.m ? fill(t.sdSyncProg, sync) : t.sdLoading) + '</p></section>';
+  if ((sync && sync.ask) || !archUser) return '<section class="dk-sync"><form data-syncform class="dk-form"><input name="user" id="dkArchUser" value="' + esc(archUser) + '" maxlength="40" pattern="[A-Za-z0-9_.\\-]{1,40}" required autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="' + esc(t.sdImportUser) + '" placeholder="' + esc(t.sdImportUser) + '">' +
+    '<button class="btn-primary">' + esc(t.sdSyncConnect) + '</button>' + (archUser ? '<button type="button" class="btn-ghost-sm" data-act="sync-keep">' + esc(t.sdCancel) + '</button>' : '') + '</form>' +
+    (sync && sync.err ? note('note-bad', t[sync.err]) : note('note-sm', t.sdSyncHow)) + '</section>';
+  const o = sync && sync.done;
+  return '<section class="dk-sync"><div class="dk-actions"><button class="btn-primary" id="dk-sync" data-act="sync">' + esc(t.sdSync) + '</button>' +
+    '<button class="btn-ghost-sm" id="dk-sync-user" data-act="sync-user" aria-label="' + esc(t.sdSyncChange + ', ' + archUser) + '">@' + esc(archUser) + '</button></div>' +
+    (o ? note(o.failed ? 'note-bad' : 'note-sm', fill(t.sdSyncDone, o) + (o.failed ? ' ' + fill(o.limit ? t.sdSyncLimit : t.sdSyncFailed, { n: o.failed }) : '')) : '') + '</section>';
 }
 
 export function renderDecks() {
@@ -227,7 +249,7 @@ export function renderDecks() {
   const body = status === 'auth' ? '<p>' + esc(t.sdNeedLogin) + '</p><a class="btn-primary dk-login" href="account.html">' + esc(t.sdSignIn) + '</a>'
     : status === 'error' ? '<p>' + esc(t.sdErr) + '</p>'
     : status !== 'done' ? '<p class="note-sm">' + esc(t.sdLoading) + '</p>'
-    : importHtml(t) + listHtml(t);
+    : syncHtml(t) + listHtml(t);
   el.innerHTML = '<div class="part-head"><div><h2 class="part-title">' + esc(t.tabDecks) + '</h2><p class="part-sub">' + esc(t.sdIntro) + '</p></div></div><div class="dk-list">' + body + '</div>';
   el.onclick = onClick; el.onchange = onChange; el.onsubmit = onSubmit; el.oninput = onInput;
 }
@@ -249,8 +271,9 @@ function onClick(e) {
   const b = e.target.closest('[data-act]');
   if (!b || b.tagName === 'INPUT') return;
   const act = b.dataset.act, d = rowOf(b);
-  if (act === 'imp-open') { imp = { user: '', status: 'idle', items: [], busy: false, progress: '' }; return paint('dkImpUser'); }
-  if (act === 'imp-close') { imp = null; return paint('dk-imp-open'); }
+  if (act === 'sync') return runSync(archUser);
+  if (act === 'sync-user') { sync = { ask: true }; return paint('dkArchUser'); }
+  if (act === 'sync-keep') { sync = null; return paint('dk-sync-user'); }
   if (act === 'filter') { filter = Number(b.dataset.value) || b.dataset.value; return paint(); }
   if (act === 'sort') { byName = !!b.dataset.value; return paint(); }
   if (!d) return;
@@ -288,9 +311,5 @@ function onSubmit(e) {
   e.preventDefault();
   const f = e.target;
   if (f.dataset.rename) patch(list.find(x => x.id === Number(f.dataset.rename)), { name: f.name.value.trim() });
-  else if ('userform' in f.dataset) findUser(f.user.value.trim());
-  else if ('importform' in f.dataset && !imp.busy) {
-    const ids = [...f.querySelectorAll('input:checked')].map(i => i.value);
-    if (ids.length) runImport(ids);
-  }
+  else if ('syncform' in f.dataset) runSync(f.user.value.trim());
 }
