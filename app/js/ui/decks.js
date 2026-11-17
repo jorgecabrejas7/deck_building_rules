@@ -2,7 +2,7 @@
 import { state } from '../state.js';
 import { T, fill } from '../i18n.js';
 import { api } from '../api.js';
-import { $, esc, has, announce, coverArt, coverStyle, bindCovers, glide } from './helpers.js';
+import { $, esc, has, announce, coverArt, coverStyle, bindCovers, needCovers, glide } from './helpers.js';
 import { renderHeader } from './header.js';
 import { renderAll } from '../main.js';
 import { analyze } from '../pipeline.js';
@@ -272,6 +272,7 @@ export function renderDecks() {
   el.innerHTML = '<div class="lib-head"><div><h2 class="part-title">' + esc(t.tabDecks) + '</h2><p class="part-sub">' + esc(t.sdIntro) + '</p></div>' + (status === 'done' ? syncHtml(t) : '') + '</div><div class="dk-list">' + body + '</div>';
   el.onclick = onClick; el.onchange = onChange; el.onsubmit = onSubmit; el.oninput = onInput;
   bindCovers(el);
+  if (status === 'done') needCovers(list.map(d => d.commanders), () => paint());
   const sheet = $('dkSheet');
   sheetWas = sheet ? openId : null;
   if (sheet) {

@@ -5,7 +5,7 @@ import { T, fill } from '../i18n.js';
 import { api } from '../api.js';
 import { podRules } from '../rules.js';
 import { readDeck, readDeps } from '../pipeline.js';
-import { $, esc, has, tierTone } from './helpers.js';
+import { $, esc, has, tierTone, coverThumb, bindCovers, needCovers } from './helpers.js';
 import { renderAll } from '../main.js';
 
 const API = '../api/';
@@ -102,7 +102,7 @@ export function renderHeroInvite() {
 }
 
 // ---- the tab ----
-const row = (id, act, key, name, sub, side, off) => '<li><button class="gm-row" id="' + id + '" data-act="' + act + '" data-id="' + key + '"' + (off ? ' disabled' : '') + '>' +
+const row = (id, act, key, name, sub, side, off, thumb = '') => '<li><button class="gm-row" id="' + id + '" data-act="' + act + '" data-id="' + key + '"' + (off ? ' disabled' : '') + '>' + thumb +
   '<span class="gm-main"><span class="gm-name">' + esc(name) + '</span>' + (sub ? '<span class="gm-sub">' + esc(sub) + '</span>' : '') + '</span>' + side + '</button></li>';
 const search = (id, value, label) => '<div class="dk-form"><input type="search" id="' + id + '" value="' + esc(value) + '" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="' + esc(label) + '" aria-label="' + esc(label) + '"></div>';
 
@@ -137,7 +137,7 @@ function decksLi(t) {
   const li = (d) => {
     const e = inPod.get(d.id), tier = e && tiers.get(tierKey(pod, e));
     return row('gm-deck-' + d.id, 'deck', d.id, d.name, d.commanders.join(' · '),
-      tier ? '<span class="tier-pill ' + tierTone(tier) + '">' + esc(t['short_' + tier]) + '</span>' : '', busy);
+      tier ? '<span class="tier-pill ' + tierTone(tier) + '">' + esc(t['short_' + tier]) + '</span>' : '', busy, coverThumb(d.name, d.commanders));
   };
   const found = decks.filter(d => has(dq, d.name, ...d.commanders)).sort(first);
   if (!found.length) return '<li class="note-sm">' + esc(t.gmNoMatch) + '</li>';
@@ -194,6 +194,8 @@ export function renderGames() {
   else body = pick ? choiceHtml(t) : listHtml(t);
   el.innerHTML = '<div class="stack-16"><div class="part-head"><div><h2 class="part-title">' + esc(t.gmTitle) + '</h2><p class="part-sub">' + esc(t.gmIntro) + '</p></div></div>' + body + '</div>';
   el.onclick = onClick; el.oninput = onInput;
+  bindCovers(el);
+  if (decks) needCovers(decks.map(d => d.commanders), () => paint());
 }
 // Redraws the tab and puts the keyboard back where it was, or on the control named.
 function paint(focus) {
