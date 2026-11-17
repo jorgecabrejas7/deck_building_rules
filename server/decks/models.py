@@ -25,6 +25,7 @@ class DeckVersion(models.Model):
     source = models.CharField(max_length=10, choices=[(s, s) for s in ("paste", "moxfield", "archidekt", "builder")])
     source_url = models.CharField(max_length=300, blank=True)
     note = models.CharField(max_length=500, blank=True)
+    name = models.CharField(max_length=60, blank=True)  # e.g. "Bracket 3"
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -13,12 +13,24 @@ MAX_FRAME = 4096
 RATE = 10  # actions per second per connection
 
 
+def lobby_view(game, seat):
+    """Per seat only public facts; the viewer alone gets their own boards in `mine`."""
+    players, mine = {}, None
+    for p in game.players.select_related("user", "deck", "version"):
+        lst = p.list
+        players[str(p.seat)] = {"name": p.name, "deck": p.deck.name if p.deck else None,
+                                "commanders": lst["commanders"] if lst else [],
+                                "count": sum(e["quantity"] for e in lst["entries"]) if lst else 0, "ready": p.ready,
+                                "version": p.version.name if p.version else ""}
+        if p.seat == seat:
+            mine = {"deck": p.deck_id, "version": p.version_id, **(lst or {"entries": [], "commanders": [], "side": [], "maybe": []})}
+    return {"status": "lobby", "you": seat, "zones": {}, "players": players, "mine": mine}
+
+
 def named_view(game, seat):
     if game.status == "lobby":
-        view = {"status": "lobby", "you": seat, "zones": {}, "players": {},
-                "picked": {str(p.seat): p.deck_version_id is not None for p in game.players.all()}}
-    else:
-        view = table.view(game.state, seat)
+        return lobby_view(game, seat)
+    view = table.view(game.state, seat)
     for p in game.players.select_related("user"):
         view["players"].setdefault(str(p.seat), {})["name"] = p.name
     return view
@@ -53,6 +65,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_id = self.scope["url_route"]["kwargs"]["id"]
         self.seat = await seat_of(self.game_id, self.scope["user"])
         if self.seat is None:
+            await self.accept()  # a refused handshake reaches the browser as code 1006 and it keeps retrying
             return await self.close(code=4403)
         self.group = f"game_{self.game_id}"
         self.sent = -1

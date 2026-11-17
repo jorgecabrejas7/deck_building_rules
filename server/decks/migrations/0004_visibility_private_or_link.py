@@ -8,7 +8,7 @@ def fold(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [("decks", "0001_initial")]
+    dependencies = [("decks", "0003_version_name")]
 
     operations = [
         migrations.RunPython(fold, migrations.RunPython.noop),

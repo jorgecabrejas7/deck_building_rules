@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from channels.testing import WebsocketCommunicator
 from django.conf import settings
 from django.test import Client
@@ -9,14 +9,16 @@ from django.test import Client
 from accounts.models import User
 from decks.models import Deck, DeckVersion
 from friends.models import Friendship
+from games.consumers import named_view
 from games.models import Game, GamePlayer
 from pod.asgi import application
 from pods.models import Pod, PodMember
 
-LIST = {"entries": [{"name": "Sol Ring", "quantity": 1}], "commanders": ["Atraxa"]}
+LIST = {"entries": [{"name": "Atraxa", "quantity": 1}, {"name": "Sol Ring", "quantity": 99}], "commanders": ["Atraxa"],
+        "side": [{"name": "Mana Crypt", "quantity": 1}], "maybe": [{"name": "Island", "quantity": 2}]}
 
 # Relies on table.py: new_game accepts {seat: {"entries","commanders"}}; apply(state, seat, {"type":"life",
-# "seat":1|2,"delta":int}) changes state or raises ActionError("invalid") for a bad delta, and ("stale") for an unknown card id;
+# "seat":1..N,"delta":int}) changes state or raises ActionError("invalid") for a bad delta, and ("stale") for an unknown card id;
 # view(state, seat) returns a dict with "players" keyed by str seat.
 LIFE = {"type": "life", "seat": 1, "delta": -1}
 
@@ -32,11 +34,19 @@ def post(c, url, data):
     return c.post(url, json.dumps(data), content_type="application/json")
 
 
-def mkdeck(user, cards=1):
+def mkdeck(user, cards=99):
     d = Deck.objects.create(owner=user, name="D")
-    DeckVersion.objects.create(deck=d, list={**LIST, "entries": [{"name": "Sol Ring", "quantity": cards}]},
+    DeckVersion.objects.create(deck=d, list={**LIST, "entries": [LIST["entries"][0], {"name": "Sol Ring", "quantity": cards}]},
                                source="paste")
     return d
+
+
+def choose(c, gid, deck=None):
+    return post(c, f"/pod/api/games/{gid}/deck", {"deck": (deck or mkdeck(c.user)).id})
+
+
+def ready(c, gid, ok=True, **boards):
+    return post(c, f"/pod/api/games/{gid}/ready", {"ready": ok, **boards})
 
 
 @pytest.fixture
@@ -48,16 +58,18 @@ def setup(db):
     return a, b, pod
 
 
-def lobby(a, b, pod):
-    r = post(a, "/pod/api/games", {"opponent": b.user.id, "pod": pod.id})
+def lobby(a, b, pod, *more):
+    r = post(a, "/pod/api/games", {"pod": pod.id, "opponents": [b.user.id, *(m.user.id for m in more)]})
     assert r.status_code == 201
     return r.json()["id"]
 
 
-def active(a, b, pod):
-    gid = lobby(a, b, pod)
-    assert post(a, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(a.user).id}).status_code == 200
-    assert post(b, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(b.user).id}).json()["status"] == "active"
+def active(a, b, pod, *more):
+    gid = lobby(a, b, pod, *more)
+    *first, last = (a, b, *more)
+    for c in first:
+        assert choose(c, gid).status_code == 200 and ready(c, gid).json()["status"] == "lobby"
+    assert choose(last, gid).status_code == 200 and ready(last, gid).json()["status"] == "active"
     return gid
 
 
@@ -82,50 +94,170 @@ def test_lobby_flow(setup):
     a, b, pod = setup
     gid = lobby(a, b, pod)
     g = a.get("/pod/api/games").json()["games"]
-    assert g == [{"id": gid, "status": "lobby", "seat": 1, "opponent": "ben", "picked": {"1": False, "2": False},
+    assert g == [{"id": gid, "status": "lobby", "seat": 1, "opponents": ["ben"],
+                  "ready": {"1": False, "2": False}, "decks": {"1": False, "2": False},
                   "pod": {"id": pod.id, "name": "Mesa"}}]
     assert b.get("/pod/api/games").json()["games"][0]["seat"] == 2
-    r = post(a, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(a.user).id})
-    assert r.json() == {"picked": {"1": True, "2": False}, "status": "lobby"}
+    assert choose(a, gid).json() == {"status": "lobby"}
+    assert a.get("/pod/api/games").json()["games"][0]["decks"] == {"1": True, "2": False}
+    assert ready(a, gid).json() == {"status": "lobby"}
+    assert a.get("/pod/api/games").json()["games"][0]["ready"] == {"1": True, "2": False}
     assert Game.objects.get(pk=gid).state == {}
-    r = post(b, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(b.user).id})
-    assert r.json()["status"] == "active"
+    choose(b, gid)
+    assert ready(b, gid).json() == {"status": "active"}
     players = Game.objects.get(pk=gid).state["players"]
     assert players["1"]["life"] == players["2"]["life"] == 40
-    assert post(a, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(a.user).id}).status_code == 400
+    assert choose(a, gid).status_code == 400 and ready(a, gid).status_code == 400
+
+
+def test_ready_needs_a_deck_and_can_be_undone(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    assert ready(a, gid).json() == {"errors": {"deck": "none"}}
+    assert post(a, f"/pod/api/games/{gid}/ready", {"ready": "yes"}).status_code == 400
+    choose(a, gid), choose(b, gid)
+    ready(a, gid)
+    assert ready(a, gid, False).json() == {"status": "lobby"}
+    assert ready(b, gid).json() == {"status": "lobby"}  # a took it back, so nobody starts
+    assert not GamePlayer.objects.get(game_id=gid, seat=1).ready
+    assert ready(a, gid).json() == {"status": "active"}
+
+
+def played(gid, seat):
+    zones = Game.objects.get(pk=gid).state["zones"][str(seat)]
+    return sorted(c["name"] for z in zones.values() for c in z), [c["name"] for c in zones["command"]]
+
+
+def test_moved_boards_are_what_is_dealt(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    choose(a, gid), choose(b, gid)
+    moved = {"entries": [{"name": "Atraxa", "quantity": 1}, {"name": "Mana Crypt", "quantity": 1}, {"name": "Sol Ring", "quantity": 97}, {"name": "Island", "quantity": 1}],
+             "side": [{"name": "Sol Ring", "quantity": 2}], "maybe": [{"name": "Island", "quantity": 1}]}  # a split quantity
+    assert ready(a, gid, **moved).json() == {"status": "lobby"}
+    assert GamePlayer.objects.get(game_id=gid, seat=1).list == {**moved, "commanders": ["Atraxa"]}
+    assert ready(b, gid).json() == {"status": "active"}
+    assert played(gid, 1) == (sorted(["Atraxa", "Island", "Mana Crypt"] + ["Sol Ring"] * 97), ["Atraxa"])
+    assert played(gid, 2) == (sorted(["Atraxa"] + ["Sol Ring"] * 99), ["Atraxa"])
+    assert Deck.objects.get(owner=a.user).versions.get().list == LIST  # the saved deck is untouched
+
+
+def test_bad_boards_refused(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    choose(a, gid, mkdeck(a.user))
+    atraxa, sol, crypt, isle = ({"name": n, "quantity": q} for n, q in (("Atraxa", 1), ("Sol Ring", 99), ("Mana Crypt", 1), ("Island", 2)))
+    ok = {"entries": [atraxa, sol], "side": [crypt], "maybe": [isle]}
+    cases = [
+        {**ok, "side": [crypt, {"name": "Black Lotus", "quantity": 1}]},   # invented card
+        {**ok, "side": []},                                                 # vanished
+        {**ok, "entries": [atraxa, {"name": "Sol Ring", "quantity": 100}]},  # changed total
+        {**ok, "entries": [sol], "side": [crypt, atraxa]},                  # commander moved out
+        {"entries": [], "side": [atraxa, sol, crypt], "maybe": [isle]},     # empty main
+        {**ok, "entries": [atraxa, {"name": "Sol Ring", "quantity": 0}]},   # malformed
+        {**ok, "side": "x"},
+        {"entries": ok["entries"]},                                         # others absent means empty
+    ]
+    for c in cases:
+        assert ready(a, gid, **c).json() == {"errors": {"list": "invalid"}}, c
+    assert not GamePlayer.objects.get(game_id=gid, seat=1).ready
+    assert ready(a, gid, **ok).status_code == 200
+
+
+def test_too_many_cards_in_main_refused(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    d = mkdeck(a.user, 249)
+    d.versions.update(list={**LIST, "entries": [LIST["entries"][0], {"name": "Sol Ring", "quantity": 249}],
+                            "side": [{"name": "Sol Ring", "quantity": 5}], "maybe": []})
+    choose(a, gid, d)
+    big = {"entries": [LIST["entries"][0], {"name": "Sol Ring", "quantity": 254}], "side": [], "maybe": []}
+    assert ready(a, gid, **big).json() == {"errors": {"list": "invalid"}}
+
+
+def test_rechoosing_resets_ready_and_boards(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    choose(a, gid)
+    ready(a, gid, entries=[LIST["entries"][0], {"name": "Sol Ring", "quantity": 98}, *LIST["side"]],
+          side=[{"name": "Sol Ring", "quantity": 1}], maybe=LIST["maybe"])
+    p = GamePlayer.objects.get(game_id=gid, seat=1)
+    assert p.ready and p.list["side"][0]["name"] == "Sol Ring"
+    choose(a, gid)
+    p = GamePlayer.objects.get(game_id=gid, seat=1)
+    assert not p.ready and p.list == LIST
 
 
 def test_lobby_refusals(setup):
     a, b, pod = setup
     c = login("cat")
-    assert post(c, "/pod/api/games", {"opponent": a.user.id, "pod": pod.id}).status_code == 404
     assert c.get("/pod/api/games").json() == {"games": [], "people": []}
-    assert post(a, "/pod/api/games", {"opponent": b.user.id, "pod": "x"}).json() == {"errors": {"pod": "invalid"}}
-    for opp in (c.user.id, a.user.id, "x", None):  # outsider, self, junk
-        r = post(a, "/pod/api/games", {"opponent": opp, "pod": pod.id})
-        assert r.status_code == 400 and r.json() == {"errors": {"opponent": "invalid"}}
+    assert post(a, "/pod/api/games", {"opponents": [b.user.id], "pod": "x"}).json() == {"errors": {"pod": "invalid"}}
+    assert post(c, "/pod/api/games", {"pod": pod.id, "opponents": [a.user.id]}).status_code == 404
     gid = lobby(a, b, pod)
     assert post(c, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(c.user).id}).status_code == 404
     assert c.delete(f"/pod/api/games/{gid}").status_code == 404
     assert post(a, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(b.user).id}).status_code == 404  # others' deck
     assert post(a, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(a.user, 251).id}).json() == {"errors": {"deck": "size"}}
+    assert post(c, f"/pod/api/games/{gid}/ready", {"ready": True}).status_code == 404
     assert post(a, f"/pod/api/games/{gid}/deck", {"deck": "x"}).status_code == 400
     assert Client().get("/pod/api/games").status_code == 403
+
+
+def members(pod, n):
+    out = []
+    for i in range(n):
+        c = login(f"p{i}")
+        PodMember.objects.create(pod=pod, user=c.user, role="member")
+        out.append(c)
+    return out
+
+
+@pytest.mark.parametrize("n", [3, 6])
+def test_many_player_game_starts_after_the_last_ready(setup, n):
+    a, b, pod = setup
+    rest = members(pod, n - 2)
+    gid = lobby(a, b, pod, *rest)
+    everyone = [a, b, *rest]
+    g = a.get("/pod/api/games").json()["games"][0]
+    assert g["opponents"] == ["ben", *(f"p{i}" for i in range(n - 2))] and len(g["ready"]) == len(g["decks"]) == n
+    assert [c.get("/pod/api/games").json()["games"][0]["seat"] for c in everyone] == list(range(1, n + 1))
+    for c in everyone:
+        choose(c, gid)
+    for c in everyone[:-1]:
+        assert ready(c, gid).json()["status"] == "lobby"
+    assert Game.objects.get(pk=gid).state == {}
+    assert ready(everyone[-1], gid).json()["status"] == "active"
+    assert sorted(Game.objects.get(pk=gid).state["players"]) == [str(s) for s in range(1, n + 1)]
+
+
+def test_opponents_refused(setup):
+    a, b, pod = setup
+    rest = members(pod, 5)
+    outsider = login("out")
+    ids = [m.user.id for m in rest]
+    for bad in ([], ids + [b.user.id], [b.user.id, b.user.id], [a.user.id], [b.user.id, a.user.id],
+                [outsider.user.id], [b.user.id, outsider.user.id], "x", None, [None], [True], [[1]], b.user.id):
+        r = post(a, "/pod/api/games", {"pod": pod.id, "opponents": bad})
+        assert r.status_code == 400 and r.json() == {"errors": {"opponents": "invalid"}}, bad
+    assert post(a, "/pod/api/games", {"pod": pod.id, "opponent": b.user.id}).status_code == 400
+    assert post(a, "/pod/api/games", {"pod": pod.id, "opponents": ids}).status_code == 201  # five is the most
+    assert Game.objects.count() == 1 and GamePlayer.objects.count() == 6
 
 
 def test_game_limit(setup):
     a, b, pod = setup
     for _ in range(5):
         lobby(a, b, pod)
-    r = post(a, "/pod/api/games", {"opponent": b.user.id, "pod": pod.id})
+    r = post(a, "/pod/api/games", {"pod": pod.id, "opponents": [b.user.id]})
     assert r.status_code == 400 and r.json() == {"errors": {"games": "limit"}}
 
 
-def test_deleted_user_leaves_null_opponent(setup):
+def test_deleted_user_leaves_null_opponents(setup):
     a, b, pod = setup
     lobby(a, b, pod)
     b.user.delete()
-    assert a.get("/pod/api/games").json()["games"][0]["opponent"] is None
+    assert a.get("/pod/api/games").json()["games"][0]["opponents"] == [None]
 
 
 # ---- WebSocket ----
@@ -139,8 +271,8 @@ def test_connect_refused(setup):
     async def scenario():
         for who, g in ((None, gid), (c, gid), (a, gid + 99)):
             comm_ = comm(g, who)
-            ok, code = await comm_.connect()
-            assert not ok and code == 4403
+            assert (await comm_.connect())[0]  # accepted, so the browser gets the close code
+            assert await comm_.receive_output() == {"type": "websocket.close", "code": 4403}
         ok, _ = await comm(gid, a, origin=b"http://evil.example").connect()
         assert not ok
 
@@ -151,24 +283,25 @@ def test_connect_refused(setup):
 def test_two_clients_same_seq_and_ack_only_to_actor(setup):
     a, b, pod = setup
     gid = active(a, b, pod)
+    start = Game.objects.get(pk=gid).seq
 
     async def scenario():
         ca, cb = comm(gid, a), comm(gid, b)
         assert (await ca.connect())[0] and (await cb.connect())[0]
         sa, sb = await ca.receive_json_from(), await cb.receive_json_from()
-        assert sa["seq"] == sb["seq"] == 1 and sa["ack"] is None
+        assert sa["seq"] == sb["seq"] == start and sa["ack"] is None
         assert sa["view"]["players"]["1"]["name"] == "ana" and sa["view"]["players"]["2"]["name"] == "ben"
         await ca.send_to(act(17))
         mine = await ca.receive_json_from()
         theirs = await cb.receive_json_from()
-        assert mine["seq"] == theirs["seq"] == 2
+        assert mine["seq"] == theirs["seq"] == start + 1
         assert mine["ack"] == 17 and theirs["ack"] is None
         assert await ca.receive_nothing()  # the echo of its own change is skipped
         await ca.disconnect()
         await cb.disconnect()
 
     run(scenario)
-    assert Game.objects.get(pk=gid).seq == 2
+    assert Game.objects.get(pk=gid).seq == start + 1
 
 
 @pytest.mark.django_db(transaction=True)
@@ -197,6 +330,32 @@ def test_errors_and_rate_limit(setup):
 
 
 @pytest.mark.django_db(transaction=True)
+def test_three_players_each_get_their_own_view(setup):
+    a, b, pod = setup
+    (c,) = members(pod, 1)
+    gid = active(a, b, pod, c)
+    start = Game.objects.get(pk=gid).seq
+
+    async def scenario():
+        comms = [comm(gid, x) for x in (a, b, c)]
+        for cm in comms:
+            assert (await cm.connect())[0]
+        states = [await cm.receive_json_from() for cm in comms]
+        assert [s["view"]["you"] for s in states] == [1, 2, 3]
+        assert all(sorted(s["view"]["players"]) == ["1", "2", "3"] for s in states)
+        assert states[0]["view"]["players"]["3"]["name"] == "p0"
+        await comms[2].send_to(act(1, {"type": "life", "seat": 1, "delta": -2}))
+        assert (await comms[2].receive_json_from())["ack"] == 1
+        for cm in comms[:2]:
+            s = await cm.receive_json_from()
+            assert s["seq"] == start + 1 and s["view"]["players"]["1"]["life"] == 38
+        for cm in comms:
+            await cm.disconnect()
+
+    run(scenario)
+
+
+@pytest.mark.django_db(transaction=True)
 def test_big_frame_closes_4400(setup):
     a, b, pod = setup
     gid = active(a, b, pod)
@@ -216,15 +375,18 @@ def test_big_frame_closes_4400(setup):
 def test_lobby_view_and_action_refused(setup):
     a, b, pod = setup
     gid = lobby(a, b, pod)
-    post(a, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(a.user).id})
+    choose(a, gid)
+    ready(a, gid)
 
     async def scenario():
         c = comm(gid, b)
         await c.connect()
         s = await c.receive_json_from()
-        assert s["seq"] == 0 and s["ack"] is None
-        assert s["view"] == {"status": "lobby", "you": 2, "zones": {}, "picked": {"1": True, "2": False},
-                             "players": {"1": {"name": "ana"}, "2": {"name": "ben"}}}
+        assert s["seq"] == 2 and s["ack"] is None
+        assert s["view"] == {"status": "lobby", "you": 2, "zones": {},
+                             "players": {"1": {"name": "ana", "deck": "D", "commanders": ["Atraxa"], "count": 100, "ready": True, "version": ""},
+                                         "2": {"name": "ben", "deck": None, "commanders": [], "count": 0, "ready": False, "version": ""}},
+                             "mine": {"deck": None, "version": None, "entries": [], "commanders": [], "side": [], "maybe": []}}
         await c.send_to(act(5))
         assert await c.receive_json_from() == {"type": "error", "ack": 5, "code": "lobby"}
         await c.disconnect()
@@ -233,9 +395,42 @@ def test_lobby_view_and_action_refused(setup):
 
 
 @pytest.mark.django_db(transaction=True)
+def test_lobby_updates_live_and_hides_boards(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+
+    async def scenario():
+        ca, cb = comm(gid, a), comm(gid, b)
+        await ca.connect(), await cb.connect()
+        assert (await ca.receive_json_from())["seq"] == 0 and (await cb.receive_json_from())["seq"] == 0
+        sync = sync_to_async
+        d = await sync(mkdeck)(a.user)
+        await sync(choose)(a, gid, d)
+        sa, sb = await ca.receive_json_from(), await cb.receive_json_from()
+        assert sa["seq"] == sb["seq"] == 1
+        assert sb["view"]["players"]["1"]["deck"] == "D" and sb["view"]["players"]["1"]["ready"] is False
+        assert sa["view"]["mine"]["deck"] == d.id and sa["view"]["mine"]["side"] == LIST["side"]
+        assert sb["view"]["mine"]["deck"] is None and "Mana Crypt" not in json.dumps(sb)  # ana's boards are hers alone
+        await sync(ready)(a, gid)
+        assert (await cb.receive_json_from())["view"]["players"]["1"]["ready"] is True
+        await ca.receive_json_from()
+        await sync(choose)(b, gid)
+        for cm in (ca, cb):
+            assert (await cm.receive_json_from())["seq"] == 3
+        await sync(ready)(b, gid)
+        for cm in (ca, cb):
+            last = await cm.receive_json_from()
+            assert last["seq"] == 4 and last["view"]["status"] == "active"
+        await ca.disconnect(), await cb.disconnect()
+
+    run(scenario)
+
+
+@pytest.mark.django_db(transaction=True)
 def test_reconnect_gets_current_seq(setup):
     a, b, pod = setup
     gid = active(a, b, pod)
+    start = Game.objects.get(pk=gid).seq
 
     async def scenario():
         c = comm(gid, a)
@@ -246,7 +441,7 @@ def test_reconnect_gets_current_seq(setup):
         await c.disconnect()
         c2 = comm(gid, a)
         await c2.connect()
-        assert (await c2.receive_json_from())["seq"] == 2
+        assert (await c2.receive_json_from())["seq"] == start + 1
         await c2.disconnect()
 
     run(scenario)
@@ -261,7 +456,6 @@ def test_delete_ends_game(setup):
         c = comm(gid, b)
         await c.connect()
         await c.receive_json_from()
-        from asgiref.sync import sync_to_async
         assert (await sync_to_async(a.delete)(f"/pod/api/games/{gid}")).status_code == 204
         assert await c.receive_json_from() == {"type": "ended"}
         assert await c.receive_output() == {"type": "websocket.close", "code": 4000}
@@ -289,6 +483,42 @@ def test_deleted_opponent_shows_null_name(setup):
     run(scenario)
 
 
+def test_ready_needs_exactly_100_cards(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    choose(a, gid)
+    short = {"entries": [LIST["entries"][0], {"name": "Sol Ring", "quantity": 98}], "side": [{"name": "Sol Ring", "quantity": 1}],
+             "maybe": [{"name": "Mana Crypt", "quantity": 1}, *LIST["maybe"]]}
+    assert ready(a, gid, **short).json() == {"errors": {"list": "count"}}
+    assert ready(a, gid, False, **short).json() == {"status": "lobby"}  # saving boards is not restricted
+    assert ready(a, gid).json() == {"errors": {"list": "count"}}
+    assert GamePlayer.objects.get(game_id=gid, seat=1).list["entries"] == short["entries"]
+
+
+def test_choose_a_deck_version(setup):
+    a, b, pod = setup
+    gid = lobby(a, b, pod)
+    d = mkdeck(a.user)
+    old = d.versions.get()
+    old.name = "Bracket 3"
+    old.save()
+    new = DeckVersion.objects.create(deck=d, list={**LIST, "side": []}, source="paste", name="Bracket 4")
+    choose(a, gid, d)  # latest by default
+    p = GamePlayer.objects.get(game_id=gid, seat=1)
+    assert p.version_id == new.id and p.list["side"] == []
+    assert post(a, f"/pod/api/games/{gid}/deck", {"deck": d.id, "version": old.id}).status_code == 200
+    p = GamePlayer.objects.get(game_id=gid, seat=1)
+    assert p.version_id == old.id and p.list == LIST and not p.ready
+    view = named_view(Game.objects.get(pk=gid), 1)
+    assert view["mine"]["version"] == old.id and view["players"]["1"]["version"] == "Bracket 3"
+    assert named_view(Game.objects.get(pk=gid), 2)["players"]["1"]["version"] == "Bracket 3"
+    other = mkdeck(a.user)
+    for bad in (other.versions.get().id, mkdeck(b.user).versions.get().id, 0):
+        assert post(a, f"/pod/api/games/{gid}/deck", {"deck": d.id, "version": bad}).status_code == 404
+    assert post(a, f"/pod/api/games/{gid}/deck", {"deck": d.id, "version": "x"}).status_code == 400
+    assert GamePlayer.objects.get(game_id=gid, seat=1).version_id == old.id
+
+
 def test_practice_game_needs_no_pod_and_replaces_the_last_one(db):
     a = login("ana")
     first = post(a, "/pod/api/games/practice", {})
@@ -299,41 +529,55 @@ def test_practice_game_needs_no_pod_and_replaces_the_last_one(db):
     assert g.pod is None and g.practice and g.status == "active"
     assert a.get("/pod/api/games").json()["games"] == []  # never listed
     assert len(g.state["zones"]["1"]["hand"]) == 7 and g.state["zones"]["2"]["library"] == []
+    assert named_view(g, 1)["players"]["2"]["name"] is None
     assert Client().post("/pod/api/games/practice").status_code == 403
 
 
 # ---- games between friends, and every game in one list ----
 
+def befriend(a, *others):
+    for o in others:
+        Friendship.objects.create(from_user=a.user, to_user=o.user, accepted=True)
+
+
 def test_friends_play_without_a_pod(db):
-    a, b, c = login("ana"), login("ben"), login("cat")
+    a, b, c, d = login("ana"), login("ben"), login("cat"), login("dan")
     url = "/pod/api/games"
-    assert post(a, url, {"opponent": b.user.id}).json() == {"errors": {"opponent": "invalid"}}  # strangers
+    assert post(a, url, {"opponents": [b.user.id]}).json() == {"errors": {"opponents": "invalid"}}  # strangers
     f = Friendship.objects.create(from_user=a.user, to_user=b.user)
-    assert post(a, url, {"opponent": b.user.id}).status_code == 400  # a pending request is not a friendship
-    assert post(b, url, {"opponent": a.user.id}).status_code == 400
+    assert post(a, url, {"opponents": [b.user.id]}).status_code == 400  # a pending request is not a friendship
+    assert post(b, url, {"opponents": [a.user.id]}).status_code == 400
     f.accepted = True
     f.save()
-    r = post(b, url, {"opponent": a.user.id})  # either friend may invite
+    befriend(c, b)
+    assert post(b, url, {"opponents": [a.user.id, d.user.id]}).status_code == 400  # every guest must be the inviter's friend
+    r = post(b, url, {"opponents": [a.user.id, c.user.id]})  # the guests need not be friends of each other
     assert r.status_code == 201
     gid = r.json()["id"]
     g = Game.objects.get(pk=gid)
     assert g.pod is None and not g.practice
-    assert a.get(url).json()["games"][0] == {"id": gid, "status": "lobby", "seat": 2, "opponent": "ben",
-                                             "picked": {"1": False, "2": False}, "pod": None}
-    assert post(c, url, {"opponent": a.user.id}).status_code == 400
-    assert post(c, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(c.user).id}).status_code == 404
+    assert a.get(url).json()["games"][0] == {"id": gid, "status": "lobby", "seat": 2, "opponents": ["ben", "cat"], "pod": None,
+                                             "ready": {"1": False, "2": False, "3": False}, "decks": {"1": False, "2": False, "3": False}}
+    assert post(d, url, {"opponents": [a.user.id]}).status_code == 400
+    assert post(d, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(d.user).id}).status_code == 404
     post(a, "/pod/api/games/practice", {})  # a practice game leaves the friend game alone
     assert Game.objects.filter(pk=gid).exists()
 
 
 def test_inviter_picks_a_deck_while_inviting(setup):
     a, b, pod = setup
-    assert post(a, "/pod/api/games", {"opponent": b.user.id, "pod": pod.id, "deck": mkdeck(b.user).id}).status_code == 404
-    assert post(a, "/pod/api/games", {"opponent": b.user.id, "pod": pod.id, "deck": "x"}).status_code == 400
+    new = {"opponents": [b.user.id], "pod": pod.id}
+    assert post(a, "/pod/api/games", {**new, "deck": mkdeck(b.user).id}).status_code == 404
+    assert post(a, "/pod/api/games", {**new, "deck": "x"}).status_code == 400
     assert not Game.objects.exists()
-    gid = post(a, "/pod/api/games", {"opponent": b.user.id, "pod": pod.id, "deck": mkdeck(a.user).id}).json()["id"]
-    assert a.get("/pod/api/games").json()["games"][0]["picked"] == {"1": True, "2": False}
-    assert post(b, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(b.user).id}).json()["status"] == "active"
+    d = mkdeck(a.user)
+    gid = post(a, "/pod/api/games", {**new, "deck": d.id}).json()["id"]
+    assert a.get("/pod/api/games").json()["games"][0]["decks"] == {"1": True, "2": False}
+    p = GamePlayer.objects.get(game_id=gid, seat=1)
+    assert p.deck == d and p.version == d.versions.get() and p.list == LIST and not p.ready
+    assert ready(a, gid).json() == {"status": "lobby"}  # the lobby opens with the deck already chosen
+    choose(b, gid)
+    assert ready(b, gid).json() == {"status": "active"}
 
 
 def test_games_and_people_across_pods(setup):
@@ -342,11 +586,11 @@ def test_games_and_people_across_pods(setup):
     other = Pod.objects.create(name="Liga", rules={})
     for u in (a, b, c):
         PodMember.objects.create(pod=other, user=u.user, role="member")
-    Friendship.objects.create(from_user=d.user, to_user=a.user, accepted=True)
-    Friendship.objects.create(from_user=a.user, to_user=c.user, accepted=True)
+    befriend(a, c, d)
     Friendship.objects.create(from_user=login("eve").user, to_user=a.user)  # pending: not offered
-    g1, g2 = lobby(b, a, pod), lobby(c, a, other)
-    g3 = post(d, "/pod/api/games", {"opponent": a.user.id}).json()["id"]
+    g1 = lobby(b, a, pod)
+    g2 = post(c, "/pod/api/games", {"opponents": [a.user.id], "pod": other.id}).json()["id"]
+    g3 = post(d, "/pod/api/games", {"opponents": [a.user.id]}).json()["id"]
     data = a.get("/pod/api/games").json()
     assert [(g["id"], g["pod"] and g["pod"]["name"]) for g in data["games"]] == [(g3, None), (g2, "Liga"), (g1, "Mesa")]
     assert data["people"] == [
@@ -356,17 +600,16 @@ def test_games_and_people_across_pods(setup):
 
 
 @pytest.mark.django_db(transaction=True)
-def test_friend_game_socket_is_for_its_two_players(db):
+def test_friend_game_socket_is_for_its_players(db):
     a, b, c = login("ana"), login("ben"), login("cat")
-    Friendship.objects.create(from_user=a.user, to_user=b.user, accepted=True)
-    Friendship.objects.create(from_user=a.user, to_user=c.user, accepted=True)  # a friend of a player is still no player
-    gid = post(a, "/pod/api/games", {"opponent": b.user.id, "deck": mkdeck(a.user).id}).json()["id"]
-    assert post(b, f"/pod/api/games/{gid}/deck", {"deck": mkdeck(b.user).id}).json()["status"] == "active"
+    befriend(a, b, c)  # a friend of a player is still no player
+    gid = post(a, "/pod/api/games", {"opponents": [b.user.id]}).json()["id"]
 
     async def scenario():
         for who in (c, None):
-            connected, code = await comm(gid, who).connect()
-            assert not connected and code == 4403
+            s = comm(gid, who)
+            await s.connect()
+            assert (await s.receive_output())["code"] == 4403
         s = comm(gid, b)
         assert (await s.connect())[0]
         assert (await s.receive_json_from())["view"]["you"] == 2

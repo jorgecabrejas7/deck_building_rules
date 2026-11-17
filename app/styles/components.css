@@ -470,6 +470,7 @@ body.modal-open{overflow:hidden}
 .gm-list>.note-sm{padding:var(--sp-3) 0}
 .gm-chip{min-height:44px}
 .gm-chip[aria-pressed="true"]{background:var(--accentBtn);color:var(--accentFg)}
+.gm-chip:disabled{opacity:.45;cursor:default}
 /* the line of a game keeps room to read; its buttons drop below it on a phone */
 .pod-member .gm-main{padding:var(--sp-2) 0;flex:1 1 11rem}
 .pod-member .gm-main+.dk-actions{padding-bottom:var(--sp-2)}

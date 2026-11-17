@@ -10,6 +10,8 @@ function cardFromScryfall(c) {
   const imgs = c.image_uris || (faces && faces[0].image_uris) || {};
   const mana = c.mana_cost !== undefined && c.mana_cost !== "" ? c.mana_cost
     : faces ? (faces[0].mana_cost || "") : "";
+  const front = faces ? faces[0] : c; // power, toughness and loyalty are the front face's
+  const bk = faces && faces[1] && faces[1].image_uris ? faces[1] : null; // a two-sided card: the face that shows when it is turned
   const eur = c.prices && (parseFloat(c.prices.eur) || parseFloat(c.prices.eur_foil)) || null;
   return {
     name: c.name, cmc: c.cmc, mana_cost: mana,
@@ -23,13 +25,16 @@ function cardFromScryfall(c) {
     produced_mana: c.produced_mana || (faces ? [...new Set(faces.flatMap(f => f.produced_mana || []))] : []),
     legal_commander: (c.legalities && c.legalities.commander) || "unknown",
     edhrec_rank: c.edhrec_rank || null,
+    power: front.power ?? null, toughness: front.toughness ?? null, loyalty: front.loyalty ?? null,
     img_art: imgs.art_crop || "", img_normal: imgs.normal || "", img_small: imgs.small || "",
+    back: bk && { name: bk.name, type_line: bk.type_line || "", power: bk.power ?? null, toughness: bk.toughness ?? null, loyalty: bk.loyalty ?? null,
+      colors: bk.colors || [], img_art: bk.image_uris.art_crop || "", img_small: bk.image_uris.small || "", img_normal: bk.image_uris.normal || "" },
   };
 }
 
 // Scryfall answers 429 once a burst outruns its limit; waiting a little is all it
 // asks, so one throttled call must not fail a whole analysis.
-async function scryfallFetch(url, opts) {
+export async function scryfallFetch(url, opts) {
   for (let attempt = 0; ; attempt++) {
     const res = await fetch(url, opts);
     if (res.status !== 429 || attempt === 4) return res;

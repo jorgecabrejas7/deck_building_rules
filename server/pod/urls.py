@@ -41,6 +41,7 @@ urlpatterns = [
     path("pod/api/games", games.games),
     path("pod/api/games/practice", games.practice),
     path("pod/api/games/<int:id>/deck", games.game_deck),
+    path("pod/api/games/<int:id>/ready", games.game_ready),
     path("pod/api/games/<int:id>", games.game),
 ]
 if settings.DEV_STATIC:

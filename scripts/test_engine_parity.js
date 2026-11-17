@@ -483,6 +483,14 @@ const moxOk = moxDeck.commanders.join() === "Boss" && moxDeck.entries.map(e => e
 console.log(`Moxfield links: ${moxOk ? "correct" : "FAIL"}`);
 if (!moxOk) fails++;
 
+// (n2) Sideboard and maybeboard are kept apart, never in entries.
+const names = (l) => l.map(e => e.name + e.quantity).join();
+const txtDeck = PodEngine.parseDecklist("Commander: Boss\n2 Island\nSideboard\n1 Mana Crypt\n// Maybeboard\n1 Sol Ring\n3 Swamp [Considering]\nTokens\n1 Goblin\nMainboard\n1 Forest");
+const boardsOk = names(txtDeck.entries) === "Boss1,Island2,Forest1" && names(txtDeck.side) === "Mana Crypt1" && names(txtDeck.maybe) === "Sol Ring1,Swamp3" &&
+  names(moxDeck.side) === "Mana Crypt1" && names(moxDeck.maybe) === "Sol Ring1";
+console.log(`Other boards: ${boardsOk ? "correct" : "FAIL"}`);
+if (!boardsOk) fails++;
+
 // (m) land drop odds.
 const oddsOk = Math.abs(PodEngine.atLeastOdds(10, 4, 1, 3) - PodEngine.drawOdds(10, 4, 3)) < 1e-9 && PodEngine.atLeastOdds(10, 4, 5, 8) === 0 && Math.abs(PodEngine.atLeastOdds(4, 2, 2, 2) - 1 / 6) < 1e-9;
 console.log(`Land odds: ${oddsOk ? "correct" : "FAIL"}`);

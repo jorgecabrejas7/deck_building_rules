@@ -7,7 +7,8 @@ DEBUG = os.environ.get("DJANGO_DEBUG") == "1"
 DEV_STATIC = DEBUG  # test runners force DEBUG off before urls load
 SECRET_KEY = "dev-only-insecure-key" if DEBUG else os.environ["DJANGO_SECRET_KEY"]
 POD_HOST = os.environ.get("POD_HOST", "localhost")
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"] if DEBUG else [POD_HOST]
+# DEV_HOSTS: extra comma-separated hosts for a debug server, to reach it from a phone on the same network
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver", *filter(None, os.environ.get("DEV_HOSTS", "").split(","))] if DEBUG else [POD_HOST]
 CSRF_TRUSTED_ORIGINS = [f"https://{POD_HOST}"]
 ADMIN_EMAIL = "admin@localhost" if DEBUG else os.environ["ADMIN_EMAIL"]  # without it new accounts would wait unseen
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

@@ -1,5 +1,6 @@
 import json
 import random
+from pathlib import Path
 
 import pytest
 
@@ -11,30 +12,47 @@ def deck(tag, n=100):
     return {"entries": entries, "commanders": [entries[0]["name"]]}
 
 
-@pytest.fixture
-def game():
-    return new_game({1: deck("a"), 2: deck("b")})
+def mkgame(n):
+    return new_game({s: deck("abcdef"[s - 1]) for s in range(1, n + 1)})
+
+
+@pytest.fixture(params=[2, 4], ids=["2p", "4p"])
+def game(request):
+    return mkgame(request.param)
+
+
+def seats(state):
+    return range(1, len(state["players"]) + 1)
 
 
 def all_cards(state):
     return [(c, z) for zs in state["zones"].values() for z, cs in zs.items() for c in cs]
 
 
-def assert_no_leak(state, viewer):
-    dumped = json.dumps(view(state, viewer))
+def assert_no_leak(state, viewer, ever=None):
+    """No hidden name in the view. The log may name a card that is hidden now, but only one this seat could
+    see at some earlier check: pass the same `ever` dict along a game to remember those."""
+    v = view(state, viewer)
+    log = json.dumps(v.pop("log"))
+    dumped = json.dumps(v)
     seen = {n for p in state["players"].values() for n in p["commanders"]}  # public in players
     seen |= {c["name"] for c, z in all_cards(state)
             if (z not in ("library", "hand") and not c["face_down"]) or viewer in c["known_by"]}
+    ever = (ever if ever is not None else {}).setdefault(viewer, set())
+    ever |= seen
     for c, z in all_cards(state):
         # a name also on a visible card (duplicate token names) cannot be told apart
         if c["name"] not in seen:
             assert json.dumps(c["name"]) not in dumped, f"{c['name']} leaked to seat {viewer}"
-    assert "known_by" not in dumped
+        if c["name"] not in ever:
+            assert json.dumps(c["name"]) not in log, f"{c['name']} leaked to seat {viewer} in the log"
+    for secret in ("known_by", "uid", "history", "seen", "peek"):
+        assert f'"{secret}"' not in dumped + log
 
 
-def check(state):
-    for v in (1, 2):
-        assert_no_leak(state, v)
+def check(state, ever=None):
+    for v in seats(state):
+        assert_no_leak(state, v, ever)
 
 
 def ids(state, seat, zone):
@@ -61,11 +79,38 @@ def mv(cards, seat, zone, **kw):
 def test_new_game(game):
     assert [c["name"] for c in game["zones"]["1"]["command"]] == ["a-card-000"]
     assert len(game["zones"]["1"]["library"]) == 92 and len(game["zones"]["1"]["hand"]) == 7
-    for s in "12":
-        assert sum(len(c) for c in game["zones"][s].values()) == 100
-    assert game["players"]["1"]["cmd_damage"] == {"b-card-000": 0}
-    assert game["players"]["1"]["life"] == 40
+    for s in seats(game):
+        assert sum(len(c) for c in game["zones"][str(s)].values()) == 100
+        assert game["players"][str(s)]["life"] == 40 and game["players"][str(s)]["out"] is False
+        assert game["zones"][str(s)]["command"][0]["known_by"] == list(seats(game))
+    assert game["players"]["1"]["cmd_damage"] == {str(o): {f"{'abcdef'[o - 1]}-card-000": 0} for o in seats(game) if o != 1}
     check(game)
+
+
+TOKENS = json.loads((Path(__file__).resolve().parents[2] / "data" / "tokens.json").read_text(encoding="utf-8"))
+
+
+def token_ids(*names):
+    return sorted(e["o"] for n in names for e in TOKENS if e["n"] == n)
+
+
+def test_new_game_tokens():
+    makers = {"entries": [{"name": "Siege-Gang Commander", "quantity": 1}, {"name": "Generous Gift", "quantity": 1}],
+              "commanders": ["Siege-Gang Commander"]}
+    g = new_game({1: makers, 2: deck("b")})
+    tokens = g["players"]["1"]["tokens"]
+    assert tokens == sorted(tokens) and all(set(token_ids(n)) & set(tokens) for n in ("Goblin", "Elephant"))  # many tokens share a name
+    assert g["players"]["2"]["tokens"] == []
+    for viewer in (1, 2):  # every seat sees every seat's tokens
+        assert {s: p["tokens"] for s, p in view(g, viewer)["players"].items()} == {"1": tokens, "2": []}
+
+
+def test_new_game_tokens_by_front_face():
+    full = next(k for k in json.loads((Path(__file__).resolve().parents[2] / "data" / "token_makers.json").read_text()) if " // " in k)
+    front = {"entries": [{"name": full.split(" // ")[0], "quantity": 1}], "commanders": []}
+    both = {"entries": [{"name": full, "quantity": 1}], "commanders": []}
+    a, b = new_game({1: front, 2: both})["players"].values()
+    assert a["tokens"] and a["tokens"] == b["tokens"]
 
 
 def test_new_game_quantities_and_limit():
@@ -78,6 +123,16 @@ def test_new_game_quantities_and_limit():
     assert e.value.code == "invalid"
 
 
+@pytest.mark.parametrize("n", [0, 1, 7])
+def test_new_game_player_count(n):
+    with pytest.raises(ActionError) as e:
+        new_game({s: deck("x") for s in range(1, n + 1)})
+    assert e.value.code == "invalid"
+    assert len(mkgame(6)["players"]) == 6
+    with pytest.raises(ActionError):
+        new_game({1: deck("a"), 3: deck("c")})
+
+
 def test_apply_does_not_mutate(game):
     snap = json.dumps(game)
     apply(game, 1, mv(ids(game, 1, "hand")[:1], 1, "battlefield"))
@@ -85,21 +140,58 @@ def test_apply_does_not_mutate(game):
 
 
 def test_move_each_destination_and_ids(game):
-    for seat in (1, 2):
+    for seat in seats(game):
         for zone in ("library", "hand", "battlefield", "graveyard", "exile"):
             for pos in ((None,) if zone != "library" else ("top", "bottom")):
                 moving = ids(game, 1, "hand")[:2]
                 kw = {"pos": pos} if pos else {}
                 g = apply(game, 1, mv(moving, seat, zone, **kw))
                 check(g)
-                assert not set(moving) & {c["id"] for c, _ in all_cards(g)}
+                assert set(moving) <= {c["id"] for c, _ in all_cards(g)}
 
 
-def test_library_move_reissues_ids_within_library(game):
+def test_library_move_keeps_ids_within_library(game):
     top = ids(game, 1, "library")[:3]
     g = apply(game, 1, mv(top, 1, "library", pos="bottom"))
-    assert not set(top) & set(ids(g, 1, "library"))
+    assert ids(g, 1, "library")[-3:] == top
     check(g)
+
+
+def test_move_to_nth_from_top(game):
+    lib = ids(game, 1, "library")[:20]
+    two = ids(game, 1, "hand")[:2]
+    g = apply(game, 1, mv(two[:1], 1, "library", pos=7))
+    assert ids(g, 1, "library").index(two[0]) == 6 and g["log"][-1]["pos"] == 7
+    g = apply(g, 1, mv(two, 1, "library", pos=3))  # several keep their order from that place
+    assert ids(g, 1, "library")[2:4] == two
+    assert ids(apply(game, 1, mv(two[:1], 1, "library", pos=1)), 1, "library") == ids(apply(game, 1, mv(two[:1], 1, "library", pos="top")), 1, "library")
+    assert ids(apply(game, 1, mv(two[:1], 1, "library", pos=10000)), 1, "library")[-1] == two[0]
+    g = apply(game, 1, mv(lib[:1], 1, "library", pos=5))  # already in that library: counted without it
+    assert ids(g, 1, "library")[4] == lib[0] and len(ids(g, 1, "library")) == len(lib) + 72
+    assert ids(g, 1, "library")[:4] == lib[1:5]
+    check(g)
+    assert ids(apply(g, 1, {"type": "undo"}), 1, "library") == ids(game, 1, "library")
+    for bad in (0, -1, 2.5, "7", True, 10001):
+        with pytest.raises(ActionError):
+            apply(game, 1, mv(two[:1], 1, "library", pos=bad))
+    with pytest.raises(ActionError):
+        apply(game, 1, mv(two[:1], 1, "hand", pos=7))
+
+
+def test_ids_survive_moves_and_draws_but_not_shuffles(game):
+    c = ids(game, 1, "hand")[0]
+    g = game
+    for zone in ("battlefield", "graveyard", "hand"):
+        g = apply(g, 1, mv([c], 1, zone))
+        assert c in ids(g, 1, zone)
+    top = ids(g, 1, "library")[0]
+    g = apply(g, 1, mv([top], 1, "hand"))
+    assert top in ids(g, 1, "hand")
+    lib = set(ids(g, 1, "library"))
+    assert not lib & set(ids(apply(g, 1, {"type": "shuffle", "seat": 1}), 1, "library"))
+    mull = apply(g, 1, {"type": "mulligan", "n": 7})
+    before = lib | set(ids(g, 1, "hand"))
+    assert not before & (set(ids(mull, 1, "library")) | set(ids(mull, 1, "hand")))
 
 
 def test_library_top_order(game):
@@ -114,7 +206,7 @@ def test_draw_then_bounce_opponent_knows(game):
     name = card(game, top[0])["name"]
     g = apply(game, 1, mv(top, 1, "hand"))
     assert_no_leak(g, 2)
-    assert 2 not in g["zones"]["1"]["hand"][-1]["known_by"]
+    assert not set(range(2, len(g["players"]) + 1)) & set(g["zones"]["1"]["hand"][-1]["known_by"])
     g = apply(g, 1, mv(ids(g, 1, "hand")[-1:], 1, "battlefield"))
     g = apply(g, 1, mv(ids(g, 1, "battlefield")[-1:], 1, "hand"))
     v = view(g, 2)["zones"]["1"]["hand"][-1]
@@ -122,22 +214,43 @@ def test_draw_then_bounce_opponent_knows(game):
     check(g)
 
 
+def test_shared_needs_every_other_seat(game):
+    n = len(game["players"])
+    g = apply(game, 1, {"type": "look", "cards": ids(game, 2, "hand")[:1]})  # seat 1 now knows a card of seat 2's hand
+    c = view(g, 1)["zones"]["2"]["hand"][0]
+    assert "name" in c and c["shared"] is (n == 2)  # seat 2 holds it; with 4 players seats 3 and 4 do not
+    g = apply(g, 2, {"type": "reveal", "cards": [c["id"]]})
+    assert all(view(g, s)["zones"]["2"]["hand"][0]["shared"] is True and "name" in view(g, s)["zones"]["2"]["hand"][0]
+               for s in seats(g))
+
+
+def test_flip_up_is_known_to_every_seat(game):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:1], 1, "battlefield", face_down=True))
+    cid = ids(g, 1, "battlefield")
+    g = apply(g, 1, {"type": "flip", "cards": cid, "face_down": False})
+    assert card(g, cid[0])["known_by"] == list(seats(g))
+    assert all("name" in view(g, s)["zones"]["1"]["battlefield"][0] for s in seats(g))
+    check(g)
+
+
 def test_look_then_shuffle_nobody_knows(game):
+    ever = {}
     top = ids(game, 2, "library")[:3]
     g = apply(game, 1, {"type": "look", "cards": top})
     v = view(g, 1)["zones"]["2"]["library"][:3]
     assert all("name" in c and c["shared"] is False for c in v)
-    assert_no_leak(g, 2)
+    check(g, ever)
     g = apply(g, 1, {"type": "shuffle", "seat": 2})
     assert all(not c["known_by"] for c in g["zones"]["2"]["library"])
     assert not set(top) & set(ids(g, 2, "library"))
-    check(g)
+    check(g, ever)
 
 
 def test_reveal(game):
     h = ids(game, 1, "hand")[:2]
     g = apply(game, 1, {"type": "reveal", "cards": h})
-    assert all("name" in c for c in view(g, 2)["zones"]["1"]["hand"][:2])
+    for s in seats(g):
+        assert all("name" in c and c["shared"] for c in view(g, s)["zones"]["1"]["hand"][:2])
     check(g)
 
 
@@ -204,10 +317,31 @@ def test_counter(game):
     check(g)
 
 
+REF = "3c549374-6c37-42e0-8d88-a8555d46732d"
+
+
+def test_token_ref(game):
+    g = apply(game, 1, {"type": "token", "seat": 2, "name": "Treasure", "count": 2, "ref": REF})
+    g = apply(g, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 1})
+    for viewer in seats(g):
+        bf = view(g, viewer)["zones"]["2"]["battlefield"]
+        assert [c.get("ref") for c in bf] == [REF, REF, None] and "ref" not in bf[2]
+    check(g)
+
+
+def test_token_counters(game):
+    g = apply(game, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 2, "counters": {"+1/+1": 3, "stun": 0, "lore": -1}})
+    toks = view(g, 1)["zones"]["2"]["battlefield"]
+    assert [t["counters"] for t in toks] == [{"+1/+1": 3, "lore": -1}] * 2
+    toks[0]["counters"]["x"] = 1  # copies, not one shared dict
+    assert g["zones"]["2"]["battlefield"][1]["counters"] == {"+1/+1": 3, "lore": -1}
+    assert apply(game, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 1, "counters": {}})["zones"]["2"]["battlefield"][0]["counters"] == {}
+
+
 def test_token_and_delete(game):
     g = apply(game, 1, {"type": "token", "seat": 2, "name": "Goblin", "count": 3})
     toks = g["zones"]["2"]["battlefield"]
-    assert len(toks) == 3 and all(t["token"] and t["owner"] == 2 for t in toks)
+    assert len(toks) == 3 and all(t["token"] and t["owner"] == 2 and t["known_by"] == list(seats(g)) for t in toks)
     assert all(c["token"] and "name" in c for c in view(g, 1)["zones"]["2"]["battlefield"])
     g = apply(g, 1, {"type": "delete", "card": toks[0]["id"]})
     assert len(g["zones"]["2"]["battlefield"]) == 2
@@ -243,13 +377,28 @@ def test_life(game):
 
 
 def test_cmd_damage(game):
-    g = apply(game, 1, {"type": "cmd_damage", "seat": 1, "commander": "b-card-000", "delta": 4})
-    assert view(g, 2)["players"]["1"]["cmd_damage"] == {"b-card-000": 4}
-    for bad in ("a-card-000", "a-card-001", "nope"):
+    g = apply(game, 1, {"type": "cmd_damage", "seat": 1, "from": 2, "commander": "b-card-000", "delta": 4})
+    assert view(g, 2)["players"]["1"]["cmd_damage"]["2"] == {"b-card-000": 4}
+    assert g["log"][-1]["from"] == 2 and g["log"][-1]["value"] == 4
+    g = apply(g, 1, {"type": "cmd_damage", "seat": 1, "from": 2, "commander": "b-card-000", "delta": -9})
+    assert g["players"]["1"]["cmd_damage"]["2"] == {"b-card-000": 0}
+    for bad in (dict(commander="a-card-000"), dict(commander="a-card-001"), dict(commander="nope"),
+                dict(**{"from": 1}), dict(**{"from": 9}), dict(**{"from": "2"})):
         with pytest.raises(ActionError) as e:
-            apply(g, 1, {"type": "cmd_damage", "seat": 1, "commander": bad, "delta": 1})
+            apply(g, 1, {"type": "cmd_damage", "seat": 1, "from": 2, "commander": "b-card-000", "delta": 1, **bad})
         assert e.value.code == "invalid"
+    with pytest.raises(ActionError):
+        apply(g, 1, {"type": "cmd_damage", "seat": 1, "commander": "b-card-000", "delta": 1})
     check(g)
+
+
+def test_cmd_damage_same_commander_from_two_opponents():
+    g = new_game({1: deck("a"), 2: deck("x"), 3: deck("x")})
+    for src in (2, 3):
+        g = apply(g, 1, {"type": "cmd_damage", "seat": 1, "from": src, "commander": "x-card-000", "delta": src})
+    assert g["players"]["1"]["cmd_damage"] == {"2": {"x-card-000": 2}, "3": {"x-card-000": 3}}
+    with pytest.raises(ActionError):  # seat 1 runs a-card-000, not x
+        apply(g, 2, {"type": "cmd_damage", "seat": 2, "from": 1, "commander": "x-card-000", "delta": 1})
 
 
 def test_roll(game):
@@ -260,7 +409,8 @@ def test_roll(game):
 
 
 @pytest.mark.parametrize("seat,action,code", [
-    (3, {"type": "life", "seat": 1, "delta": 1}, "invalid"),
+    (7, {"type": "life", "seat": 1, "delta": 1}, "invalid"),
+    (1, {"type": "life", "seat": 7, "delta": 1}, "invalid"),
     (True, {"type": "life", "seat": 1, "delta": 1}, "invalid"),
     (1, {"type": "bogus"}, "invalid"),
     (1, {}, "invalid"),
@@ -276,6 +426,16 @@ def test_roll(game):
     (1, {"type": "token", "seat": 1, "name": "", "count": 1}, "invalid"),
     (1, {"type": "token", "seat": 1, "name": "x" * 101, "count": 1}, "invalid"),
     (1, {"type": "token", "seat": 1, "name": "x", "count": 21}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": "Not-Hex"}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": ""}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": "a" * 41}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "ref": 7}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": []}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"": 1}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"y" * 31: 1}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"a": 1000}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {"a": "1"}}, "invalid"),
+    (1, {"type": "token", "seat": 1, "name": "x", "count": 1, "counters": {f"c{i}": 1 for i in range(21)}}, "invalid"),
     (1, {"type": "mulligan", "n": 8}, "invalid"),
     (1, {"type": "shuffle", "seat": "1"}, "invalid"),
     (1, {"type": "move", "cards": [], "to": {"seat": 1, "zone": "hand"}}, "invalid"),
@@ -289,6 +449,10 @@ def test_roll(game):
     (1, {"type": "move", "cards": ["a"], "to": {"seat": 1, "zone": "hand"}}, "stale"),
     (1, {"type": "tap", "cards": ["a"], "tapped": 1}, "invalid"),
     (1, {"type": "tap", "cards": ["a"], "tapped": True}, "stale"),
+    (1, {"type": "transform", "cards": ["a"], "flipped": 1}, "invalid"),
+    (1, {"type": "transform", "cards": ["a"]}, "invalid"),
+    (1, {"type": "transform", "cards": ["a"], "flipped": True}, "stale"),
+    (1, {"type": "move", "cards": ["a"], "to": {"seat": 1, "zone": "battlefield"}, "flipped": "yes"}, "invalid"),
     (1, {"type": "look", "cards": ["a"]}, "stale"),
     (1, {"type": "counter", "card": "a", "name": "x" * 31, "delta": 1}, "invalid"),
     (1, {"type": "counter", "card": "a", "name": "x", "delta": 1}, "stale"),
@@ -308,26 +472,81 @@ def test_move_face_down_non_bool_and_cleared(game):
     assert not g["zones"]["1"]["graveyard"][0]["face_down"]
 
 
-def test_token_cap(game):
-    g = game
+def test_token_cap():
+    g = mkgame(6)  # six 100-card decks: the cap counts tokens only
+    for _ in range(30):
+        g = apply(g, 1, {"type": "token", "seat": 1, "name": "t", "count": 20})
+    assert sum(c["token"] for c, _ in all_cards(g)) == 600
     with pytest.raises(ActionError):
-        for _ in range(40):
-            g = apply(g, 1, {"type": "token", "seat": 1, "name": "t", "count": 20})
+        apply(g, 1, {"type": "token", "seat": 1, "name": "t", "count": 1})
+    g = apply(g, 1, {"type": "delete", "card": ids(g, 1, "battlefield")[0]})
+    assert len(apply(g, 1, {"type": "token", "seat": 6, "name": "t", "count": 1})["zones"]["6"]["battlefield"]) == 1
 
 
-def test_fuzz(game):
-    rnd = random.Random(1234)
-    g = game
+def test_move_to_top_after_shuffling(game):
+    lib = ids(game, 1, "library")
+    g = apply(game, 1, {"type": "look", "cards": lib[:50]})
+    g = apply(g, 1, mv([lib[40]], 1, "library", pos="top", shuffle=True))
+    top = g["zones"]["1"]["library"][0]
+    assert top["name"] == card(game, lib[40])["name"] and top["known_by"] == [1]
+    assert not any(c["known_by"] for c in g["zones"]["1"]["library"][1:])  # the rest was shuffled
+    with pytest.raises(ActionError):
+        apply(g, 1, mv(ids(g, 1, "hand")[:1], 1, "graveyard", shuffle=True))
+
+
+def test_attach_follows_host_and_falls_off(game):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:3], 1, "battlefield"))
+    aura, host, other = ids(g, 1, "battlefield")
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": host})
+    assert card(g, aura)["attached"] == host
+    assert view(g, 2)["zones"]["1"]["battlefield"][0]["attached"] == host
+    g = apply(g, 1, mv([host], 2, "battlefield"))  # change of control: the aura follows
+    new_host = ids(g, 2, "battlefield")[0]
+    assert card(g, aura)["attached"] == new_host
+    g = apply(g, 2, mv([new_host], 2, "graveyard"))  # host leaves: the aura stays, unattached
+    assert card(g, aura)["attached"] is None
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": other})
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": None})
+    assert card(g, aura)["attached"] is None
+    g = apply(g, 1, {"type": "attach", "card": aura, "to": other})
+    g = apply(g, 1, mv([aura], 1, "hand"))  # the attachment leaves: its pointer goes with it
+    assert card(g, ids(g, 1, "hand")[-1])["attached"] is None
+
+
+def test_attach_from_hand_enters_battlefield(game):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:1], 1, "battlefield"))
+    host, equip = ids(g, 1, "battlefield")[0], ids(g, 1, "hand")[0]
+    g = apply(g, 1, {"type": "attach", "card": equip, "to": host})
+    entered = g["zones"]["1"]["battlefield"][-1]
+    assert entered["attached"] == host and entered["id"] == equip
     check(g)
+
+
+@pytest.mark.parametrize("bad", ["self", "hand", "nested"])
+def test_attach_invalid(game, bad):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:3], 1, "battlefield"))
+    a, b, c = ids(g, 1, "battlefield")
+    g = apply(g, 1, {"type": "attach", "card": b, "to": c})
+    to = {"self": a, "hand": ids(g, 1, "hand")[0], "nested": b}[bad]
+    with pytest.raises(ActionError):
+        apply(g, 1, {"type": "attach", "card": a, "to": to})
+
+
+@pytest.mark.parametrize("n", [2, 3, 6])
+def test_fuzz(n):
+    rnd = random.Random(1234)
+    g, ever = mkgame(n), {}
+    check(g, ever)
     for _ in range(500):
         cs = [c for c, _z in all_cards(g)]
         pick = lambda k=None: [c["id"] for c in rnd.sample(cs, min(len(cs), k or rnd.randint(1, 5)))]  # noqa: E731
-        seat = rnd.choice((1, 2))
+        seat = rnd.randint(1, n)
         t = rnd.choice(["move", "move", "move", "tap", "untap_all", "flip", "counter", "token", "delete",
-                        "look", "reveal", "shuffle", "mulligan", "life", "cmd_damage", "roll"])
-        other = 3 - seat
+                        "look", "reveal", "shuffle", "mulligan", "life", "cmd_damage", "roll", "attach",
+                        "pass_turn", "out", "undo", "undo"])
+        other = rnd.choice([s for s in range(1, n + 1) if s != seat])
         a = {
-            "move": lambda: mv(pick(), rnd.choice((1, 2)), z := rnd.choice(
+            "move": lambda: mv(pick(), rnd.randint(1, n), z := rnd.choice(
                 ["library", "hand", "battlefield", "graveyard", "exile", "command"]),
                 **({"pos": rnd.choice(("top", "bottom"))} if z == "library" else {}),
                 **({"face_down": rnd.random() < .5} if z in ("battlefield", "exile") else {})),
@@ -336,24 +555,209 @@ def test_fuzz(game):
             "flip": lambda: {"cards": [c["id"] for c in g["zones"][str(seat)]["battlefield"]][:3] or ["x"],
                              "face_down": rnd.random() < .5},
             "counter": lambda: {"card": pick(1)[0], "name": rnd.choice(("a", "b", "c")), "delta": rnd.randint(-3, 3)},
-            "token": lambda: {"seat": seat, "name": "tok", "count": rnd.randint(1, 3)},
+            "token": lambda: {"seat": seat, "name": "tok", "count": rnd.randint(1, 3), **rnd.choice(({}, {"ref": REF}))},
             "delete": lambda: {"card": next((c["id"] for c in cs if c["token"]), "x")},
             "look": lambda: {"cards": pick()},
             "reveal": lambda: {"cards": pick(2)},
             "shuffle": lambda: {"seat": seat},
             "mulligan": lambda: {"n": rnd.randint(1, 7)},
             "life": lambda: {"seat": seat, "delta": rnd.randint(-5, 5)},
-            "cmd_damage": lambda: {"seat": seat, "commander": f"{'ab'[other - 1]}-card-000", "delta": rnd.randint(-2, 5)},
+            "cmd_damage": lambda: {"seat": seat, "from": other, "commander": f"{'abcdef'[other - 1]}-card-000",
+                                   "delta": rnd.randint(-2, 5)},
+            "out": lambda: {"out": rnd.random() < .5},
             "roll": lambda: {"sides": rnd.randint(2, 20)},
+            "attach": lambda: {"card": pick(1)[0], "to": rnd.choice([None] + [c["id"] for zs in g["zones"].values()
+                                                                        for c in zs["battlefield"]][:4])},
+            "pass_turn": lambda: {"draw": rnd.random() < .5},
+            "undo": lambda: {},
         }[t]()
         if t != "move":
             a = {"type": t, **a}
         if "x" in (a.get("cards") or [a.get("card")]):
             continue
-        g = apply(g, seat, a)
-        check(g)
-        if t in ("move", "shuffle", "mulligan"):
-            now = {c["id"] for c, _z in all_cards(g)}
-            old = set(a.get("cards", [])) if t == "move" else set()
-            assert not old & now
+        try:
+            g = apply(g, seat, a)
+        except ActionError as e:
+            # a random host can be the card itself or already attached; undo needs your own undoable action
+            assert (t, e.code) in (("attach", "invalid"), ("undo", "undo"))
+            assert t == "attach" or not view(g, seat)["can_undo"]
+            continue
+        check(g, ever)
+        assert len(g["log"]) <= 50 and len(g["history"]) <= 5 and g["log"][-1]["type"] == t
+        on_bf = {c["id"] for zs in g["zones"].values() for c in zs["battlefield"]}
+        assert all(c.get("attached") in on_bf | {None} for c, _z in all_cards(g))
+        if t == "move":
+            assert set(a["cards"]) <= {c["id"] for c, _z in all_cards(g)}
     assert sum(len(c) for zs in g["zones"].values() for c in zs.values()) >= 1
+
+
+def test_turns(game):
+    n = len(game["players"])
+    assert game["turn"]["seat"] in seats(game) and game["turn"]["number"] == 1
+    assert {mkgame(n)["turn"]["seat"] for _ in range(60)} == set(seats(game))
+    cur = game["turn"]["seat"]
+    nxt = cur % n + 1
+    g = apply(game, nxt, mv(ids(game, nxt, "hand")[:2], nxt, "battlefield"))
+    g = apply(g, nxt, {"type": "tap", "cards": ids(g, nxt, "battlefield"), "tapped": True})
+    g = apply(g, cur, {"type": "pass_turn", "draw": True})
+    assert view(g, 1)["turn"] == {"seat": nxt, "number": 2}
+    assert not any(c["tapped"] for c in g["zones"][str(nxt)]["battlefield"])
+    assert len(g["zones"][str(nxt)]["hand"]) == 6
+    drawn = g["zones"][str(nxt)]["hand"][-1]["name"]
+    other = nxt % n + 1
+    mine, theirs = view(g, nxt)["log"][-1], view(g, other)["log"][-1]
+    assert mine["cards"] == [{"seat": nxt, "zone": "library", "name": drawn}]
+    assert theirs["cards"] == [{"seat": nxt, "zone": "library"}]
+    assert theirs["type"] == "pass_turn" and theirs["target"] == nxt and theirs["prev"] == cur and theirs["turn"] == 2
+    g = apply(g, nxt, {"type": "pass_turn"})
+    assert g["turn"] == {"seat": other, "number": 3} and g["log"][-1]["cards"] == []
+    with pytest.raises(ActionError):
+        apply(g, 1, {"type": "pass_turn", "draw": 1})
+    check(g)
+
+
+def with_turn(g, seat):
+    g = json.loads(json.dumps(g))
+    g["turn"]["seat"] = seat
+    return g
+
+
+def test_pass_turn_order_and_out_seats():
+    g = with_turn(mkgame(4), 1)
+    order = []
+    for _ in range(5):
+        g = apply(g, 1, {"type": "pass_turn"})
+        order.append(g["turn"]["seat"])
+    assert order == [2, 3, 4, 1, 2] and g["turn"]["number"] == 6
+    g = apply(g, 3, {"type": "out", "out": True})
+    g = apply(g, 4, {"type": "out", "out": True})
+    g = apply(g, 1, {"type": "pass_turn"})  # from seat 2: 3 and 4 are out, so seat 1
+    assert (g["turn"]["seat"], g["log"][-1]["prev"]) == (1, 2)
+    g = apply(g, 1, {"type": "pass_turn"})
+    assert g["turn"]["seat"] == 2
+    g = apply(g, 2, {"type": "out", "out": True})
+    g = apply(g, 1, {"type": "pass_turn"})
+    assert g["turn"]["seat"] == 1
+    g = apply(g, 1, {"type": "pass_turn"})  # every other seat is out: seat 1 takes the next turn itself
+    assert g["turn"] == {"seat": 1, "number": 10} and g["log"][-1]["prev"] == 1 and g["log"][-1]["target"] == 1
+    g = apply(g, 3, {"type": "out", "out": False})
+    assert apply(g, 1, {"type": "pass_turn"})["turn"]["seat"] == 3
+
+
+def test_out_toggles_and_undoes(game):
+    g = apply(game, 2, {"type": "out", "out": True})
+    assert view(g, 1)["players"]["2"]["out"] is True and g["players"]["1"]["out"] is False
+    assert g["log"][-1]["out"] is True and view(g, 2)["can_undo"]
+    g = apply(g, 2, {"type": "life", "seat": 2, "delta": -1})  # an out seat can still act
+    g = apply(g, 2, {"type": "undo"})
+    g = apply(g, 2, {"type": "undo"})
+    assert g["players"]["2"]["out"] is False
+    for bad in ({"out": 1}, {}, {"out": True, "seat": 1}):
+        with pytest.raises(ActionError):
+            apply(g, 1, {"type": "out", **bad})
+
+
+def test_undo_play_keeps_what_was_seen(game):
+    hand = ids(game, 1, "hand")
+    g = apply(game, 1, mv(hand[:1], 1, "battlefield"))
+    assert view(g, 1)["can_undo"] and not view(g, 2)["can_undo"]
+    with pytest.raises(ActionError) as e:
+        apply(g, 2, {"type": "undo"})
+    assert e.value.code == "undo"
+    g = apply(g, 1, {"type": "undo"})
+    assert ids(g, 1, "hand") == hand and g["zones"]["1"]["battlefield"] == []
+    assert g["zones"]["1"]["hand"][0]["known_by"] == list(seats(g))  # everyone saw it played
+    assert g["seq"] == 2 and g["log"][-1]["undone"] == "move" and not view(g, 1)["can_undo"]
+    check(g)
+
+
+def test_undo_depth_and_turn_order(game):
+    g = game
+    for _ in range(6):
+        g = apply(g, 1, {"type": "life", "seat": 2, "delta": -1})
+    for _ in range(5):
+        g = apply(g, 1, {"type": "undo"})
+    assert g["players"]["2"]["life"] == 39
+    with pytest.raises(ActionError):
+        apply(g, 1, {"type": "undo"})
+    g = apply(g, 1, {"type": "life", "seat": 1, "delta": 1})
+    g = apply(g, 2, {"type": "pass_turn"})  # the other seat acted: seat 1's run is gone
+    assert not view(g, 1)["can_undo"] and view(g, 2)["can_undo"]
+    turn = game["turn"]
+    g = apply(g, 2, {"type": "undo"})
+    assert g["turn"] == turn and not view(g, 1)["can_undo"] and not view(g, 2)["can_undo"]
+    with pytest.raises(ActionError):
+        apply(g, 1, {"type": "undo", "x": 1})
+
+
+@pytest.mark.parametrize("make", [
+    lambda g: {"type": "shuffle", "seat": 1},
+    lambda g: {"type": "mulligan"},
+    lambda g: {"type": "look", "cards": ids(g, 1, "library")[:1]},
+    lambda g: {"type": "reveal", "cards": ids(g, 1, "hand")[:1]},
+    lambda g: {"type": "roll", "sides": 6},
+    lambda g: {"type": "pass_turn", "draw": True},
+    lambda g: mv(ids(g, 1, "hand")[:1], 1, "library", shuffle=True),
+    lambda g: mv(ids(g, 1, "library")[:1], 1, "hand"),  # a draw shows the actor a card
+    lambda g: mv(ids(g, 1, "library")[:2], 1, "graveyard"),  # a mill too
+    lambda g: mv(ids(g, 2, "hand")[:1], 2, "graveyard"),  # so does discarding the opponent's card
+    lambda g: {"type": "attach", "card": ids(g, 1, "library")[0], "to": ids(g, 1, "battlefield")[0]},
+    lambda g: {"type": "flip", "cards": ids(g, 2, "battlefield"), "face_down": False},  # their morph
+])
+def test_actions_that_cannot_be_undone(game, make):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:1], 1, "battlefield"))
+    g = apply(g, 2, mv(ids(g, 2, "hand")[:1], 2, "battlefield", face_down=True))
+    g = apply(g, 1, {"type": "life", "seat": 1, "delta": 1})
+    g = apply(g, 1, make(g))
+    assert not view(g, 1)["can_undo"]
+    with pytest.raises(ActionError):
+        apply(g, 1, {"type": "undo"})
+
+
+def test_undoable_own_face_down_flip(game):
+    g = apply(game, 1, mv(ids(game, 1, "hand")[:1], 1, "battlefield", face_down=True))
+    g = apply(g, 1, {"type": "flip", "cards": ids(g, 1, "battlefield"), "face_down": False})
+    assert view(g, 1)["can_undo"]
+
+
+def test_log_names_per_seat(game):
+    top = ids(game, 1, "library")[0]
+    name = card(game, top)["name"]
+    g = apply(game, 1, mv([top], 1, "hand"))
+    assert view(g, 1)["log"][-1]["cards"] == [{"seat": 1, "zone": "library", "name": name}]
+    assert view(g, 2)["log"][-1] == {"seq": 1, "turn": 1, "seat": 1, "type": "move", "pos": None,
+                                     "cards": [{"seat": 1, "zone": "library"}], "to": {"seat": 1, "zone": "hand"},
+                                     "face_down": False, "shuffle": False}
+    g = apply(g, 1, mv(ids(g, 1, "hand")[-1:], 1, "battlefield", face_down=True))
+    assert "name" not in view(g, 2)["log"][-1]["cards"][0] and "name" in view(g, 1)["log"][-1]["cards"][0]
+    g = apply(g, 1, mv(ids(g, 1, "hand")[:1], 1, "battlefield"))
+    assert all("name" in view(g, s)["log"][-1]["cards"][0] for s in (1, 2))
+    for _ in range(60):
+        g = apply(g, 2, {"type": "roll", "sides": 6})
+    log = view(g, 1)["log"]
+    assert len(log) == 50 and log[-1]["type"] == "roll" and log[-1]["result"] == g["roll"]["result"]
+    check(g)
+
+
+def test_transform(game):
+    h = ids(game, 1, "hand")[:1]
+    with pytest.raises(ActionError):  # not on a battlefield
+        apply(game, 1, {"type": "transform", "cards": h, "flipped": True})
+    g = apply(game, 1, mv(h, 1, "battlefield"))
+    assert view(g, 2)["zones"]["1"]["battlefield"][0]["flipped"] is False
+    g = apply(g, 2, {"type": "transform", "cards": h, "flipped": True})  # any seat, like tap
+    assert view(g, 1)["zones"]["1"]["battlefield"][0]["flipped"] and view(g, 2)["log"][-1]["flipped"]
+    assert not apply(g, 1, {"type": "transform", "cards": h, "flipped": False})["zones"]["1"]["battlefield"][0]["flipped"]
+    assert not view(apply(g, 2, {"type": "undo"}), 1)["zones"]["1"]["battlefield"][0]["flipped"]
+
+
+def test_move_flipped(game):
+    h = ids(game, 1, "hand")[:1]
+    g = apply(game, 1, mv(h, 1, "battlefield", flipped=True))
+    assert card(g, h[0])["flipped"]
+    g2 = apply(g, 1, mv(h, 2, "battlefield"))  # change of control keeps it, like tapped
+    assert card(g2, h[0])["flipped"]
+    assert not card(apply(g2, 1, mv(h, 2, "battlefield", flipped=False)), h[0])["flipped"]
+    for z in ("hand", "graveyard"):
+        assert not card(apply(g, 1, mv(h, 1, z)), h[0])["flipped"]
+    assert not card(apply(game, 1, mv(h, 1, "hand", flipped=True)), h[0])["flipped"]

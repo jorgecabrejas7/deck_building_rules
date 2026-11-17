@@ -15,6 +15,8 @@ const HEADER_RE = /^(commander|deck|mainboard|sideboard|maybeboard|considering|c
 // that count toward the 100 (Krenko's Command). Only a text export's section
 // header means actual token objects, and sectionFor handles that separately.
 export const OUT_OF_DECK_RE = /^(sideboard|maybeboard|considering|companion)s?$/i;
+// The board a parked card is kept on: the sideboard (companion too) or the maybeboard.
+export const boardOf = (word) => /^(sideboard|companion)s?$/i.test(word) ? "side" : /^(maybeboard|considering)s?$/i.test(word) ? "maybe" : null;
 
 export function detectInput(text) {
   const t = text.trim();
@@ -26,7 +28,7 @@ export function detectInput(text) {
 }
 
 export function parseDecklist(text) {
-  const entries = new Map();
+  const boards = { main: new Map(), side: new Map(), maybe: new Map() };
   const commanders = [];
   let section = "main";
   for (let raw of text.split(/\r?\n/)) {
@@ -41,35 +43,37 @@ export function parseDecklist(text) {
       continue;
     }
     const cm = line.match(/^commanders?\s*:\s*(.+)$/i);
-    if (cm) { commanders.push(stripLine(cm[1]).name); addEntry(entries, stripLine(cm[1])); continue; }
+    if (cm) { commanders.push(stripLine(cm[1]).name); addEntry(boards.main, stripLine(cm[1])); continue; }
     const hm = line.match(HEADER_RE);
     if (hm) { section = sectionFor(hm[1]); continue; }
     if (section === "skip") continue;
     const e = stripLine(line);
-    if (!e.name || e.skip) continue;
-    if (section === "commander") commanders.push(e.name);
-    addEntry(entries, e);
+    if (!e.name) continue;
+    const board = e.board || (section === "side" || section === "maybe" ? section : "main");
+    if (board === "main" && section === "commander") commanders.push(e.name);
+    addEntry(boards[board], e);
   }
-  return { entries: [...entries.entries()].map(([name, quantity]) => ({ name, quantity })), commanders };
+  const list = (m) => [...m.entries()].map(([name, quantity]) => ({ name, quantity }));
+  return { entries: list(boards.main), commanders, side: list(boards.side), maybe: list(boards.maybe) };
 }
 function sectionFor(word) {
   if (/commander/i.test(word)) return "commander";
-  return OUT_OF_DECK_RE.test(word) || /^tokens?$/i.test(word) ? "skip" : "main";
+  return boardOf(word) || (/^tokens?$/i.test(word) ? "skip" : "main");
 }
 function stripLine(line) {
-  let skip = false;
+  let board = null;
   // strip the category tag first: it sits after the set code, so leaving it on
   // would also break the set-suffix match and send a junk name to Scryfall
   const cat = line.match(CATEGORY_SUFFIX_RE);
   if (cat) {
     line = line.replace(CATEGORY_SUFFIX_RE, "");
-    skip = cat[1].split(",").some(c => OUT_OF_DECK_RE.test(c.trim()));
+    board = cat[1].split(",").map(c => boardOf(c.trim())).find(Boolean) || null;
   }
   const m = line.match(LINE_RE);
   let qty = 1, name = line;
   if (m) { qty = parseInt(m[1], 10); name = m[2]; }
   name = name.replace(SET_SUFFIX_RE, "").replace(FOIL_SUFFIX_RE, "").trim();
-  return { name, quantity: qty, skip };
+  return { name, quantity: qty, board };
 }
 function addEntry(map, e) { map.set(e.name, (map.get(e.name) || 0) + e.quantity); }
 

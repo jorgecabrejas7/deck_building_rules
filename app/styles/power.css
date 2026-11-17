@@ -386,6 +386,7 @@ body.dark{--ink:oklch(.8 .14 var(--h1));--ink2:oklch(.8 .14 var(--h2));--wash:ok
 .report-stage{opacity:.55;filter:blur(64px) saturate(1.7)}
 .report-stage::after{content:"";position:absolute;inset:0;background:radial-gradient(50% 80% at 18% 30%,oklch(.6 .2 var(--h1)),transparent 70%),radial-gradient(50% 80% at 82% 30%,oklch(.6 .2 var(--h2)),transparent 70%)}
 .panel{background:color-mix(in oklab,var(--panel) 95%,oklch(.6 .16 var(--h1)))}
+.panel .pod-table tbody th,.panel .pod-table thead th:first-child{background:color-mix(in oklab,var(--panel) 95%,oklch(.6 .16 var(--h1)))}
 .tab-btn.active{color:var(--ink)}
 .section-nav a[aria-current],body.dark .section-nav a[aria-current]{background:var(--ink);color:var(--on-ink);box-shadow:none}
 .rd-filter[aria-pressed=true]{background:var(--ink);color:var(--on-ink)}
