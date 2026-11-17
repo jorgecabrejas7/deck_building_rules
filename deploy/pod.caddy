@@ -35,21 +35,6 @@ handle_path /pod/* {
 		method GET
 		path_regexp archidekt ^/api/archidekt/([0-9]{1,12})$
 	}
-	# a player's public Commander decks, listed by Archidekt username
-	@archidektuser {
-		method GET
-		path_regexp archidektuser ^/api/archidekt/user/([A-Za-z0-9_.-]{1,40})$
-	}
-	handle @archidektuser {
-		rewrite * /api/decks/v3/?ownerUsername={re.archidektuser.1}&deckFormat=3&pageSize=50
-		reverse_proxy https://archidekt.com {
-			header_up Host {upstream_hostport}
-			header_up User-Agent pod-deck-checker
-			header_up -Cookie
-			header_up -Referer
-			header_up -X-Forwarded-For
-		}
-	}
 	handle @archidekt {
 		rewrite * /api/decks/{re.archidekt.1}/
 		reverse_proxy https://archidekt.com {

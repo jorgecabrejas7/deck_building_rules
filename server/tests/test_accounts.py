@@ -80,6 +80,8 @@ def test_me_post(client, active):
     assert post(client, "/pod/api/me", {"language": "fr"}).status_code == 400
     r = post(client, "/pod/api/me", {"language": "en", "display_name": "Bob"})
     assert r.status_code == 200 and r.json()["user"]["language"] == "en"
+    assert r.json()["user"]["archidekt_username"] == ""
+    assert post(client, "/pod/api/me", {"archidekt_username": "x"}).json()["user"]["archidekt_username"] == ""  # only the sign-in sets it
 
 
 def test_me_post_requires_csrf(active):

@@ -25,7 +25,7 @@ delNeedsPw:'Si entraste con Google, crea primero una contraseña arriba.',delGo:
 delConfirm:'Sí, borrar mi cuenta',delCancel:'Cancelar',delWrongPw:'Contraseña incorrecta.',
 privT:'Privacidad',
 priv:[
-['Qué datos guardamos','Tu usuario, tu correo si lo das, tu nombre para mostrar, tu idioma y una huella de tu contraseña (nunca la contraseña). Si entras con Google: tu correo de Google, tu nombre y tu identificador de Google. Una cookie de sesión te mantiene dentro. Es estrictamente necesaria. No usamos cookies de seguimiento ni analítica.'],
+['Qué datos guardamos','Tu usuario, tu correo si lo das, tu nombre para mostrar, tu idioma y una huella de tu contraseña (nunca la contraseña). Si entras con Google: tu correo de Google, tu nombre y tu identificador de Google. Si conectas Archidekt en Mis mazos: tu usuario de Archidekt y la sesión que Archidekt nos devuelve, nunca tu contraseña de Archidekt, hasta que la desconectes. Una cookie de sesión te mantiene dentro. Es estrictamente necesaria. No usamos cookies de seguimiento ni analítica.'],
 ['Para qué','Para que puedas entrar y para que aprobemos las cuentas nuevas. Cuando alguien crea una cuenta, el administrador recibe un correo con su usuario y su correo.'],
 ['Base legal','Ejecución del servicio que pides (RGPD, art. 6.1.b).'],
 ['Cuánto tiempo','Hasta que borres tu cuenta. Las copias de seguridad se guardan 14 días.'],
@@ -61,7 +61,7 @@ delNeedsPw:'If you signed in with Google, set a password above first.',delGo:'De
 delConfirm:'Yes, delete my account',delCancel:'Cancel',delWrongPw:'Wrong password.',
 privT:'Privacy',
 priv:[
-['What we store','Your username, your email if you give one, your display name, your language and a hash of your password (never the password). If you sign in with Google: your Google email, your name and your Google id. A session cookie keeps you signed in. It is strictly necessary. We use no tracking or analytics cookies.'],
+['What we store','Your username, your email if you give one, your display name, your language and a hash of your password (never the password). If you sign in with Google: your Google email, your name and your Google id. If you connect Archidekt in My decks: your Archidekt username and the session Archidekt returns to us, never your Archidekt password, until you disconnect it. A session cookie keeps you signed in. It is strictly necessary. We use no tracking or analytics cookies.'],
 ['Why','So you can sign in and so we can approve new accounts. When someone creates an account, the administrator gets an email with their username and email.'],
 ['Legal basis','Performing the service you ask for (GDPR, art. 6.1.b).'],
 ['How long','Until you delete your account. Backups are kept 14 days.'],

@@ -4,7 +4,7 @@ import { state, persistCache } from '../state.js';
 import { T, fill } from '../i18n.js';
 import { api } from '../api.js';
 import { setRules } from '../rules.js';
-import { $, esc, has, tierTone, announce } from './helpers.js';
+import { $, esc, has, tierTone, announce, coverThumb, bindCovers, needCovers } from './helpers.js';
 import { forgetDecks } from './decks.js';
 import { friendList, loadFriends } from './friends.js';
 import { loadStudy } from './profile.js';
@@ -160,7 +160,7 @@ function deckLi(d, t) {
   const ask = asking === 'd' + d.id
     ? '<div class="dk-actions"><span class="dk-confirm">' + esc(fill(t.pdRemoveDeckAsk, { n: d.name })) + '</span><button class="btn-ghost-sm btn-danger" id="pd-outyes-' + d.id + '" data-act="deck-out-yes" data-deck="' + d.id + '">' + esc(t.pdYes) + '</button><button class="btn-ghost-sm" id="pd-outno-' + d.id + '" data-act="cancel" data-back="pd-out-' + d.id + '">' + esc(t.pdCancel) + '</button></div>'
     : '';
-  return '<li><div class="dk-row"><button class="gm-row" id="pd-open-' + d.id + '" data-act="analyze" data-deck="' + d.id + '"><span class="gm-main"><span class="gm-name">' + esc(d.name) + '</span>' +
+  return '<li><div class="dk-row"><button class="gm-row" id="pd-open-' + d.id + '" data-act="analyze" data-deck="' + d.id + '">' + coverThumb(d.name, d.list ? d.list.commanders : []) + '<span class="gm-main"><span class="gm-name">' + esc(d.name) + '</span>' +
     (sub ? '<span class="gm-sub">' + esc(sub) + '</span>' : '') + '</span>' + pill + '</button>' + out + '</div>' + ask + '</li>';
 }
 function rowsHtml(t) {
@@ -319,6 +319,8 @@ export function renderPod() {
   const stale = state.pod && view === 'decks' && !creating && !progress && !failed && state.pod.decks.some(d => !rows.has(keyOf(d)));
   if (stale) compute();
   el.onclick = onClick; el.onsubmit = onSubmit; el.onchange = onChange; el.oninput = onInput;
+  bindCovers(el);
+  if (state.pod) needCovers(state.pod.decks.filter(d => d.list).map(d => d.list.commanders), () => paint());
   const table = $('pdTable');
   if (table) table.ontoggle = () => { tableOpen = table.open; };
 }

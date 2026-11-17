@@ -58,6 +58,7 @@ export const state = {
   // shortcut: openDeck is not kept across reloads, persist it if players ask
   openDeck: null,    // {id, name, commanders}: the saved deck behind the analysis, so Guardar adds a version; cleared when an analysis has other commanders
   deckSource: null,  // {source, url?}: where the analyzed list came from, saved with it
+  studio: false,     // the deck-building workspace covers the app
   saveSt: null,      // label key shown on the Guardar button for a moment
   deckView: { level: null, q: '', group: 'value', sort: 'value', mode: store.deckMode, card: null, open: false, add: '', hits: null, locked: new Set() },
   deck: null,        // {entries, commanders, deckName}

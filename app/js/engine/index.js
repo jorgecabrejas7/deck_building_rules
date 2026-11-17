@@ -6,7 +6,7 @@ export { evaluateDeck, validateDeck, whatIfCut, dialPoints } from "./rules.js";
 export { detectInput, parseDecklist, deckFingerprint } from "./decks.js";
 export { encodeShare, decodeShare } from "./share.js";
 export { fetchCards, fetchCheapest, suggestCards, searchScryfall } from "./scryfall.js";
-export { fetchArchidekt } from "./archidekt.js";
+export { fetchArchidekt, parseArchidekt } from "./archidekt.js";
 export { fetchMoxfield, parseMoxfield } from "./moxfield.js";
 export { isLegalCommander, isBackground, canPair, pairKinds, commanderCandidates,
   commanderOptions, normalizeCommanders, pickCommanders } from "./commander.js";

@@ -1,4 +1,5 @@
-import { state } from '../state.js';
+import { state, cardCache, persistCache } from '../state.js';
+import { fetchCards } from '../engine/index.js';
 import { RULES } from '../rules.js';
 import { T } from '../i18n.js';
 import { ARCH, CATS, CAT_HELP, BADGE_OF } from './constants.js';
@@ -59,3 +60,28 @@ export function dialCost(spec, lang) {
   const steps = Object.entries(spec.point_steps).map(([k, v]) => k + '→' + v).join(', ');
   return (P ? 'gratis hasta ' : 'free up to ') + spec.baseline_max + (steps ? ' · ' + steps : '') + (P ? ' · después +1/unidad' : ' · then +1/unit');
 }
+
+// A deck's cover: its commanders' art, from the cards the browser already knows (the tint shows until then).
+const hueOf = (text) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+export const coverStyle = (name) => '--hue:' + hueOf(name);
+export const coverArt = (commanders) => commanders.slice(0, 2).map(c => (cardCache[c] || {}).img_art).filter(Boolean).map(src =>
+  '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async" draggable="false">').join('');
+// Looks up the commanders not known yet, all in one batched request, then redraws.
+const asked = new Set();
+export async function needCovers(decks, redraw) {
+  const missing = [...new Set(decks.flatMap(d => d.slice(0, 2)))].filter(n => !cardCache[n] && !asked.has(n));
+  if (!missing.length) return;
+  for (const n of missing) asked.add(n);
+  try { await fetchCards(missing, cardCache); persistCache(); redraw(); }
+  catch (e) { console.error(e); for (const n of missing) asked.delete(n); } // the next redraw asks again
+}
+// Covers fade in once loaded; el is any ancestor of the images, bound once.
+export function bindCovers(el) {
+  if (el.dataset.covers) return;
+  el.dataset.covers = '1';
+  el.addEventListener('load', (e) => { if (e.target.tagName === 'IMG') e.target.classList.add('in'); }, true);
+  el.addEventListener('error', (e) => { if (e.target.tagName === 'IMG') e.target.remove(); }, true);
+}
+// Runs a redraw as a view transition where the browser has them, so things glide to their new place.
+export const glide = (fn) => document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches ? document.startViewTransition(fn) : fn();
+export const coverThumb = (name, commanders) => '<span class="gm-thumb" style="' + coverStyle(name) + '">' + coverArt(commanders.slice(0, 1)) + '</span>';

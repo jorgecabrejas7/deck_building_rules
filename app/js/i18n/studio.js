@@ -1,0 +1,31 @@
+// The deck-building workspace (ui/studio.js). Merged into the app dictionary by i18n.js.
+export default {
+es: {
+stOpen:'Abrir el constructor',stBack:'Salir del constructor',stSave:'Guardar',stUndo:'Deshacer',stReport:'Ver informe',
+stCards:'%n / 100',stCardsLabel:'cartas',stPts:'%n pts',stLevel:'Nivel %n',
+stSearch:'Buscar cartas para añadir',stSearchHint:'Solo salen cartas legales en los colores de tu comandante. Toca una para añadirla.',
+stTop:'Las más jugadas que puedes añadir',stResults:'Resultados',stNone:'Ninguna carta coincide. Prueba con otro nombre o quita un filtro.',stSearching:'Buscando…',stErr:'Scryfall no responde. Inténtalo de nuevo.',
+stAdd:'Añadir %c',stRemove:'Quitar %c',stOneMore:'Otra copia de %c',stWait:'Un momento: se está comprobando el mazo.',
+stF_creature:'Criaturas',stF_instant:'Instantáneos',stF_sorcery:'Conjuros',stF_artifact:'Artefactos',stF_enchantment:'Encantamientos',stF_planeswalker:'Planeswalkers',stF_land:'Tierras',
+stR_ramp:'Rampa',stR_draw:'Robo',stR_removal:'Removal',stR_wipe:'Barridos',stR_tutor:'Tutores',stCheap:'Hasta 1 €',
+stTypes:'Tipo de carta',stRoles:'Función',
+stGroup:'Agrupar por',stG_type:'Tipo',stG_mv:'Coste',stMv:'Coste %v',stCmd:'Comandante',
+stEmpty:'Tu mazo empieza aquí. Busca cartas y tócalas para añadirlas.',
+stCurve:'Curva de maná',stAvg:'Coste medio %v',stColors:'Símbolos de maná',stTypeCount:'Tipos',stPod:'En tu pod',stPrice:'Precio',
+stPane_search:'Buscar',stPane_deck:'Mazo',stPane_stats:'Datos',stPanes:'Parte del constructor',
+},
+en: {
+stOpen:'Open the builder',stBack:'Leave the builder',stSave:'Save',stUndo:'Undo',stReport:'See the report',
+stCards:'%n / 100',stCardsLabel:'cards',stPts:'%n pts',stLevel:'Level %n',
+stSearch:'Search cards to add',stSearchHint:'Only cards legal in your commander’s colours show up. Tap one to add it.',
+stTop:'The most played cards you can add',stResults:'Results',stNone:'No card matches. Try another name or drop a filter.',stSearching:'Searching…',stErr:'Scryfall is not answering. Try again.',
+stAdd:'Add %c',stRemove:'Remove %c',stOneMore:'Another copy of %c',stWait:'One moment: the deck is being checked.',
+stF_creature:'Creatures',stF_instant:'Instants',stF_sorcery:'Sorceries',stF_artifact:'Artifacts',stF_enchantment:'Enchantments',stF_planeswalker:'Planeswalkers',stF_land:'Lands',
+stR_ramp:'Ramp',stR_draw:'Card draw',stR_removal:'Removal',stR_wipe:'Board wipes',stR_tutor:'Tutors',stCheap:'Up to €1',
+stTypes:'Card type',stRoles:'Job',
+stGroup:'Group by',stG_type:'Type',stG_mv:'Cost',stMv:'Cost %v',stCmd:'Commander',
+stEmpty:'Your deck starts here. Search cards and tap them to add them.',
+stCurve:'Mana curve',stAvg:'Average cost %v',stColors:'Mana symbols',stTypeCount:'Types',stPod:'In your pod',stPrice:'Price',
+stPane_search:'Search',stPane_deck:'Deck',stPane_stats:'Stats',stPanes:'Part of the builder',
+},
+};

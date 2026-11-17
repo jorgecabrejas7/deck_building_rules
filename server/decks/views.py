@@ -1,5 +1,4 @@
 import json
-import re
 import urllib.error
 import urllib.request
 from functools import wraps
@@ -86,11 +85,13 @@ def clean_version(data):
 
 def summary(d):
     latest = d.versions.first()
+    synced = next((v for v in d.versions.all() if v.source == "archidekt"), None)  # the last copy taken from Archidekt
     return {"id": d.id, "name": d.name, "visibility": d.visibility, "link_token": d.link_token,
             "created_at": d.created_at, "updated_at": d.updated_at, "version_count": d.versions.count(),
             "commanders": latest.list["commanders"] if latest else [],
             "versions": [{"id": v.id, "name": v.name, "created_at": v.created_at,
                           "count": sum(e["quantity"] for e in v.list["entries"])} for v in d.versions.all()[:MAX_PICKER]],
+            "archidekt": {"url": synced.source_url, "at": synced.created_at} if synced else None,
             "pods": sorted(d.pod_entries.values_list("pod_id", flat=True))}
 
 
@@ -105,7 +106,8 @@ def own_deck(request, id):
 @signed_in
 def decks(request):
     if request.method == "GET":
-        return JsonResponse({"decks": [summary(d) for d in request.user.decks.order_by("-updated_at")]})
+        return JsonResponse({"decks": [summary(d) for d in request.user.decks.order_by("-updated_at")],
+                             "archidekt_username": request.user.archidekt_username})
     data = body(request)
     if data is None:
         return bad({"body": "invalid"})
@@ -200,12 +202,3 @@ def archidekt_get(url):
 @signed_in
 def archidekt_deck(request, id):
     return archidekt_get(f"https://archidekt.com/api/decks/{id}/")
-
-
-@require_GET
-@signed_in
-def archidekt_user(request, username):
-    if not re.fullmatch(r"[A-Za-z0-9_.-]{1,40}", username):
-        raise Http404
-    return archidekt_get(
-        f"https://archidekt.com/api/decks/v3/?ownerUsername={username}&deckFormat=3&pageSize=50")

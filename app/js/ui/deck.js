@@ -7,6 +7,7 @@ import { ICON, fold, paint } from './reading.js';
 import { startCheapest } from '../pipeline.js';
 import { addToDeck, canEdit, removeFromDeck } from '../edits.js';
 import { addBoxHtml, bindAddBox } from './edits.js';
+import { openStudio } from './studio.js';
 
 // The whole deck, three ways of looking at it. The list stays put and the card you pick
 // opens beside it (on a phone, in a sheet), so reading one never loses your place.
@@ -182,6 +183,7 @@ export function renderDeck() {
       select('dkGroup', t.dkGroup, GROUPS.map(([k, l]) => [k, t[l]]), dv.group) +
       select('dkSort', t.dkSort, Object.entries(SORTS).map(([k, s]) => [k, t[s.label]]), dv.sort) +
       '<div class="seg-toggle-sm" role="group" aria-label="' + esc(t.dkView) + '">' + MODES.map(([k, l]) => seg(k, l)).join('') + '</div></div>' +
+      '<div class="dk-actions"><button class="btn-primary dk-studio" id="dkStudio">' + esc(t.stOpen) + '</button></div>' +
       addBoxHtml(t) +
       (hint ? '<p class="dk-note">' + esc(hint) + '</p>' : '') + '</div>' +
     '<div class="dk-body"><div id="dkList" class="dk-list dk-mode-' + dv.mode + '"></div><aside id="dkInspect" class="dk-inspect panel" aria-live="polite"></aside></div>');
@@ -228,6 +230,7 @@ export function renderDeck() {
   };
   paintList();
   bindAddBox();
+  $('dkStudio').onclick = openStudio;
   if (excess > 0) paintTrim(all, excess);
 
   const fetchBtn = $('bgFetch');

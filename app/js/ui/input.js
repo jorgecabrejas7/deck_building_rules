@@ -3,7 +3,10 @@ import { T, fill } from '../i18n.js';
 import { ARCH, SAMPLES } from './constants.js';
 import { $, esc } from './helpers.js';
 import { isLegalCommander, canPair, pairKinds } from '../engine/index.js';
-import { searchCommanders, startDeck } from '../edits.js';
+import { searchCommanders, startDeck as begin } from '../edits.js';
+
+// A new deck is built in the workspace.
+const startDeck = (cards) => { state.studio = true; return begin(cards); };
 
 export function renderInput() {
   const t = T();

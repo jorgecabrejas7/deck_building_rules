@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import include, path
 
 from accounts import views
-from decks import views as decks
+from decks import archidekt, views as decks
 from friends import views as friends
 from games import views as games
 from pods import views as pods
@@ -38,6 +38,9 @@ urlpatterns = [
     path("pod/api/pods/<int:id>/members/<int:user_id>", pods.member),
     path("pod/api/pods/<int:id>/decks", pods.add_deck),
     path("pod/api/pods/<int:id>/decks/<int:deck_id>", pods.remove_deck),
+    path("pod/api/sync/archidekt", archidekt.account),
+    path("pod/api/sync/archidekt/decks", archidekt.decks),
+    path("pod/api/sync/archidekt/decks/<int:id>", archidekt.deck),
     path("pod/api/games", games.games),
     path("pod/api/games/practice", games.practice),
     path("pod/api/games/<int:id>/deck", games.game_deck),
@@ -47,7 +50,6 @@ urlpatterns = [
 if settings.DEV_STATIC:
     urlpatterns += [
         path("pod/api/archidekt/<int:id>", decks.archidekt_deck),
-        path("pod/api/archidekt/user/<str:username>", decks.archidekt_user),
         path("pod/", views.dev_redirect),
         path("pod/app", views.dev_redirect),
         path("pod/app/", views.dev_static, {"root": "app", "rest": ""}),

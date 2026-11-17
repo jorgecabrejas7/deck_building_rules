@@ -32,7 +32,7 @@ def is_open(path):
 
 def user_json(u):
     return {"username": u.username, "email": u.email, "display_name": u.display_name,
-            "language": u.language, "has_password": u.has_usable_password()}
+            "language": u.language, "archidekt_username": u.archidekt_username, "has_password": u.has_usable_password()}
 
 
 @ensure_csrf_cookie

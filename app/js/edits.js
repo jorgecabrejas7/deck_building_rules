@@ -82,12 +82,14 @@ export function scryText(q) {
 
 // Cards the deck can legally take: inside the commanders' colours, and not a second copy of a
 // singleton. Game changers are welcome: the player is asking, and the bar shows what it does.
-export function searchToAdd(q) {
+// `terms` are Scryfall search terms; with none it lists the most played cards the deck can take.
+export function searchForDeck(terms, limit) {
   const ci = deckIdentity();
   const id = ci ? ' id<=' + (ci.join('') || 'c') : '';
   const excludeNames = state.result.cardsInfo.filter(x => !PodEngine.stacksInDeck(x.card)).map(x => x.card.name);
-  return PodEngine.searchScryfall('(' + scryText(q) + ') f:commander' + id + ' order:edhrec', { excludeNames, limit: 8, allowGameChanger: true });
+  return PodEngine.searchScryfall(terms.join(' ') + ' f:commander' + id + ' order:edhrec', { excludeNames, limit, allowGameChanger: true });
 }
+export const searchToAdd = (q) => searchForDeck(['(' + scryText(q) + ')'], 8);
 
 // A card named by a suggestion: cached, or one lookup away.
 export async function addByName(name) {
