@@ -199,6 +199,7 @@ function optionsHtml(d, t) {
     '<fieldset class="dk-set"><legend class="lbl-muted">' + esc(t.sdPods) + '</legend>' + pods + (podMsg === d.id ? '<p class="note-bad" role="alert">' + esc(t.sdPodErr) + '</p>' : '') + '</fieldset>' +
     '<fieldset class="dk-set"><legend class="lbl-muted">' + esc(t.sdShareTitle) + '</legend><label class="dk-pick"><input type="checkbox" id="dk-share-' + d.id + '" data-act="share"' + (shared ? ' checked' : '') + '><span>' + esc(t.sdShare) + '</span></label>' +
     (shared ? '<div class="dk-actions"><button class="btn-ghost-sm" id="dk-copy-' + d.id + '" data-act="copy">' + esc(copiedId === d.id ? t.copied : t.sdCopyLink) + '</button></div>' : '') + '</fieldset>' +
+    '<div class="dk-actions"><button class="btn-primary" id="dk-go-' + d.id + '" data-act="open">' + esc(t.sdOpen) + '</button><button class="btn-ghost-sm" id="dk-build-' + d.id + '" data-act="build">' + esc(t.stOpen) + '</button></div>' +
     '<div class="sheet-foot"><button class="btn-ghost-sm" id="dk-hist-' + d.id + '" data-act="history" aria-expanded="' + !!showHist + '">' + esc(showHist ? t.sdHideHistory : t.sdHistory) + '</button>' + del + '</div>' +
     (showHist ? '<ol class="dk-history">' + hist.versions.map((v, i) => '<li><b>' + esc(fmtDate(v.created_at)) + '</b>' + (v.note ? ' · ' + esc(v.note) : '') + changes(v, hist.versions[i + 1], t) + '</li>').join('') + '</ol>' : '') +
     '</div>';
@@ -310,7 +311,7 @@ function onClick(e) {
   if (act === 'filter') { filter = Number(b.dataset.value) || b.dataset.value; arrived = true; return glide(() => paint()); }
   if (act === 'sort') { byName = !!b.dataset.value; arrived = true; return glide(() => paint()); }
   if (!d) return;
-  if (act === 'open') openSaved(d.id);
+  if (act === 'open' || act === 'build') { state.studio = act === 'build'; openId = null; openSaved(d.id); }
   else if (act === 'options') { if (openId === d.id) closeSheet(); else { openId = d.id; arrived = true; paint('dk-sheet-close'); } }
   else if (act === 'history') showHistory(d.id);
   else if (act === 'copy') copyLink(d);

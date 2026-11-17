@@ -34,6 +34,7 @@ import { renderFriends, loadFriends } from './ui/friends.js';
 import { renderPod, renderPodPicker, selectPod, joinPod } from './ui/pod.js';
 import { renderGames, renderHeroInvite, loadGames } from './ui/games.js';
 import { renderDecks, saveDeck, openLinked } from './ui/decks.js';
+import { renderStudio } from './ui/studio.js';
 import { openHow, closeHow } from './ui/how.js';
 import { copyReport, copyShareLink } from './ui/report.js';
 import { initHelpPopovers } from './ui/popover.js';
@@ -123,6 +124,7 @@ export function renderAll() {
       renderEditBar();
     }
   }
+  renderStudio();
   if (state.tab === 'decks') renderDecks();
   if (state.tab === 'pod') renderPod();
   if (state.tab === 'friends') renderFriends();
