@@ -113,6 +113,51 @@ def test_delete(client, active):
     assert not User.objects.filter(username="bob").exists()
 
 
+def test_requests_admin_only(client, active):
+    assert client.get("/pod/api/requests").status_code == 403
+    client.force_login(active)
+    assert client.get("/pod/api/requests").status_code == 403
+    assert client.post("/pod/api/requests/1/approve").status_code == 403
+    staff = User.objects.create_user("st", is_staff=True, password="pw-staff-123")
+    client.force_login(staff)
+    assert client.get("/pod/api/requests").status_code == 403
+
+
+def test_requests_list_approve_reject(client):
+    signup(client, "ana")
+    signup(client, "ben")
+    root = User.objects.create_superuser("root", "r@x.com", "pw-root-12345")
+    client.force_login(root)
+    body = client.get("/pod/api/requests").json()
+    assert [r["username"] for r in body["requests"]] == ["ana", "ben"]
+    assert body["requests"][0]["email"] == "ana@x.com" and "date_joined" in body["requests"][0]
+    ana, ben = User.objects.get(username="ana"), User.objects.get(username="ben")
+    assert client.post(f"/pod/api/requests/{ana.pk}/approve").status_code == 204
+    assert User.objects.get(username="ana").is_active
+    assert client.post(f"/pod/api/requests/{ben.pk}/reject").status_code == 204
+    assert not User.objects.filter(username="ben").exists()
+    assert client.get("/pod/api/requests").json() == {"requests": []}
+    # an active account is not a request: it can be neither approved again nor rejected (deleted) this way
+    assert client.post(f"/pod/api/requests/{ana.pk}/approve").status_code == 404
+    assert client.post(f"/pod/api/requests/{ana.pk}/reject").status_code == 404
+    assert User.objects.filter(username="ana").exists()
+    assert client.post(f"/pod/api/requests/{ben.pk}/approve").status_code == 404
+
+
+def test_me_says_is_admin(client, active):
+    client.force_login(active)
+    assert client.get("/pod/api/me").json()["user"]["is_admin"] is False
+    root = User.objects.create_superuser("root", "r@x.com", "pw-root-12345")
+    client.force_login(root)
+    assert client.get("/pod/api/me").json()["user"]["is_admin"] is True
+
+
+def test_signup_email_links_requests_view(client, settings):
+    settings.POD_HOST = "pod.example"
+    signup(client)
+    assert "https://pod.example/pod/app/account.html?view=requests" in mail.outbox[0].body
+
+
 def test_admin_superuser_only(client):
     staff = User.objects.create_user("st", is_staff=True, password="pw-staff-123")
     client.force_login(staff)

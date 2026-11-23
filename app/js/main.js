@@ -8,7 +8,7 @@ import { deckToText } from './advice.js';
 import { T, fill } from './i18n.js';
 import { legalHtml } from './i18n/account.js';
 import { $ } from './ui/helpers.js';
-import { applyTheme, renderHeader } from './ui/header.js';
+import { applyTheme, renderHeader, initAccountMenu } from './ui/header.js';
 import { renderInput } from './ui/input.js';
 import { renderSummary } from './ui/summary.js';
 import { renderTabbar, renderBanner, renderSectionNav, setView } from './ui/tabbar.js';
@@ -153,6 +153,7 @@ const __boot = () => {
   // a link pasted into an open tab only changes the hash, so boot again to read it
   addEventListener('hashchange', () => { if (/^#(d|deck|join)=/.test(location.hash)) location.reload(); });
   $('howBtn').onclick = openHow;
+  initAccountMenu();
   $('howModal').onclick = (e) => { if (e.target === $('howModal')) closeHow(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHow(); });
   document.addEventListener('focusin', (e) => { const k = focusKey(e.target); if (k) lastFocus = k; });

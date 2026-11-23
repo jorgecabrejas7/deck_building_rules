@@ -5,3 +5,6 @@ server/.venv/
 server/db.sqlite3
 server/staticfiles/
 server/seed/dev_accounts.json
+.pytest_cache/
+.claude/
+.env

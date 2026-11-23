@@ -26,6 +26,7 @@ const field = (id, label, type, auto) =>
   `<label class="f-lbl" for="${id}">${label}</label><input class="f-in" id="${id}" name="${id}" type="${type}" autocomplete="${auto}"${id === 'username' ? ' required autocapitalize="none" spellcheck="false"' : ''}>`
   + `<p class="f-err" id="e-${id}" aria-live="polite"></p>`;
 const msg = (id) => `<p class="f-err" id="${id}" aria-live="polite"></p>`;
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const text = (id, s) => { $(id).textContent = s; };
 const clearErrs = () => document.querySelectorAll('.f-err').forEach((e) => { e.textContent = ''; });
 
@@ -99,6 +100,7 @@ function viewProfile() {
   $('card').innerHTML = `<h2>${t.profileT}</h2><p>${u.username}</p>`
     + `<form id="f-prof">${field('display_name', t.displayName, 'text', 'nickname')}<label class="f-lbl" for="language">${t.language}</label><select class="f-in" id="language" name="language"><option value="es">Español</option><option value="en">English</option></select>${msg('f-prof-err')}<button class="btn-primary" type="submit">${t.save}</button></form>`
     + `<section><h3>${t.changePw}</h3><form id="f-pw">${u.has_password ? field('current_password', t.currentPw, 'password', 'current-password') : ''}${field('new_password', t.newPw, 'password', 'new-password')}${msg('f-pw-err')}<button class="btn-alt" type="submit">${t.changePw}</button></form></section>`
+    + (u.is_admin ? `<section><h3>${t.adminT}</h3><a class="btn-alt" href="?view=requests">${t.reqT}</a></section>` : '')
     + `<section><button id="signOut" class="btn-alt" type="button">${t.signOut}</button></section>`
     + `<section><h3>${t.delT}</h3><p>${t.delX}</p>${u.has_password ? '' : `<p>${t.delNeedsPw}</p>`}<button id="delGo" class="btn-alt btn-danger" type="button">${t.delGo}</button>`
     + `<form id="f-del" hidden>${field('del_password', t.password, 'password', 'current-password')}${msg('f-del-err')}<button class="btn-alt btn-danger" type="submit">${t.delConfirm}</button><button id="delNo" class="btn-alt" type="button">${t.delCancel}</button></form></section>`;
@@ -124,19 +126,42 @@ function viewProfile() {
   });
 }
 
+// Admins only: accounts that signed up and wait for approval. Approve lets them in; reject deletes the account.
+async function viewRequests() {
+  const t = T();
+  $('card').innerHTML = `<h2>${t.reqT}</h2><p>${t.reqX}</p>${msg('f-req-err')}<ul id="reqList" class="req"></ul><a class="btn-alt" href="?view=profile">${t.backProfile}</a>`;
+  const res = await api(API + 'requests');
+  if (res.status !== 200) return text('f-req-err', t.errNet);
+  const rows = res.data.requests;
+  if (!rows.length) { $('reqList').innerHTML = `<li class="req-none">${t.reqNone}</li>`; return; }
+  $('reqList').innerHTML = rows.map((r) => `<li class="req-row" data-id="${r.id}"><div class="req-who"><strong>${esc(r.username)}</strong>`
+    + `<span>${r.email ? esc(r.email) + ' · ' : ''}${new Date(r.date_joined).toLocaleDateString(state.lang)}</span></div>`
+    + `<div class="req-act"><button class="btn-primary" data-do="approve" type="button">${t.reqApprove}</button><button class="btn-alt btn-danger" data-do="reject" type="button">${t.reqReject}</button></div></li>`).join('');
+  $('reqList').onclick = async (ev) => {
+    const b = ev.target.closest('button[data-do]'); if (!b) return;
+    const row = b.closest('.req-row');
+    // rejecting deletes the account: the first tap only arms the button
+    if (b.dataset.do === 'reject' && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = t.reqRejectSure; return; }
+    b.disabled = true;
+    const r = await api(API + 'requests/' + row.dataset.id + '/' + b.dataset.do, 'POST');
+    if (r.status === 204 || r.status === 404) viewRequests();   // 404: someone else decided it meanwhile
+    else { b.disabled = false; text('f-req-err', t.errNet); }
+  };
+}
+
 // k is 'priv' or 'terms': the page title is t[k+'T'], the rows t[k]
 const legalView = (k) => () => {
   const t = T();
   $('card').innerHTML = `<h2>${t[k + 'T']}</h2><dl class="priv">${t[k].map(([h, p]) => `<dt>${h}</dt><dd>${p}</dd>`).join('')}</dl><a class="btn-alt" href="./">${t.backApp}</a>`;
 };
 
-const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, profile: viewProfile, privacy: legalView('priv'), terms: legalView('terms') };
+const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, profile: viewProfile, requests: viewRequests, privacy: legalView('priv'), terms: legalView('terms') };
 
 // The state decides what is allowed; the ?view= only picks among the allowed ones.
 function pick() {
   const want = params.get('view') || 'signin';
   if (want === 'privacy' || want === 'terms') return want;
-  if (me && me.state === 'active') return want === 'profile' ? 'profile' : null;
+  if (me && me.state === 'active') return want === 'profile' || (want === 'requests' && me.user.is_admin) ? want : null;
   // pending is the landing, but its own sign-in link must still reach the form (another account may be approved)
   if (me && me.state === 'pending' && !params.has('view')) return 'pending';
   return want === 'signup' ? 'signup' : 'signin';

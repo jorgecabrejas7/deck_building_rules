@@ -23,6 +23,8 @@ changePw:'Cambiar contraseña',currentPw:'Contraseña actual',newPw:'Contraseña
 signOut:'Salir',delT:'Borrar la cuenta',delX:'Se borra tu cuenta y sus datos. No se puede deshacer. Los mazos guardados en este navegador no se tocan.',
 delNeedsPw:'Si entraste con Google, crea primero una contraseña arriba.',delGo:'Borrar mi cuenta…',
 delConfirm:'Sí, borrar mi cuenta',delCancel:'Cancelar',delWrongPw:'Contraseña incorrecta.',
+adminT:'Administración',reqT:'Solicitudes de cuenta',reqX:'Cuentas creadas que esperan tu aprobación. Rechazar borra la cuenta.',
+reqNone:'No hay solicitudes pendientes.',reqApprove:'Aprobar',reqReject:'Rechazar',reqRejectSure:'¿Seguro? Rechazar',backProfile:'Volver a tu cuenta',
 privT:'Privacidad',
 priv:[
 ['Qué datos guardamos','Tu usuario, tu correo si lo das, tu nombre para mostrar, tu idioma y una huella de tu contraseña (nunca la contraseña). Si entras con Google: tu correo de Google, tu nombre y tu identificador de Google. Si conectas Archidekt en Mis mazos: tu usuario de Archidekt y la sesión que Archidekt nos devuelve, nunca tu contraseña de Archidekt, hasta que la desconectes. Una cookie de sesión te mantiene dentro. Es estrictamente necesaria. No usamos cookies de seguimiento ni analítica.'],
@@ -59,6 +61,8 @@ changePw:'Change password',currentPw:'Current password',newPw:'New password',pwC
 signOut:'Sign out',delT:'Delete the account',delX:'Your account and its data are deleted. This cannot be undone. Decks saved in this browser are not touched.',
 delNeedsPw:'If you signed in with Google, set a password above first.',delGo:'Delete my account…',
 delConfirm:'Yes, delete my account',delCancel:'Cancel',delWrongPw:'Wrong password.',
+adminT:'Administration',reqT:'Account requests',reqX:'Accounts that signed up and wait for your approval. Rejecting deletes the account.',
+reqNone:'No requests waiting.',reqApprove:'Approve',reqReject:'Reject',reqRejectSure:'Sure? Reject',backProfile:'Back to your account',
 privT:'Privacy',
 priv:[
 ['What we store','Your username, your email if you give one, your display name, your language and a hash of your password (never the password). If you sign in with Google: your Google email, your name and your Google id. If you connect Archidekt in My decks: your Archidekt username and the session Archidekt returns to us, never your Archidekt password, until you disconnect it. A session cookie keeps you signed in. It is strictly necessary. We use no tracking or analytics cookies.'],

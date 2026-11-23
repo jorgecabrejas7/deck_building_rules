@@ -65,7 +65,10 @@ window.addEventListener('error', function (e) {
         <button id="esBtn">ES</button>
         <button id="enBtn">EN</button>
       </div>
-      <a id="accountBtn" class="icon-btn" href="account.html?view=profile"></a>
+      <div class="acct-menu">
+        <button id="accountBtn" class="icon-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu"></button>
+        <div id="accountMenu" class="menu" role="menu" hidden></div>
+      </div>
       <button id="themeBtn" class="icon-btn"></button>
     </div>
   </div>

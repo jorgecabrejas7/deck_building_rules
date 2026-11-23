@@ -32,7 +32,37 @@ def is_open(path):
 
 def user_json(u):
     return {"username": u.username, "email": u.email, "display_name": u.display_name,
-            "language": u.language, "archidekt_username": u.archidekt_username, "has_password": u.has_usable_password()}
+            "language": u.language, "archidekt_username": u.archidekt_username, "has_password": u.has_usable_password(),
+            "is_admin": u.is_superuser}
+
+
+def is_admin(request):
+    return request.user.is_authenticated and request.user.is_superuser
+
+
+# Accounts waiting for approval (signed up, is_active=False), for the admins' Solicitudes view in account.html.
+@require_GET
+def requests(request):
+    if not is_admin(request):
+        return JsonResponse({"error": "forbidden"}, status=403)
+    rows = [{"id": u.pk, "username": u.username, "email": u.email, "date_joined": u.date_joined.isoformat()}
+            for u in User.objects.filter(is_active=False).order_by("date_joined")]
+    return JsonResponse({"requests": rows})
+
+
+@require_POST
+def request_decide(request, id, decision):
+    if not is_admin(request):
+        return JsonResponse({"error": "forbidden"}, status=403)
+    u = User.objects.filter(pk=id, is_active=False).first()
+    if u is None:
+        return JsonResponse({"error": "not found"}, status=404)
+    if decision == "approve":
+        u.is_active = True
+        u.save(update_fields=["is_active"])
+    else:
+        u.delete()
+    return HttpResponse(status=204)
 
 
 @ensure_csrf_cookie

@@ -10,6 +10,16 @@
 .brand-title{font-size:var(--fs-ui);font-weight:600;letter-spacing:var(--track-snug);white-space:nowrap}
 .brand-tag{font-size:var(--fs-caption);color:var(--muted);white-space:nowrap}
 .header-actions{display:flex;gap:var(--sp-1);align-items:center}
+/* the account button's menu: anchored under it, right-aligned, one item a row */
+.acct-menu{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);min-width:200px;padding:var(--sp-1);background:var(--panel);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-2);z-index:150;display:flex;flex-direction:column}
+.menu[hidden]{display:none}
+.menu-who{padding:var(--sp-2) var(--sp-3) var(--sp-1);font-size:var(--fs-caption);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-item{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);width:100%;box-sizing:border-box;min-height:40px;padding:0 var(--sp-3);border:none;border-radius:var(--r-sm);background:transparent;color:var(--text);font-size:var(--fs-ui);text-align:left;text-decoration:none;white-space:nowrap}
+.menu-item:hover{background:var(--fill)}
+.menu-badge{min-width:20px;padding:1px 6px;border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:var(--fs-micro);font-weight:600;text-align:center}
+.icon-btn{position:relative}
+.menu-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--panel)}
 
 /* main column: children keep to the page width; the sticky strip alone runs edge to edge */
 .main{position:relative;width:100%;padding:var(--sp-2) 0 var(--sp-7);display:flex;flex-direction:column;gap:var(--sp-5);box-sizing:border-box}

@@ -13,7 +13,7 @@ def hold_for_approval(request, user, **kwargs):
     user.is_active = False
     user.save(update_fields=["is_active"])
     request.session["pod_pending"] = user.pk
-    url = f"https://{settings.POD_HOST}/pod/api/admin/accounts/user/?is_active__exact=0"
+    url = f"https://{settings.POD_HOST}/pod/app/account.html?view=requests"
     try:
         send_mail(
             "Nueva cuenta pendiente de aprobación",
