@@ -5,6 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib.auth import logout
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
@@ -40,16 +41,18 @@ def is_admin(request):
     return request.user.is_authenticated and request.user.is_superuser
 
 
-# Accounts waiting for approval (signed up, is_active=False), for the admins' Solicitudes view in account.html.
+# Accounts waiting for approval (signed up, is_active=False, not rejected), for the admins' Solicitudes view in account.html.
 @require_GET
 def requests(request):
     if not is_admin(request):
         return JsonResponse({"error": "forbidden"}, status=403)
     rows = [{"id": u.pk, "username": u.username, "email": u.email, "date_joined": u.date_joined.isoformat()}
-            for u in User.objects.filter(is_active=False).order_by("date_joined")]
+            for u in User.objects.filter(is_active=False, rejected_at__isnull=True).order_by("date_joined")]
     return JsonResponse({"requests": rows})
 
 
+# Approve lets the account in. Reject only marks it: it stays inactive, leaves the list, and nothing is deleted
+# (a friend who mistyped a signup is not erased; the Django admin can still delete or approve it later).
 @require_POST
 def request_decide(request, id, decision):
     if not is_admin(request):
@@ -58,10 +61,10 @@ def request_decide(request, id, decision):
     if u is None:
         return JsonResponse({"error": "not found"}, status=404)
     if decision == "approve":
-        u.is_active = True
-        u.save(update_fields=["is_active"])
+        u.is_active, u.rejected_at = True, None
     else:
-        u.delete()
+        u.rejected_at = timezone.now()
+    u.save(update_fields=["is_active", "rejected_at"])
     return HttpResponse(status=204)
 
 

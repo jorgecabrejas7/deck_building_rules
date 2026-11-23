@@ -1,6 +1,6 @@
 // Account page: sign-in, sign-up, pending, profile, privacy. Talks to the server's /pod/api (allauth headless + /me).
 import { state, store } from './state.js';
-import { T } from './i18n.js';
+import { T, fill } from './i18n.js';
 import { legalHtml } from './i18n/account.js';
 import { api, csrf } from './api.js';
 
@@ -52,6 +52,14 @@ function onSubmit(formId, fn) {
 // only the admin console may be a return target, so the parameter can't send anyone off-site
 const goApp = () => location.assign(params.get('next') === 'admin' ? '../api/admin/' : './' + location.hash);
 const goSignin = () => { location.assign('account.html'); };
+// The ?view= the visitor came for (the approval email links to requests) survives the sign-in: ask /me again and
+// show that view when the fresh state allows it, else the app.
+async function afterSignin() {
+  const r = await api(API + 'me');
+  me = r.status === 200 ? r.data : null;
+  const v = pick();
+  if (v && v !== 'signin' && v !== 'signup') show(v); else goApp();
+}
 const wipeCaches = async () => { if (window.caches) for (const k of await caches.keys()) await caches.delete(k); };
 
 function viewSignin() {
@@ -62,7 +70,7 @@ function viewSignin() {
   else if (!me) text('f-net', t.errNet);
   onSubmit('f-login', async (v) => {
     const res = await api(AUTH + 'auth/login', 'POST', { username: v.username, password: v.password });
-    if (res.status === 200) goApp();
+    if (res.status === 200) return afterSignin();
     else if (res.status === 401) show('pending');
     else if (res.status === 400) text('f-login-err', t.wrongCreds);
     else text('f-login-err', t.errNet);
@@ -100,11 +108,13 @@ function viewProfile() {
   $('card').innerHTML = `<h2>${t.profileT}</h2><p>${u.username}</p>`
     + `<form id="f-prof">${field('display_name', t.displayName, 'text', 'nickname')}<label class="f-lbl" for="language">${t.language}</label><select class="f-in" id="language" name="language"><option value="es">Español</option><option value="en">English</option></select>${msg('f-prof-err')}<button class="btn-primary" type="submit">${t.save}</button></form>`
     + `<section><h3>${t.changePw}</h3><form id="f-pw">${u.has_password ? field('current_password', t.currentPw, 'password', 'current-password') : ''}${field('new_password', t.newPw, 'password', 'new-password')}${msg('f-pw-err')}<button class="btn-alt" type="submit">${t.changePw}</button></form></section>`
-    + (u.is_admin ? `<section><h3>${t.adminT}</h3><a class="btn-alt" href="?view=requests">${t.reqT}</a></section>` : '')
-    + `<section><button id="signOut" class="btn-alt" type="button">${t.signOut}</button></section>`
+    + (u.is_admin ? `<section><h3>${t.adminT}</h3><a class="btn-alt" id="reqLink" href="?view=requests">${t.reqT}</a></section>` : '')
+    + `<section><button id="signOut" class="btn-alt" type="button">${t.signOut}</button><p class="f-alt"><a href="./">${t.backApp}</a></p></section>`
     + `<section><h3>${t.delT}</h3><p>${t.delX}</p>${u.has_password ? '' : `<p>${t.delNeedsPw}</p>`}<button id="delGo" class="btn-alt btn-danger" type="button">${t.delGo}</button>`
     + `<form id="f-del" hidden>${field('del_password', t.password, 'password', 'current-password')}${msg('f-del-err')}<button class="btn-alt btn-danger" type="submit">${t.delConfirm}</button><button id="delNo" class="btn-alt" type="button">${t.delCancel}</button></form></section>`;
   $('display_name').value = u.display_name; $('language').value = u.language;
+  // the admin sees how many wait without opening the view
+  if (u.is_admin) api(API + 'requests').then((r) => { const n = r.status === 200 ? r.data.requests.length : 0; if (n && $('reqLink')) $('reqLink').innerHTML = `${t.reqT}<span class="req-count">${n}</span>`; });
   onSubmit('f-prof', async (v) => {
     const res = await api(API + 'me', 'POST', { display_name: v.display_name, language: v.language });
     if (res.status !== 200) return showErrors(res, 'f-prof-err');
@@ -126,26 +136,37 @@ function viewProfile() {
   });
 }
 
-// Admins only: accounts that signed up and wait for approval. Approve lets them in; reject deletes the account.
-async function viewRequests() {
+// Admins only: accounts that signed up and wait for approval. Approve lets them in; reject only marks them (nothing
+// is deleted) and takes them off the list. `note` is the line to show above the list after a decision.
+async function viewRequests(note) {
   const t = T();
-  $('card').innerHTML = `<h2>${t.reqT}</h2><p>${t.reqX}</p>${msg('f-req-err')}<ul id="reqList" class="req"></ul><a class="btn-alt" href="?view=profile">${t.backProfile}</a>`;
+  $('card').innerHTML = `<h2>${t.reqT}</h2><p>${t.reqX}</p><p class="f-ok" id="f-req-ok" aria-live="polite"></p>${msg('f-req-err')}`
+    + `<ul id="reqList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`
+    + `<p class="f-alt"><a href="?view=profile">${t.profileT}</a> · <a href="./">${t.backApp}</a></p>`;
+  if (note) text('f-req-ok', note);
   const res = await api(API + 'requests');
-  if (res.status !== 200) return text('f-req-err', t.errNet);
-  const rows = res.data.requests;
+  $('reqList').removeAttribute('aria-busy');
+  if (res.status !== 200) { $('reqList').innerHTML = ''; return text('f-req-err', res.status === 403 ? t.reqForbidden : t.errNet); }
+  const rows = res.data.requests, names = Object.fromEntries(rows.map((r) => [r.id, r.username]));
   if (!rows.length) { $('reqList').innerHTML = `<li class="req-none">${t.reqNone}</li>`; return; }
+  const when = (iso) => `<time datetime="${iso}">${new Date(iso).toLocaleString(state.lang, { dateStyle: 'medium', timeStyle: 'short' })}</time>`;
+  const actions = () => `<div class="req-act"><button class="btn-primary" data-do="approve" type="button">${t.reqApprove}</button><button class="btn-alt btn-danger" data-do="ask" type="button">${t.reqReject}</button></div>`;
   $('reqList').innerHTML = rows.map((r) => `<li class="req-row" data-id="${r.id}"><div class="req-who"><strong>${esc(r.username)}</strong>`
-    + `<span>${r.email ? esc(r.email) + ' · ' : ''}${new Date(r.date_joined).toLocaleDateString(state.lang)}</span></div>`
-    + `<div class="req-act"><button class="btn-primary" data-do="approve" type="button">${t.reqApprove}</button><button class="btn-alt btn-danger" data-do="reject" type="button">${t.reqReject}</button></div></li>`).join('');
+    + (r.email ? `<span>${esc(r.email)}</span>` : '') + `<span>${when(r.date_joined)}</span></div>${actions()}</li>`).join('');
   $('reqList').onclick = async (ev) => {
     const b = ev.target.closest('button[data-do]'); if (!b) return;
-    const row = b.closest('.req-row');
-    // rejecting deletes the account: the first tap only arms the button
-    if (b.dataset.do === 'reject' && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = t.reqRejectSure; return; }
-    b.disabled = true;
-    const r = await api(API + 'requests/' + row.dataset.id + '/' + b.dataset.do, 'POST');
-    if (r.status === 204 || r.status === 404) viewRequests();   // 404: someone else decided it meanwhile
-    else { b.disabled = false; text('f-req-err', t.errNet); }
+    const row = b.closest('.req-row'), id = row.dataset.id, name = names[id], act = row.querySelector('.req-act');
+    if (b.dataset.do === 'ask') {   // the question replaces the buttons; Cancelar puts them back
+      act.outerHTML = `<div class="req-act req-ask" role="group" aria-live="polite"><p>${fill(t.reqRejectAsk, { u: esc(name) })}</p><button class="btn-alt btn-danger" data-do="reject" type="button">${t.reqRejectYes}</button><button class="btn-alt" data-do="cancel" type="button">${t.delCancel}</button></div>`;
+      row.querySelector('[data-do="cancel"]').focus();
+      return;
+    }
+    if (b.dataset.do === 'cancel') { act.outerHTML = actions(); row.querySelector('[data-do="ask"]').focus(); return; }
+    for (const x of act.querySelectorAll('button')) x.disabled = true;
+    const r = await api(API + 'requests/' + id + '/' + b.dataset.do, 'POST');
+    if (r.status === 204) viewRequests(fill(b.dataset.do === 'approve' ? t.reqApproved : t.reqRejected, { u: name }));
+    else if (r.status === 404) viewRequests(fill(t.reqGone, { u: name }));   // someone else decided it meanwhile
+    else { for (const x of act.querySelectorAll('button')) x.disabled = false; text('f-req-err', t.errNet); }
   };
 }
 

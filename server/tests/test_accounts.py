@@ -10,6 +10,7 @@ from django.contrib.admin.sites import site
 from django.core import mail
 from django.core.cache import cache
 from django.test import Client
+from django.utils import timezone
 
 from accounts.admin import approve
 from accounts.models import User
@@ -135,13 +136,29 @@ def test_requests_list_approve_reject(client):
     assert client.post(f"/pod/api/requests/{ana.pk}/approve").status_code == 204
     assert User.objects.get(username="ana").is_active
     assert client.post(f"/pod/api/requests/{ben.pk}/reject").status_code == 204
-    assert not User.objects.filter(username="ben").exists()
+    # rejecting keeps the account, inactive and marked, and takes it off the list; nothing is deleted
+    ben.refresh_from_db()
+    assert not ben.is_active and ben.rejected_at is not None
     assert client.get("/pod/api/requests").json() == {"requests": []}
-    # an active account is not a request: it can be neither approved again nor rejected (deleted) this way
+    c = Client()
+    assert post(c, BASE + "auth/login", {"username": "ben", "password": "correct-horse-42"}).status_code == 401
+    # an active account is not a request: it can be neither approved again nor rejected this way
     assert client.post(f"/pod/api/requests/{ana.pk}/approve").status_code == 404
     assert client.post(f"/pod/api/requests/{ana.pk}/reject").status_code == 404
-    assert User.objects.filter(username="ana").exists()
-    assert client.post(f"/pod/api/requests/{ben.pk}/approve").status_code == 404
+    # a rejected account can still be let in later, which clears the mark
+    assert client.post(f"/pod/api/requests/{ben.pk}/approve").status_code == 204
+    ben.refresh_from_db()
+    assert ben.is_active and ben.rejected_at is None
+
+
+def test_admin_approve_action_clears_rejection(client):
+    signup(client, "ana")
+    ana = User.objects.get(username="ana")
+    ana.rejected_at = timezone.now()
+    ana.save()
+    approve(None, None, User.objects.filter(pk=ana.pk))
+    ana.refresh_from_db()
+    assert ana.is_active and ana.rejected_at is None
 
 
 def test_me_says_is_admin(client, active):
