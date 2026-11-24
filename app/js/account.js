@@ -77,6 +77,12 @@ async function afterSignin() {
   const v = pick();
   if (v && v !== 'signin' && v !== 'signup') show(v); else goApp();
 }
+// A 401 to the right password means the account is inactive: /me says whether it waits for approval or lost its access.
+async function afterInactive() {
+  const r = await api(API + 'me');
+  me = r.status === 200 ? r.data : null;
+  show(me && me.state === 'closed' ? 'closed' : 'pending');
+}
 const wipeCaches = async () => { if (window.caches) for (const k of await caches.keys()) await caches.delete(k); };
 
 function viewSignin() {
@@ -88,7 +94,7 @@ function viewSignin() {
   onSubmit('f-login', async (v) => {
     const res = await api(AUTH + 'auth/login', 'POST', { username: v.username, password: v.password });
     if (res.status === 200) return afterSignin();
-    else if (res.status === 401) show('pending');
+    else if (res.status === 401) return afterInactive();
     else if (res.status === 400) text('f-login-err', t.wrongCreds);
     else text('f-login-err', t.errNet);
   });
@@ -125,6 +131,11 @@ const sec = (icon, title, body, cls = '') => `<section class="set${cls}"><h3 cla
 const cell = (html) => `<div class="f-cell">${html}</div>`;
 const head = (title, sub, actions) => `<div class="acct-head"><div class="acct-id"><h2>${title}</h2>${sub}</div><div class="acct-go">${actions}</div></div>`;
 const btnI = (cls, icon, label, attrs = '') => `<button class="${cls}" type="button"${attrs}>${icon}<span>${label}</span></button>`;
+
+function viewClosed() {
+  const t = T();
+  $('card').innerHTML = `<h2>${t.closedT}</h2><p>${t.closedX}</p><a class="btn-alt" href="?view=signin">${t.signIn}</a>`;
+}
 
 function viewProfile() {
   const t = T(), u = me.user;
@@ -273,7 +284,7 @@ const legalView = (k) => () => {
   $('card').innerHTML = `<h2>${t[k + 'T']}</h2><dl class="priv">${t[k].map(([h, p]) => `<dt>${h}</dt><dd>${p}</dd>`).join('')}</dl><a class="btn-alt" href="./">${t.backApp}</a>`;
 };
 
-const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, profile: viewProfile, requests: viewRequests, users: viewUsers, privacy: legalView('priv'), terms: legalView('terms') };
+const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, closed: viewClosed, profile: viewProfile, requests: viewRequests, users: viewUsers, privacy: legalView('priv'), terms: legalView('terms') };
 
 // The state decides what is allowed; the ?view= only picks among the allowed ones.
 function pick() {
@@ -281,7 +292,7 @@ function pick() {
   if (want === 'privacy' || want === 'terms') return want;
   if (me && me.state === 'active') return want === 'profile' || ((want === 'requests' || want === 'users') && me.user.is_admin) ? want : null;
   // pending is the landing, but its own sign-in link must still reach the form (another account may be approved)
-  if (me && me.state === 'pending' && !params.has('view')) return 'pending';
+  if (me && (me.state === 'pending' || me.state === 'closed') && !params.has('view')) return me.state;
   return want === 'signup' ? 'signup' : 'signin';
 }
 function show(view) { current = view; render(); }

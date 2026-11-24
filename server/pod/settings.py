@@ -113,6 +113,7 @@ HEADLESS_FRONTEND_URLS = {
     "account_reset_password_from_key": _acct + "reset/{key}",
     "socialaccount_login_error": _acct + "signin",
 }
+ACCOUNT_ADAPTER = "accounts.adapter.AccountAdapter"
 ACCOUNT_LOGIN_METHODS = {"username"}
 ACCOUNT_SIGNUP_FIELDS = ["username*", "email", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "none"

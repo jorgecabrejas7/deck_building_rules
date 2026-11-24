@@ -133,9 +133,10 @@ def me(request):
         u.save()
     if u.is_authenticated:
         return JsonResponse({"state": "active", "user": user_json(u)})
-    pk = request.session.get("pod_pending")
-    if pk and User.objects.filter(pk=pk, is_active=False).exists():
-        return JsonResponse({"state": "pending"})
+    # set by a signup or by signing in to an inactive account: pending waits for approval, closed had access removed
+    held = User.objects.filter(pk=request.session.get("pod_pending"), is_active=False).first()
+    if held:
+        return JsonResponse({"state": "pending" if held.state == "pending" else "closed"})
     return JsonResponse({"state": "anonymous"})
 
 

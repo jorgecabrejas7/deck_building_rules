@@ -223,6 +223,21 @@ def test_admin_accounts_are_protected(client):
     assert User.objects.filter(is_superuser=True, is_active=True).count() == 2
 
 
+@pytest.mark.parametrize("mark, state", [(None, "pending"), ("rejected_at", "closed"), ("deactivated_at", "closed")])
+def test_signin_to_inactive_account_says_why(active, mark, state):
+    active.is_active = False
+    if mark:
+        setattr(active, mark, timezone.now())
+    active.save()
+    c = Client()
+    assert post(c, BASE + "auth/login", {"username": "bob", "password": "pw-bob-12345"}).status_code == 401
+    assert c.get("/pod/api/me").json() == {"state": state}
+    # a wrong password says nothing about the account
+    c2 = Client()
+    assert post(c2, BASE + "auth/login", {"username": "bob", "password": "nope-nope"}).status_code == 400
+    assert c2.get("/pod/api/me").json() == {"state": "anonymous"}
+
+
 def test_admin_approve_action_clears_rejection(client):
     signup(client, "ana")
     ana = User.objects.get(username="ana")
