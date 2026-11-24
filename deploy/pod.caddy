@@ -10,7 +10,7 @@ handle_path /pod/* {
 	# GATE (step 2; delete this block for the backend-only step 1). forward_auth sorts before handle, so it runs
 	# first: a 2xx from /pod/api/gate lets the request through, anything else (its 302 to the account page) is the answer.
 	# Open paths, identical to OPEN_PATHS in server/accounts/views.py. The Moxfield and Archidekt proxies stay gated.
-	@gated expression `!path('/app/account.html', '/app/js/account.js', '/app/js/api.js', '/app/js/i18n.js', '/app/js/i18n/*', '/app/js/state.js', '/app/js/engine/history.js', '/app/js/engine/decks.js', '/app/styles/*') && !(path('/api/*') && !path('/api/moxfield/*') && !path('/api/archidekt/*'))`
+	@gated expression `!path('/app/account.html', '/app/js/account.js', '/app/js/api.js', '/app/js/i18n.js', '/app/js/i18n/*', '/app/js/state.js', '/app/js/engine/history.js', '/app/js/engine/decks.js', '/app/styles/*', '/app/favicon.svg', '/app/apple-touch-icon.png') && !(path('/api/*') && !path('/api/moxfield/*') && !path('/api/archidekt/*'))`
 	forward_auth @gated 127.0.0.1:8770 {
 		uri /pod/api/gate
 	}

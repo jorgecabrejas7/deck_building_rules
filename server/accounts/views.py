@@ -16,7 +16,7 @@ ACCOUNT_PAGE = "/pod/app/account.html"
 OPEN_PATHS = [
     "/app/account.html", "/app/js/account.js", "/app/js/api.js", "/app/js/i18n.js", "/app/js/i18n/*",
     "/app/js/state.js", "/app/js/engine/history.js", "/app/js/engine/decks.js",
-    "/app/styles/*",
+    "/app/styles/*", "/app/favicon.svg", "/app/apple-touch-icon.png",
 ]
 GATED_API = ("/api/moxfield/", "/api/archidekt/")
 
