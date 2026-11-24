@@ -14,6 +14,8 @@ const ICON = {
   save: svg('<path d="M6 4h9l3 3v13H6z"/><path d="M9 4v5h6V4M9 20v-6h6v6"/>'),
   help: svg('<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 2"/><path d="M12 16.6v.01"/>'),
   user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'),
+  shield: svg('<path d="M12 3.5 5 6v5.5c0 4.4 3 7.6 7 8.9 4-1.3 7-4.5 7-8.9V6l-7-2.5Z"/><path d="m9.2 12 2 2 3.6-3.8"/>'),
+  out: svg('<path d="M9.5 20H6.5A2.5 2.5 0 0 1 4 17.5v-11A2.5 2.5 0 0 1 6.5 4h3"/><path d="m15.5 16 4-4-4-4M19.5 12H9.5"/>'),
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>'),
   moon: svg('<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>'),
 };
@@ -30,14 +32,14 @@ export function applyTheme() {
 }
 
 // The account button opens a small menu: the profile, the account requests for admins (with how many wait), sign out.
-const item = (href, label, extra = '') => '<a class="menu-item" role="menuitem" href="' + href + '">' + label + extra + '</a>';
+const item = (href, icon, label, extra = '') => '<a class="menu-item" role="menuitem" href="' + href + '">' + icon + '<span>' + label + '</span>' + extra + '</a>';
 function renderAccountMenu() {
   const t = T(), m = $('accountMenu');
-  if (!me) { m.innerHTML = item('account.html', t.signIn); return; }
+  if (!me) { m.innerHTML = item('account.html', ICON.user, t.signIn); return; }
   m.innerHTML = '<div class="menu-who">' + (me.display_name || me.username).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) + '</div>'
-    + item('account.html?view=profile', t.profileT)
-    + (me.is_admin ? item('account.html?view=requests', t.reqT, pending ? '<span class="menu-badge">' + pending + '</span>' : '') : '')
-    + '<button class="menu-item" role="menuitem" type="button" id="signOutBtn">' + t.signOut + '</button>';
+    + item('account.html?view=profile', ICON.user, t.profileT)
+    + (me.is_admin ? item('account.html?view=requests', ICON.shield, t.reqT, pending ? '<span class="menu-badge">' + pending + '</span>' : '') : '')
+    + '<button class="menu-item" role="menuitem" type="button" id="signOutBtn">' + ICON.out + '<span>' + t.signOut + '</span></button>';
   $('signOutBtn').onclick = async () => {
     await api(AUTH + 'auth/session', 'DELETE');
     if (window.caches) for (const k of await caches.keys()) await caches.delete(k);

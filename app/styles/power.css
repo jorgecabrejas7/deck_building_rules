@@ -267,8 +267,8 @@ html[data-slide=back]{--slide:-1}
 @keyframes bar-grow{from{transform:scaleX(0)}}
 
 /* the landing: planeswalkers shuffled into a deck by scrolling. Dark in both themes, a table at night. */
-.main>#hero{--hero-bg:oklch(0.955 0.006 260);--hero-fg:oklch(0.21 0.006 260);--hero-sub:oklch(0.42 0.008 260);--glow-l:0.8;--glow-c:0.13;--glow-a:.5;--hero-shade:.3;width:100%;margin:calc(var(--sp-5)*-1 - var(--sp-2)) 0 0;height:200vh;color:var(--hero-fg);overflow-x:clip}
-body.dark .main>#hero{--hero-bg:oklch(0.12 0.008 260);--hero-fg:#f5f4f0;--hero-sub:oklch(0.86 0.01 260);--glow-l:0.52;--glow-c:0.16;--glow-a:.55;--hero-shade:.7}
+.main>#hero{--hero-bg:var(--bg);--hero-fg:var(--text);--hero-sub:var(--muted);--glow-l:0.8;--glow-c:0.13;--glow-a:.5;--hero-shade:.3;width:100%;margin:calc(var(--sp-5)*-1 - var(--sp-2)) 0 0;height:200vh;color:var(--hero-fg);overflow-x:clip}
+body.dark .main>#hero{--glow-l:0.52;--glow-c:0.16;--glow-a:.55;--hero-shade:.7}
 .main>#hero[hidden]{display:none}
 .hero-pin{position:sticky;top:var(--hero-top,0px);height:calc(100vh - var(--hero-top,0px));height:calc(100dvh - var(--hero-top,0px));overflow:hidden;background:var(--hero-bg);display:flex;flex-direction:column;align-items:center;opacity:calc(1 - var(--leave,0));contain:strict}
 .hero-tint{position:absolute;inset:0;pointer-events:none}
