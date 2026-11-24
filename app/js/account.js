@@ -15,19 +15,15 @@ const SUN = svg('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M
 const MOON = svg('<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>');
 // one stroke, one size: the section and button icons of the profile and requests views
 const I = {
-  card: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16a3 3 0 0 1 6 0M14 10h4M14 14h3"/>'),
   lock: svg('<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
-  shield: svg('<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'),
   trash: svg('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/>'),
   out: svg('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'),
   back: svg('<path d="M19 12H5M12 19l-7-7 7-7"/>'),
-  chev: svg('<path d="m9 6 6 6-6 6"/>'),
   check: svg('<path d="m5 12 5 5 9-10"/>'),
   x: svg('<path d="M6 6l12 12M18 6 6 18"/>'),
   mail: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
   clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
   user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'),
-  users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/>'),
   undo: svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
 };
 
@@ -126,10 +122,9 @@ function viewPending() {
   $('card').innerHTML = `<h2>${t.pendingT}</h2><p>${t.pendingX}</p><a class="btn-alt" href="?view=signin">${t.signIn}</a>`;
 }
 
-// One settings row per job: icon and title on the left, the controls in one line on the right (stacked on phones).
+// A section of a tab: its title with an icon, the controls below.
 const sec = (icon, title, body, cls = '') => `<section class="set${cls}"><h3 class="set-h">${icon}<span>${title}</span></h3><div class="set-b">${body}</div></section>`;
 const cell = (html) => `<div class="f-cell">${html}</div>`;
-const head = (title, sub, actions) => `<div class="acct-head"><div class="acct-id"><h2>${title}</h2>${sub}</div><div class="acct-go">${actions}</div></div>`;
 const btnI = (cls, icon, label, attrs = '') => `<button class="${cls}" type="button"${attrs}>${icon}<span>${label}</span></button>`;
 
 function viewClosed() {
@@ -137,37 +132,57 @@ function viewClosed() {
   $('card').innerHTML = `<h2>${t.closedT}</h2><p>${t.closedX}</p><a class="btn-alt" href="?view=signin">${t.signIn}</a>`;
 }
 
+// The signed-in pages share one frame: a plain way back to the guide, who is signed in with Salir, and the tabs. Each
+// tab is a ?view= of its own, switched in place; the admins' tabs come after the user's own.
+const FRAMED = ['profile', 'security', 'requests', 'users'];
+function frame(body) {
+  const t = T(), u = me.user;
+  const tabs = [['profile', t.profileSec], ['security', t.securityT], ...(u.is_admin ? [['requests', t.reqT], ['users', t.usersT]] : [])];
+  $('card').innerHTML = `<a class="acct-back" href="./">${I.back}<span>${t.backApp}</span></a>`
+    + `<div class="acct-head"><div class="acct-id"><h2>${t.profileT}</h2><p>${esc(u.username)}</p></div>${btnI('btn-alt btn-sm', I.out, t.signOut, ' id="signOut"')}</div>`
+    + `<div class="acct-tabs"><div class="tabbar" role="tablist" aria-label="${t.acctTabs}">`
+    + tabs.map(([v, l]) => `<button class="tab-btn${v === current ? ' active' : ''}" type="button" role="tab" aria-selected="${v === current}" data-view="${v}">${l}`
+      + `${v === 'requests' ? '<span class="req-count" hidden></span>' : ''}</button>`).join('')
+    + `</div></div><div class="acct-pane" role="tabpanel">${body}</div>`;
+  $('signOut').onclick = async () => { await api(AUTH + 'auth/session', 'DELETE'); await wipeCaches(); goSignin(); };
+  document.querySelector('.acct-tabs').onclick = (e) => {
+    const b = e.target.closest('[data-view]');
+    if (!b || b.dataset.view === current) return;
+    history.replaceState(null, '', '?view=' + b.dataset.view);
+    show(b.dataset.view);
+  };
+  // how many wait, on the Solicitudes tab, wherever the admin is
+  if (u.is_admin) api(API + 'requests').then((r) => {
+    const n = r.status === 200 ? r.data.requests.length : 0, c = document.querySelector('.acct-tabs .req-count');
+    if (c) { c.textContent = n; c.hidden = !n; }
+  });
+}
+
 function viewProfile() {
   const t = T(), u = me.user;
-  $('card').innerHTML = head(t.profileT, `<p>${esc(u.username)}</p>`,
-    `<a class="btn-alt btn-sm" href="./">${I.back}<span>${t.backApp}</span></a>${btnI('btn-alt btn-sm', I.out, t.signOut, ' id="signOut"')}`)
-    + sec(I.card, t.profileSec, `<form id="f-prof"><div class="f-line">${cell(field('display_name', t.displayName, 'text', 'nickname'))}`
-      + cell(`<label class="f-lbl" for="language">${t.language}</label><select class="f-in" id="language" name="language"><option value="es">Español</option><option value="en">English</option></select>`)
-      + `<button class="btn-primary" type="submit">${t.save}</button></div>${msg('f-prof-err')}</form>`)
-    + sec(I.lock, t.changePw, `<form id="f-pw"><div class="f-line">${u.has_password ? cell(field('current_password', t.currentPw, 'password', 'current-password')) : ''}`
-      + `${cell(field('new_password', t.newPw, 'password', 'new-password'))}<button class="btn-alt" type="submit">${t.changePw}</button></div>${msg('f-pw-err')}</form>`)
-    + (u.is_admin ? sec(I.shield, t.adminT, `<a class="set-link" id="reqLink" href="?view=requests"><span class="set-link-t">${t.reqT}</span><span class="req-count" hidden></span>${I.chev}</a>`
-      + `<a class="set-link" href="?view=users"><span class="set-link-t">${t.usersT}</span>${I.chev}</a>`) : '')
-    + sec(I.trash, t.delT, `<p>${t.delX}</p>${u.has_password ? '' : `<p>${t.delNeedsPw}</p>`}${btnI('btn-alt btn-danger btn-sm', I.trash, t.delGo, ' id="delGo"')}`
-      + `<form id="f-del" hidden><div class="f-line">${cell(field('del_password', t.password, 'password', 'current-password'))}<button class="btn-alt btn-danger" type="submit">${t.delConfirm}</button><button id="delNo" class="btn-alt" type="button">${t.delCancel}</button></div>${msg('f-del-err')}</form>`, ' set-danger');
+  frame(`<form id="f-prof"><div class="f-line">${cell(field('display_name', t.displayName, 'text', 'nickname'))}`
+    + cell(`<label class="f-lbl" for="language">${t.language}</label><select class="f-in" id="language" name="language"><option value="es">Español</option><option value="en">English</option></select>`)
+    + `<button class="btn-primary" type="submit">${t.save}</button></div>${msg('f-prof-err')}</form>`);
   $('display_name').value = u.display_name; $('language').value = u.language;
-  // the admin sees how many wait without opening the view
-  if (u.is_admin) api(API + 'requests').then((r) => {
-    const n = r.status === 200 ? r.data.requests.length : 0, c = document.querySelector('#reqLink .req-count');
-    if (n && c) { c.textContent = n; c.hidden = false; }
-  });
   onSubmit('f-prof', async (v) => {
     const res = await api(API + 'me', 'POST', { display_name: v.display_name, language: v.language });
     if (res.status !== 200) return showErrors(res, 'f-prof-err');
     me = res.data; state.lang = store.lang = me.user.language;
     render(); text('f-prof-err', T().saved);
   });
+}
+
+function viewSecurity() {
+  const t = T(), u = me.user;
+  frame(sec(I.lock, t.changePw, `<form id="f-pw"><div class="f-line">${u.has_password ? cell(field('current_password', t.currentPw, 'password', 'current-password')) : ''}`
+      + `${cell(field('new_password', t.newPw, 'password', 'new-password'))}<button class="btn-alt" type="submit">${t.changePw}</button></div>${msg('f-pw-err')}</form>`)
+    + sec(I.trash, t.delT, `<p>${t.delX}</p>${u.has_password ? '' : `<p>${t.delNeedsPw}</p>`}${btnI('btn-alt btn-danger btn-sm', I.trash, t.delGo, ' id="delGo"')}`
+      + `<form id="f-del" hidden><div class="f-line">${cell(field('del_password', t.password, 'password', 'current-password'))}<button class="btn-alt btn-danger" type="submit">${t.delConfirm}</button><button id="delNo" class="btn-alt" type="button">${t.delCancel}</button></div>${msg('f-del-err')}</form>`, ' set-danger'));
   onSubmit('f-pw', async (v) => {
     const res = await api(AUTH + 'account/password/change', 'POST', { ...(u.has_password ? { current_password: v.current_password } : {}), new_password: v.new_password });
     if (res.status !== 200) return showErrors(res, 'f-pw-err', { password: 'new_password' });
     me.user.has_password = true; render(); text('f-pw-err', T().pwChanged);
   });
-  $('signOut').onclick = async () => { await api(AUTH + 'auth/session', 'DELETE'); await wipeCaches(); goSignin(); };
   $('delGo').onclick = () => { $('f-del').hidden = false; $('delGo').hidden = true; $('del_password').focus(); };
   $('delNo').onclick = () => { $('f-del').hidden = true; $('delGo').hidden = false; $('delGo').focus(); };
   onSubmit('f-del', async (v) => {
@@ -181,10 +196,8 @@ function viewProfile() {
 // is deleted) and takes them off the list. `note` is the line to show above the list after a decision.
 async function viewRequests(note) {
   const t = T();
-  $('card').innerHTML = head(t.reqT, `<p>${t.reqX}</p>`,
-    `<a class="btn-alt btn-sm" href="?view=profile">${I.back}<span>${t.profileT}</span></a>`)
-    + `<p class="f-ok" id="f-req-ok" aria-live="polite"></p>${msg('f-req-err')}`
-    + `<ul id="reqList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`;
+  frame(`<p>${t.reqX}</p><p class="f-ok" id="f-req-ok" aria-live="polite"></p>${msg('f-req-err')}`
+    + `<ul id="reqList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`);
   if (note) text('f-req-ok', note);
   const res = await api(API + 'requests');
   $('reqList').removeAttribute('aria-busy');
@@ -219,12 +232,10 @@ let uFilter = 'all', uQuery = '';
 const inFilter = (u, f) => f === 'all' || u.state === f || (f === 'active' && u.state === 'admin');
 async function viewUsers(note) {
   const t = T();
-  $('card').innerHTML = head(t.usersT, `<p>${t.usersX}</p>`,
-    `<a class="btn-alt btn-sm" href="?view=profile">${I.back}<span>${t.profileT}</span></a>`)
-    + `<div class="u-tools"><input class="f-in" id="uSearch" type="search" placeholder="${t.usersSearch}" aria-label="${t.usersSearch}" autocomplete="off" spellcheck="false">`
+  frame(`<p>${t.usersX}</p><div class="u-tools"><input class="f-in" id="uSearch" type="search" placeholder="${t.usersSearch}" aria-label="${t.usersSearch}" autocomplete="off" spellcheck="false">`
     + `<div class="u-filter" id="uFilter" role="group" aria-label="${t.usersFilter}"></div></div>`
     + `<p class="f-ok" id="f-u-ok" aria-live="polite"></p>${msg('f-u-err')}`
-    + `<ul id="userList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`;
+    + `<ul id="userList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`);
   if (note) text('f-u-ok', note);
   $('uSearch').value = uQuery;
   const res = await api(API + 'users');
@@ -284,13 +295,13 @@ const legalView = (k) => () => {
   $('card').innerHTML = `<h2>${t[k + 'T']}</h2><dl class="priv">${t[k].map(([h, p]) => `<dt>${h}</dt><dd>${p}</dd>`).join('')}</dl><a class="btn-alt" href="./">${t.backApp}</a>`;
 };
 
-const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, closed: viewClosed, profile: viewProfile, requests: viewRequests, users: viewUsers, privacy: legalView('priv'), terms: legalView('terms') };
+const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, closed: viewClosed, profile: viewProfile, security: viewSecurity, requests: viewRequests, users: viewUsers, privacy: legalView('priv'), terms: legalView('terms') };
 
 // The state decides what is allowed; the ?view= only picks among the allowed ones.
 function pick() {
   const want = params.get('view') || 'signin';
   if (want === 'privacy' || want === 'terms') return want;
-  if (me && me.state === 'active') return want === 'profile' || ((want === 'requests' || want === 'users') && me.user.is_admin) ? want : null;
+  if (me && me.state === 'active') return want === 'profile' || want === 'security' || ((want === 'requests' || want === 'users') && me.user.is_admin) ? want : null;
   // pending is the landing, but its own sign-in link must still reach the form (another account may be approved)
   if (me && (me.state === 'pending' || me.state === 'closed') && !params.has('view')) return me.state;
   return want === 'signup' ? 'signup' : 'signin';
@@ -304,7 +315,7 @@ function render() {
   $('esBtn').classList.toggle('active', state.lang === 'es'); $('esBtn').setAttribute('aria-pressed', String(state.lang === 'es'));
   $('enBtn').classList.toggle('active', state.lang === 'en'); $('enBtn').setAttribute('aria-pressed', String(state.lang === 'en'));
   $('footer').innerHTML = legalHtml(t);
-  $('card').classList.toggle('acct-wide', current === 'profile' || current === 'requests' || current === 'users');
+  $('card').classList.toggle('acct-wide', FRAMED.includes(current));
   VIEWS[current]();
 }
 
