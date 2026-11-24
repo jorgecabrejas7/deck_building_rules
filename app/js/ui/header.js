@@ -15,6 +15,7 @@ const ICON = {
   help: svg('<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 2"/><path d="M12 16.6v.01"/>'),
   user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'),
   shield: svg('<path d="M12 3.5 5 6v5.5c0 4.4 3 7.6 7 8.9 4-1.3 7-4.5 7-8.9V6l-7-2.5Z"/><path d="m9.2 12 2 2 3.6-3.8"/>'),
+  users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/>'),
   out: svg('<path d="M9.5 20H6.5A2.5 2.5 0 0 1 4 17.5v-11A2.5 2.5 0 0 1 6.5 4h3"/><path d="m15.5 16 4-4-4-4M19.5 12H9.5"/>'),
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>'),
   moon: svg('<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>'),
@@ -38,7 +39,8 @@ function renderAccountMenu() {
   if (!me) { m.innerHTML = item('account.html', ICON.user, t.signIn); return; }
   m.innerHTML = '<div class="menu-who">' + (me.display_name || me.username).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) + '</div>'
     + item('account.html?view=profile', ICON.user, t.profileT)
-    + (me.is_admin ? item('account.html?view=requests', ICON.shield, t.reqT, pending ? '<span class="menu-badge">' + pending + '</span>' : '') : '')
+    + (me.is_admin ? item('account.html?view=requests', ICON.shield, t.reqT, pending ? '<span class="menu-badge">' + pending + '</span>' : '')
+      + item('account.html?view=users', ICON.users, t.usersT) : '')
     + '<button class="menu-item" role="menuitem" type="button" id="signOutBtn">' + ICON.out + '<span>' + t.signOut + '</span></button>';
   $('signOutBtn').onclick = async () => {
     await api(AUTH + 'auth/session', 'DELETE');

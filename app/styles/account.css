@@ -63,6 +63,22 @@
 .req-count{min-width:20px;padding:1px 6px;border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:var(--fs-micro);font-weight:600;text-align:center}
 .req-none{color:var(--muted)}
 
+/* users: a search and a state filter above the list; each row says its state in a small badge */
+.u-tools{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-3)}
+.u-tools .f-in{flex:1 1 220px;width:auto}
+.u-filter{display:flex;gap:2px;padding:2px;border-radius:var(--r-pill);background:var(--fill);overflow-x:auto;scrollbar-width:none;max-width:100%}
+.u-filter button{display:inline-flex;align-items:center;gap:6px;flex:none;min-height:32px;padding:0 12px;border:none;border-radius:var(--r-pill);background:transparent;color:var(--muted);font-size:var(--fs-caption);font-weight:500;white-space:nowrap}
+.u-filter button:hover{color:var(--text)}
+.u-filter button[aria-pressed="true"]{background:var(--panel);color:var(--text);box-shadow:var(--shadow-1)}
+body.dark .u-filter button[aria-pressed="true"]{background:var(--fill-hover)}
+.u-filter button span{font-size:var(--fs-micro);color:var(--faint);font-variant-numeric:tabular-nums}
+.req-who .u-badge{display:inline-block;margin-left:var(--sp-1);padding:1px 8px;border-radius:var(--r-pill);font-size:var(--fs-micro);font-weight:500;vertical-align:2px;white-space:nowrap}
+.u-active{background:var(--okBg);color:var(--okFg)}
+.u-pending{background:var(--warnBg);color:var(--warnFg)}
+.u-rejected{background:var(--badBg);color:var(--badFg)}
+.u-inactive{background:var(--fill);color:var(--muted)}
+.u-admin{background:var(--tipBg);color:var(--tipFg)}
+
 /* phones: rows stack, controls go full width and back to touch size */
 @media (max-width:640px){
   .acct-card{padding:var(--sp-4)}
@@ -73,5 +89,7 @@
   .acct-go{flex:1 1 100%}
   .acct-go .btn-alt{flex:1 1 auto;white-space:nowrap}
   .req-act{flex:1 1 100%}
-  .acct-card .req-act .btn-primary,.req-act .btn-alt{flex:1}
+  .u-filter button{min-height:40px}
+  .req-act{flex-wrap:wrap}
+  .acct-card .req-act .btn-primary,.req-act .btn-alt{flex:1 1 auto;white-space:nowrap}
 }

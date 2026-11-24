@@ -47,7 +47,8 @@ def requests(request):
     if not is_admin(request):
         return JsonResponse({"error": "forbidden"}, status=403)
     rows = [{"id": u.pk, "username": u.username, "email": u.email, "date_joined": u.date_joined.isoformat()}
-            for u in User.objects.filter(is_active=False, rejected_at__isnull=True).order_by("date_joined")]
+            for u in User.objects.filter(is_active=False, rejected_at__isnull=True, deactivated_at__isnull=True)
+            .order_by("date_joined")]
     return JsonResponse({"requests": rows})
 
 
@@ -61,10 +62,48 @@ def request_decide(request, id, decision):
     if u is None:
         return JsonResponse({"error": "not found"}, status=404)
     if decision == "approve":
-        u.is_active, u.rejected_at = True, None
+        u.activate()
     else:
         u.rejected_at = timezone.now()
-    u.save(update_fields=["is_active", "rejected_at"])
+        u.save(update_fields=["rejected_at"])
+    return HttpResponse(status=204)
+
+
+# Every account, for the admins' Usuarios view in account.html.
+@require_GET
+def users(request):
+    if not is_admin(request):
+        return JsonResponse({"error": "forbidden"}, status=403)
+    rows = [{"id": u.pk, "username": u.username, "display_name": u.display_name, "email": u.email, "state": u.state,
+             "is_self": u.pk == request.user.pk, "date_joined": u.date_joined.isoformat(),
+             "last_login": u.last_login.isoformat() if u.last_login else None}
+            for u in User.objects.order_by("username")]
+    return JsonResponse({"users": rows})
+
+
+# Dar de baja closes an account in use: it stays, inactive and marked, and its sessions stop working at once (Django
+# drops an inactive user on the next request). Activate lets any inactive account in again. Delete removes the account
+# and its data, as the user's own delete does. Admin accounts, the caller's own included, are left to the Django admin.
+@require_POST
+def user_action(request, id, action):
+    if not is_admin(request):
+        return JsonResponse({"error": "forbidden"}, status=403)
+    u = User.objects.filter(pk=id).first()
+    if u is None:
+        return JsonResponse({"error": "not found"}, status=404)
+    if u.is_superuser:
+        return JsonResponse({"error": "protected"}, status=409)
+    if action == "deactivate":
+        if not u.is_active:
+            return JsonResponse({"error": "state"}, status=409)
+        u.is_active, u.deactivated_at = False, timezone.now()
+        u.save(update_fields=["is_active", "deactivated_at"])
+    elif action == "activate":
+        if u.is_active:
+            return JsonResponse({"error": "state"}, status=409)
+        u.activate()
+    else:
+        u.delete()
     return HttpResponse(status=204)
 
 

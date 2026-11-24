@@ -26,6 +26,9 @@ const I = {
   x: svg('<path d="M6 6l12 12M18 6 6 18"/>'),
   mail: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
   clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'),
+  users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/>'),
+  undo: svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
 };
 
 function applyTheme() {
@@ -132,7 +135,8 @@ function viewProfile() {
       + `<button class="btn-primary" type="submit">${t.save}</button></div>${msg('f-prof-err')}</form>`)
     + sec(I.lock, t.changePw, `<form id="f-pw"><div class="f-line">${u.has_password ? cell(field('current_password', t.currentPw, 'password', 'current-password')) : ''}`
       + `${cell(field('new_password', t.newPw, 'password', 'new-password'))}<button class="btn-alt" type="submit">${t.changePw}</button></div>${msg('f-pw-err')}</form>`)
-    + (u.is_admin ? sec(I.shield, t.adminT, `<a class="set-link" id="reqLink" href="?view=requests"><span class="set-link-t">${t.reqT}</span><span class="req-count" hidden></span>${I.chev}</a>`) : '')
+    + (u.is_admin ? sec(I.shield, t.adminT, `<a class="set-link" id="reqLink" href="?view=requests"><span class="set-link-t">${t.reqT}</span><span class="req-count" hidden></span>${I.chev}</a>`
+      + `<a class="set-link" href="?view=users"><span class="set-link-t">${t.usersT}</span>${I.chev}</a>`) : '')
     + sec(I.trash, t.delT, `<p>${t.delX}</p>${u.has_password ? '' : `<p>${t.delNeedsPw}</p>`}${btnI('btn-alt btn-danger btn-sm', I.trash, t.delGo, ' id="delGo"')}`
       + `<form id="f-del" hidden><div class="f-line">${cell(field('del_password', t.password, 'password', 'current-password'))}<button class="btn-alt btn-danger" type="submit">${t.delConfirm}</button><button id="delNo" class="btn-alt" type="button">${t.delCancel}</button></div>${msg('f-del-err')}</form>`, ' set-danger');
   $('display_name').value = u.display_name; $('language').value = u.language;
@@ -197,19 +201,85 @@ async function viewRequests(note) {
   };
 }
 
+// Admins only: every account, filtered by state and searched by name or email. Dar de baja and Borrar ask first, inline,
+// the way Rechazar does. Admin accounts, the admin's own included, are left to the Django admin. The filter and the
+// search survive the re-render after an action.
+let uFilter = 'all', uQuery = '';
+const inFilter = (u, f) => f === 'all' || u.state === f || (f === 'active' && u.state === 'admin');
+async function viewUsers(note) {
+  const t = T();
+  $('card').innerHTML = head(t.usersT, `<p>${t.usersX}</p>`,
+    `<a class="btn-alt btn-sm" href="?view=profile">${I.back}<span>${t.profileT}</span></a>`)
+    + `<div class="u-tools"><input class="f-in" id="uSearch" type="search" placeholder="${t.usersSearch}" aria-label="${t.usersSearch}" autocomplete="off" spellcheck="false">`
+    + `<div class="u-filter" id="uFilter" role="group" aria-label="${t.usersFilter}"></div></div>`
+    + `<p class="f-ok" id="f-u-ok" aria-live="polite"></p>${msg('f-u-err')}`
+    + `<ul id="userList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`;
+  if (note) text('f-u-ok', note);
+  $('uSearch').value = uQuery;
+  const res = await api(API + 'users');
+  $('userList').removeAttribute('aria-busy');
+  if (res.status !== 200) { $('userList').innerHTML = ''; return text('f-u-err', res.status === 403 ? t.reqForbidden : t.errNet); }
+  const all = res.data.users, byId = Object.fromEntries(all.map((u) => [u.id, u]));
+  const FILTERS = [['all', t.fAll], ['active', t.fActive], ['pending', t.fPending], ['inactive', t.fInactive], ['rejected', t.fRejected]];
+  const STATE = { admin: t.stAdmin, active: t.stActive, pending: t.stPending, inactive: t.stInactive, rejected: t.stRejected };
+  const day = (iso) => new Date(iso).toLocaleDateString(state.lang, { dateStyle: 'medium' });
+  const actions = (u) => {
+    if (u.state === 'admin') return '';
+    const del = btnI('btn-alt btn-danger', I.trash, t.uDel, ' data-do="ask-delete"');
+    if (u.state === 'active') return `<div class="req-act">${del}${btnI('btn-alt', I.out, t.uDeact, ' data-do="ask-deactivate"')}</div>`;
+    const on = u.state === 'pending' ? btnI('btn-primary', I.check, t.reqApprove, ' data-do="activate"') : btnI('btn-alt', I.undo, t.uReact, ' data-do="activate"');
+    return `<div class="req-act">${del}${on}</div>`;
+  };
+  const row = (u) => `<li class="req-row" data-id="${u.id}"><div class="req-who"><strong>${esc(u.display_name || u.username)}`
+    + ` <span class="u-badge u-${u.state}">${u.is_self ? t.stYou : STATE[u.state]}</span></strong>`
+    + (u.display_name ? `<span>${I.user}${esc(u.username)}</span>` : '') + (u.email ? `<span>${I.mail}${esc(u.email)}</span>` : '')
+    + `<span>${I.clock}${fill(t.uJoined, { d: day(u.date_joined) })} · ${u.last_login ? fill(t.uLast, { d: day(u.last_login) }) : t.uNever}</span></div>`
+    + `${actions(u)}</li>`;
+  const drawFilter = () => {
+    $('uFilter').innerHTML = FILTERS.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === uFilter}">${l}<span>${all.filter((u) => inFilter(u, k)).length}</span></button>`).join('');
+  };
+  const drawList = () => {
+    const q = uQuery.trim().toLowerCase();
+    const rows = all.filter((u) => inFilter(u, uFilter) && (!q || [u.username, u.display_name, u.email].some((s) => s.toLowerCase().includes(q))));
+    $('userList').innerHTML = rows.length ? rows.map(row).join('') : `<li class="req-none">${t.uNone}</li>`;
+  };
+  drawFilter(); drawList();
+  $('uSearch').oninput = (e) => { uQuery = e.target.value; drawList(); };
+  $('uFilter').onclick = (e) => { const b = e.target.closest('button[data-f]'); if (b) { uFilter = b.dataset.f; drawFilter(); drawList(); } };
+  $('userList').onclick = async (ev) => {
+    const b = ev.target.closest('button[data-do]'); if (!b) return;
+    const li = b.closest('.req-row'), u = byId[li.dataset.id], act = li.querySelector('.req-act'), d = b.dataset.do;
+    if (d.startsWith('ask-')) {   // the question replaces the buttons; Cancelar puts them back
+      const what = d.slice(4), del = what === 'delete';
+      act.outerHTML = `<div class="req-act req-ask" role="group" aria-live="polite"><p>${fill(del ? t.uDelAsk : t.uDeactAsk, { u: esc(u.username) })}</p>`
+        + btnI('btn-alt btn-danger', del ? I.trash : I.out, del ? t.uDelYes : t.uDeactYes, ` data-do="${what}"`)
+        + `<button class="btn-alt" data-do="cancel" type="button">${t.delCancel}</button></div>`;
+      li.querySelector('[data-do="cancel"]').focus();
+      return;
+    }
+    if (d === 'cancel') { act.outerHTML = actions(u); li.querySelector('[data-do^="ask-"]').focus(); return; }
+    for (const x of act.querySelectorAll('button')) x.disabled = true;
+    const r = await api(API + 'users/' + u.id + '/' + d, 'POST');
+    const done = { deactivate: t.uDeactDone, activate: u.state === 'pending' ? t.reqApproved : t.uReactDone, delete: t.uDelDone }[d];
+    if (r.status === 204) viewUsers(fill(done, { u: u.username }));
+    else if (r.status === 404 || r.status === 409) viewUsers(fill(t.uGone, { u: u.username }));   // changed meanwhile
+    else { for (const x of act.querySelectorAll('button')) x.disabled = false; text('f-u-err', t.errNet); }
+  };
+}
+
 // k is 'priv' or 'terms': the page title is t[k+'T'], the rows t[k]
 const legalView = (k) => () => {
   const t = T();
   $('card').innerHTML = `<h2>${t[k + 'T']}</h2><dl class="priv">${t[k].map(([h, p]) => `<dt>${h}</dt><dd>${p}</dd>`).join('')}</dl><a class="btn-alt" href="./">${t.backApp}</a>`;
 };
 
-const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, profile: viewProfile, requests: viewRequests, privacy: legalView('priv'), terms: legalView('terms') };
+const VIEWS = { signin: viewSignin, signup: viewSignup, pending: viewPending, profile: viewProfile, requests: viewRequests, users: viewUsers, privacy: legalView('priv'), terms: legalView('terms') };
 
 // The state decides what is allowed; the ?view= only picks among the allowed ones.
 function pick() {
   const want = params.get('view') || 'signin';
   if (want === 'privacy' || want === 'terms') return want;
-  if (me && me.state === 'active') return want === 'profile' || (want === 'requests' && me.user.is_admin) ? want : null;
+  if (me && me.state === 'active') return want === 'profile' || ((want === 'requests' || want === 'users') && me.user.is_admin) ? want : null;
   // pending is the landing, but its own sign-in link must still reach the form (another account may be approved)
   if (me && me.state === 'pending' && !params.has('view')) return 'pending';
   return want === 'signup' ? 'signup' : 'signin';
@@ -223,7 +293,7 @@ function render() {
   $('esBtn').classList.toggle('active', state.lang === 'es'); $('esBtn').setAttribute('aria-pressed', String(state.lang === 'es'));
   $('enBtn').classList.toggle('active', state.lang === 'en'); $('enBtn').setAttribute('aria-pressed', String(state.lang === 'en'));
   $('footer').innerHTML = legalHtml(t);
-  $('card').classList.toggle('acct-wide', current === 'profile' || current === 'requests');
+  $('card').classList.toggle('acct-wide', current === 'profile' || current === 'requests' || current === 'users');
   VIEWS[current]();
 }
 

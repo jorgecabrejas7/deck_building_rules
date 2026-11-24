@@ -151,6 +151,78 @@ def test_requests_list_approve_reject(client):
     assert ben.is_active and ben.rejected_at is None
 
 
+def test_users_admin_only(client, active):
+    assert client.get("/pod/api/users").status_code == 403
+    client.force_login(active)
+    assert client.get("/pod/api/users").status_code == 403
+    assert client.post(f"/pod/api/users/{active.pk}/deactivate").status_code == 403
+    assert client.post(f"/pod/api/users/{active.pk}/delete").status_code == 403
+    assert User.objects.filter(pk=active.pk, is_active=True).exists()
+
+
+def test_users_list_states(client, active):
+    signup(client, "ana")
+    signup(client, "ben")
+    ben = User.objects.get(username="ben")
+    ben.rejected_at = timezone.now()
+    ben.save()
+    root = User.objects.create_superuser("root", "r@x.com", "pw-root-12345")
+    client.force_login(root)
+    rows = {r["username"]: r for r in client.get("/pod/api/users").json()["users"]}
+    assert {k: v["state"] for k, v in rows.items()} == {"ana": "pending", "ben": "rejected", "bob": "active", "root": "admin"}
+    assert rows["root"]["is_self"] and not rows["bob"]["is_self"]
+    assert rows["bob"]["email"] == "bob@x.com" and rows["bob"]["last_login"] is None and "date_joined" in rows["bob"]
+
+
+def test_deactivate_cuts_the_session_and_activate_restores(client, active):
+    bob = Client()
+    bob.force_login(active)
+    assert bob.get("/pod/api/me").json()["state"] == "active"
+    root = User.objects.create_superuser("root", "r@x.com", "pw-root-12345")
+    client.force_login(root)
+    assert client.post(f"/pod/api/users/{active.pk}/deactivate").status_code == 204
+    active.refresh_from_db()
+    assert not active.is_active and active.deactivated_at is not None and active.state == "inactive"
+    # the open session stops working at once and the password no longer signs in
+    assert bob.get("/pod/api/me").json() == {"state": "anonymous"}
+    assert post(Client(), BASE + "auth/login", {"username": "bob", "password": "pw-bob-12345"}).status_code == 401
+    # a closed account is not a signup waiting for approval
+    assert client.get("/pod/api/requests").json() == {"requests": []}
+    assert client.post(f"/pod/api/users/{active.pk}/deactivate").status_code == 409
+    assert client.post(f"/pod/api/users/{active.pk}/activate").status_code == 204
+    active.refresh_from_db()
+    assert active.is_active and active.deactivated_at is None
+    assert client.post(f"/pod/api/users/{active.pk}/activate").status_code == 409
+
+
+def test_activate_lets_in_a_rejected_signup(client):
+    signup(client, "ana")
+    ana = User.objects.get(username="ana")
+    ana.rejected_at = timezone.now()
+    ana.save()
+    client.force_login(User.objects.create_superuser("root", "r@x.com", "pw-root-12345"))
+    assert client.post(f"/pod/api/users/{ana.pk}/activate").status_code == 204
+    ana.refresh_from_db()
+    assert ana.is_active and ana.rejected_at is None
+
+
+def test_delete_user(client, active):
+    client.force_login(User.objects.create_superuser("root", "r@x.com", "pw-root-12345"))
+    assert client.post(f"/pod/api/users/{active.pk}/delete").status_code == 204
+    assert not User.objects.filter(username="bob").exists()
+    assert client.post(f"/pod/api/users/{active.pk}/delete").status_code == 404
+
+
+def test_admin_accounts_are_protected(client):
+    root = User.objects.create_superuser("root", "r@x.com", "pw-root-12345")
+    other = User.objects.create_superuser("boss", "b@x.com", "pw-boss-12345")
+    client.force_login(root)
+    for target in (root, other):
+        for action in ("deactivate", "delete"):
+            assert client.post(f"/pod/api/users/{target.pk}/{action}").status_code == 409
+    assert User.objects.filter(is_superuser=True, is_active=True).count() == 2
+
+
 def test_admin_approve_action_clears_rejection(client):
     signup(client, "ana")
     ana = User.objects.get(username="ana")
