@@ -13,6 +13,20 @@ let current = null;   // the view being shown, re-run on language change
 const svg = (d) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
 const SUN = svg('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>');
 const MOON = svg('<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>');
+// one stroke, one size: the section and button icons of the profile and requests views
+const I = {
+  card: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16a3 3 0 0 1 6 0M14 10h4M14 14h3"/>'),
+  lock: svg('<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
+  shield: svg('<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'),
+  trash: svg('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/>'),
+  out: svg('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'),
+  back: svg('<path d="M19 12H5M12 19l-7-7 7-7"/>'),
+  chev: svg('<path d="m9 6 6 6-6 6"/>'),
+  check: svg('<path d="m5 12 5 5 9-10"/>'),
+  x: svg('<path d="M6 6l12 12M18 6 6 18"/>'),
+  mail: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
+  clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+};
 
 function applyTheme() {
   const eff = state.theme ? state.theme === 'dark' : state.sysDark, t = T();
@@ -103,18 +117,30 @@ function viewPending() {
   $('card').innerHTML = `<h2>${t.pendingT}</h2><p>${t.pendingX}</p><a class="btn-alt" href="?view=signin">${t.signIn}</a>`;
 }
 
+// One settings row per job: icon and title on the left, the controls in one line on the right (stacked on phones).
+const sec = (icon, title, body, cls = '') => `<section class="set${cls}"><h3 class="set-h">${icon}<span>${title}</span></h3><div class="set-b">${body}</div></section>`;
+const cell = (html) => `<div class="f-cell">${html}</div>`;
+const head = (title, sub, actions) => `<div class="acct-head"><div class="acct-id"><h2>${title}</h2>${sub}</div><div class="acct-go">${actions}</div></div>`;
+const btnI = (cls, icon, label, attrs = '') => `<button class="${cls}" type="button"${attrs}>${icon}<span>${label}</span></button>`;
+
 function viewProfile() {
   const t = T(), u = me.user;
-  $('card').innerHTML = `<h2>${t.profileT}</h2><p>${u.username}</p>`
-    + `<form id="f-prof">${field('display_name', t.displayName, 'text', 'nickname')}<label class="f-lbl" for="language">${t.language}</label><select class="f-in" id="language" name="language"><option value="es">Español</option><option value="en">English</option></select>${msg('f-prof-err')}<button class="btn-primary" type="submit">${t.save}</button></form>`
-    + `<section><h3>${t.changePw}</h3><form id="f-pw">${u.has_password ? field('current_password', t.currentPw, 'password', 'current-password') : ''}${field('new_password', t.newPw, 'password', 'new-password')}${msg('f-pw-err')}<button class="btn-alt" type="submit">${t.changePw}</button></form></section>`
-    + (u.is_admin ? `<section><h3>${t.adminT}</h3><a class="btn-alt" id="reqLink" href="?view=requests">${t.reqT}</a></section>` : '')
-    + `<section><button id="signOut" class="btn-alt" type="button">${t.signOut}</button><p class="f-alt"><a href="./">${t.backApp}</a></p></section>`
-    + `<section><h3>${t.delT}</h3><p>${t.delX}</p>${u.has_password ? '' : `<p>${t.delNeedsPw}</p>`}<button id="delGo" class="btn-alt btn-danger" type="button">${t.delGo}</button>`
-    + `<form id="f-del" hidden>${field('del_password', t.password, 'password', 'current-password')}${msg('f-del-err')}<button class="btn-alt btn-danger" type="submit">${t.delConfirm}</button><button id="delNo" class="btn-alt" type="button">${t.delCancel}</button></form></section>`;
+  $('card').innerHTML = head(t.profileT, `<p>${esc(u.username)}</p>`,
+    `<a class="btn-alt btn-sm" href="./">${I.back}<span>${t.backApp}</span></a>${btnI('btn-alt btn-sm', I.out, t.signOut, ' id="signOut"')}`)
+    + sec(I.card, t.profileSec, `<form id="f-prof"><div class="f-line">${cell(field('display_name', t.displayName, 'text', 'nickname'))}`
+      + cell(`<label class="f-lbl" for="language">${t.language}</label><select class="f-in" id="language" name="language"><option value="es">Español</option><option value="en">English</option></select>`)
+      + `<button class="btn-primary" type="submit">${t.save}</button></div>${msg('f-prof-err')}</form>`)
+    + sec(I.lock, t.changePw, `<form id="f-pw"><div class="f-line">${u.has_password ? cell(field('current_password', t.currentPw, 'password', 'current-password')) : ''}`
+      + `${cell(field('new_password', t.newPw, 'password', 'new-password'))}<button class="btn-alt" type="submit">${t.changePw}</button></div>${msg('f-pw-err')}</form>`)
+    + (u.is_admin ? sec(I.shield, t.adminT, `<a class="set-link" id="reqLink" href="?view=requests"><span class="set-link-t">${t.reqT}</span><span class="req-count" hidden></span>${I.chev}</a>`) : '')
+    + sec(I.trash, t.delT, `<p>${t.delX}</p>${u.has_password ? '' : `<p>${t.delNeedsPw}</p>`}${btnI('btn-alt btn-danger btn-sm', I.trash, t.delGo, ' id="delGo"')}`
+      + `<form id="f-del" hidden><div class="f-line">${cell(field('del_password', t.password, 'password', 'current-password'))}<button class="btn-alt btn-danger" type="submit">${t.delConfirm}</button><button id="delNo" class="btn-alt" type="button">${t.delCancel}</button></div>${msg('f-del-err')}</form>`, ' set-danger');
   $('display_name').value = u.display_name; $('language').value = u.language;
   // the admin sees how many wait without opening the view
-  if (u.is_admin) api(API + 'requests').then((r) => { const n = r.status === 200 ? r.data.requests.length : 0; if (n && $('reqLink')) $('reqLink').innerHTML = `${t.reqT}<span class="req-count">${n}</span>`; });
+  if (u.is_admin) api(API + 'requests').then((r) => {
+    const n = r.status === 200 ? r.data.requests.length : 0, c = document.querySelector('#reqLink .req-count');
+    if (n && c) { c.textContent = n; c.hidden = false; }
+  });
   onSubmit('f-prof', async (v) => {
     const res = await api(API + 'me', 'POST', { display_name: v.display_name, language: v.language });
     if (res.status !== 200) return showErrors(res, 'f-prof-err');
@@ -128,7 +154,7 @@ function viewProfile() {
   });
   $('signOut').onclick = async () => { await api(AUTH + 'auth/session', 'DELETE'); await wipeCaches(); goSignin(); };
   $('delGo').onclick = () => { $('f-del').hidden = false; $('delGo').hidden = true; $('del_password').focus(); };
-  $('delNo').onclick = () => { $('f-del').hidden = true; $('delGo').hidden = false; };
+  $('delNo').onclick = () => { $('f-del').hidden = true; $('delGo').hidden = false; $('delGo').focus(); };
   onSubmit('f-del', async (v) => {
     const res = await api(API + 'me/delete', 'POST', { password: v.del_password });
     if (res.status === 204) { await wipeCaches(); goSignin(); }
@@ -140,9 +166,10 @@ function viewProfile() {
 // is deleted) and takes them off the list. `note` is the line to show above the list after a decision.
 async function viewRequests(note) {
   const t = T();
-  $('card').innerHTML = `<h2>${t.reqT}</h2><p>${t.reqX}</p><p class="f-ok" id="f-req-ok" aria-live="polite"></p>${msg('f-req-err')}`
-    + `<ul id="reqList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`
-    + `<p class="f-alt"><a href="?view=profile">${t.profileT}</a> · <a href="./">${t.backApp}</a></p>`;
+  $('card').innerHTML = head(t.reqT, `<p>${t.reqX}</p>`,
+    `<a class="btn-alt btn-sm" href="?view=profile">${I.back}<span>${t.profileT}</span></a>`)
+    + `<p class="f-ok" id="f-req-ok" aria-live="polite"></p>${msg('f-req-err')}`
+    + `<ul id="reqList" class="req" aria-busy="true"><li class="req-none">${t.reqLoading}</li></ul>`;
   if (note) text('f-req-ok', note);
   const res = await api(API + 'requests');
   $('reqList').removeAttribute('aria-busy');
@@ -150,14 +177,14 @@ async function viewRequests(note) {
   const rows = res.data.requests, names = Object.fromEntries(rows.map((r) => [r.id, r.username]));
   if (!rows.length) { $('reqList').innerHTML = `<li class="req-none">${t.reqNone}</li>`; return; }
   const when = (iso) => `<time datetime="${iso}">${new Date(iso).toLocaleString(state.lang, { dateStyle: 'medium', timeStyle: 'short' })}</time>`;
-  const actions = () => `<div class="req-act"><button class="btn-primary" data-do="approve" type="button">${t.reqApprove}</button><button class="btn-alt btn-danger" data-do="ask" type="button">${t.reqReject}</button></div>`;
+  const actions = () => `<div class="req-act">${btnI('btn-primary', I.check, t.reqApprove, ' data-do="approve"')}${btnI('btn-alt btn-danger', I.x, t.reqReject, ' data-do="ask"')}</div>`;
   $('reqList').innerHTML = rows.map((r) => `<li class="req-row" data-id="${r.id}"><div class="req-who"><strong>${esc(r.username)}</strong>`
-    + (r.email ? `<span>${esc(r.email)}</span>` : '') + `<span>${when(r.date_joined)}</span></div>${actions()}</li>`).join('');
+    + (r.email ? `<span>${I.mail}${esc(r.email)}</span>` : '') + `<span>${I.clock}${when(r.date_joined)}</span></div>${actions()}</li>`).join('');
   $('reqList').onclick = async (ev) => {
     const b = ev.target.closest('button[data-do]'); if (!b) return;
     const row = b.closest('.req-row'), id = row.dataset.id, name = names[id], act = row.querySelector('.req-act');
     if (b.dataset.do === 'ask') {   // the question replaces the buttons; Cancelar puts them back
-      act.outerHTML = `<div class="req-act req-ask" role="group" aria-live="polite"><p>${fill(t.reqRejectAsk, { u: esc(name) })}</p><button class="btn-alt btn-danger" data-do="reject" type="button">${t.reqRejectYes}</button><button class="btn-alt" data-do="cancel" type="button">${t.delCancel}</button></div>`;
+      act.outerHTML = `<div class="req-act req-ask" role="group" aria-live="polite"><p>${fill(t.reqRejectAsk, { u: esc(name) })}</p>${btnI('btn-alt btn-danger', I.x, t.reqRejectYes, ' data-do="reject"')}<button class="btn-alt" data-do="cancel" type="button">${t.delCancel}</button></div>`;
       row.querySelector('[data-do="cancel"]').focus();
       return;
     }
@@ -196,6 +223,7 @@ function render() {
   $('esBtn').classList.toggle('active', state.lang === 'es'); $('esBtn').setAttribute('aria-pressed', String(state.lang === 'es'));
   $('enBtn').classList.toggle('active', state.lang === 'en'); $('enBtn').setAttribute('aria-pressed', String(state.lang === 'en'));
   $('footer').innerHTML = legalHtml(t);
+  $('card').classList.toggle('acct-wide', current === 'profile' || current === 'requests');
   VIEWS[current]();
 }
 
