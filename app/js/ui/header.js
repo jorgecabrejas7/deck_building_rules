@@ -37,7 +37,8 @@ const item = (href, icon, label, extra = '') => '<a class="menu-item" role="menu
 function renderAccountMenu() {
   const t = T(), m = $('accountMenu');
   if (!me) { m.innerHTML = item('account.html', ICON.user, t.signIn); return; }
-  m.innerHTML = '<div class="menu-who">' + (me.display_name || me.username).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) + '</div>'
+  m.innerHTML = '<div class="menu-who"><span>' + (me.display_name || me.username).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) + '</span>'
+    + (me.is_admin ? '<span class="menu-role">' + t.stAdmin + '</span>' : '') + '</div>'
     + item('account.html?view=profile', ICON.user, t.profileT)
     + (me.is_admin ? item('account.html?view=requests', ICON.shield, t.reqT, pending ? '<span class="menu-badge">' + pending + '</span>' : '')
       + item('account.html?view=users', ICON.users, t.usersT) : '')

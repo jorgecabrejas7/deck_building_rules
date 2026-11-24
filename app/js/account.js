@@ -22,6 +22,7 @@ const I = {
   check: svg('<path d="m5 12 5 5 9-10"/>'),
   x: svg('<path d="M6 6l12 12M18 6 6 18"/>'),
   mail: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
+  shield: svg('<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'),
   clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
   user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'),
   undo: svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
@@ -139,7 +140,7 @@ function frame(body) {
   const t = T(), u = me.user;
   const tabs = [['profile', t.profileSec], ['security', t.securityT], ...(u.is_admin ? [['requests', t.reqT], ['users', t.usersT]] : [])];
   $('card').innerHTML = `<a class="acct-back" href="./">${I.back}<span>${t.backApp}</span></a>`
-    + `<div class="acct-head"><div class="acct-id"><h2>${t.profileT}</h2><p>${esc(u.username)}</p></div>${btnI('btn-alt btn-sm', I.out, t.signOut, ' id="signOut"')}</div>`
+    + `<div class="acct-head"><div class="acct-id"><h2>${t.profileT}</h2><p>${esc(u.username)}${u.is_admin ? ` <span class="u-badge u-admin">${I.shield}${t.stAdmin}</span>` : ''}</p></div>${btnI('btn-alt btn-sm', I.out, t.signOut, ' id="signOut"')}</div>`
     + `<div class="acct-tabs"><div class="tabbar" role="tablist" aria-label="${t.acctTabs}">`
     + tabs.map(([v, l]) => `<button class="tab-btn${v === current ? ' active' : ''}" type="button" role="tab" aria-selected="${v === current}" data-view="${v}">${l}`
       + `${v === 'requests' ? '<span class="req-count" hidden></span>' : ''}</button>`).join('')
@@ -242,7 +243,7 @@ async function viewUsers(note) {
   $('userList').removeAttribute('aria-busy');
   if (res.status !== 200) { $('userList').innerHTML = ''; return text('f-u-err', res.status === 403 ? t.reqForbidden : t.errNet); }
   const all = res.data.users, byId = Object.fromEntries(all.map((u) => [u.id, u]));
-  const FILTERS = [['all', t.fAll], ['active', t.fActive], ['pending', t.fPending], ['inactive', t.fInactive], ['rejected', t.fRejected]];
+  const FILTERS = [['all', t.fAll], ['active', t.fActive], ['admin', t.fAdmin], ['pending', t.fPending], ['inactive', t.fInactive], ['rejected', t.fRejected]];
   const STATE = { admin: t.stAdmin, active: t.stActive, pending: t.stPending, inactive: t.stInactive, rejected: t.stRejected };
   const day = (iso) => new Date(iso).toLocaleDateString(state.lang, { dateStyle: 'medium' });
   const actions = (u) => {
@@ -253,7 +254,7 @@ async function viewUsers(note) {
     return `<div class="req-act">${del}${on}</div>`;
   };
   const row = (u) => `<li class="req-row" data-id="${u.id}"><div class="req-who"><strong>${esc(u.display_name || u.username)}`
-    + ` <span class="u-badge u-${u.state}">${u.is_self ? t.stYou : STATE[u.state]}</span></strong>`
+    + ` <span class="u-badge u-${u.state}">${u.state === 'admin' ? I.shield : ''}${STATE[u.state]}</span>${u.is_self ? ` <span class="u-badge u-you">${t.stYou}</span>` : ''}</strong>`
     + (u.display_name ? `<span>${I.user}${esc(u.username)}</span>` : '') + (u.email ? `<span>${I.mail}${esc(u.email)}</span>` : '')
     + `<span>${I.clock}${fill(t.uJoined, { d: day(u.date_joined) })} · ${u.last_login ? fill(t.uLast, { d: day(u.last_login) }) : t.uNever}</span></div>`
     + `${actions(u)}</li>`;
