@@ -1,7 +1,7 @@
-/* Account pages: one centred card, phone first. Colours come from tokens.css only. Type sizes are the tokens'; only the
+/* Account pages: one centred column straight on the page background (no card), phone first. Colours come from tokens.css only. Type sizes are the tokens'; only the
    space is tight: controls are 40px high on a desktop and 44px on a phone. */
 .acct{flex:1;padding:var(--sp-4) 0}
-.acct-card{box-sizing:border-box;width:min(420px,100% - 2*var(--sp-4));margin:0 auto;padding:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-3)}
+.acct-card{box-sizing:border-box;width:min(420px,100% - 2*var(--sp-4));margin:0 auto;padding:var(--sp-3) 0;display:flex;flex-direction:column;gap:var(--sp-3)}
 .acct-card.acct-wide{width:min(800px,100% - 2*var(--sp-4))}
 .acct-card h2{font-size:var(--fs-title);font-weight:600;letter-spacing:var(--track-snug)}
 .acct-card h3{font-size:var(--fs-ui);font-weight:600}
@@ -48,8 +48,8 @@
 .set-link svg{color:var(--muted)}
 
 /* account requests: one row an account; who on the left, the two decisions on the right */
-.req{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-2)}
-.req-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-4);padding:var(--sp-3) var(--sp-4);border:1px solid var(--border);border-radius:var(--r-md)}
+.req{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-bottom:1px solid var(--border)}
+.req-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-4);padding:var(--sp-3) 0;border-top:1px solid var(--border)}
 .req-who{flex:1 1 240px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .req-who strong{overflow-wrap:anywhere}
 .req-who span{display:flex;align-items:center;gap:var(--sp-1);font-size:var(--fs-caption);color:var(--muted);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
@@ -61,7 +61,7 @@
 .req-ask p{width:100%;color:var(--text);font-size:var(--fs-caption);margin:0}
 .req-ask .btn-danger{order:2}
 .req-count{min-width:20px;padding:1px 6px;border-radius:var(--r-pill);background:var(--accentBtn);color:var(--accentFg);font-size:var(--fs-micro);font-weight:600;text-align:center}
-.req-none{color:var(--muted)}
+.req-none{padding:var(--sp-3) 0;border-top:1px solid var(--border);color:var(--muted)}
 
 /* users: a search and a state filter above the list; each row says its state in a small badge */
 .u-tools{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-3)}
@@ -81,7 +81,6 @@ body.dark .u-filter button[aria-pressed="true"]{background:var(--fill-hover)}
 
 /* phones: rows stack, controls go full width and back to touch size */
 @media (max-width:640px){
-  .acct-card{padding:var(--sp-4)}
   .f-in,.acct-card .btn-primary,.btn-alt,.set-link{min-height:44px}
   .acct-card .set{grid-template-columns:1fr}
   .set-h{min-height:0}
