@@ -18,11 +18,16 @@ const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 
 export function initHero() {
-  const stage = $('hero'), ring = $('heroRing');
+  const stage = $('hero'), ring = $('heroRing'), pin = stage.querySelector('.hero-pin');
   const still = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let built = false, cards = [], lights = [], glares = [], idle = 0, last = 0, frame = 0, front = -1, eased = 0, tiltX = 0, tiltY = 0, aimX = 0, aimY = 0;
 
+  let pinTop = 0;
+  const measure = () => { pinTop = parseFloat(getComputedStyle(pin).top) || 0; };
+  addEventListener('resize', measure);
+
   const build = () => {
+    measure();
     built = true;
     ring.innerHTML = WALKERS.map(([, file], i) => '<div class="hw-card" style="--i:' + i + ';--tint:' + WALKERS[i][0] + '"><div class="hw-back"></div>' +
       '<img src="https://cards.scryfall.io/normal/front/' + file + '" alt="" decoding="async" draggable="false"><div class="hw-glare"><i></i></div></div>').join('');
@@ -37,7 +42,8 @@ export function initHero() {
     frame = requestAnimationFrame(draw);
     const dt = Math.min(now - last, 50); last = now;
     const box = stage.getBoundingClientRect();
-    const target = clamp01(-box.top / Math.max(box.height - innerHeight, 1));
+    // 0 when the stage pins (under the tab row on wide screens), 1 when it lets go
+    const target = clamp01((pinTop - box.top) / Math.max(box.height - pin.offsetHeight, 1));
     // the cards follow the scroll with a little weight, so a wheel's steps turn into one motion
     eased += (target - eased) * (1 - Math.exp(-dt / 140));
     tiltX += (aimX - tiltX) * (1 - Math.exp(-dt / 200));
@@ -45,7 +51,7 @@ export function initHero() {
     const p = eased, calm = 1 - smooth(clamp01((p - 0.35) / 0.2));
     idle += dt * 0.007 * calm;
     const spin = idle + p * 200;
-    const R = Math.min(innerWidth * 0.36, innerHeight * 0.34), step = 360 / cards.length;
+    const R = Math.min(innerWidth * 0.36, ring.offsetHeight * 1.1), step = 360 / cards.length;
     let nearest = 0, best = -2;
     const gather = smooth(clamp01((p - 0.42) / 0.45));
     const rx = -7 * (1 - gather) + tiltX;
